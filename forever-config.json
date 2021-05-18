@@ -1,0 +1,16 @@
+{
+    "uid": "databaser",
+    "max": 100,
+    "spinSleepTime": 30000,
+    "append": true,
+    "watch": false,
+    "command": "node --experimental-modules --experimental-json-modules",
+    "script": "./index.mjs",
+    "path": "/Users/dev/Projects/rune-databaser",
+    "workingDir": "./",
+    "sourceDir": "./",
+    "logFile": "./forever-script-log.log",
+    "outFile": "./forever-script-out.log",
+    "errFile": "./forever-script-err.log",
+    "args": []
+  }

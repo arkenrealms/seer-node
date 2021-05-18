@@ -1,24 +1,39 @@
 import contracts from "./contracts.mjs"
+import secrets from "./secrets.json"
 import ethers from 'ethers'
 import Web3 from "web3"
-import networks from "./networks.mjs"
+// import networks from "./networks.mjs"
 import jetpack from 'fs-jetpack'
+import HDWalletProvider from "@truffle/hdwallet-provider"
 import { exec } from 'child_process'
-import ArcaneBarracksV1Contract from './contracts/ArcaneBarracksV1.json'
+import ArcaneTraderV1Contract from './contracts/ArcaneTraderV1.json'
 import ArcaneCharactersContract from './contracts/ArcaneCharacters.json'
+
+const networks = ["https://bsc-dataseed.binance.org/", "https://bsc-dataseed1.defibit.io/", "https://bsc-dataseed1.ninicoin.io/", "https://bsc-dataseed2.defibit.io/", "https://bsc-dataseed3.defibit.io/", "https://bsc-dataseed4.defibit.io/", "https://bsc-dataseed2.ninicoin.io/", "https://bsc-dataseed3.ninicoin.io/", "https://bsc-dataseed4.ninicoin.io/", "https://bsc-dataseed1.binance.org/", "https://bsc-dataseed2.binance.org/", "https://bsc-dataseed3.binance.org/", "https://bsc-dataseed4.binance.org/"]
+
+const getRandomProvider = () => {
+  return new HDWalletProvider(
+    secrets.mnemonic,
+    networks[Math.floor(Math.random() * networks.length)]
+  )
+}
+
+const network = "mainnet";
+let provider = getRandomProvider();
+const web3 = new Web3(provider);
 
 process
   .on("unhandledRejection", (reason, p) => {
     console.warn(reason, "Unhandled Rejection at Promise", p);
   })
   .on("uncaughtException", (err) => {
-    console.warn(err, "Uncaught Exception thrown");
+    console.warn(err, "Uncaught Exception thrown. Rotating provider");
+
+    provider = getRandomProvider();
+    // run();
     //process.exit(1);
   });
 
-const network = "mainnet";
-const provider = networks[network].provider();
-const web3 = new Web3(provider);
 
 const gasPrice = 6;
 let nonce;
@@ -27,6 +42,15 @@ let pending = false
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+function round(num, precision) {
+  const _precision = 10 ** precision
+  return Math.ceil(num * _precision) / _precision
+}
+
+
+const toLong = (x) => ethers.utils.parseEther(x + '')
+const toShort = (x) => round(parseFloat(ethers.utils.formatEther(x)), 4)
 
 
 const getAddress = (address) => {
@@ -43,9 +67,6 @@ const aggregateGuildMembers = async () => {
 
   const charactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi);
-  // const filter = charactersContract.filters.Transfer(getAddress(contracts.characters), null)
-
-  // const logs = await charactersContract.queryFilter(filter, 6141000, "latest");
 
   async function iterate(fromBlock, toBlock, logs) {
     const event = charactersContract.filters['Transfer(address,address,uint256)']()
@@ -108,8 +129,6 @@ const aggregateGuildMembers = async () => {
 
   const encodedUri = encodeURI(csvContent);
   window.open(encodedUri);
-
-// 0x2c51b570b11da6c0852aadd059402e390a936b39
 }
 
 async function getAllBarracksEvents() {
@@ -208,44 +227,264 @@ async function monitorBarracksEvents() {
   })
 }
 
-async function monitorTraderEvents() {
-  const equips = jetpack.read('./db/equips.json', 'json')
+let tradeCounter = 1
+
+function removeDupes(list) {
+  const seen = {};
+  return list.filter(function(item) {
+      const k = item.seller + item.tokenId;
+      return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+  })
+}
+
+const trades = removeDupes(jetpack.read('./db/trades.json', 'json'))
+let lastBlock = 7496405
+
+async function getAllTradeEvents() {
+  tradeCounter = trades[trades.length-1].id
 
   const Contract = ArcaneTraderV1Contract
+  provider = getRandomProvider();
   const web3Provider = new ethers.providers.Web3Provider(provider)
   web3Provider.pollingInterval = 15000
   const signer = web3Provider.getSigner()
 
   const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
+  const iface = new ethers.utils.Interface(Contract.abi);
 
-  contract.on('Equip', async (user, tokenId, itemId) => {
-    const equip = {
-      user,
-      tokenId: tokenId.toString(),
-      itemId
+  async function iterate(fromBlock, toBlock, processLog) {
+    // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+    // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+    // event Delist(address indexed seller, uint256 tokenId);
+    // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+    // event Recover(address indexed user, address indexed seller, uint256 tokenId);
+
+    const events = [
+      contract.filters['List(address,address,uint256,uint256)'](),
+      contract.filters['Update(address,address,uint256,uint256)'](),
+      contract.filters['Delist(address,uint256)'](),
+      contract.filters['Buy(address,address,uint256,uint256)'](),
+    ]
+    
+    const toBlock2 = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
+
+    for (const event of events) {
+      try {
+        const filter = {
+          address: getAddress(contracts.trader),
+          fromBlock,
+          toBlock: toBlock2,
+          topics: event.topics
+        }
+    
+        const logs = await web3Provider.getLogs(filter)
+
+        for(let i = 0; i < logs.length; i++) {
+          processLog(logs[i])
+        }
+  
+        if (toBlock2 !== toBlock) {
+          await wait(10000)
+          
+          await iterate(toBlock2, toBlock, processLog)
+        }
+      } catch(e) {
+        console.log('error', e)
+        console.log(fromBlock, toBlock)
+        // await iterate(fromBlock, toBlock, processLog)
+      }
+    }
+  }
+
+  async function processLog(log) {
+    const event = iface.parseLog(log)
+    // const block = await library.getBlock(log.blockNumber)
+    
+    if (event.name === 'List') {
+      const { seller, buyer, tokenId, price } = event.args
+
+      let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+
+      if (!trade) {
+        trade = {
+          id: ++tradeCounter,
+          seller,
+          buyer,
+          tokenId: tokenId.toString(),
+          price: toShort(price),
+          status: "available",
+          hotness: 0,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime()
+        }
+        trades.push(trade)
+      }
+      console.log('List', trade)
     }
 
-    console.log(equip)
-    equips.push(equip)
+    if (event.name === 'Update') {
+      const { seller, buyer, tokenId, price } = event.args
 
-    jetpack.write('./db/equips.json', JSON.stringify(equips, null, 2))
+      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
-    exec('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master', (err, stdout, stderr) => {
-      // handle err, stdout & stderr
-     });
-  })
+      trade.buyer = buyer
+      trade.price = toShort(price)
+      trade.updatedAt = new Date().getTime()
+
+      console.log('Update', trade)
+    }
+
+    if (event.name === 'Delist') {
+      const { seller, buyer, tokenId, price } = event.args
+
+      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+
+      trade.status = "delisted"
+      trade.updatedAt = new Date().getTime()
+
+      console.log('Delist', trade)
+    }
+
+    if (event.name === 'Buy') {
+      const { seller, buyer, tokenId, price } = event.args
+
+      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+
+      trade.status = "sold"
+      trade.updatedAt = new Date().getTime()
+
+      console.log('Buy', trade)
+    }
+  }
+
+  const blockNumber = await web3.eth.getBlockNumber()
+  await iterate(lastBlock, blockNumber, processLog)
+
+  jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
+  updateGit()
+
+  lastBlock = blockNumber
+
+  console.log('Finished', lastBlock)
+  setTimeout(getAllTradeEvents, 2 * 60 * 1000) // Manually update every 5 mins
 }
+
+function updateGit() {
+  exec('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master', (err, stdout, stderr) => {
+    // handle err, stdout & stderr
+    console.log(err, stderr, stdout)
+   });
+}
+
+async function monitorTraderEvents() {
+  tradeCounter = trades[trades.length-1].id
+
+  const Contract = ArcaneTraderV1Contract
+
+  // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Delist(address indexed seller, uint256 tokenId);
+  // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Recover(address indexed user, address indexed seller, uint256 tokenId);
+
+  let contract 
+  let web3Provider
+
+  const monitor = () => {
+    provider = getRandomProvider();
+
+    // if (web3Provider) web3Provider.pollingInterval = 15000000
+
+    web3Provider = new ethers.providers.Web3Provider(provider)
+    web3Provider.pollingInterval = 15000
+    const signer = web3Provider.getSigner()
+
+    if (contract) {
+      contract.off('List')
+      contract.off('Update')
+      contract.off('Delist')
+      contract.off('Buy')
+    }
+  
+    contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
+
+    contract.on('List', async (seller, buyer, tokenId, price) => {
+      const trade = {
+        id: ++tradeCounter,
+        seller,
+        buyer,
+        tokenId: tokenId.toString(),
+        price: toShort(price),
+        status: "available",
+        hotness: 0,
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime()
+      }
+
+      trades.push(trade)
+
+      console.log(trade)
+      jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
+      updateGit()
+    })
+
+    contract.on('Update', async (seller, buyer, tokenId, price) => {
+      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+
+      trade.buyer = buyer
+      trade.price = toShort(price)
+      trade.updatedAt = new Date().getTime()
+
+      console.log(trade)
+      jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
+      updateGit()
+    })
+
+    contract.on('Delist', async (seller, tokenId) => {
+      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+
+      trade.status = "delisted"
+      trade.updatedAt = new Date().getTime()
+
+      console.log(trade)
+      jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
+      updateGit()
+    })
+
+    contract.on('Buy', async (seller, buyer, tokenId, price) => {
+      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+
+      trade.status = "sold"
+      trade.updatedAt = new Date().getTime()
+
+      console.log(trade)
+      jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
+      updateGit()
+    })
+
+    // setTimeout(monitor, 15 * 60 * 1000)
+  }
+
+  monitor()
+}
+
 
 async function catchup() {
   // await getAllBarracksEvents()
-  await run();
+  await getAllTradeEvents()
+  getAllTradeEvents()
+  // setInterval(getAllTradeEvents, 2 * 60 * 1000) // Manually update every 5 mins
+  // await run();
 }
 
 async function run() {
   const accounts = await web3.eth.getAccounts();
   const account = accounts[3];
 
-  await monitorBarracksEvents()
+  // await monitorBarracksEvents()
+  await monitorTraderEvents()
+
+
 }
 
 catchup();

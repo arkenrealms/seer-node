@@ -10,6 +10,10 @@ export default {
     [MAINNET]: '0x33bc7539D83C1ADB95119A255134e7B584cd5c59',
     [TESTNET]: '',
   },
+  trader: {
+    [MAINNET]: '0xdAE69A43bC73e662095b488dbDDD1D3aBA59c1FF',
+    [TESTNET]: '',
+  },
 
   ralMasterChef: {
     [MAINNET]: '0xcfA857d6EC2F59b050D7296FbcA8a91D061451f3',
