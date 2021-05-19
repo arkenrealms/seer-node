@@ -5,64 +5,59 @@ import Web3 from "web3"
 // import networks from "./networks.mjs"
 import jetpack from 'fs-jetpack'
 import HDWalletProvider from "@truffle/hdwallet-provider"
-import { exec } from 'child_process'
+import { wait, round, removeDupes, toLong, toShort, getAddress, updateGit } from './util.mjs'
 import ArcaneTraderV1Contract from './contracts/ArcaneTraderV1.json'
 import ArcaneCharactersContract from './contracts/ArcaneCharacters.json'
 
-const networks = ["https://bsc-dataseed.binance.org/", "https://bsc-dataseed1.defibit.io/", "https://bsc-dataseed1.ninicoin.io/", "https://bsc-dataseed2.defibit.io/", "https://bsc-dataseed3.defibit.io/", "https://bsc-dataseed4.defibit.io/", "https://bsc-dataseed2.ninicoin.io/", "https://bsc-dataseed3.ninicoin.io/", "https://bsc-dataseed4.ninicoin.io/", "https://bsc-dataseed1.binance.org/", "https://bsc-dataseed2.binance.org/", "https://bsc-dataseed3.binance.org/", "https://bsc-dataseed4.binance.org/"]
-
-
+const config = jetpack.read('./db/config.json', 'json')
+const trades = removeDupes(jetpack.read('./db/trades.json', 'json'))
+const characters = removeDupes(jetpack.read('./db/characters.json', 'json'))
+const equips = removeDupes(jetpack.read('./db/equips.json', 'json'))
+const inventory = jetpack.read('./db/inventory.json', 'json')
 
 const getRandomProvider = () => {
   return new HDWalletProvider(
     secrets.mnemonic,
-    "https://bsc.getblock.io/mainnet/?api_key=3f594a5f-d0ed-48ca-b0e7-a57d04f76332" //networks[Math.floor(Math.random() * networks.length)]
+    "https://thrumming-still-leaf.bsc.quiknode.pro/b2f8a5b1bd0809dbf061112e1786b4a8e53c9a83/" //"https://bsc.getblock.io/mainnet/?api_key=3f594a5f-d0ed-48ca-b0e7-a57d04f76332" //networks[Math.floor(Math.random() * networks.length)]
   )
 }
 
 const blocknativeApiKey = '58a45321-bf96-485c-ab9b-e0610e181d26'
 
-const network = "mainnet";
-let provider = getRandomProvider();
-const web3 = new Web3(provider);
+let provider = getRandomProvider()
+const web3 = new Web3(provider)
 
 process
   .on("unhandledRejection", (reason, p) => {
-    console.warn(reason, "Unhandled Rejection at Promise", p);
+    console.warn(reason, "Unhandled Rejection at Promise", p)
   })
   .on("uncaughtException", (err) => {
-    console.warn(err, "Uncaught Exception thrown. Rotating provider");
+    console.warn(err, "Uncaught Exception thrown. Rotating provider")
 
-    //provider = getRandomProvider();
-    // run();
-    process.exit(1);
-  });
+    //provider = getRandomProvider()
+    // run()
+    process.exit(1)
+  })
 
-
-const gasPrice = 6;
-let nonce;
-let pending = false
-
-function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+const saveConfig = () => {
+  jetpack.write('./db/config.json', JSON.stringify(config, null, 2))
 }
 
-function round(num, precision) {
-  const _precision = 10 ** precision
-  return Math.ceil(num * _precision) / _precision
+const saveEquips = () => {
+  jetpack.write('./db/equips.json', JSON.stringify(equips, null, 2))
 }
 
-
-const toLong = (x) => ethers.utils.parseEther(x + '')
-const toShort = (x) => round(parseFloat(ethers.utils.formatEther(x)), 4)
-
-
-const getAddress = (address) => {
-  const mainNetChainId = 56
-  const chainId = process.env.REACT_APP_CHAIN_ID
-  return address[chainId] ? address[chainId] : address[mainNetChainId]
+const saveInventory = () => {
+  jetpack.write('./db/inventory.json', JSON.stringify(inventory, null, 2))
 }
 
+const saveTrades = () => {
+  jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
+}
+
+const saveCharacters = () => {
+  jetpack.write('./db/characters.json', JSON.stringify(characters, null, 2))
+}
 
 const aggregateGuildMembers = async () => {
   const web3Provider = new ethers.providers.Web3Provider(library)
@@ -70,20 +65,20 @@ const aggregateGuildMembers = async () => {
   const signer = web3Provider.getSigner()
 
   const charactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
-  const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi);
+  const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi)
 
   async function iterate(fromBlock, toBlock, logs) {
     if (fromBlock === toBlock) return logs
   
     const event = charactersContract.filters['Transfer(address,address,uint256)']()
     
-    const topic = ethers.utils.id("CharacterMint(address,uint256,uint8)");
+    const topic = ethers.utils.id("CharacterMint(address,uint256,uint8)")
 
-    const lastBlock = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
+    config.trades.lastBlock = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
     const filter = {
       address: getAddress(contracts.characters),
       fromBlock,
-      toBlock: lastBlock,
+      toBlock: config.trades.lastBlock,
       topics: event.topics
     }
 
@@ -91,9 +86,9 @@ const aggregateGuildMembers = async () => {
       const logs2 = await web3Provider.getLogs(filter)
       console.log(logs)
       await wait(3000)
-      return iterate(lastBlock, toBlock, [...logs, ...logs2])
+      return iterate(config.trades.lastBlock, toBlock, [...logs, ...logs2])
     } catch(e) {
-      console.log(fromBlock, toBlock, lastBlock, logs)
+      console.log(fromBlock, toBlock, config.trades.lastBlock, logs)
       return iterate(fromBlock, toBlock, logs)
     }
 
@@ -124,15 +119,15 @@ const aggregateGuildMembers = async () => {
   }
 
   function onlyUnique(value, index, self) {
-    return self.indexOf(value) === index;
+    return self.indexOf(value) === index
   }
-  console.log(airdropAddresses)
-  const rows = airdropAddresses.filter(onlyUnique).map(a => [a, 40000/airdropAddresses.length])
-  console.log(rows)
-  const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
 
-  const encodedUri = encodeURI(csvContent);
-  window.open(encodedUri);
+  const rows = airdropAddresses.filter(onlyUnique).map(a => [a, 40000/airdropAddresses.length])
+
+  const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n")
+
+  const encodedUri = encodeURI(csvContent)
+  window.open(encodedUri)
 }
 
 async function getAllBarracksEvents() {
@@ -142,24 +137,24 @@ async function getAllBarracksEvents() {
   const signer = web3Provider.getSigner()
 
   const charactersContract = new ethers.Contract(getAddress(contracts.barracks), Contract.abi, signer)
-  const iface = new ethers.utils.Interface(Contract.abi);
+  const iface = new ethers.utils.Interface(Contract.abi)
 
   async function iterate(fromBlock, toBlock, processLog) {
-    if (lastBlock === toBlock) return
+    if (config.trades.lastBlock === toBlock) return
   
-    // event Equip(address indexed user, uint256 indexed tokenId, uint16 indexed itemId);
-    // event Unequip(address indexed user, uint256 indexed tokenId, uint16 indexed itemId);
-    // event ActionBurn(address indexed user, uint256 amount);
-    // event ActionBonus(address indexed user, uint256 amount);
-    // event ActionHiddenPool(address indexed user, uint256 amount);
-    // event ActionFee(address indexed user, address indexed token, uint256 amount);
+    // event Equip(address indexed user, uint256 indexed tokenId, uint16 indexed itemId)
+    // event Unequip(address indexed user, uint256 indexed tokenId, uint16 indexed itemId)
+    // event ActionBurn(address indexed user, uint256 amount)
+    // event ActionBonus(address indexed user, uint256 amount)
+    // event ActionHiddenPool(address indexed user, uint256 amount)
+    // event ActionFee(address indexed user, address indexed token, uint256 amount)
     const event = charactersContract.filters['Equip(address,uint256,uint16)']()
     
-    const lastBlock = (fromBlock + 4000) < toBlock ? fromBlock + 4000 : toBlock
+    config.trades.lastBlock = (fromBlock + 4000) < toBlock ? fromBlock + 4000 : toBlock
     const filter = {
       address: getAddress(contracts.barracks),
       fromBlock,
-      toBlock: lastBlock,
+      toBlock: config.trades.lastBlock,
       topics: event.topics
     }
 
@@ -171,11 +166,11 @@ async function getAllBarracksEvents() {
 
       await wait(3000)
       
-      iterate(lastBlock, toBlock, processLog)
+      iterate(config.trades.lastBlock, toBlock, processLog)
     } catch(e) {
       console.log('error', e)
       console.log(fromBlock, toBlock)
-      iterate(fromBlock, lastBlock, toBlock, processLog)
+      iterate(fromBlock, config.trades.lastBlock, toBlock, processLog)
     }
   }
 
@@ -223,40 +218,26 @@ async function monitorBarracksEvents() {
     console.log(equip)
     equips.push(equip)
 
-    jetpack.write('./db/equips.json', JSON.stringify(equips, null, 2))
-
-    exec('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master', (err, stdout, stderr) => {
-      // handle err, stdout & stderr
-     });
+    saveEquips()
+    saveConfig()
+    updateGit()
   })
 }
 
-let tradeCounter = 1
+async function getAllMarketEvents() {
+  config.trades.counter = characters[trades.length-1]?.id || 1
 
-function removeDupes(list) {
-  const seen = {};
-  return list.filter(function(item) {
-      const k = item.seller + item.tokenId;
-      return seen.hasOwnProperty(k) ? false : (seen[k] = true);
-  })
-}
-
-const trades = removeDupes(jetpack.read('./db/trades.json', 'json'))
-let lastBlock = 7496405
-
-async function getAllTradeEvents() {
-  tradeCounter = trades[trades.length-1].id
-
-  const Contract = ArcaneTraderV1Contract
-  provider = getRandomProvider();
-  const web3Provider = new ethers.providers.Web3Provider(provider)
+  const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
   web3Provider.pollingInterval = 15000
   const signer = web3Provider.getSigner()
 
+  const Contract = ArcaneTraderV1Contract
   const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
   const iface = new ethers.utils.Interface(Contract.abi);
 
   async function iterate(fromBlock, toBlock, processLog) {
+    if (fromBlock === toBlock) return
+  
     // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
     // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
     // event Delist(address indexed seller, uint256 tokenId);
@@ -311,7 +292,7 @@ async function getAllTradeEvents() {
 
       if (!trade) {
         trade = {
-          id: ++tradeCounter
+          id: ++config.trades.counter
         }
 
         trades.push(trade)
@@ -362,31 +343,26 @@ async function getAllTradeEvents() {
 
       console.log('Buy', trade)
     }
+
+    config.trades.lastBlock = log.blockNumber
+
+    saveTrades()
+    saveConfig()
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
-  await iterate(lastBlock, blockNumber, processLog)
+  await iterate(config.trades.lastBlock, blockNumber, processLog)
 
-  jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
+  console.log('Finished', config.trades.lastBlock)
+
+  saveTrades()
+  saveConfig()
   updateGit()
-
-  lastBlock = blockNumber
-
-  console.log('Finished', lastBlock)
-  setTimeout(getAllTradeEvents, 2 * 60 * 1000) // Manually update every 5 mins
+  setTimeout(getAllMarketEvents, 2 * 60 * 1000) // Manually update every 5 mins
 }
 
-function updateGit() {
-  exec('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master', (err, stdout, stderr) => {
-    // handle err, stdout & stderr
-    console.log(err, stderr, stdout)
-   });
-}
-
-async function monitorTraderEvents() {
-  tradeCounter = trades[trades.length-1].id
-
-  const Contract = ArcaneTraderV1Contract
+async function monitorMarketEvents() {
+  config.trades.counter = characters[trades.length-1]?.id || 1
 
   // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
@@ -394,105 +370,120 @@ async function monitorTraderEvents() {
   // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Recover(address indexed user, address indexed seller, uint256 tokenId);
 
-  let contract 
-  let web3Provider
+  const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
+  web3Provider.pollingInterval = 15000
+  const signer = web3Provider.getSigner()
 
-  const monitor = () => {
-    provider = getRandomProvider();
+  const Contract = ArcaneTraderV1Contract
+  const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
 
-    // if (web3Provider) web3Provider.pollingInterval = 15000000
+  contract.on('List', async (seller, buyer, tokenId, price) => {
+    let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
-    web3Provider = new ethers.providers.Web3Provider(provider)
-    web3Provider.pollingInterval = 15000
-    const signer = web3Provider.getSigner()
-
-    if (contract) {
-      contract.off('List')
-      contract.off('Update')
-      contract.off('Delist')
-      contract.off('Buy')
-    }
-  
-    contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
-
-    contract.on('List', async (seller, buyer, tokenId, price) => {
-      let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
-
-      if (!trade) {
-        trade = {
-          id: ++tradeCounter
-        }
-
-        trades.push(trade)
+    if (!trade) {
+      trade = {
+        id: ++config.trades.counter
       }
 
-      trade.seller = seller
-      trade.buyer = buyer
-      trade.tokenId = tokenId.toString()
-      trade.price = toShort(price)
-      trade.status = "available"
-      trade.hotness = 0
-      trade.createdAt = new Date().getTime()
-      trade.updatedAt = new Date().getTime()
+      trades.push(trade)
+    }
 
-      console.log(trade)
-      jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
-      updateGit()
-    })
+    trade.seller = seller
+    trade.buyer = buyer
+    trade.tokenId = tokenId.toString()
+    trade.price = toShort(price)
+    trade.status = "available"
+    trade.hotness = 0
+    trade.createdAt = new Date().getTime()
+    trade.updatedAt = new Date().getTime()
 
-    contract.on('Update', async (seller, buyer, tokenId, price) => {
-      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+    console.log(trade)
+    saveTrades()
+    saveConfig()
+    updateGit()
+  })
 
-      trade.buyer = buyer
-      trade.price = toShort(price)
-      trade.updatedAt = new Date().getTime()
+  contract.on('Update', async (seller, buyer, tokenId, price) => {
+    const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
-      console.log(trade)
-      jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
-      updateGit()
-    })
+    trade.buyer = buyer
+    trade.price = toShort(price)
+    trade.updatedAt = new Date().getTime()
 
-    contract.on('Delist', async (seller, tokenId) => {
-      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+    console.log(trade)
+    saveTrades()
+    saveConfig()
+    updateGit()
+  })
 
-      trade.status = "delisted"
-      trade.updatedAt = new Date().getTime()
+  contract.on('Delist', async (seller, tokenId) => {
+    const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
-      console.log(trade)
-      jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
-      updateGit()
-    })
+    trade.status = "delisted"
+    trade.updatedAt = new Date().getTime()
 
-    contract.on('Buy', async (seller, buyer, tokenId, price) => {
-      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+    console.log(trade)
+    saveTrades()
+    saveConfig()
+    updateGit()
+  })
 
-      trade.status = "sold"
-      trade.updatedAt = new Date().getTime()
+  contract.on('Buy', async (seller, buyer, tokenId, price) => {
+    const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
-      console.log(trade)
-      jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
-      updateGit()
-    })
+    trade.status = "sold"
+    trade.updatedAt = new Date().getTime()
 
-    // setTimeout(monitor, 15 * 60 * 1000)
-  }
-
-  monitor()
+    console.log(trade)
+    saveTrades()
+    saveConfig()
+    updateGit()
+  })
 }
 
+async function monitorCharacterEvents() {
+  config.characters.counter = characters[characters.length-1]?.id || 1
+
+  const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
+  web3Provider.pollingInterval = 15000
+  const signer = web3Provider.getSigner()
+
+  const Contract = ArcaneCharactersContract
+  const contract = new ethers.Contract(getAddress(contracts.characters), Contract.abi, signer)
+
+  contract.on('Transfer', async (from, to, tokenId) => {
+    let character = characters.find(t => t.tokenId === tokenId.toString())
+
+    if (!character) {
+      character = {
+        id: ++characterCounter
+      }
+
+      characters.push(character)
+    }
+
+    character.owner = to
+    character.tokenId = tokenId.toString()
+
+    console.log(character)
+    saveCharacters()
+    saveConfig()
+    updateGit()
+  })
+}
+
+async function run() {
+  const accounts = await web3.eth.getAccounts()
+
+  // monitorBarracksEvents()
+  getAllMarketEvents()
+  monitorMarketEvents()
+  monitorCharacterEvents()
+}
+
+run()
 
 // Force restart after 15 mins
 setTimeout(() => {
-  process.exit(1);
+  process.exit(1)
 }, 15 * 60 * 1000)
-
-async function run() {
-  const accounts = await web3.eth.getAccounts();
-  const account = accounts[3];
-
-  // await monitorBarracksEvents()
-  getAllTradeEvents()
-  monitorTraderEvents()
-}
-
-run();
