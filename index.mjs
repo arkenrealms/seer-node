@@ -236,6 +236,7 @@ async function getAllMarketEvents() {
   const iface = new ethers.utils.Interface(Contract.abi);
 
   async function iterate(fromBlock, toBlock, processLog) {
+    console.log(fromBlock, toBlock, fromBlock === toBlock)
     if (fromBlock === toBlock) return
   
     // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
@@ -251,9 +252,9 @@ async function getAllMarketEvents() {
       contract.filters['Buy(address,address,uint256,uint256)'](),
     ]
     
-    const toBlock2 = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
-
     for (const event of events) {
+      const toBlock2 = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
+  
       try {
         const filter = {
           address: getAddress(contracts.trader),
@@ -262,28 +263,27 @@ async function getAllMarketEvents() {
           topics: event.topics
         }
     
+        console.log('Iterating block', fromBlock, 'to', toBlock2, 'eventually', toBlock, 'for', event.topics)
+
         const logs = await web3Provider.getLogs(filter)
 
         for(let i = 0; i < logs.length; i++) {
-          processLog(logs[i])
+          processLog(logs[i], false)
         }
   
-        if (toBlock2 !== toBlock) {
-          await wait(10000)
-          
-          await iterate(toBlock2, toBlock, processLog)
-        }
+        // await wait(3 * 1000)
+        
+        await iterate(toBlock2, toBlock, processLog)
       } catch(e) {
         console.log('error', e)
         console.log(fromBlock, toBlock)
-        // await iterate(fromBlock, toBlock, processLog)
+        process.exit(1)
       }
     }
   }
 
-  async function processLog(log) {
+  async function processLog(log, updateConfig = true) {
     const event = iface.parseLog(log)
-    // const block = await library.getBlock(log.blockNumber)
     
     if (event.name === 'List') {
       const { seller, buyer, tokenId, price } = event.args
@@ -344,21 +344,25 @@ async function getAllMarketEvents() {
       console.log('Buy', trade)
     }
 
-    config.trades.lastBlock = log.blockNumber
-
     saveTrades()
-    saveConfig()
+
+    if (updateConfig) {
+      config.trades.lastBlock = log.blockNumber
+      saveConfig()
+    }
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
   await iterate(config.trades.lastBlock, blockNumber, processLog)
+
+  config.trades.lastBlock = blockNumber
 
   console.log('Finished', config.trades.lastBlock)
 
   saveTrades()
   saveConfig()
   updateGit()
-  setTimeout(getAllMarketEvents, 2 * 60 * 1000) // Manually update every 5 mins
+  // setTimeout(getAllMarketEvents, 2 * 60 * 1000) // Manually update every 5 mins
 }
 
 async function monitorMarketEvents() {
