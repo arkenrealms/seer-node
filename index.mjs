@@ -225,7 +225,7 @@ async function monitorBarracksEvents() {
 }
 
 async function getAllMarketEvents() {
-  config.trades.counter = characters[trades.length-1]?.id || 1
+  config.trades.counter = trades[trades.length-1]?.id || 1
 
   const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
   web3Provider.pollingInterval = 15000
@@ -235,8 +235,7 @@ async function getAllMarketEvents() {
   const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
   const iface = new ethers.utils.Interface(Contract.abi);
 
-  async function iterate(fromBlock, toBlock, processLog) {
-    console.log(fromBlock, toBlock, fromBlock === toBlock)
+  async function iterate(fromBlock, toBlock, event, processLog) {
     if (fromBlock === toBlock) return
   
     // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
@@ -245,40 +244,31 @@ async function getAllMarketEvents() {
     // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
     // event Recover(address indexed user, address indexed seller, uint256 tokenId);
 
-    const events = [
-      contract.filters['List(address,address,uint256,uint256)'](),
-      contract.filters['Update(address,address,uint256,uint256)'](),
-      contract.filters['Delist(address,uint256)'](),
-      contract.filters['Buy(address,address,uint256,uint256)'](),
-    ]
-    
-    for (const event of events) {
+    try {
       const toBlock2 = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
   
-      try {
-        const filter = {
-          address: getAddress(contracts.trader),
-          fromBlock,
-          toBlock: toBlock2,
-          topics: event.topics
-        }
-    
-        console.log('Iterating block', fromBlock, 'to', toBlock2, 'eventually', toBlock, 'for', event.topics)
-
-        const logs = await web3Provider.getLogs(filter)
-
-        for(let i = 0; i < logs.length; i++) {
-          processLog(logs[i], false)
-        }
-  
-        // await wait(3 * 1000)
-        
-        await iterate(toBlock2, toBlock, processLog)
-      } catch(e) {
-        console.log('error', e)
-        console.log(fromBlock, toBlock)
-        process.exit(1)
+      const filter = {
+        address: getAddress(contracts.trader),
+        fromBlock,
+        toBlock: toBlock2,
+        topics: event.topics
       }
+  
+      console.log('Iterating block', fromBlock, 'to', toBlock2, 'eventually', toBlock, 'for', event.topics)
+
+      const logs = await web3Provider.getLogs(filter)
+
+      for(let i = 0; i < logs.length; i++) {
+        processLog(logs[i], false)
+      }
+
+      // await wait(3 * 1000)
+      
+      await iterate(toBlock2, toBlock, event, processLog)
+    } catch(e) {
+      console.log('error', e)
+      console.log(fromBlock, toBlock)
+      process.exit(1)
     }
   }
 
@@ -290,7 +280,11 @@ async function getAllMarketEvents() {
 
       let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
-      if (!trade) {
+      if (trade) {
+        if (trade.blockNumber >= log.blockNumber) {
+          return
+        }
+      } else {
         trade = {
           id: ++config.trades.counter
         }
@@ -306,6 +300,7 @@ async function getAllMarketEvents() {
       trade.hotness = 0
       trade.createdAt = new Date().getTime()
       trade.updatedAt = new Date().getTime()
+      trade.blockNumber = log.blockNumber
       
       console.log('List', trade)
     }
@@ -315,9 +310,13 @@ async function getAllMarketEvents() {
 
       const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
+      if (trade.blockNumber >= log.blockNumber)
+        return
+
       trade.buyer = buyer
       trade.price = toShort(price)
       trade.updatedAt = new Date().getTime()
+      trade.blockNumber = log.blockNumber
 
       console.log('Update', trade)
     }
@@ -327,8 +326,12 @@ async function getAllMarketEvents() {
 
       const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
+      if (trade.blockNumber >= log.blockNumber)
+        return
+  
       trade.status = "delisted"
       trade.updatedAt = new Date().getTime()
+      trade.blockNumber = log.blockNumber
 
       console.log('Delist', trade)
     }
@@ -338,8 +341,12 @@ async function getAllMarketEvents() {
 
       const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
+      if (trade.blockNumber >= log.blockNumber)
+        return
+
       trade.status = "sold"
       trade.updatedAt = new Date().getTime()
+      trade.blockNumber = log.blockNumber
 
       console.log('Buy', trade)
     }
@@ -353,7 +360,17 @@ async function getAllMarketEvents() {
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
-  await iterate(config.trades.lastBlock, blockNumber, processLog)
+
+  const events = [
+    contract.filters['List(address,address,uint256,uint256)'](),
+    contract.filters['Update(address,address,uint256,uint256)'](),
+    contract.filters['Delist(address,uint256)'](),
+    contract.filters['Buy(address,address,uint256,uint256)'](),
+  ]
+  
+  for (const event of events) {
+    await iterate(config.trades.lastBlock, blockNumber, event, processLog)
+  }
 
   config.trades.lastBlock = blockNumber
 
@@ -366,7 +383,7 @@ async function getAllMarketEvents() {
 }
 
 async function monitorMarketEvents() {
-  config.trades.counter = characters[trades.length-1]?.id || 1
+  config.trades.counter = trades[trades.length-1]?.id || 1
 
   // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
@@ -381,10 +398,14 @@ async function monitorMarketEvents() {
   const Contract = ArcaneTraderV1Contract
   const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
 
-  contract.on('List', async (seller, buyer, tokenId, price) => {
+  contract.on('List', async (seller, buyer, tokenId, price, log) => {
     let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
-    if (!trade) {
+    if (trade) {
+      if (trade.blockNumber >= log.blockNumber) {
+        return
+      }
+    } else {
       trade = {
         id: ++config.trades.counter
       }
@@ -400,6 +421,7 @@ async function monitorMarketEvents() {
     trade.hotness = 0
     trade.createdAt = new Date().getTime()
     trade.updatedAt = new Date().getTime()
+    trade.blockNumber = log.blockNumber
 
     console.log(trade)
     saveTrades()
@@ -410,9 +432,13 @@ async function monitorMarketEvents() {
   contract.on('Update', async (seller, buyer, tokenId, price) => {
     const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
+    if (trade.blockNumber >= log.blockNumber)
+      return
+
     trade.buyer = buyer
     trade.price = toShort(price)
     trade.updatedAt = new Date().getTime()
+    trade.blockNumber = log.blockNumber
 
     console.log(trade)
     saveTrades()
@@ -420,11 +446,15 @@ async function monitorMarketEvents() {
     updateGit()
   })
 
-  contract.on('Delist', async (seller, tokenId) => {
+  contract.on('Delist', async (seller, tokenId, log) => {
     const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+
+    if (trade.blockNumber >= log.blockNumber)
+      return
 
     trade.status = "delisted"
     trade.updatedAt = new Date().getTime()
+    trade.blockNumber = log.blockNumber
 
     console.log(trade)
     saveTrades()
@@ -432,11 +462,15 @@ async function monitorMarketEvents() {
     updateGit()
   })
 
-  contract.on('Buy', async (seller, buyer, tokenId, price) => {
+  contract.on('Buy', async (seller, buyer, tokenId, price, log) => {
     const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+
+    if (trade.blockNumber >= log.blockNumber)
+      return
 
     trade.status = "sold"
     trade.updatedAt = new Date().getTime()
+    trade.blockNumber = log.blockNumber
 
     console.log(trade)
     saveTrades()
@@ -460,7 +494,7 @@ async function monitorCharacterEvents() {
 
     if (!character) {
       character = {
-        id: ++characterCounter
+        id: ++config.characters.counter
       }
 
       characters.push(character)
