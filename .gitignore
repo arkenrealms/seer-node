@@ -109,3 +109,5 @@ dist
 /typechain/
 /artifacts/
 /cache/
+
+nohup.out
