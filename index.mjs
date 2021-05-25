@@ -32,11 +32,13 @@ process
     console.warn(reason, "Unhandled Rejection at Promise", p)
   })
   .on("uncaughtException", (err) => {
-    console.warn(err, "Uncaught Exception thrown. Rotating provider")
+    console.warn(err, "Uncaught Exception thrown.")
 
     //provider = getRandomProvider()
     // run()
-    process.exit(1)
+    setTimeout(() => {
+      process.exit(1)
+    }, 60 * 1000)
   })
 
 const saveConfig = () => {
