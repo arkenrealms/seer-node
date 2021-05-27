@@ -8,12 +8,15 @@ import HDWalletProvider from "@truffle/hdwallet-provider"
 import { wait, round, removeDupes, toLong, toShort, getAddress, updateGit } from './util.mjs'
 import ArcaneTraderV1Contract from './contracts/ArcaneTraderV1.json'
 import ArcaneCharactersContract from './contracts/ArcaneCharacters.json'
+import ArcaneItemsContract from './contracts/ArcaneItems.json'
 
 const config = jetpack.read('./db/config.json', 'json')
 const trades = removeDupes(jetpack.read('./db/trades.json', 'json'))
 const characters = removeDupes(jetpack.read('./db/characters.json', 'json'))
+const items = removeDupes(jetpack.read('./db/items.json', 'json'))
 const equips = removeDupes(jetpack.read('./db/equips.json', 'json'))
 const inventory = jetpack.read('./db/inventory.json', 'json')
+const stats = jetpack.read('./db/stats.json', 'json')
 
 const getRandomProvider = () => {
   return new HDWalletProvider(
@@ -26,6 +29,10 @@ const blocknativeApiKey = '58a45321-bf96-485c-ab9b-e0610e181d26'
 
 let provider = getRandomProvider()
 const web3 = new Web3(provider)
+
+const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
+web3Provider.pollingInterval = 15000
+const signer = web3Provider.getSigner()
 
 process
   .on("unhandledRejection", (reason, p) => {
@@ -61,11 +68,15 @@ const saveCharacters = () => {
   jetpack.write('./db/characters.json', JSON.stringify(characters, null, 2))
 }
 
-const aggregateGuildMembers = async () => {
-  const web3Provider = new ethers.providers.Web3Provider(library)
-  web3Provider.pollingInterval = 15000
-  const signer = web3Provider.getSigner()
+const saveItems = () => {
+  jetpack.write('./db/items.json', JSON.stringify(items, null, 2))
+}
 
+const saveStats = () => {
+  jetpack.write('./db/stats.json', JSON.stringify(stats, null, 2))
+}
+
+const aggregateGuildMembers = async () => {
   const charactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi)
 
@@ -134,9 +145,6 @@ const aggregateGuildMembers = async () => {
 
 async function getAllBarracksEvents() {
   const Contract = ArcaneBarracksV1Contract
-  const web3Provider = new ethers.providers.Web3Provider(provider)
-  web3Provider.pollingInterval = 15000
-  const signer = web3Provider.getSigner()
 
   const charactersContract = new ethers.Contract(getAddress(contracts.barracks), Contract.abi, signer)
   const iface = new ethers.utils.Interface(Contract.abi)
@@ -204,9 +212,6 @@ async function monitorBarracksEvents() {
   const equips = jetpack.read('./db/equips.json', 'json')
 
   const Contract = ArcaneBarracksV1Contract
-  const web3Provider = new ethers.providers.Web3Provider(provider)
-  web3Provider.pollingInterval = 15000
-  const signer = web3Provider.getSigner()
 
   const contract = new ethers.Contract(getAddress(contracts.barracks), Contract.abi, signer)
 
@@ -228,10 +233,6 @@ async function monitorBarracksEvents() {
 
 async function getAllMarketEvents() {
   config.trades.counter = trades[trades.length-1]?.id || 1
-
-  const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
-  web3Provider.pollingInterval = 15000
-  const signer = web3Provider.getSigner()
 
   const Contract = ArcaneTraderV1Contract
   const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
@@ -393,10 +394,6 @@ async function monitorMarketEvents() {
   // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Recover(address indexed user, address indexed seller, uint256 tokenId);
 
-  const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
-  web3Provider.pollingInterval = 15000
-  const signer = web3Provider.getSigner()
-
   const Contract = ArcaneTraderV1Contract
   const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
 
@@ -484,10 +481,6 @@ async function monitorMarketEvents() {
 async function monitorCharacterEvents() {
   config.characters.counter = characters[characters.length-1]?.id || 1
 
-  const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
-  web3Provider.pollingInterval = 15000
-  const signer = web3Provider.getSigner()
-
   const Contract = ArcaneCharactersContract
   const contract = new ethers.Contract(getAddress(contracts.characters), Contract.abi, signer)
 
@@ -512,6 +505,73 @@ async function monitorCharacterEvents() {
   })
 }
 
+async function monitorItemEvents() {
+  config.items.counter = items[items.length-1]?.id || 1
+
+  const Contract = ArcaneItemsContract
+  const contract = new ethers.Contract(getAddress(contracts.items), Contract.abi, signer)
+
+  contract.on('Transfer', async (from, to, tokenId) => {
+    let item = items.find(t => t.tokenId === tokenId.toString())
+
+    if (!item) {
+      item = {
+        id: ++config.items.counter
+      }
+
+      items.push(item)
+    }
+
+    item.owner = to
+    item.tokenId = tokenId.toString()
+
+    console.log(item)
+    saveItems()
+    saveConfig()
+    updateGit()
+  })
+}
+
+async function monitorGeneralStats() {
+  const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
+
+  try {
+    stats.totalCharacters = (await arcaneCharactersContract.totalSupply()).toNumber()
+
+    if (!stats.characters) stats.characters = {}
+  
+    for (let i = 1; i <= 7; i++) {
+      if (!stats.characters[i]) stats.characters[i] = {}
+
+      stats.characters[i].total = (await arcaneCharactersContract.characterCount(i)).toNumber()
+    }
+  } catch (e) {
+    console.error(e)
+  }
+
+  const arcaneItemsContract = new ethers.Contract(getAddress(contracts.items), ArcaneItemsContract.abi, signer)
+  try {
+    stats.totalItems = (await arcaneItemsContract.totalSupply()).toNumber()
+
+    if (!stats.items) stats.items = {}
+  
+    for (let i = 1; i <= 7; i++) {
+      if (!stats.items[i]) stats.items[i] = {}
+
+      stats.items[i].total = (await arcaneItemsContract.itemCount(i)).toNumber()
+      stats.items[i].burned = (await arcaneItemsContract.itemBurnCount(i)).toNumber()
+    }
+  } catch (e) {
+    console.error(e)
+  }
+
+  saveStats()
+  saveConfig()
+  updateGit()
+
+  setTimeout(monitorGeneralStats, 15 * 60 * 1000)
+}
+
 async function run() {
   const accounts = await web3.eth.getAccounts()
 
@@ -519,6 +579,8 @@ async function run() {
   getAllMarketEvents()
   monitorMarketEvents()
   monitorCharacterEvents()
+  monitorItemEvents()
+  monitorGeneralStats()
 }
 
 run()
