@@ -1,22 +1,41 @@
 import contracts from "./contracts.mjs"
-import secrets from "./secrets.json"
+import secrets from "../secrets.json"
 import ethers from 'ethers'
 import Web3 from "web3"
-// import networks from "./networks.mjs"
+import BigNumber from "bignumber.js"
+import fetch from "node-fetch"
+import path from 'path'
+import networks from "./networks.mjs"
 import jetpack from 'fs-jetpack'
 import HDWalletProvider from "@truffle/hdwallet-provider"
 import { wait, round, removeDupes, toLong, toShort, getAddress, updateGit } from './util.mjs'
-import ArcaneTraderV1Contract from './contracts/ArcaneTraderV1.json'
-import ArcaneCharactersContract from './contracts/ArcaneCharacters.json'
-import ArcaneItemsContract from './contracts/ArcaneItems.json'
+import farmsData, { MAINNET, TESTNET } from './farms.mjs'
+import ArcaneRaidV1Contract from '../contracts/ArcaneRaidV1.json'
+import ArcaneTraderV1Contract from '../contracts/ArcaneTraderV1.json'
+import ArcaneCharactersContract from '../contracts/ArcaneCharacters.json'
+import ArcaneItemsContract from '../contracts/ArcaneItems.json'
+import BEP20Contract from '../contracts/BEP20.json'
+import { QuoteToken } from "./farms.mjs"
 
-const config = jetpack.read('./db/config.json', 'json')
-const trades = removeDupes(jetpack.read('./db/trades.json', 'json'))
-const characters = removeDupes(jetpack.read('./db/characters.json', 'json'))
-const items = removeDupes(jetpack.read('./db/items.json', 'json'))
-const equips = removeDupes(jetpack.read('./db/equips.json', 'json'))
-const inventory = jetpack.read('./db/inventory.json', 'json')
-const stats = jetpack.read('./db/stats.json', 'json')
+const config = jetpack.read(path.resolve('./db/config.json'), 'json')
+const trades = removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json'))
+const characters = removeDupes(jetpack.read(path.resolve('./db/characters.json'), 'json'))
+const items = removeDupes(jetpack.read(path.resolve('./db/items.json'), 'json'))
+const equips = removeDupes(jetpack.read(path.resolve('./db/equips.json'), 'json'))
+const farms = jetpack.read(path.resolve('./db/farms.json'), 'json')
+const runes = jetpack.read(path.resolve('./db/runes.json'), 'json')
+const inventory = jetpack.read(path.resolve('./db/inventory.json'), 'json')
+const stats = jetpack.read(path.resolve('./db/stats.json'), 'json')
+
+const fetchPrice = async (id, vs = 'usd') => {
+  const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=${vs}`)
+
+  return parseFloat((await response.json())[id][vs])
+}
+const fetchPrices = async () => {
+  // const response = await fetch('https://api.coingecko.com/api/v3/coins/list')
+  // prices = (await response.json())
+}
 
 const getRandomProvider = () => {
   return new HDWalletProvider(
@@ -49,31 +68,39 @@ process
   })
 
 const saveConfig = () => {
-  jetpack.write('./db/config.json', JSON.stringify(config, null, 2))
+  jetpack.write(path.resolve('./db/config.json'), JSON.stringify(config, null, 2))
 }
 
 const saveEquips = () => {
-  jetpack.write('./db/equips.json', JSON.stringify(equips, null, 2))
+  jetpack.write(path.resolve('./db/equips.json'), JSON.stringify(equips, null, 2))
 }
 
 const saveInventory = () => {
-  jetpack.write('./db/inventory.json', JSON.stringify(inventory, null, 2))
+  jetpack.write(path.resolve('./db/inventory.json'), JSON.stringify(inventory, null, 2))
 }
 
 const saveTrades = () => {
-  jetpack.write('./db/trades.json', JSON.stringify(trades, null, 2))
+  jetpack.write(path.resolve('./db/trades.json'), JSON.stringify(trades, null, 2))
 }
 
 const saveCharacters = () => {
-  jetpack.write('./db/characters.json', JSON.stringify(characters, null, 2))
+  jetpack.write(path.resolve('./db/characters.json'), JSON.stringify(characters, null, 2))
 }
 
 const saveItems = () => {
-  jetpack.write('./db/items.json', JSON.stringify(items, null, 2))
+  jetpack.write(path.resolve('./db/items.json'), JSON.stringify(items, null, 2))
+}
+
+const saveFarms = () => {
+  jetpack.write(path.resolve('./db/farms.json'), JSON.stringify(farms, null, 2))
+}
+
+const saveRunes = () => {
+  jetpack.write(path.resolve('./db/runes.json'), JSON.stringify(runes, null, 2))
 }
 
 const saveStats = () => {
-  jetpack.write('./db/stats.json', JSON.stringify(stats, null, 2))
+  jetpack.write(path.resolve('./db/stats.json'), JSON.stringify(stats, null, 2))
 }
 
 const aggregateGuildMembers = async () => {
@@ -194,7 +221,8 @@ async function getAllBarracksEvents() {
       const equip = {
         user: event.args.user,
         tokenId: event.args.tokenId.toString(),
-        itemId: event.args.itemId
+        itemId: event.args.itemId,
+        timestamp: (new Date()).getTime()
       }
 
       console.log(equip)
@@ -219,7 +247,8 @@ async function monitorBarracksEvents() {
     const equip = {
       user,
       tokenId: tokenId.toString(),
-      itemId
+      itemId,
+      timestamp: (new Date()).getTime()
     }
 
     console.log(equip)
@@ -227,16 +256,15 @@ async function monitorBarracksEvents() {
 
     saveEquips()
     saveConfig()
-    updateGit()
+    await updateGit()
   })
 }
 
 async function getAllMarketEvents() {
   config.trades.counter = trades[trades.length-1]?.id || 1
 
-  const Contract = ArcaneTraderV1Contract
-  const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
-  const iface = new ethers.utils.Interface(Contract.abi);
+  const contract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1Contract.abi, signer)
+  const iface = new ethers.utils.Interface(ArcaneTraderV1Contract.abi);
 
   async function iterate(fromBlock, toBlock, event, processLog) {
     if (fromBlock === toBlock) return
@@ -381,7 +409,7 @@ async function getAllMarketEvents() {
 
   saveTrades()
   saveConfig()
-  updateGit()
+  await updateGit()
   // setTimeout(getAllMarketEvents, 2 * 60 * 1000) // Manually update every 5 mins
 }
 
@@ -400,11 +428,7 @@ async function monitorMarketEvents() {
   contract.on('List', async (seller, buyer, tokenId, price, log) => {
     let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
-    if (trade) {
-      if (trade.blockNumber >= log.blockNumber) {
-        return
-      }
-    } else {
+    if (!trade) {
       trade = {
         id: ++config.trades.counter
       }
@@ -412,6 +436,9 @@ async function monitorMarketEvents() {
       trades.push(trade)
     }
 
+    if (trade.blockNumber >= log.blockNumber)
+      return
+  
     trade.seller = seller
     trade.buyer = buyer
     trade.tokenId = tokenId.toString()
@@ -425,10 +452,10 @@ async function monitorMarketEvents() {
     console.log(trade)
     saveTrades()
     saveConfig()
-    updateGit()
+    await updateGit()
   })
 
-  contract.on('Update', async (seller, buyer, tokenId, price) => {
+  contract.on('Update', async (seller, buyer, tokenId, price, log) => {
     const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
     if (trade.blockNumber >= log.blockNumber)
@@ -436,13 +463,13 @@ async function monitorMarketEvents() {
 
     trade.buyer = buyer
     trade.price = toShort(price)
-    trade.updatedAt = new Date().getTime()
     trade.blockNumber = log.blockNumber
+    trade.updatedAt = new Date().getTime()
 
     console.log(trade)
     saveTrades()
     saveConfig()
-    updateGit()
+    await updateGit()
   })
 
   contract.on('Delist', async (seller, tokenId, log) => {
@@ -452,13 +479,13 @@ async function monitorMarketEvents() {
       return
 
     trade.status = "delisted"
-    trade.updatedAt = new Date().getTime()
     trade.blockNumber = log.blockNumber
+    trade.delistedAt = new Date().getTime()
 
     console.log(trade)
     saveTrades()
     saveConfig()
-    updateGit()
+    await updateGit()
   })
 
   contract.on('Buy', async (seller, buyer, tokenId, price, log) => {
@@ -468,13 +495,13 @@ async function monitorMarketEvents() {
       return
 
     trade.status = "sold"
-    trade.updatedAt = new Date().getTime()
     trade.blockNumber = log.blockNumber
+    trade.boughtAt = new Date().getTime()
 
     console.log(trade)
     saveTrades()
     saveConfig()
-    updateGit()
+    await updateGit()
   })
 }
 
@@ -484,7 +511,7 @@ async function monitorCharacterEvents() {
   const Contract = ArcaneCharactersContract
   const contract = new ethers.Contract(getAddress(contracts.characters), Contract.abi, signer)
 
-  contract.on('Transfer', async (from, to, tokenId) => {
+  contract.on('Transfer', async (from, to, tokenId, log) => {
     let character = characters.find(t => t.tokenId === tokenId.toString())
 
     if (!character) {
@@ -495,13 +522,18 @@ async function monitorCharacterEvents() {
       characters.push(character)
     }
 
+    if (character.blockNumber >= log.blockNumber)
+      return
+
     character.owner = to
     character.tokenId = tokenId.toString()
+    character.transferredAt = new Date().getTime()
+    character.blockNumber = log.blockNumber
 
     console.log(character)
     saveCharacters()
     saveConfig()
-    updateGit()
+    await updateGit()
   })
 }
 
@@ -511,7 +543,7 @@ async function monitorItemEvents() {
   const Contract = ArcaneItemsContract
   const contract = new ethers.Contract(getAddress(contracts.items), Contract.abi, signer)
 
-  contract.on('Transfer', async (from, to, tokenId) => {
+  contract.on('Transfer', async (from, to, tokenId, log) => {
     let item = items.find(t => t.tokenId === tokenId.toString())
 
     if (!item) {
@@ -522,17 +554,24 @@ async function monitorItemEvents() {
       items.push(item)
     }
 
+    if (item.blockNumber >= log.blockNumber)
+      return
+
     item.owner = to
     item.tokenId = tokenId.toString()
+    item.transferredAt = new Date().getTime()
+    item.blockNumber = log.blockNumber
 
     console.log(item)
     saveItems()
     saveConfig()
-    updateGit()
+    await updateGit()
   })
 }
 
 async function monitorGeneralStats() {
+  stats.prices.bnb = await fetchPrice('binancecoin')
+
   const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
 
   try {
@@ -565,9 +604,232 @@ async function monitorGeneralStats() {
     console.error(e)
   }
 
-  saveStats()
+  // const arcaneRaidContract = new ethers.Contract(getAddress(contracts.raid), ArcaneRaidV1Contract.abi, signer)
+
+  // Update farms
+  {
+    console.log('Update farms')
+
+    if (!stats.prices) stats.prices = { busd: 1 }
+    if (!stats.liquidity) stats.liquidity = {}
+    stats.totalBusdLiquidity = 0
+    stats.totalBnbLiquidity = 0
+  
+    for (let i = 0; i < farmsData.length; i++) {
+      const farm = farmsData[i]
+      try {
+        if (farm.chefKey !== 'AMN') continue
+    
+        // console.log(farm.lpSymbol)
+      
+        if (farm.lpSymbol.indexOf('BUSD') !== -1) {
+          const contract = new ethers.Contract(getAddress(contracts.busd), BEP20Contract.abi, signer)
+          const value = toShort(await contract.balanceOf(getAddress(farm.lpAddresses)))
+          
+          // console.log('has', value)
+          
+          if (!['USDT-BUSD LP', 'BUSD-BNB LP'].includes(farm.lpSymbol)) {
+            if (!stats.liquidity[farm.lpSymbol]) stats.liquidity[farm.lpSymbol] = {}
+            stats.liquidity[farm.lpSymbol].value = value
+      
+            stats.totalBusdLiquidity += value
+          }
+        } else if (farm.lpSymbol.indexOf('BNB') !== -1) {
+          const contract = new ethers.Contract(getAddress(contracts.wbnb), BEP20Contract.abi, signer)
+          const value = toShort(await contract.balanceOf(getAddress(farm.lpAddresses)))
+          
+          // console.log('has', value)
+    
+          if (!['BTCB-BNB LP', 'BUSD-BNB LP'].includes(farm.lpSymbol)) {
+            if (!stats.liquidity[farm.lpSymbol]) stats.liquidity[farm.lpSymbol] = {}
+            stats.liquidity[farm.lpSymbol].value = value
+    
+            stats.totalBnbLiquidity += value
+          }
+        }
+    
+        const lpAddress = getAddress(farm.isTokenOnly ? farm.tokenLpAddresses : farm.lpAddresses)
+
+        const tokenContract = new ethers.Contract(getAddress(farm.tokenAddresses), BEP20Contract.abi, signer)
+        const lpContract = new ethers.Contract(farm.isTokenOnly ? getAddress(farm.tokenAddresses) : lpAddress, BEP20Contract.abi, signer)
+        const quotedContract = new ethers.Contract(getAddress(farm.quoteTokenAdresses), BEP20Contract.abi, signer)
+    
+        const tokenBalanceLP = (await tokenContract.balanceOf(lpAddress)).toString()
+        const quoteTokenBlanceLP = (await quotedContract.balanceOf(lpAddress)).toString()
+        const lpTokenBalanceMC = (await lpContract.balanceOf(getAddress(contracts.raid))).toString()
+        const lpTotalSupply = (await lpContract.totalSupply()).toString()
+        const tokenDecimals = await tokenContract.decimals()
+        const quoteTokenDecimals = await quotedContract.decimals()
+
+        let tokenAmount
+        let lpTotalInQuoteToken
+        let tokenPriceVsQuote
+        if (farm.isTokenOnly) {
+          tokenAmount = new BigNumber(lpTokenBalanceMC).div(new BigNumber(10).pow(tokenDecimals))
+          if (farm.tokenSymbol === QuoteToken.BUSD && farm.quoteTokenSymbol === QuoteToken.BUSD) {
+            tokenPriceVsQuote = new BigNumber(1)
+          } else {
+            tokenPriceVsQuote = new BigNumber(quoteTokenBlanceLP).div(new BigNumber(tokenBalanceLP))
+          }
+          lpTotalInQuoteToken = tokenAmount.times(tokenPriceVsQuote)
+        } else {
+          // Ratio in % a LP tokens that are in staking, vs the total number in circulation
+          const lpTokenRatio = new BigNumber(lpTokenBalanceMC).div(new BigNumber(lpTotalSupply))
+    
+          // Total value in staking in quote token value
+          lpTotalInQuoteToken = new BigNumber(quoteTokenBlanceLP)
+            .div(new BigNumber(10).pow(18))
+            .times(new BigNumber(2))
+            .times(lpTokenRatio)
+    
+          // Amount of token in the LP that are considered staking (i.e amount of token * lp ratio)
+          tokenAmount = new BigNumber(tokenBalanceLP).div(new BigNumber(10).pow(tokenDecimals)).times(lpTokenRatio)
+          const quoteTokenAmount = new BigNumber(quoteTokenBlanceLP)
+            .div(new BigNumber(10).pow(quoteTokenDecimals))
+            .times(lpTokenRatio)
+    
+          if (tokenAmount.comparedTo(0) > 0) {
+            tokenPriceVsQuote = quoteTokenAmount.div(tokenAmount)
+          } else {
+            tokenPriceVsQuote = new BigNumber(quoteTokenBlanceLP).div(new BigNumber(tokenBalanceLP))
+          }
+        }
+    
+        if (farm.quoteTokenSymbol === QuoteToken.BUSD) {
+          const tokenSymbol = farm.tokenSymbol.toLowerCase()
+          stats.prices[tokenSymbol] = tokenPriceVsQuote.toNumber()
+        }
+
+
+        console.log(tokenAmount)
+        console.log(lpTotalInQuoteToken)
+        console.log(tokenPriceVsQuote)
+        console.log(quoteTokenBlanceLP)
+        console.log(lpTokenBalanceMC)
+        console.log(lpTotalSupply)
+        farm.tokenAmount = tokenAmount.toNumber()
+        farm.lpTotalInQuoteToken = lpTotalInQuoteToken.toNumber()
+        farm.tokenPriceVsQuote = tokenPriceVsQuote.toNumber()
+        farm.tokenBalanceLP = toShort(tokenBalanceLP.toString())
+        farm.quoteTokenBlanceLP = toShort(quoteTokenBlanceLP.toString())
+        farm.lpTokenBalanceMC = toShort(lpTokenBalanceMC.toString())
+        farm.lpTotalSupply = toShort(lpTotalSupply.toString())
+        farm.tokenDecimals = tokenDecimals
+        farm.quoteTokenDecimals = quoteTokenDecimals
+        farm.tokenTotalSupply = toShort((await tokenContract.totalSupply()).toString())
+        farm.tokenTotalBurned = toShort((await tokenContract.balanceOf('0x000000000000000000000000000000000000dEaD')).toString())
+
+        // console.log(farm)
+
+        farms[farm.lpSymbol] = farm
+      } catch(e) {
+        console.log(e)
+
+        i -= 1
+      }
+    }
+
+    saveFarms()
+  }
+
+  // Update stats
+  {
+    console.log('Update stats')
+    // Update TVL
+    {
+      console.log('Updating TVL')
+
+      stats.tvl = 0
+
+      for (const tokenSymbol of Object.keys(farms)) {
+        const farm = farms[tokenSymbol]
+        let liquidity = farm.lpTotalInQuoteToken
+
+        if (!farm.lpTotalInQuoteToken) {
+          liquidity = 0
+        } else {
+          liquidity = stats.prices[farm.quoteTokenSymbol.toLowerCase()] * farm.lpTotalInQuoteToken
+        }
+
+        stats.tvl += liquidity
+      }
+    }
+
+    // Update historical token prices
+    {
+      console.log('Update historical token prices')
+      if (!stats.historicalPrice) stats.historicalPrice = {}
+
+      for (const tokenSymbol in stats.prices) {
+        if (!stats.historicalPrice[tokenSymbol]) stats.historicalPrice[tokenSymbol] = []
+
+        const currentPrice = stats.prices[tokenSymbol]
+        const historicalPrice = stats.historicalPrice[tokenSymbol]
+
+        const oldTime = (new Date(historicalPrice[historicalPrice.length-1]?.[0] || 0)).getTime()
+        const newTime = (new Date()).getTime()
+        const diff = newTime - oldTime
+
+        if (diff / (1000 * 60 * 60 * 24) > 1) {
+          historicalPrice.push([newTime, currentPrice])
+        }
+      }
+    }
+
+    // Update liquidity
+    {
+      console.log('Update liquidity')
+      if (!stats.historicalLiquidity) stats.historicalLiquidity = {
+        total: [],
+        busd: [],
+        bnb: []
+      }
+
+      stats.totalLiquidity = stats.totalBusdLiquidity + (stats.totalBnbLiquidity * stats.prices.bnb)
+
+      const oldTime = (new Date(stats.historicalLiquidity.total[stats.historicalLiquidity.total.length-1]?.[0] || 0)).getTime()
+      const newTime = (new Date()).getTime()
+      const diff = newTime - oldTime
+
+      if (diff / (1000 * 60 * 60 * 24) > 1) {
+        stats.historicalLiquidity.total.push([newTime, stats.totalLiquidity])
+        stats.historicalLiquidity.busd.push([newTime, stats.totalBusdLiquidity])
+        stats.historicalLiquidity.bnb.push([newTime, stats.totalBnbLiquidity])
+      }
+    }
+    
+    saveStats()
+  }
+
+  // Update runes
+  {
+    console.log('Update runes')
+
+    for (const tokenSymbol in stats.prices) {
+      if (tokenSymbol === 'bnb' || tokenSymbol === 'rune' || tokenSymbol === 'usdt') continue
+
+      if (!runes[tokenSymbol]) runes[tokenSymbol] = {}
+
+      runes[tokenSymbol].price = stats.prices[tokenSymbol]
+    }
+    
+    for (const tokenSymbol of Object.keys(farms)) {
+      const farm = farms[tokenSymbol]
+
+      if (farm.isTokenOnly) {
+        if (!runes[tokenSymbol.toLowerCase()]) runes[tokenSymbol.toLowerCase()] = {}
+
+        runes[tokenSymbol.toLowerCase()].totalSupply = farm.tokenTotalSupply
+        runes[tokenSymbol.toLowerCase()].circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
+        runes[tokenSymbol.toLowerCase()].totalBurned = farm.tokenTotalBurned
+      }
+    }
+    
+    saveRunes()
+  }
+  
   saveConfig()
-  updateGit()
+  await updateGit()
 
   setTimeout(monitorGeneralStats, 15 * 60 * 1000)
 }
@@ -576,6 +838,10 @@ async function run() {
   const accounts = await web3.eth.getAccounts()
 
   // monitorBarracksEvents()
+
+
+
+  await fetchPrices()
   getAllMarketEvents()
   monitorMarketEvents()
   monitorCharacterEvents()

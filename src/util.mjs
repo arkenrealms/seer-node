@@ -1,5 +1,6 @@
 import { exec } from 'child_process'
 import ethers from 'ethers'
+import util from 'util'
 
 export function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -27,9 +28,12 @@ export const getAddress = (address) => {
   return address[chainId] ? address[chainId] : address[mainNetChainId]
 }
 
-export function updateGit() {
-  exec('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master', (err, stdout, stderr) => {
-    // handle err, stdout & stderr
-    console.log(err, stderr, stdout)
-   });
+export async function updateGit() {
+  const execPromise = util.promisify(exec)
+
+  const { err, stdout, stderr } = await execPromise('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master')
+
+  console.log(err, stderr, stdout)
+
+  await wait(100)
 }

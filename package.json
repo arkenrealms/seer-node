@@ -1,9 +1,9 @@
 {
   "name": "rune-databaser",
   "version": "0.1.0",
-  "main": "index.mjs",
+  "main": "./src/index.mjs",
   "scripts": {
-    "start": "node --experimental-json-modules index.mjs",
+    "start": "node --experimental-json-modules ./src/index.mjs",
     "forever": "forever start forever-config.json"
   },
   "devDependencies": {

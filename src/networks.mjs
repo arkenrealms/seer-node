@@ -1,4 +1,4 @@
-import secrets from "./secrets.json"
+import secrets from "../secrets.json"
 import HDWalletProvider from "@truffle/hdwallet-provider"
 
 export default {

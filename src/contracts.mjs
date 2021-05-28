@@ -2,13 +2,90 @@ export const MAINNET = 56
 export const TESTNET = 97
 
 export default {
+  amn: {
+    [MAINNET]: '0x346C03fe8BE489baAAc5CE67e817Ff11fb580F98',
+    [TESTNET]: '',
+    name: 'Amn',
+  },
+  raid: {
+    [MAINNET]: '0xcfA857d6EC2F59b050D7296FbcA8a91D061451f3',
+    [TESTNET]: '0x669a10A4F226Aa1DE1e7eA800e39ae9F9Bb88834',
+  },
+  ArcaneItemLibraryV2: {
+    [MAINNET]: '0x7aFDA32Fb8FbC8845d7c53db0686FD92257E6e95',
+    [TESTNET]: '',
+  },
+  ERC165Facet: {
+    [MAINNET]: '0xFd6A197370B57E019C90AC8E3c8B341dc5059A7F',
+    [TESTNET]: '',
+  },
+  DiamondCutFacet: {
+    [MAINNET]: '0x7E12e57C61DA41c5beE39C5AE26d455F14F1B5cB',
+    [TESTNET]: '',
+  },
+  DiamondLoupeFacet: {
+    [MAINNET]: '0x8186460247fC737203204488237c2ecB8a4Fa7F8',
+    [TESTNET]: '',
+  },
+  PermsFacet: {
+    [MAINNET]: '0xE0264d88FD2557024CD48A230fDbf81c67Be745F',
+    [TESTNET]: '',
+  },
+  ArcaneBarracksFacetV1: {
+    [MAINNET]: '0x56346A8b47211731aE9EE7c64CEAF426A0fE55C7',
+    [TESTNET]: '',
+  },
+  Diamond: {
+    [MAINNET]: '0x5fE24631136D570D12920C9Fa0FEcaDA84E47673',
+    [TESTNET]: '',
+  },
+  DiamondAdmin: {
+    [MAINNET]: '0x2fF0A9091a3c4fB5f8827D36a398FbD5BF7fa12F',
+    [TESTNET]: '',
+  },
+  ContractWithdrawerFacet: {
+    [MAINNET]: '0x04C2BF59657F501aA62Dac8bFfb3fb2c92431Ab4',
+    [TESTNET]: '',
+  },
+  BEP20TimelockFacet: {
+    [MAINNET]: '0x12fc3C2B7D7B225e489De3ADF91D21eBAe61f795',
+    [TESTNET]: '',
+  },
+  MaintenanceFacet: {
+    [MAINNET]: '0x3FbCaA1481ff07f78600C29259E275C0716991D8',
+    [TESTNET]: '',
+  },
+  ArcaneBarracksFacetV1dupwtf: {
+    [MAINNET]: '0xFf563822fC039D292aC4909b7cB1302c5b3d3450',
+    [TESTNET]: '',
+  },
+  barracks: {
+    [MAINNET]: '0x5fE24631136D570D12920C9Fa0FEcaDA84E47673',
+    [TESTNET]: '',
+  },
+  blacksmith: {
+    [MAINNET]: '0xB615023dfa06944B06c4caDB308E6009907E8f4d',
+    [TESTNET]: '0x6bEf093fab1BeE45EA6b8dd60c4C3c3247Dd4E30',
+  },
+
+  thulMasterChef: {
+    [MAINNET]: '0xcfA857d6EC2F59b050D7296FbcA8a91D061451f3',
+    [TESTNET]: '0x669a10A4F226Aa1DE1e7eA800e39ae9F9Bb88834',
+  },
+  thul: {
+    [MAINNET]: '0x1fC5bffCf855B9D7897F1921363547681F6847Aa',
+    [TESTNET]: '0xDf2c033005585e6eA99fa46513Ed5Ca8c0bb3178',
+    name: 'Thul',
+  },
+
   ortMasterChef: {
     [MAINNET]: '0xcfA857d6EC2F59b050D7296FbcA8a91D061451f3',
     [TESTNET]: '0x669a10A4F226Aa1DE1e7eA800e39ae9F9Bb88834',
   },
   ort: {
     [MAINNET]: '0x33bc7539D83C1ADB95119A255134e7B584cd5c59',
-    [TESTNET]: '',
+    [TESTNET]: '0xeF8503491F1eC0f2Fea52914A74cc0CAa3AD0b38',
+    name: 'Ort',
   },
   trader: {
     [MAINNET]: '0xdAE69A43bC73e662095b488dbDDD1D3aBA59c1FF',
@@ -208,14 +285,6 @@ export default {
   tal: {
     [MAINNET]: '0x5DE72A6fca2144Aa134650bbEA92Cc919244F05D',
     [TESTNET]: '0x14c6AFcFc9C68922700DC8E3DC87e4FCFf044eCB',
-  },
-  thul: {
-    [MAINNET]: '',
-    [TESTNET]: '',
-  },
-  amn: {
-    [MAINNET]: '',
-    [TESTNET]: '',
   },
   sol: {
     [MAINNET]: '',
