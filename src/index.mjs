@@ -103,6 +103,8 @@ const saveStats = () => {
   jetpack.write(path.resolve('./db/stats.json'), JSON.stringify(stats, null, 2))
 }
 
+const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
+
 const aggregateGuildMembers = async () => {
   const charactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi)
@@ -797,6 +799,16 @@ async function monitorGeneralStats() {
         stats.historicalLiquidity.bnb.push([newTime, stats.totalBnbLiquidity])
       }
     }
+
+    // Update market
+    {
+      console.log('Update market')
+
+      stats.marketItemsAvailable = trades.filter(t => t.status === 'available').length
+      stats.marketItemsSold = trades.filter(t => t.status === 'sold').length
+      stats.marketItemsDelisted = trades.filter(t => t.status === 'delisted').length
+      stats.marketAverageSoldPrice = average(trades.filter(t => t.status === 'sold').map(t => t.price))
+    }
     
     saveStats()
   }
@@ -806,7 +818,7 @@ async function monitorGeneralStats() {
     console.log('Update runes')
 
     for (const tokenSymbol in stats.prices) {
-      if (tokenSymbol === 'bnb' || tokenSymbol === 'rune' || tokenSymbol === 'usdt') continue
+      if (tokenSymbol === 'bnb' || tokenSymbol === 'rune' || tokenSymbol === 'usdt' || tokenSymbol === 'busd') continue
 
       if (!runes[tokenSymbol]) runes[tokenSymbol] = {}
 

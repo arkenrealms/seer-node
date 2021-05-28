@@ -6,7 +6,7 @@
     "append": true,
     "watch": false,
     "command": "node --experimental-modules --experimental-json-modules",
-    "script": "./index.mjs",
+    "script": "./src/index.mjs",
     "path": "/Users/dev/Projects/rune-databaser",
     "workingDir": "./",
     "sourceDir": "./",
