@@ -1,3 +1,7 @@
+import * as dotenv from 'dotenv'
+
+dotenv.config()
+
 import contracts from "./contracts.mjs"
 import secrets from "../secrets.json"
 import ethers from 'ethers'
@@ -21,12 +25,8 @@ import { decodeItem } from "./util/decodeItem.mjs"
 
 const config = jetpack.read(path.resolve('./db/config.json'), 'json')
 const trades = removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json'))
-const characters = removeDupes(jetpack.read(path.resolve('./db/characters.json'), 'json'))
-const items = removeDupes(jetpack.read(path.resolve('./db/items.json'), 'json'))
-const equips = removeDupes(jetpack.read(path.resolve('./db/equips.json'), 'json'))
 const farms = jetpack.read(path.resolve('./db/farms.json'), 'json')
 const runes = jetpack.read(path.resolve('./db/runes.json'), 'json')
-const inventory = jetpack.read(path.resolve('./db/inventory.json'), 'json')
 const stats = jetpack.read(path.resolve('./db/stats.json'), 'json')
 const historical = jetpack.read(path.resolve('./db/historical.json'), 'json')
 const barracksEvents = jetpack.read(path.resolve('./db/barracks/events.json'), 'json')
@@ -36,10 +36,12 @@ const guildsEvents = jetpack.read(path.resolve('./db/guilds/events.json'), 'json
 const itemsEvents = jetpack.read(path.resolve('./db/items/events.json'), 'json')
 const charactersEvents = jetpack.read(path.resolve('./db/characters/events.json'), 'json')
 const usersEvents = jetpack.read(path.resolve('./db/users/events.json'), 'json')
+const tradesEvents = jetpack.read(path.resolve('./db/trades/events.json'), 'json')
 
 
 config.trades.updating = false
 config.barracks.updating = false
+config.blacksmith.updating = false
 config.items.updating = false
 config.characters.updating = false
 config.test.updating = false
@@ -128,24 +130,20 @@ const saveConfig = () => {
   jetpack.write(path.resolve('./db/config.json'), JSON.stringify(config, null, 2))
 }
 
-const saveEquips = () => {
-  jetpack.write(path.resolve('./db/equips.json'), JSON.stringify(equips, null, 2))
-}
-
-const saveInventory = () => {
-  jetpack.write(path.resolve('./db/inventory.json'), JSON.stringify(inventory, null, 2))
-}
-
 const saveTrades = () => {
   jetpack.write(path.resolve('./db/trades.json'), JSON.stringify(trades, null, 2))
+}
+
+const saveTradesEvents = () => {
+  jetpack.write(path.resolve('./db/trades/events.json'), JSON.stringify(tradesEvents, null, 2))
 }
 
 const saveBarracksEvents = () => {
   jetpack.write(path.resolve('./db/barracks/events.json'), JSON.stringify(barracksEvents, null, 2))
 }
 
-const saveCharacters = () => {
-  jetpack.write(path.resolve('./db/characters.json'), JSON.stringify(characters, null, 2))
+const saveCharactersEvents = () => {
+  jetpack.write(path.resolve('./db/characters/events.json'), JSON.stringify(charactersEvents, null, 2))
 }
 
 const saveItemsEvents = () => {
@@ -168,17 +166,123 @@ const saveHistorical = () => {
   jetpack.write(path.resolve('./db/historical.json'), JSON.stringify(historical, null, 2))
 }
 
+const updateLeaderboardByUser = (user) => {
+  const leaderboard = {
+    mostInventoryItems: {
+      value: 0,
+      address: null
+    },
+    mostMarketItemsListed: {
+      value: 0,
+      address: null
+    },
+    mostMarketItemsSold: {
+      value: 0,
+      address: null
+    },
+    mostItemsTransferred: {
+      value: 0,
+      address: null
+    },
+    mostItemsCrafted: {
+      value: 0,
+      address: null
+    },
+    mostCharactersCreated: {
+      value: 0,
+      address: null
+    },
+    mostItemsCraftedByItemId: {
+      1: {
+        value: 0,
+        address: null
+      }
+    },
+    mostPerfectItemsAttained: {
+      value: 0,
+      address: null
+    },
+    mostPerfectItemsCrafted: {
+      value: 0,
+      address: null
+    },
+    highestAveragePefectionScore: {
+      value: 0,
+      address: null
+    },
+    top10Crafters: {
+      since: 1622310971556,
+      list: []
+    },
+    top10CraftersByItemId: {
+      since: 1622310971556,
+      list: []
+    },
+    ...(jetpack.read(path.resolve(`./db/leaderboard.json`), 'json') || {})
+  }
+
+  if (user.inventoryItemCount > leaderboard.mostInventoryItems.value) {
+    leaderboard.mostInventoryItems.value = user.inventoryItemCount
+    leaderboard.mostInventoryItems.address = user.address
+  }
+
+  if (user.marketTradeListedCount > leaderboard.mostMarketItemsListed.value) {
+    leaderboard.mostMarketItemsListed.value = user.marketTradeListedCount
+    leaderboard.mostMarketItemsListed.address = user.address
+  }
+
+  if (user.marketTradeSoldCount > leaderboard.mostMarketItemsSold.value) {
+    leaderboard.mostMarketItemsSold.value = user.marketTradeSoldCount
+    leaderboard.mostMarketItemsSold.address = user.address
+  }
+
+  if (user.transferredOutCount > leaderboard.mostItemsTransferred.value) {
+    leaderboard.mostItemsTransferred.value = user.transferredOutCount
+    leaderboard.mostItemsTransferred.address = user.address
+  }
+
+  jetpack.write(path.resolve(`./db/leaderboard.json`), JSON.stringify(leaderboard, null, 2))
+}
+
+const loadCharacter = (characterId) => {
+  return {
+    id: characterId,
+    ownersCount: 0,
+    ...(jetpack.read(path.resolve(`./db/characters/${characterId}/overview.json`), 'json') || {}),
+    owners: (jetpack.read(path.resolve(`./db/characters/${characterId}/owners.json`), 'json') || []),
+  }
+}
+
+const saveCharacter = (character) => {
+  jetpack.write(path.resolve(`./db/characters/${character.id}/overview.json`), JSON.stringify({
+    ...character,
+    owners: undefined,
+    ownersCount: character.owners.length,
+  }, null, 2))
+
+  jetpack.write(path.resolve(`./db/characters/${character.id}/owners.json`), JSON.stringify(character.owners, null, 2))
+}
+
+const saveCharacterOwner = (character, characterData) => {
+  if (!character.owners.find(o => o === characterData.owner)) {
+    character.owners.push(characterData.owner)
+    character.owners = character.owners.filter(o => o != characterData.from)
+  }
+  
+  saveCharacter(character)
+}
 
 const loadItem = (itemId) => {
   return {
-    ...(jetpack.read(path.resolve(`./db/items/${itemId}/overview.json`), 'json') || {}),
     id: itemId,
     perfectCount: 0,
     ownersCount: 0,
     marketTradesListedCount: 0,
     marketTradesSoldCount: 0,
+    ...(jetpack.read(path.resolve(`./db/items/${itemId}/overview.json`), 'json') || {}),
     owners: (jetpack.read(path.resolve(`./db/items/${itemId}/owners.json`), 'json') || []),
-    market: (jetpack.read(path.resolve(`./db/items/${itemId}/market.json`), 'json') || [])
+    market: (jetpack.read(path.resolve(`./db/items/${itemId}/market.json`), 'json') || []),
+    tokens: (jetpack.read(path.resolve(`./db/items/${itemId}/tokens.json`), 'json') || [])
   }
 }
 
@@ -187,15 +291,17 @@ const saveItem = (item) => {
     ...item,
     owners: undefined,
     market: undefined,
-    perfectCount: item.owners.filter(i => i.perfect === 100).length,
+    tokens: undefined,
+    perfectCount: item.tokens.filter(i => i.item.perfection === 1).length,
     ownersCount: item.owners.length,
-    marketTradesPerfectCount: item.market.filter(i => i.perfect === 100).length,
+    marketTradesPerfectCount: item.market.filter(i => i.item.perfection === 1).length,
     marketTradesListedCount: item.market.filter(i => i.status === 'listed').length,
     marketTradesSoldCount: item.market.filter(i => i.status === 'sold').length
   }, null, 2))
 
   jetpack.write(path.resolve(`./db/items/${item.id}/owners.json`), JSON.stringify(item.owners, null, 2))
   jetpack.write(path.resolve(`./db/items/${item.id}/market.json`), JSON.stringify(item.market, null, 2))
+  jetpack.write(path.resolve(`./db/items/${item.id}/tokens.json`), JSON.stringify(item.tokens, null, 2))
 }
 
 const saveItemOwner = (item, itemData) => {
@@ -204,6 +310,34 @@ const saveItemOwner = (item, itemData) => {
     item.owners = item.owners.filter(o => o != itemData.from)
   }
   
+  saveItem(item)
+}
+
+const saveItemTrade = (item, trade) => {
+  const found = item.market.find(i => i.seller === trade.seller && i.buyer === trade.buyer && i.tokenId === trade.tokenId)
+
+  if (found) {
+    for (const key of Object.keys(trade)) {
+      found[key] = trade[key]
+    }
+  } else {
+    item.market.push(trade)
+  }
+
+  saveItem(item)
+}
+
+const saveItemToken = (item, token) => {
+  const found = item.tokens.find(i => i.id === token.id)
+
+  if (found) {
+    for (const key of Object.keys(token)) {
+      found[key] = token[key]
+    }
+  } else {
+    item.tokens.push(token)
+  }
+
   saveItem(item)
 }
 
@@ -265,7 +399,9 @@ const loadUser = (address) => {
     equippedItemCount: 0,
     marketTradeListedCount: 0,
     marketTradeSoldCount: 0,
+    transferredOutCount: 0,
     ...(jetpack.read(path.resolve(`./db/users/${address}/overview.json`), 'json') || {}),
+    characters: (jetpack.read(path.resolve(`./db/users/${address}/characters.json`), 'json') || []),
     inventory: {
       items: [],
       ...(jetpack.read(path.resolve(`./db/users/${address}/inventory.json`), 'json') || {})
@@ -282,10 +418,17 @@ const saveUser = (user) => {
     ...user,
     inventory: undefined,
     market: undefined,
+    characters: undefined,
+    craftedItemCount: user.inventory.items.filter(i => i.status === 'created').length,
     inventoryItemCount: user.inventory.items.filter(i => i.status === 'unequipped').length,
-    equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length
+    equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
+    transferredOutCount: user.inventory.items.filter(i => i.status === 'transferred_out').length,
+    transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
   }, null, 2))
 
+  updateLeaderboardByUser(user)
+
+  jetpack.write(path.resolve(`./db/users/${user.address}/characters.json`), JSON.stringify(user.characters, null, 2))
   jetpack.write(path.resolve(`./db/users/${user.address}/inventory.json`), JSON.stringify(user.inventory, null, 2))
   jetpack.write(path.resolve(`./db/users/${user.address}/market.json`), JSON.stringify(user.market, null, 2))
 }
@@ -299,6 +442,20 @@ const saveUserItem = (user, item) => {
     }
   } else {
     user.inventory.items.push(item)
+  }
+
+  saveUser(user)
+}
+
+const saveUserCharacter = (user, character) => {
+  const savedItem = user.characters.find(i => i.tokenId === character.tokenId)
+
+  if (savedItem) {
+    for (const key of Object.keys(character)) {
+      savedItem[key] = character[key]
+    }
+  } else {
+    user.characters.push(character)
   }
 
   saveUser(user)
@@ -322,7 +479,6 @@ async function getAllBarracksEvents() {
   if (config.barracks.updating) return
 
   config.barracks.updating = true
-
   config.barracks.counter = barracksEvents[barracksEvents.length-1]?.id || 1
 
   const contract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
@@ -364,6 +520,26 @@ async function getAllBarracksEvents() {
       saveUserItem(user, item)
     }
 
+    if (e.name === 'ActionBurn') {
+      
+    }
+
+    if (e.name === 'ActionBonus') {
+      
+    }
+
+    if (e.name === 'ActionHiddenPool') {
+      
+    }
+
+    if (e.name === 'ActionFee') {
+      
+    }
+
+    if (e.name === 'ActionSwap') {
+      
+    }
+
     const e2 = barracksEvents.find(t => t.transactionHash === log.transactionHash)
 
     if (!e2) {
@@ -387,6 +563,11 @@ async function getAllBarracksEvents() {
   const events = [
     'Equip(address,uint256,uint16)',
     'Unequip(address,uint256,uint16)',
+    'ActionBurn(address,uint256)',
+    'ActionBonus(address,uint256)',
+    'ActionHiddenPool(address,uint256)',
+    'ActionFee(address,address,uint256)',
+    'ActionSwap(address,address,uint256)',
   ]
   
   for (const event of events) {
@@ -412,6 +593,26 @@ async function monitorBarracksEvents() {
   })
 
   contract.on('Unequip', async () => {
+    await getAllBarracksEvents()
+  })
+
+  contract.on('ActionBurn', async () => {
+    await getAllBarracksEvents()
+  })
+
+  contract.on('ActionBonus', async () => {
+    await getAllBarracksEvents()
+  })
+
+  contract.on('ActionHiddenPool', async () => {
+    await getAllBarracksEvents()
+  })
+
+  contract.on('ActionFee', async () => {
+    await getAllBarracksEvents()
+  })
+
+  contract.on('ActionSwap', async () => {
     await getAllBarracksEvents()
   })
 }
@@ -454,9 +655,12 @@ async function getAllMarketEvents() {
       trade.createdAt = new Date().getTime()
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
+      trade.item = decodeItem(trade.tokenId)
 
       saveUserTrade(loadUser(seller), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
+      saveItemTrade(loadItem(trade.item.id), trade)
+      saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
       
       console.log('List', trade)
     }
@@ -476,6 +680,8 @@ async function getAllMarketEvents() {
 
       saveUserTrade(loadUser(seller), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
+      saveItemTrade(loadItem(trade.item.id), trade)
+      saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
       
       console.log('Update', trade)
     }
@@ -494,6 +700,8 @@ async function getAllMarketEvents() {
 
       saveUserTrade(loadUser(seller), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
+      saveItemTrade(loadItem(trade.item.id), trade)
+      saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
       
       console.log('Delist', trade)
     }
@@ -507,17 +715,31 @@ async function getAllMarketEvents() {
         return
 
       trade.status = "sold"
+      trade.buyer = buyer
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
 
       saveUserTrade(loadUser(seller), trade)
       saveUserTrade(loadUser(buyer), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
+      saveItemTrade(loadItem(trade.item.id), trade)
+      saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
       
       console.log('Buy', trade)
     }
 
+    const e2 = tradesEvents.find(t => t.transactionHash === log.transactionHash)
+
+    if (!e2) {
+      tradesEvents.push({
+        id: ++config.trades.counter,
+        ...log,
+        ...e
+      })
+    }
+
     saveTrades()
+    saveTradesEvents()
 
     if (updateConfig) {
       config.trades.lastBlock = log.blockNumber
@@ -579,35 +801,88 @@ async function monitorMarketEvents() {
   })
 }
 
-async function monitorCharacterEvents() {
-  config.characters.counter = characters[characters.length-1]?.id || 1
+async function getAllCharacterEvents() {
+  if (config.characters.updating) return
 
-  const Contract = ArcaneCharactersContract
-  const contract = new ethers.Contract(getAddress(contracts.characters), Contract.abi, signer)
+  config.characters.updating = true
+  config.characters.counter = charactersEvents[charactersEvents.length-1]?.id || 1
 
-  contract.on('Transfer', async (from, to, tokenId, log) => {
-    let character = characters.find(t => t.tokenId === tokenId.toString())
+  const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
+  const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi)
 
-    if (!character) {
-      character = {
-        id: ++config.characters.counter
+  async function processLog(log, updateConfig = true) {
+    const e = iface.parseLog(log)
+    
+    console.log(e.name, e)
+
+    if (e.name === 'Transfer') {
+      const { from, to: userAddress, tokenId } = e.args
+
+      const user = loadUser(userAddress)
+
+      const characterData = {
+        owner: userAddress,
+        from,
+        status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
+        tokenId: tokenId.toString(),
+        transferredAt: new Date().getTime(),
+        id: await contract.getCharacterId(tokenId.toString())
       }
 
-      characters.push(character)
+      saveUserCharacter(user, characterData)
+      // saveTokenTransfer(loadToken(characterData.tokenId), characterData)
+
+      if (from !== '0x0000000000000000000000000000000000000000') {
+        saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
+      }
+
+      saveCharacterOwner(loadCharacter(characterData.id), characterData)
     }
 
-    if (character.blockNumber >= log.blockNumber)
-      return
+    const e2 = charactersEvents.find(t => t.transactionHash === log.transactionHash)
 
-    character.owner = to
-    character.tokenId = tokenId.toString()
-    character.transferredAt = new Date().getTime()
-    character.blockNumber = log.blockNumber
+    if (!e2) {
+      charactersEvents.push({
+        id: ++config.characters.counter,
+        ...log,
+        ...e
+      })
+    }
+  
+    saveCharactersEvents()
 
-    console.log('Character Transfer', character)
-    saveCharacters()
-    saveConfig()
-    await updateGit()
+    if (updateConfig) {
+      config.characters.lastBlock = log.blockNumber
+      saveConfig()
+    }
+  }
+
+  const blockNumber = await web3.eth.getBlockNumber()
+
+  const events = [
+    'Transfer'
+  ]
+  
+  for (const event of events) {
+    await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock, blockNumber, contract.filters[event](), processLog)
+  }
+
+  config.characters.lastBlock = blockNumber
+
+  console.log('Finished', config.characters.lastBlock)
+
+  saveCharactersEvents()
+  saveConfig()
+  await updateGit()
+
+  config.characters.updating = false
+}
+
+async function monitorCharacterEvents() {
+  const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
+
+  contract.on('Transfer', async (from, to, tokenId, log) => {
+    await getAllCharacterEvents()
   })
 }
 
@@ -689,12 +964,10 @@ async function getAllItemEvents() {
 }
 
 async function monitorItemEvents() {
-  config.items.counter = items[items.length-1]?.id || 1
-
   const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItemsContract.abi, signer)
 
-  contract.on('Transfer', async (from, to, tokenId, log) => {
-    
+  contract.on('Transfer', async () => {
+    await getAllItemEvents()
   })
 }
 
@@ -1034,15 +1307,14 @@ async function monitorGeneralStats() {
 async function run() {
   await fetchPrices()
 
-  getAllItemEvents()
+  setInterval(getAllItemEvents, 15 * 60 * 1000)
+  setInterval(getAllBarracksEvents, 15 * 60 * 1000)
+  setInterval(getAllMarketEvents, 15 * 60 * 1000)
+  setInterval(getAllCharacterEvents, 15 * 60 * 1000)
+
   monitorItemEvents()
-
-  getAllBarracksEvents()
   monitorBarracksEvents()
-
-  getAllMarketEvents()
   monitorMarketEvents()
-  
   monitorCharacterEvents()
   
   monitorGeneralStats()
