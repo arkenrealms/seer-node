@@ -13,9 +13,11 @@ import farmsData, { MAINNET, TESTNET } from './farms.mjs'
 import ArcaneRaidV1Contract from '../contracts/ArcaneRaidV1.json'
 import ArcaneTraderV1Contract from '../contracts/ArcaneTraderV1.json'
 import ArcaneCharactersContract from '../contracts/ArcaneCharacters.json'
+import ArcaneBarracksFacetV1 from '../contracts/ArcaneBarracksFacetV1.json'
 import ArcaneItemsContract from '../contracts/ArcaneItems.json'
 import BEP20Contract from '../contracts/BEP20.json'
 import { QuoteToken } from "./farms.mjs"
+import { decodeItem } from "./util/decodeItem.mjs"
 
 const config = jetpack.read(path.resolve('./db/config.json'), 'json')
 const trades = removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json'))
@@ -26,6 +28,21 @@ const farms = jetpack.read(path.resolve('./db/farms.json'), 'json')
 const runes = jetpack.read(path.resolve('./db/runes.json'), 'json')
 const inventory = jetpack.read(path.resolve('./db/inventory.json'), 'json')
 const stats = jetpack.read(path.resolve('./db/stats.json'), 'json')
+const historical = jetpack.read(path.resolve('./db/historical.json'), 'json')
+const barracksEvents = jetpack.read(path.resolve('./db/barracks/events.json'), 'json')
+const blacksmithEvents = jetpack.read(path.resolve('./db/blacksmith/events.json'), 'json')
+const raidEvents = jetpack.read(path.resolve('./db/raid/events.json'), 'json')
+const guildsEvents = jetpack.read(path.resolve('./db/guilds/events.json'), 'json')
+const itemsEvents = jetpack.read(path.resolve('./db/items/events.json'), 'json')
+const charactersEvents = jetpack.read(path.resolve('./db/characters/events.json'), 'json')
+const usersEvents = jetpack.read(path.resolve('./db/users/events.json'), 'json')
+
+
+config.trades.updating = false
+config.barracks.updating = false
+config.items.updating = false
+config.characters.updating = false
+config.test.updating = false
 
 const fetchPrice = async (id, vs = 'usd') => {
   const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=${vs}`)
@@ -40,7 +57,7 @@ const fetchPrices = async () => {
 const getRandomProvider = () => {
   return new HDWalletProvider(
     secrets.mnemonic,
-    "https://thrumming-still-leaf.bsc.quiknode.pro/b2f8a5b1bd0809dbf061112e1786b4a8e53c9a83/" //"https://bsc.getblock.io/mainnet/?api_key=3f594a5f-d0ed-48ca-b0e7-a57d04f76332" //networks[Math.floor(Math.random() * networks.length)]
+    "wss://thrumming-still-leaf.bsc.quiknode.pro/b2f8a5b1bd0809dbf061112e1786b4a8e53c9a83/" //"https://bsc.getblock.io/mainnet/?api_key=3f594a5f-d0ed-48ca-b0e7-a57d04f76332" //networks[Math.floor(Math.random() * networks.length)]
   )
 }
 
@@ -51,6 +68,7 @@ const web3 = new Web3(provider)
 
 const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
 web3Provider.pollingInterval = 15000
+
 const signer = web3Provider.getSigner()
 
 process
@@ -67,6 +85,45 @@ process
     }, 60 * 1000)
   })
 
+const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
+
+async function iterateBlocks(name, address, fromBlock, toBlock, event, processLog) {
+  if (fromBlock === toBlock) return
+
+  // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Delist(address indexed seller, uint256 tokenId);
+  // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Recover(address indexed user, address indexed seller, uint256 tokenId);
+
+  try {
+    const toBlock2 = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
+
+    const filter = {
+      address,
+      fromBlock,
+      toBlock: toBlock2,
+      topics: event.topics
+    }
+
+    console.log(name, 'Iterating block', fromBlock, 'to', toBlock2, 'eventually', toBlock, 'for', event.topics)
+
+    const logs = await web3Provider.getLogs(filter)
+
+    for(let i = 0; i < logs.length; i++) {
+      processLog(logs[i], false)
+    }
+
+    // await wait(3 * 1000)
+    
+    await iterateBlocks(name, address, toBlock2, toBlock, event, processLog)
+  } catch(e) {
+    console.log('error', e)
+    console.log(fromBlock, toBlock)
+    process.exit(1)
+  }
+}
+  
 const saveConfig = () => {
   jetpack.write(path.resolve('./db/config.json'), JSON.stringify(config, null, 2))
 }
@@ -83,12 +140,16 @@ const saveTrades = () => {
   jetpack.write(path.resolve('./db/trades.json'), JSON.stringify(trades, null, 2))
 }
 
+const saveBarracksEvents = () => {
+  jetpack.write(path.resolve('./db/barracks/events.json'), JSON.stringify(barracksEvents, null, 2))
+}
+
 const saveCharacters = () => {
   jetpack.write(path.resolve('./db/characters.json'), JSON.stringify(characters, null, 2))
 }
 
-const saveItems = () => {
-  jetpack.write(path.resolve('./db/items.json'), JSON.stringify(items, null, 2))
+const saveItemsEvents = () => {
+  jetpack.write(path.resolve('./db/items/events.json'), JSON.stringify(itemsEvents, null, 2))
 }
 
 const saveFarms = () => {
@@ -103,207 +164,266 @@ const saveStats = () => {
   jetpack.write(path.resolve('./db/stats.json'), JSON.stringify(stats, null, 2))
 }
 
-const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
+const saveHistorical = () => {
+  jetpack.write(path.resolve('./db/historical.json'), JSON.stringify(historical, null, 2))
+}
 
-const aggregateGuildMembers = async () => {
-  const charactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
-  const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi)
 
-  async function iterate(fromBlock, toBlock, logs) {
-    if (fromBlock === toBlock) return logs
+const loadItem = (itemId) => {
+  return {
+    ...(jetpack.read(path.resolve(`./db/items/${itemId}/overview.json`), 'json') || {}),
+    id: itemId,
+    perfectCount: 0,
+    ownersCount: 0,
+    marketTradesListedCount: 0,
+    marketTradesSoldCount: 0,
+    owners: (jetpack.read(path.resolve(`./db/items/${itemId}/owners.json`), 'json') || []),
+    market: (jetpack.read(path.resolve(`./db/items/${itemId}/market.json`), 'json') || [])
+  }
+}
+
+const saveItem = (item) => {
+  jetpack.write(path.resolve(`./db/items/${item.id}/overview.json`), JSON.stringify({
+    ...item,
+    owners: undefined,
+    market: undefined,
+    perfectCount: item.owners.filter(i => i.perfect === 100).length,
+    ownersCount: item.owners.length,
+    marketTradesPerfectCount: item.market.filter(i => i.perfect === 100).length,
+    marketTradesListedCount: item.market.filter(i => i.status === 'listed').length,
+    marketTradesSoldCount: item.market.filter(i => i.status === 'sold').length
+  }, null, 2))
+
+  jetpack.write(path.resolve(`./db/items/${item.id}/owners.json`), JSON.stringify(item.owners, null, 2))
+  jetpack.write(path.resolve(`./db/items/${item.id}/market.json`), JSON.stringify(item.market, null, 2))
+}
+
+const saveItemOwner = (item, itemData) => {
+  if (!item.owners.find(o => o === itemData.owner)) {
+    item.owners.push(itemData.owner)
+    item.owners = item.owners.filter(o => o != itemData.from)
+  }
   
-    const event = charactersContract.filters['Transfer(address,address,uint256)']()
-    
-    const topic = ethers.utils.id("CharacterMint(address,uint256,uint8)")
+  saveItem(item)
+}
 
-    config.trades.lastBlock = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
-    const filter = {
-      address: getAddress(contracts.characters),
-      fromBlock,
-      toBlock: config.trades.lastBlock,
-      topics: event.topics
+const loadToken = (tokenId) => {
+  return {
+    id: tokenId,
+    ownersCount: 0,
+    marketTradesListedCount: 0,
+    marketTradesSoldCount: 0,
+    ...(jetpack.read(path.resolve(`./db/tokens/${tokenId}/overview.json`), 'json') || {}),
+    transfers: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/transfers.json`), 'json') || []),
+    trades: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/trades.json`), 'json') || [])
+  }
+}
+
+const saveToken = (token) => {
+  jetpack.write(path.resolve(`./db/tokens/${token.id}/overview.json`), JSON.stringify({
+    ...token,
+    transfers: undefined,
+    trades: undefined
+  }, null, 2))
+
+  jetpack.write(path.resolve(`./db/tokens/${token.id}/transfers.json`), JSON.stringify(token.transfers, null, 2))
+  jetpack.write(path.resolve(`./db/tokens/${token.id}/trades.json`), JSON.stringify(token.trades, null, 2))
+}
+
+const saveTokenTrade = (token, trade) => {
+  const found = token.trades.find(i => i.seller === trade.seller && i.buyer === trade.buyer && i.tokenId === trade.tokenId)
+
+  if (found) {
+    for (const key of Object.keys(trade)) {
+      found[key] = trade[key]
     }
+  } else {
+    token.trades.push(trade)
+  }
 
-    try {
-      const logs2 = await web3Provider.getLogs(filter)
-      console.log(logs)
-      await wait(3000)
-      return iterate(config.trades.lastBlock, toBlock, [...logs, ...logs2])
-    } catch(e) {
-      console.log(fromBlock, toBlock, config.trades.lastBlock, logs)
-      return iterate(fromBlock, toBlock, logs)
+  saveToken(token)
+}
+
+const saveTokenTransfer = (token, itemData) => {
+  const found = token.transfers.find(i => i.owner === itemData.owner && i.tokenId === itemData.tokenId)
+
+  if (found) {
+    for (const key of Object.keys(itemData)) {
+      found[key] = itemData[key]
     }
-
-    return logs
+  } else {
+    token.transfers.push(itemData)
   }
 
-  const logs = await iterate(6141200, 6160300, [])
-  // const logs = logs222
+  saveToken(token)
+}
 
-  async function processEvent(event) {
-    const characterHolder = event.args.from
+const loadUser = (address) => {
+  return {
+    address,
+    inventoryItemCount: 0,
+    equippedItemCount: 0,
+    marketTradeListedCount: 0,
+    marketTradeSoldCount: 0,
+    ...(jetpack.read(path.resolve(`./db/users/${address}/overview.json`), 'json') || {}),
+    inventory: {
+      items: [],
+      ...(jetpack.read(path.resolve(`./db/users/${address}/inventory.json`), 'json') || {})
+    },
+    market: {
+      trades: [],
+      ...(jetpack.read(path.resolve(`./db/users/${address}/market.json`), 'json') || {})
+    }
+  }
+}
 
-    // const block = await library.getBlock(log.blockNumber)
-    return characterHolder
-    // if (event.name === 'mintNFT') {
-      
-    // }
+const saveUser = (user) => {
+  jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), JSON.stringify({
+    ...user,
+    inventory: undefined,
+    market: undefined,
+    inventoryItemCount: user.inventory.items.filter(i => i.status === 'unequipped').length,
+    equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length
+  }, null, 2))
+
+  jetpack.write(path.resolve(`./db/users/${user.address}/inventory.json`), JSON.stringify(user.inventory, null, 2))
+  jetpack.write(path.resolve(`./db/users/${user.address}/market.json`), JSON.stringify(user.market, null, 2))
+}
+
+const saveUserItem = (user, item) => {
+  const savedItem = user.inventory.items.find(i => i.tokenId === item.tokenId)
+
+  if (savedItem) {
+    for (const key of Object.keys(item)) {
+      savedItem[key] = item[key]
+    }
+  } else {
+    user.inventory.items.push(item)
   }
 
-  const airdropAddresses = []
+  saveUser(user)
+}
 
-  for (const log2 of logs) {
-    const event = iface.parseLog(log2)
+const saveUserTrade = (user, trade) => {
+  const marketTrade = user.market.trades.find(i => i.tokenId === trade.tokenId)
 
-    const airdropAddress = await processEvent(event)
-
-    airdropAddresses.push(airdropAddress)
+  if (marketTrade) {
+    for (const key of Object.keys(trade)) {
+      marketTrade[key] = trade[key]
+    }
+  } else {
+    user.market.trades.push(trade)
   }
 
-  function onlyUnique(value, index, self) {
-    return self.indexOf(value) === index
-  }
-
-  const rows = airdropAddresses.filter(onlyUnique).map(a => [a, 40000/airdropAddresses.length])
-
-  const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n")
-
-  const encodedUri = encodeURI(csvContent)
-  window.open(encodedUri)
+  saveUser(user)
 }
 
 async function getAllBarracksEvents() {
-  const Contract = ArcaneBarracksV1Contract
+  if (config.barracks.updating) return
 
-  const charactersContract = new ethers.Contract(getAddress(contracts.barracks), Contract.abi, signer)
-  const iface = new ethers.utils.Interface(Contract.abi)
+  config.barracks.updating = true
 
-  async function iterate(fromBlock, toBlock, processLog) {
-    if (config.trades.lastBlock === toBlock) return
-  
-    // event Equip(address indexed user, uint256 indexed tokenId, uint16 indexed itemId)
-    // event Unequip(address indexed user, uint256 indexed tokenId, uint16 indexed itemId)
-    // event ActionBurn(address indexed user, uint256 amount)
-    // event ActionBonus(address indexed user, uint256 amount)
-    // event ActionHiddenPool(address indexed user, uint256 amount)
-    // event ActionFee(address indexed user, address indexed token, uint256 amount)
-    const event = charactersContract.filters['Equip(address,uint256,uint16)']()
+  config.barracks.counter = barracksEvents[barracksEvents.length-1]?.id || 1
+
+  const contract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
+  const iface = new ethers.utils.Interface(ArcaneBarracksFacetV1.abi)
+
+  async function processLog(log, updateConfig = true) {
+    const e = iface.parseLog(log)
     
-    config.trades.lastBlock = (fromBlock + 4000) < toBlock ? fromBlock + 4000 : toBlock
-    const filter = {
-      address: getAddress(contracts.barracks),
-      fromBlock,
-      toBlock: config.trades.lastBlock,
-      topics: event.topics
-    }
+    console.log(e.name, e)
 
-    try {
-      const logs = await web3Provider.getLogs(filter)
-      for(let i = 0; i < logs.length; i++) {
-        processLog(logs[i])
+    if (e.name === 'Equip') {
+      const { user: userAddress, tokenId, itemId } = e.args
+
+      const user = loadUser(userAddress)
+
+      const item = {
+        status: "equipped",
+        tokenId: tokenId.toString(),
+        updatedAt: new Date().getTime(),
+        ...decodeItem(tokenId.toString())
       }
-
-      await wait(3000)
       
-      iterate(config.trades.lastBlock, toBlock, processLog)
-    } catch(e) {
-      console.log('error', e)
-      console.log(fromBlock, toBlock)
-      iterate(fromBlock, config.trades.lastBlock, toBlock, processLog)
+      saveUserItem(user, item)
     }
-  }
 
-  const equips = []
+    if (e.name === 'Unequip') {
+      const { user: userAddress, tokenId, itemId } = e.args
 
-  async function processLog(log) {
-    const event = iface.parseLog(log)
-    // const block = await library.getBlock(log.blockNumber)
-    
-    if (event.name === 'Equip') {
-      const equip = {
-        user: event.args.user,
-        tokenId: event.args.tokenId.toString(),
-        itemId: event.args.itemId,
-        timestamp: (new Date()).getTime()
+      const user = loadUser(userAddress)
+
+      const item = {
+        status: "unequipped",
+        tokenId: tokenId.toString(),
+        itemId: itemId,
+        updatedAt: new Date().getTime(),
+        ...decodeItem(tokenId.toString())
       }
+      
+      saveUserItem(user, item)
+    }
 
-      console.log(equip)
-      equips.push(equip)
+    const e2 = barracksEvents.find(t => t.transactionHash === log.transactionHash)
+
+    if (!e2) {
+      barracksEvents.push({
+        id: ++config.barracks.counter,
+        ...log,
+        ...e
+      })
+    }
+  
+    saveBarracksEvents()
+
+    if (updateConfig) {
+      config.barracks.lastBlock = log.blockNumber
+      saveConfig()
     }
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
-  await iterate(7310654, blockNumber, processLog)
 
-  jetpack.write('./db/equips.json', JSON.stringify(equips, null, 2))
+  const events = [
+    'Equip(address,uint256,uint16)',
+    'Unequip(address,uint256,uint16)',
+  ]
+  
+  for (const event of events) {
+    await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock, blockNumber, contract.filters[event](), processLog)
+  }
+
+  config.barracks.lastBlock = blockNumber
+
+  console.log('Finished', config.barracks.lastBlock)
+
+  saveBarracksEvents()
+  saveConfig()
+  await updateGit()
+
+  config.barracks.updating = false
 }
 
 async function monitorBarracksEvents() {
-  const equips = jetpack.read('./db/equips.json', 'json')
+  const contract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
 
-  const Contract = ArcaneBarracksV1Contract
+  contract.on('Equip', async () => {
+    await getAllBarracksEvents()
+  })
 
-  const contract = new ethers.Contract(getAddress(contracts.barracks), Contract.abi, signer)
-
-  contract.on('Equip', async (user, tokenId, itemId) => {
-    const equip = {
-      user,
-      tokenId: tokenId.toString(),
-      itemId,
-      timestamp: (new Date()).getTime()
-    }
-
-    console.log(equip)
-    equips.push(equip)
-
-    saveEquips()
-    saveConfig()
-    await updateGit()
+  contract.on('Unequip', async () => {
+    await getAllBarracksEvents()
   })
 }
 
 async function getAllMarketEvents() {
+  if (config.trades.updating) return
+
+  config.trades.updating = true
   config.trades.counter = trades[trades.length-1]?.id || 1
 
   const contract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1Contract.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneTraderV1Contract.abi);
-
-  async function iterate(fromBlock, toBlock, event, processLog) {
-    if (fromBlock === toBlock) return
-  
-    // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
-    // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
-    // event Delist(address indexed seller, uint256 tokenId);
-    // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
-    // event Recover(address indexed user, address indexed seller, uint256 tokenId);
-
-    try {
-      const toBlock2 = (fromBlock + 5000) < toBlock ? fromBlock + 5000 : toBlock
-  
-      const filter = {
-        address: getAddress(contracts.trader),
-        fromBlock,
-        toBlock: toBlock2,
-        topics: event.topics
-      }
-  
-      console.log('Iterating block', fromBlock, 'to', toBlock2, 'eventually', toBlock, 'for', event.topics)
-
-      const logs = await web3Provider.getLogs(filter)
-
-      for(let i = 0; i < logs.length; i++) {
-        processLog(logs[i], false)
-      }
-
-      // await wait(3 * 1000)
-      
-      await iterate(toBlock2, toBlock, event, processLog)
-    } catch(e) {
-      console.log('error', e)
-      console.log(fromBlock, toBlock)
-      process.exit(1)
-    }
-  }
 
   async function processLog(log, updateConfig = true) {
     const event = iface.parseLog(log)
@@ -334,6 +454,9 @@ async function getAllMarketEvents() {
       trade.createdAt = new Date().getTime()
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
+
+      saveUserTrade(loadUser(seller), trade)
+      saveTokenTrade(loadToken(trade.tokenId), trade)
       
       console.log('List', trade)
     }
@@ -351,6 +474,9 @@ async function getAllMarketEvents() {
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
 
+      saveUserTrade(loadUser(seller), trade)
+      saveTokenTrade(loadToken(trade.tokenId), trade)
+      
       console.log('Update', trade)
     }
 
@@ -366,6 +492,9 @@ async function getAllMarketEvents() {
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
 
+      saveUserTrade(loadUser(seller), trade)
+      saveTokenTrade(loadToken(trade.tokenId), trade)
+      
       console.log('Delist', trade)
     }
 
@@ -381,6 +510,10 @@ async function getAllMarketEvents() {
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
 
+      saveUserTrade(loadUser(seller), trade)
+      saveUserTrade(loadUser(buyer), trade)
+      saveTokenTrade(loadToken(trade.tokenId), trade)
+      
       console.log('Buy', trade)
     }
 
@@ -395,14 +528,14 @@ async function getAllMarketEvents() {
   const blockNumber = await web3.eth.getBlockNumber()
 
   const events = [
-    contract.filters['List(address,address,uint256,uint256)'](),
-    contract.filters['Update(address,address,uint256,uint256)'](),
-    contract.filters['Delist(address,uint256)'](),
-    contract.filters['Buy(address,address,uint256,uint256)'](),
+    'List(address,address,uint256,uint256)',
+    'Update(address,address,uint256,uint256)',
+    'Delist(address,uint256)',
+    'Buy(address,address,uint256,uint256)',
   ]
   
   for (const event of events) {
-    await iterate(config.trades.lastBlock, blockNumber, event, processLog)
+    await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock, blockNumber, contract.filters[event](), processLog)
   }
 
   config.trades.lastBlock = blockNumber
@@ -412,6 +545,8 @@ async function getAllMarketEvents() {
   saveTrades()
   saveConfig()
   await updateGit()
+
+  config.trades.updating = false
   // setTimeout(getAllMarketEvents, 2 * 60 * 1000) // Manually update every 5 mins
 }
 
@@ -427,83 +562,20 @@ async function monitorMarketEvents() {
   const Contract = ArcaneTraderV1Contract
   const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
 
-  contract.on('List', async (seller, buyer, tokenId, price, log) => {
-    let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
-
-    if (!trade) {
-      trade = {
-        id: ++config.trades.counter
-      }
-
-      trades.push(trade)
-    }
-
-    if (trade.blockNumber >= log.blockNumber)
-      return
-  
-    trade.seller = seller
-    trade.buyer = buyer
-    trade.tokenId = tokenId.toString()
-    trade.price = toShort(price)
-    trade.status = "available"
-    trade.hotness = 0
-    trade.createdAt = new Date().getTime()
-    trade.updatedAt = new Date().getTime()
-    trade.blockNumber = log.blockNumber
-
-    console.log(trade)
-    saveTrades()
-    saveConfig()
-    await updateGit()
+  contract.on('List', async () => {
+    await getAllMarketEvents()
   })
 
-  contract.on('Update', async (seller, buyer, tokenId, price, log) => {
-    const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
-
-    if (trade.blockNumber >= log.blockNumber)
-      return
-
-    trade.buyer = buyer
-    trade.price = toShort(price)
-    trade.blockNumber = log.blockNumber
-    trade.updatedAt = new Date().getTime()
-
-    console.log(trade)
-    saveTrades()
-    saveConfig()
-    await updateGit()
+  contract.on('Update', async () => {
+    await getAllMarketEvents()
   })
 
-  contract.on('Delist', async (seller, tokenId, log) => {
-    const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
-
-    if (trade.blockNumber >= log.blockNumber)
-      return
-
-    trade.status = "delisted"
-    trade.blockNumber = log.blockNumber
-    trade.delistedAt = new Date().getTime()
-
-    console.log(trade)
-    saveTrades()
-    saveConfig()
-    await updateGit()
+  contract.on('Delist', async () => {
+    await getAllMarketEvents()
   })
 
-  contract.on('Buy', async (seller, buyer, tokenId, price, log) => {
-    const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
-
-    if (trade.blockNumber >= log.blockNumber)
-      return
-
-    trade.status = "sold"
-    trade.blockNumber = log.blockNumber
-    trade.boughtAt = new Date().getTime()
-
-    console.log(trade)
-    saveTrades()
-    saveConfig()
-    await updateGit()
+  contract.on('Buy', async () => {
+    await getAllMarketEvents()
   })
 }
 
@@ -532,47 +604,102 @@ async function monitorCharacterEvents() {
     character.transferredAt = new Date().getTime()
     character.blockNumber = log.blockNumber
 
-    console.log(character)
+    console.log('Character Transfer', character)
     saveCharacters()
     saveConfig()
     await updateGit()
   })
 }
 
+async function getAllItemEvents() {
+  if (config.items.updating) return
+
+  config.items.updating = true
+  config.items.counter = itemsEvents[itemsEvents.length-1]?.id || 1
+
+  const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItemsContract.abi, signer)
+  const iface = new ethers.utils.Interface(ArcaneItemsContract.abi)
+
+  async function processLog(log, updateConfig = true) {
+    const e = iface.parseLog(log)
+    
+    console.log(e.name, e)
+
+    if (e.name === 'Transfer') {
+      const { from, to: userAddress, tokenId } = e.args
+
+      const user = loadUser(userAddress)
+
+      const itemData = {
+        owner: userAddress,
+        from,
+        status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
+        tokenId: tokenId.toString(),
+        createdAt: new Date().getTime(),
+        ...decodeItem(tokenId.toString())
+      }
+
+      saveUserItem(user, itemData)
+      saveTokenTransfer(loadToken(itemData.tokenId), itemData)
+
+      if (from !== '0x0000000000000000000000000000000000000000') {
+        saveUserItem(user, { ...itemData, status: 'transferred_out' })
+      }
+
+      saveItemOwner(loadItem(itemData.id), itemData)
+    }
+
+    const e2 = itemsEvents.find(t => t.transactionHash === log.transactionHash)
+
+    if (!e2) {
+      itemsEvents.push({
+        id: ++config.items.counter,
+        ...log,
+        ...e
+      })
+    }
+  
+    saveItemsEvents()
+
+    if (updateConfig) {
+      config.items.lastBlock = log.blockNumber
+      saveConfig()
+    }
+  }
+
+  const blockNumber = await web3.eth.getBlockNumber()
+
+  const events = [
+    'Transfer'
+  ]
+  
+  for (const event of events) {
+    await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock, blockNumber, contract.filters[event](), processLog)
+  }
+
+  config.items.lastBlock = blockNumber
+
+  console.log('Finished', config.items.lastBlock)
+
+  saveItemsEvents()
+  saveConfig()
+  await updateGit()
+
+  config.items.updating = false
+}
+
 async function monitorItemEvents() {
   config.items.counter = items[items.length-1]?.id || 1
 
-  const Contract = ArcaneItemsContract
-  const contract = new ethers.Contract(getAddress(contracts.items), Contract.abi, signer)
+  const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItemsContract.abi, signer)
 
   contract.on('Transfer', async (from, to, tokenId, log) => {
-    let item = items.find(t => t.tokenId === tokenId.toString())
-
-    if (!item) {
-      item = {
-        id: ++config.items.counter
-      }
-
-      items.push(item)
-    }
-
-    if (item.blockNumber >= log.blockNumber)
-      return
-
-    item.owner = to
-    item.tokenId = tokenId.toString()
-    item.transferredAt = new Date().getTime()
-    item.blockNumber = log.blockNumber
-
-    console.log(item)
-    saveItems()
-    saveConfig()
-    await updateGit()
+    
   })
 }
 
 async function monitorGeneralStats() {
-  stats.prices.bnb = await fetchPrice('binancecoin')
+  // stats.prices.bnb = await fetchPrice('binancecoin')
 
   const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
 
@@ -703,12 +830,12 @@ async function monitorGeneralStats() {
         }
 
 
-        console.log(tokenAmount)
-        console.log(lpTotalInQuoteToken)
-        console.log(tokenPriceVsQuote)
-        console.log(quoteTokenBlanceLP)
-        console.log(lpTokenBalanceMC)
-        console.log(lpTotalSupply)
+        // console.log(tokenAmount)
+        // console.log(lpTotalInQuoteToken)
+        // console.log(tokenPriceVsQuote)
+        // console.log(quoteTokenBlanceLP)
+        // console.log(lpTokenBalanceMC)
+        // console.log(lpTotalSupply)
         farm.tokenAmount = tokenAmount.toNumber()
         farm.lpTotalInQuoteToken = lpTotalInQuoteToken.toNumber()
         farm.tokenPriceVsQuote = tokenPriceVsQuote.toNumber()
@@ -760,13 +887,13 @@ async function monitorGeneralStats() {
     // Update historical token prices
     {
       console.log('Update historical token prices')
-      if (!stats.historicalPrice) stats.historicalPrice = {}
+      if (!historical.price) historical.price = {}
 
       for (const tokenSymbol in stats.prices) {
-        if (!stats.historicalPrice[tokenSymbol]) stats.historicalPrice[tokenSymbol] = []
+        if (!historical.price[tokenSymbol]) historical.price[tokenSymbol] = []
 
         const currentPrice = stats.prices[tokenSymbol]
-        const historicalPrice = stats.historicalPrice[tokenSymbol]
+        const historicalPrice = historical.price[tokenSymbol]
 
         const oldTime = (new Date(historicalPrice[historicalPrice.length-1]?.[0] || 0)).getTime()
         const newTime = (new Date()).getTime()
@@ -781,7 +908,7 @@ async function monitorGeneralStats() {
     // Update liquidity
     {
       console.log('Update liquidity')
-      if (!stats.historicalLiquidity) stats.historicalLiquidity = {
+      if (!historical.liquidity) historical.liquidity = {
         total: [],
         busd: [],
         bnb: []
@@ -789,14 +916,14 @@ async function monitorGeneralStats() {
 
       stats.totalLiquidity = stats.totalBusdLiquidity + (stats.totalBnbLiquidity * stats.prices.bnb)
 
-      const oldTime = (new Date(stats.historicalLiquidity.total[stats.historicalLiquidity.total.length-1]?.[0] || 0)).getTime()
+      const oldTime = (new Date(historical.liquidity.total[historical.liquidity.total.length-1]?.[0] || 0)).getTime()
       const newTime = (new Date()).getTime()
       const diff = newTime - oldTime
 
       if (diff / (1000 * 60 * 60 * 24) > 1) {
-        stats.historicalLiquidity.total.push([newTime, stats.totalLiquidity])
-        stats.historicalLiquidity.busd.push([newTime, stats.totalBusdLiquidity])
-        stats.historicalLiquidity.bnb.push([newTime, stats.totalBnbLiquidity])
+        historical.liquidity.total.push([newTime, stats.totalLiquidity])
+        historical.liquidity.busd.push([newTime, stats.totalBusdLiquidity])
+        historical.liquidity.bnb.push([newTime, stats.totalBnbLiquidity])
       }
     }
 
@@ -818,7 +945,7 @@ async function monitorGeneralStats() {
     console.log('Update runes')
 
     for (const tokenSymbol in stats.prices) {
-      if (tokenSymbol === 'bnb' || tokenSymbol === 'rune' || tokenSymbol === 'usdt' || tokenSymbol === 'busd') continue
+      if (tokenSymbol === 'bnb' || tokenSymbol === 'usdt' || tokenSymbol === 'busd') continue
 
       if (!runes[tokenSymbol]) runes[tokenSymbol] = {}
 
@@ -829,17 +956,75 @@ async function monitorGeneralStats() {
       const farm = farms[tokenSymbol]
 
       if (farm.isTokenOnly) {
-        if (!runes[tokenSymbol.toLowerCase()]) runes[tokenSymbol.toLowerCase()] = {}
+        const symbol = tokenSymbol.toLowerCase()
 
-        runes[tokenSymbol.toLowerCase()].totalSupply = farm.tokenTotalSupply
-        runes[tokenSymbol.toLowerCase()].circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
-        runes[tokenSymbol.toLowerCase()].totalBurned = farm.tokenTotalBurned
+        const tokenContract = new ethers.Contract(getAddress(contracts[symbol]), BEP20Contract.abi, signer)
+
+        const raidHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.raid))).toString())
+        const botHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.botAddress))).toString())
+        const vaultHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.vaultAddress))).toString())
+        const devHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.devAddress))).toString())
+        const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
+
+        const totalSupply = farm.tokenTotalSupply
+        const circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
+        const totalBurned = farm.tokenTotalBurned
+
+        if (!runes[symbol]) runes[symbol] = {}
+
+        runes[symbol].totalSupply = totalSupply
+        runes[symbol].circulatingSupply = circulatingSupply
+        runes[symbol].totalBurned = totalBurned
+        runes[symbol].holders = {}
+        runes[symbol].holders.raid = raidHoldings
+        runes[symbol].holders.vault = vaultHoldings
+        runes[symbol].holders.dev = devHoldings
+        runes[symbol].holders.charity = charityHoldings
+        runes[symbol].holders.bot = botHoldings
+
+        if (!historical.totalSupply) historical.totalSupply = {}
+        if (!historical.totalSupply[symbol]) historical.totalSupply[symbol] = []
+        if (!historical.circulatingSupply) historical.circulatingSupply = {}
+        if (!historical.circulatingSupply[symbol]) historical.circulatingSupply[symbol] = []
+        if (!historical.totalBurned) historical.totalBurned = {}
+        if (!historical.totalBurned[symbol]) historical.totalBurned[symbol] = []
+        if (!historical.raid) historical.raid = {}
+        if (!historical.raid.holdings) historical.raid.holdings = {}
+        if (!historical.raid.holdings[symbol]) historical.raid.holdings[symbol] = []
+        if (!historical.bot) historical.bot = {}
+        if (!historical.bot.holdings) historical.bot.holdings = {}
+        if (!historical.bot.holdings[symbol]) historical.bot.holdings[symbol] = []
+        if (!historical.vault) historical.vault = {}
+        if (!historical.vault.holdings) historical.vault.holdings = {}
+        if (!historical.vault.holdings[symbol]) historical.vault.holdings[symbol] = []
+        if (!historical.dev) historical.dev = {}
+        if (!historical.dev.holdings) historical.dev.holdings = {}
+        if (!historical.dev.holdings[symbol]) historical.dev.holdings[symbol] = []
+        if (!historical.charity) historical.charity = {}
+        if (!historical.charity.holdings) historical.charity.holdings = {}
+        if (!historical.charity.holdings[symbol]) historical.charity.holdings[symbol] = []
+
+        const oldTime = (new Date(historical.totalSupply[symbol][historical.totalSupply[symbol].length-1]?.[0] || 0)).getTime()
+        const newTime = (new Date()).getTime()
+        const diff = newTime - oldTime
+
+        if (diff / (1000 * 60 * 60 * 24) > 1) {
+          historical.totalSupply[symbol].push([newTime, totalSupply])
+          historical.circulatingSupply[symbol].push([newTime, circulatingSupply])
+          historical.totalBurned[symbol].push([newTime, totalBurned])
+          historical.raid.holdings[symbol].push([newTime, raidHoldings])
+          historical.bot.holdings[symbol].push([newTime, botHoldings])
+          historical.vault.holdings[symbol].push([newTime, vaultHoldings])
+          historical.dev.holdings[symbol].push([newTime, devHoldings])
+          historical.charity.holdings[symbol].push([newTime, charityHoldings])
+        }
       }
     }
     
     saveRunes()
   }
   
+  saveHistorical()
   saveConfig()
   await updateGit()
 
@@ -847,23 +1032,25 @@ async function monitorGeneralStats() {
 }
 
 async function run() {
-  const accounts = await web3.eth.getAccounts()
-
-  // monitorBarracksEvents()
-
-
-
   await fetchPrices()
+
+  getAllItemEvents()
+  monitorItemEvents()
+
+  getAllBarracksEvents()
+  monitorBarracksEvents()
+
   getAllMarketEvents()
   monitorMarketEvents()
+  
   monitorCharacterEvents()
-  monitorItemEvents()
+  
   monitorGeneralStats()
 }
 
 run()
 
 // Force restart after 15 mins
-setTimeout(() => {
-  process.exit(1)
-}, 15 * 60 * 1000)
+// setTimeout(() => {
+//   process.exit(1)
+// }, 15 * 60 * 1000)

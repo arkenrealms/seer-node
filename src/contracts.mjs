@@ -113,7 +113,7 @@ export default {
     [TESTNET]: '0xE53397Dfa3364877381bCa9Ba84A8d4ee47466Cf',
   },
   barracks: {
-    [MAINNET]: '0x13008edcb0b1523f7c8891c5c9e196f5fd585095',
+    [MAINNET]: '0x5fE24631136D570D12920C9Fa0FEcaDA84E47673',
     [TESTNET]: '0x403ecFeDaF05486466BC5f8CcD3A93c0cC4043ac',
   },
   blacksmith: {
@@ -245,6 +245,10 @@ export default {
   charityAddress: {
     [MAINNET]: '0xA40b29b0DACb37331456c2ca3b65E56a6D79FC9E',
     [TESTNET]: '0xA40b29b0DACb37331456c2ca3b65E56a6D79FC9E',
+  },
+  botAddress: {
+    [MAINNET]: '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B',
+    [TESTNET]: '',
   },
   senderTestAddress: {
     [MAINNET]: '0x62c79c01c33a3761fe2d2aD6f8df324225b8073b',
