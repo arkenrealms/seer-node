@@ -479,7 +479,6 @@ async function getAllBarracksEvents() {
   if (config.barracks.updating) return
 
   config.barracks.updating = true
-  config.barracks.counter = barracksEvents[barracksEvents.length-1]?.id || 1
 
   const contract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneBarracksFacetV1.abi)
@@ -621,16 +620,15 @@ async function getAllMarketEvents() {
   if (config.trades.updating) return
 
   config.trades.updating = true
-  config.trades.counter = trades[trades.length-1]?.id || 1
 
   const contract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1Contract.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneTraderV1Contract.abi);
 
   async function processLog(log, updateConfig = true) {
-    const event = iface.parseLog(log)
+    const e = iface.parseLog(log)
     
-    if (event.name === 'List') {
-      const { seller, buyer, tokenId, price } = event.args
+    if (e.name === 'List') {
+      const { seller, buyer, tokenId, price } = e.args
 
       let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
@@ -665,8 +663,8 @@ async function getAllMarketEvents() {
       console.log('List', trade)
     }
 
-    if (event.name === 'Update') {
-      const { seller, buyer, tokenId, price } = event.args
+    if (e.name === 'Update') {
+      const { seller, buyer, tokenId, price } = e.args
 
       const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
@@ -677,6 +675,7 @@ async function getAllMarketEvents() {
       trade.price = toShort(price)
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
+      trade.item = decodeItem(trade.tokenId)
 
       saveUserTrade(loadUser(seller), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
@@ -686,8 +685,8 @@ async function getAllMarketEvents() {
       console.log('Update', trade)
     }
 
-    if (event.name === 'Delist') {
-      const { seller, buyer, tokenId, price } = event.args
+    if (e.name === 'Delist') {
+      const { seller, buyer, tokenId, price } = e.args
 
       const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
@@ -697,6 +696,7 @@ async function getAllMarketEvents() {
       trade.status = "delisted"
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
+      trade.item = decodeItem(trade.tokenId)
 
       saveUserTrade(loadUser(seller), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
@@ -706,8 +706,8 @@ async function getAllMarketEvents() {
       console.log('Delist', trade)
     }
 
-    if (event.name === 'Buy') {
-      const { seller, buyer, tokenId, price } = event.args
+    if (e.name === 'Buy') {
+      const { seller, buyer, tokenId, price } = e.args
 
       const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
 
@@ -718,6 +718,7 @@ async function getAllMarketEvents() {
       trade.buyer = buyer
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
+      trade.item = decodeItem(trade.tokenId)
 
       saveUserTrade(loadUser(seller), trade)
       saveUserTrade(loadUser(buyer), trade)
@@ -773,8 +774,6 @@ async function getAllMarketEvents() {
 }
 
 async function monitorMarketEvents() {
-  config.trades.counter = trades[trades.length-1]?.id || 1
-
   // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Delist(address indexed seller, uint256 tokenId);
@@ -805,7 +804,6 @@ async function getAllCharacterEvents() {
   if (config.characters.updating) return
 
   config.characters.updating = true
-  config.characters.counter = charactersEvents[charactersEvents.length-1]?.id || 1
 
   const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi)
@@ -890,7 +888,6 @@ async function getAllItemEvents() {
   if (config.items.updating) return
 
   config.items.updating = true
-  config.items.counter = itemsEvents[itemsEvents.length-1]?.id || 1
 
   const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItemsContract.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneItemsContract.abi)
