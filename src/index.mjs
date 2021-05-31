@@ -14,16 +14,20 @@ import jetpack from 'fs-jetpack'
 import HDWalletProvider from "@truffle/hdwallet-provider"
 import { wait, round, removeDupes, toLong, toShort, getAddress, updateGit } from './util.mjs'
 import farmsData, { MAINNET, TESTNET } from './farms.mjs'
-import ArcaneRaidV1Contract from '../contracts/ArcaneRaidV1.json'
-import ArcaneTraderV1Contract from '../contracts/ArcaneTraderV1.json'
-import ArcaneCharactersContract from '../contracts/ArcaneCharacters.json'
+import ArcaneRaidV1 from '../contracts/ArcaneRaidV1.json'
+import ArcaneTraderV1 from '../contracts/ArcaneTraderV1.json'
+import ArcaneCharacters from '../contracts/ArcaneCharacters.json'
+import ArcaneCharacterFactoryV3 from '../contracts/ArcaneCharacterFactoryV3.json'
 import ArcaneBarracksFacetV1 from '../contracts/ArcaneBarracksFacetV1.json'
-import ArcaneItemsContract from '../contracts/ArcaneItems.json'
+import ArcaneProfile from '../contracts/ArcaneProfile.json'
+import ArcaneItems from '../contracts/ArcaneItems.json'
 import BEP20Contract from '../contracts/BEP20.json'
 import { QuoteToken } from "./farms.mjs"
 import { decodeItem } from "./util/decodeItem.mjs"
+import * as Bridge from "./bridge.mjs"
 
 const config = jetpack.read(path.resolve('./db/config.json'), 'json')
+const app = jetpack.read(path.resolve('./db/app.json'), 'json')
 const trades = removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json'))
 const farms = jetpack.read(path.resolve('./db/farms.json'), 'json')
 const runes = jetpack.read(path.resolve('./db/runes.json'), 'json')
@@ -164,6 +168,10 @@ const saveStats = () => {
 
 const saveHistorical = () => {
   jetpack.write(path.resolve('./db/historical.json'), JSON.stringify(historical, null, 2))
+}
+
+const saveApp = () => {
+  jetpack.write(path.resolve('./db/app.json'), JSON.stringify(app, null, 2))
 }
 
 const updateLeaderboardByUser = (user) => {
@@ -621,8 +629,8 @@ async function getAllMarketEvents() {
 
   config.trades.updating = true
 
-  const contract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1Contract.abi, signer)
-  const iface = new ethers.utils.Interface(ArcaneTraderV1Contract.abi);
+  const contract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1.abi, signer)
+  const iface = new ethers.utils.Interface(ArcaneTraderV1.abi);
 
   async function processLog(log, updateConfig = true) {
     const e = iface.parseLog(log)
@@ -780,7 +788,7 @@ async function monitorMarketEvents() {
   // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Recover(address indexed user, address indexed seller, uint256 tokenId);
 
-  const Contract = ArcaneTraderV1Contract
+  const Contract = ArcaneTraderV1
   const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
 
   contract.on('List', async () => {
@@ -805,8 +813,8 @@ async function getAllCharacterEvents() {
 
   config.characters.updating = true
 
-  const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
-  const iface = new ethers.utils.Interface(ArcaneCharactersContract.abi)
+  const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
+  const iface = new ethers.utils.Interface(ArcaneCharacters.abi)
 
   async function processLog(log, updateConfig = true) {
     const e = iface.parseLog(log)
@@ -877,7 +885,7 @@ async function getAllCharacterEvents() {
 }
 
 async function monitorCharacterEvents() {
-  const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
+  const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
 
   contract.on('Transfer', async (from, to, tokenId, log) => {
     await getAllCharacterEvents()
@@ -889,8 +897,8 @@ async function getAllItemEvents() {
 
   config.items.updating = true
 
-  const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItemsContract.abi, signer)
-  const iface = new ethers.utils.Interface(ArcaneItemsContract.abi)
+  const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
+  const iface = new ethers.utils.Interface(ArcaneItems.abi)
 
   async function processLog(log, updateConfig = true) {
     const e = iface.parseLog(log)
@@ -961,7 +969,7 @@ async function getAllItemEvents() {
 }
 
 async function monitorItemEvents() {
-  const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItemsContract.abi, signer)
+  const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
 
   contract.on('Transfer', async () => {
     await getAllItemEvents()
@@ -971,7 +979,7 @@ async function monitorItemEvents() {
 async function monitorGeneralStats() {
   // stats.prices.bnb = await fetchPrice('binancecoin')
 
-  const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharactersContract.abi, signer)
+  const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
 
   try {
     stats.totalCharacters = (await arcaneCharactersContract.totalSupply()).toNumber()
@@ -987,7 +995,7 @@ async function monitorGeneralStats() {
     console.error(e)
   }
 
-  const arcaneItemsContract = new ethers.Contract(getAddress(contracts.items), ArcaneItemsContract.abi, signer)
+  const arcaneItemsContract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
   try {
     stats.totalItems = (await arcaneItemsContract.totalSupply()).toNumber()
 
@@ -1003,7 +1011,7 @@ async function monitorGeneralStats() {
     console.error(e)
   }
 
-  // const arcaneRaidContract = new ethers.Contract(getAddress(contracts.raid), ArcaneRaidV1Contract.abi, signer)
+  // const arcaneRaidContract = new ethers.Contract(getAddress(contracts.raid), ArcaneRaidV1.abi, signer)
 
   // Update farms
   {
@@ -1134,6 +1142,7 @@ async function monitorGeneralStats() {
   // Update stats
   {
     console.log('Update stats')
+
     // Update TVL
     {
       console.log('Updating TVL')
@@ -1206,8 +1215,49 @@ async function monitorGeneralStats() {
       stats.marketItemsDelisted = trades.filter(t => t.status === 'delisted').length
       stats.marketAverageSoldPrice = average(trades.filter(t => t.status === 'sold').map(t => t.price))
     }
+
+    // Update runes
+    {
+      console.log('Update runes')
+
+      stats.totalRunes = Object.keys(runes).length - 1
+    }
+
+    // Update community
+    {
+      console.log('Update community')
+
+      stats.totalCommunities = 8
+      stats.totalPolls = 50
+    }
+
+    // Update game info
+    {
+      console.log('Update game info')
+
+      stats.totalGuilds = 3
+      stats.totalClasses = 7
+      stats.totalRunewords = 7
+    }
     
     saveStats()
+  }
+
+  // Update app
+  {
+    console.log('Update app')
+    // Update Profile config
+    {
+      console.log('Updating Profile config')
+
+      const characterFactoryContract = new ethers.Contract(getAddress(contracts.characterFactory), ArcaneCharacterFactoryV3.abi, signer)
+      const profileContract = new ethers.Contract(getAddress(contracts.profile), ArcaneProfile.abi, signer)
+
+      app.config.characterMintCost = toShort((await characterFactoryContract.tokenPrice()).toString())
+      app.config.profileRegisterCost = toShort((await profileContract.numberRuneToRegister()).toString())
+    }
+
+    saveApp()
   }
 
   // Update runes
@@ -1301,8 +1351,32 @@ async function monitorGeneralStats() {
   setTimeout(monitorGeneralStats, 15 * 60 * 1000)
 }
 
+async function onCommand() {
+
+}
+
+async function sendCommand() {
+
+}
+
+
+async function signCommand() {
+
+}
+
+async function isConnected() {
+
+}
+
 async function run() {
   await fetchPrices()
+
+  // await Bridge.init({
+  //   on: onCommand,
+  //   send: sendCommand,
+  //   sign: signCommand,
+  //   isConnected
+  // })
 
   setInterval(getAllItemEvents, 15 * 60 * 1000)
   setInterval(getAllBarracksEvents, 15 * 60 * 1000)

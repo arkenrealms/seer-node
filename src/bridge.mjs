@@ -289,3 +289,4 @@ export const init = (on, send, sign, isConnected) => {
   initResizeMonitor()
   initContextMenuHandler()
 }
+
