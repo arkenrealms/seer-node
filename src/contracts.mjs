@@ -2,6 +2,11 @@ export const MAINNET = 56
 export const TESTNET = 97
 
 export default {
+  sol: {
+    [MAINNET]: '0x4ffd3b8ba90f5430cda7f4cc4c0a80df3cd0e495',
+    [TESTNET]: '',
+    name: 'Sol',
+  },
   amn: {
     [MAINNET]: '0x346C03fe8BE489baAAc5CE67e817Ff11fb580F98',
     [TESTNET]: '',
@@ -289,10 +294,6 @@ export default {
   tal: {
     [MAINNET]: '0x5DE72A6fca2144Aa134650bbEA92Cc919244F05D',
     [TESTNET]: '0x14c6AFcFc9C68922700DC8E3DC87e4FCFf044eCB',
-  },
-  sol: {
-    [MAINNET]: '',
-    [TESTNET]: '',
   },
   shael: {
     [MAINNET]: '',

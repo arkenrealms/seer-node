@@ -29,11 +29,15 @@ export const getAddress = (address) => {
 }
 
 export async function updateGit() {
-  const execPromise = util.promisify(exec)
-
-  const { err, stdout, stderr } = await execPromise('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master')
-
-  console.log(err, stderr, stdout)
-
-  await wait(100)
+  try {
+    const execPromise = util.promisify(exec)
+  
+    const { err, stdout, stderr } = await execPromise('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master')
+  
+    console.log(err, stderr, stdout)
+  
+    await wait(100)
+  } catch(e) {
+    
+  }
 }

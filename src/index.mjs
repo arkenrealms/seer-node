@@ -24,7 +24,7 @@ import ArcaneItems from '../contracts/ArcaneItems.json'
 import BEP20Contract from '../contracts/BEP20.json'
 import { QuoteToken } from "./farms.mjs"
 import { decodeItem } from "./util/decodeItem.mjs"
-import * as Bridge from "./bridge.mjs"
+// import * as Bridge from "./bridge.mjs"
 
 const config = jetpack.read(path.resolve('./db/config.json'), 'json')
 const app = jetpack.read(path.resolve('./db/app.json'), 'json')
@@ -486,6 +486,8 @@ const saveUserTrade = (user, trade) => {
 async function getAllBarracksEvents() {
   if (config.barracks.updating) return
 
+  console.log('[Barracks] Updating')
+
   config.barracks.updating = true
 
   const contract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
@@ -626,6 +628,8 @@ async function monitorBarracksEvents() {
 
 async function getAllMarketEvents() {
   if (config.trades.updating) return
+
+  console.log('[Market] Updating')
 
   config.trades.updating = true
 
@@ -811,6 +815,8 @@ async function monitorMarketEvents() {
 async function getAllCharacterEvents() {
   if (config.characters.updating) return
 
+  console.log('[Characters] Updating')
+
   config.characters.updating = true
 
   const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
@@ -895,6 +901,8 @@ async function monitorCharacterEvents() {
 async function getAllItemEvents() {
   if (config.items.updating) return
 
+  console.log('[Items] Updating')
+
   config.items.updating = true
 
   const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
@@ -977,7 +985,7 @@ async function monitorItemEvents() {
 }
 
 async function monitorGeneralStats() {
-  // stats.prices.bnb = await fetchPrice('binancecoin')
+  console.log('[Stats] Updating')
 
   const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
 
@@ -1001,7 +1009,7 @@ async function monitorGeneralStats() {
 
     if (!stats.items) stats.items = {}
   
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 20; i++) {
       if (!stats.items[i]) stats.items[i] = {}
 
       stats.items[i].total = (await arcaneItemsContract.itemCount(i)).toNumber()
@@ -1025,9 +1033,9 @@ async function monitorGeneralStats() {
     for (let i = 0; i < farmsData.length; i++) {
       const farm = farmsData[i]
       try {
-        if (farm.chefKey !== 'AMN') continue
+        if (farm.chefKey !== 'SOL') continue
     
-        // console.log(farm.lpSymbol)
+        console.log(farm.lpSymbol)
       
         if (farm.lpSymbol.indexOf('BUSD') !== -1) {
           const contract = new ethers.Contract(getAddress(contracts.busd), BEP20Contract.abi, signer)
@@ -1240,7 +1248,51 @@ async function monitorGeneralStats() {
       stats.totalRunewords = 7
     }
     
+    // Update stat historical
+    {
+      console.log('Update stat historical')
+
+      if (!historical.stats) historical.stats = {}
+
+      if (!historical.stats.totalCharacters) historical.stats.totalCharacters = []
+      if (!historical.stats.totalItems) historical.stats.totalItems = []
+      if (!historical.stats.tvl) historical.stats.tvl = []
+      if (!historical.stats.marketItemsAvailable) historical.stats.marketItemsAvailable = []
+      if (!historical.stats.marketItemsSold) historical.stats.marketItemsSold = []
+      if (!historical.stats.marketItemsDelisted) historical.stats.marketItemsDelisted = []
+      if (!historical.stats.marketAverageSoldPrice) historical.stats.marketAverageSoldPrice = []
+      if (!historical.stats.totalCommunities) historical.stats.totalCommunities = []
+      if (!historical.stats.totalClasses) historical.stats.totalClasses = []
+      if (!historical.stats.totalGuilds) historical.stats.totalGuilds = []
+      if (!historical.stats.totalPolls) historical.stats.totalPolls = []
+      if (!historical.stats.totalRunes) historical.stats.totalRunes = []
+      if (!historical.stats.totalRunewords) historical.stats.totalRunewords = []
+
+      const oldTime = (new Date(historical.stats.updatedAt || 0)).getTime()
+      const newTime = (new Date()).getTime()
+      const diff = newTime - oldTime
+
+      if (diff / (1000 * 60 * 60 * 24) > 1) {
+        historical.stats.totalCharacters.push([newTime, stats.totalCharacters])
+        historical.stats.totalItems.push([newTime, stats.totalItems])
+        historical.stats.tvl.push([newTime, stats.tvl])
+        historical.stats.marketItemsAvailable.push([newTime, stats.marketItemsAvailable])
+        historical.stats.marketItemsSold.push([newTime, stats.marketItemsSold])
+        historical.stats.marketItemsDelisted.push([newTime, stats.marketItemsDelisted])
+        historical.stats.marketAverageSoldPrice.push([newTime, stats.marketAverageSoldPrice])
+        historical.stats.totalCommunities.push([newTime, stats.totalCommunities])
+        historical.stats.totalClasses.push([newTime, stats.totalClasses])
+        historical.stats.totalGuilds.push([newTime, stats.totalGuilds])
+        historical.stats.totalPolls.push([newTime, stats.totalPolls])
+        historical.stats.totalRunes.push([newTime, stats.totalRunes])
+        historical.stats.totalRunewords.push([newTime, stats.totalRunewords])
+
+        historical.stats.updatedAt = newTime
+      }
+    }
+
     saveStats()
+    saveHistorical()
   }
 
   // Update app
@@ -1369,7 +1421,7 @@ async function isConnected() {
 }
 
 async function run() {
-  await fetchPrices()
+  // await fetchPrices()
 
   // await Bridge.init({
   //   on: onCommand,
@@ -1383,6 +1435,11 @@ async function run() {
   setInterval(getAllMarketEvents, 15 * 60 * 1000)
   setInterval(getAllCharacterEvents, 15 * 60 * 1000)
 
+  getAllItemEvents()
+  getAllBarracksEvents()
+  getAllMarketEvents()
+  getAllCharacterEvents()
+
   monitorItemEvents()
   monitorBarracksEvents()
   monitorMarketEvents()
@@ -1394,6 +1451,6 @@ async function run() {
 run()
 
 // Force restart after 15 mins
-// setTimeout(() => {
-//   process.exit(1)
-// }, 15 * 60 * 1000)
+setTimeout(() => {
+  process.exit(1)
+}, 30 * 60 * 1000)
