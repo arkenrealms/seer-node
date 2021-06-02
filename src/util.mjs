@@ -28,16 +28,28 @@ export const getAddress = (address) => {
   return address[chainId] ? address[chainId] : address[mainNetChainId]
 }
 
+let updatingGit = false
+
 export async function updateGit() {
+  if (updatingGit) return
+
+  updatingGit = true
   try {
     const execPromise = util.promisify(exec)
-  
+    
+    try {
+      await execPromise('rm ./db/.git/index.lock')
+    } catch(e2) {
+
+    }
+
     const { err, stdout, stderr } = await execPromise('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master')
   
     console.log(err, stderr, stdout)
   
     await wait(100)
   } catch(e) {
-    
+    console.log(e)
   }
+  updatingGit = false
 }

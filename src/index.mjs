@@ -2,6 +2,8 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
+process.env.REACT_APP_PUBLIC_URL = "https://rune.farm/"
+
 import contracts from "./contracts.mjs"
 import secrets from "../secrets.json"
 import ethers from 'ethers'
