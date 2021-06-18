@@ -1,4 +1,4 @@
-import { itemData, ItemAttributesById, mapIdToSlot } from '../data/items.mjs'
+import { itemData, ItemAttributes, ItemAttributesById, ItemType, RarityMap } from '../data/items.mjs'
 import { ItemsMainCategoriesType } from '../data/items.type.mjs'
 
 const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
@@ -9,10 +9,12 @@ export function decodeItem(tokenId) {
     details: {},
     branches: {},
     shorthand: '',
+    rarity: 'Normal',
     mods: [],
     attributes: [],
-    perfection: null,
+    perfection: [],
     category: ItemsMainCategoriesType.WEAPONS,
+    slots: [],
     meta: {
       harvestYield: 0,
       harvestFeeToken: '',
@@ -75,10 +77,10 @@ export function decodeItem(tokenId) {
 
     const item = {
       ...defaultItem,
-      ...itemData[ItemsMainCategoriesType.OTHER].find((i) => i.id === id),
-      version,
       id,
+      ...itemData[ItemsMainCategoriesType.OTHER].find((i) => i.id === id),
       type,
+      version,
       mods,
       shortTokenId: `${tokenId.slice(0, 23)}...${tokenId.slice(-3)}`,
     }
@@ -113,86 +115,149 @@ export function decodeItem(tokenId) {
       swapAmount: null,
       feeToken: null,
       feeAmount: null,
+      feeReduction: 0,
+      unstakeLocked: false,
+      classRequired: 0,
       harvestFeeToken: '',
       harvestFeePercent: 0,
+      worldstoneShardChance: 0,
+      randomRuneExchange: 0,
       harvestFees: {},
     }
 
-    item.attributes = []
+    item.attributes = branchAttributes
 
     let prevMod = null
 
     if (item.id === 1) {
-      item.mods[0].attributeId = 1
-      item.mods[1].attributeId = 2
-      item.mods[2].attributeId = 3
+      item.mods[0].attributeId = ItemAttributes.HarvestYield.id
+      item.mods[1].attributeId = ItemAttributes.HarvestFee.id
+      item.mods[2].attributeId = ItemAttributes.HarvestFeeToken.id
     } else if (item.id === 2) {
-      item.mods[0].attributeId = 1
-      item.mods[1].attributeId = 4
-      item.mods[2].attributeId = 5
+      item.mods[0].attributeId = ItemAttributes.HarvestYield.id
+      item.mods[1].attributeId = ItemAttributes.SendHarvestHiddenPool.id
+      item.mods[2].attributeId = ItemAttributes.BurnEntireHarvest.id
     } else if (item.id === 3) {
-      item.mods[0].attributeId = 1
-      item.mods[1].attributeId = 6
+      item.mods[0].attributeId = ItemAttributes.HarvestYield.id
+      item.mods[1].attributeId = ItemAttributes.HarvestBurn.id
+      item.mods[2].attributeId = ItemAttributes.FindShard.id
+
+      if (item.mods[2].value === 0) item.mods[2].value = 100
     } else if (item.id === 4) {
-      item.mods[0].attributeId = 7
+      item.mods[0].attributeId = ItemAttributes.FindShard.id
+
+      if (item.mods[0].value === 0) item.mods[0].value = 100
     }
 
     for (const i in item.mods) {
       const mod = item.mods[i]
       const branchAttribute = branchAttributes[i]
-      if (mod.attributeId === 1) {
+      if (mod.attributeId === ItemAttributes.HarvestYield.id) {
         actionMetadata.harvestYield += mod.value
 
-        item.attributes.push({
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
           ...branchAttribute,
           ...mod,
-        })
-      } else if (mod.attributeId === 2) {
-        item.attributes.push({
+        }
+      } else if (mod.attributeId === ItemAttributes.HarvestFee.id) {
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
           ...branchAttribute,
           ...mod,
-        })
-      } else if (mod.attributeId === 3) {
-        actionMetadata.harvestFees[branchAttribute.map[mod.value]] = prevMod.value
-
-        item.attributes.push({
+        }
+      } else if (mod.attributeId === ItemAttributes.HarvestFeeToken.id) {
+        actionMetadata.h
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
           ...branchAttribute,
           ...mod,
-          // value: branchAttribute.map[mod.value],
-        })
-      } else if (mod.attributeId === 4) {
+        }
+      } else if (mod.attributeId === ItemAttributes.SendHarvestHiddenPool.id) {
         actionMetadata.chanceToSendHarvestToHiddenPool += mod.value
 
-        item.attributes.push({
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
           ...branchAttribute,
           ...mod,
-        })
-      } else if (mod.attributeId === 5) {
+        }
+      } else if (mod.attributeId === ItemAttributes.BurnEntireHarvest.id) {
         actionMetadata.chanceToLoseHarvest += mod.value
 
-        item.attributes.push({
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
           ...branchAttribute,
           ...mod,
-        })
-      } else if (mod.attributeId === 6) {
+        }
+      } else if (mod.attributeId === ItemAttributes.HarvestBurn.id) {
         actionMetadata.harvestBurn += mod.value
 
-        item.attributes.push({
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
           ...branchAttribute,
           ...mod,
-        })
+        }
+      } else if (mod.attributeId === ItemAttributes.FindShard.id) {
+        if (branchAttribute.value !== undefined) mod.value = branchAttribute.value
+
+        actionMetadata.worldstoneShardChance += mod.value
+
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
+          ...ItemAttributesById[mod.attributeId],
+          ...branchAttribute,
+          ...mod,
+        }
+      } else if (mod.attributeId === ItemAttributes.RemoveFees.id) {
+        actionMetadata.feeReduction += mod.value
+
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
+          ...ItemAttributesById[mod.attributeId],
+          ...branchAttribute,
+          ...mod,
+        }
+      } else if (mod.attributeId === ItemAttributes.RandomRuneExchange.id) {
+        actionMetadata.randomRuneExchange += mod.value
+
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
+          ...ItemAttributesById[mod.attributeId],
+          ...branchAttribute,
+          ...mod,
+        }
+      } else if (mod.attributeId === ItemAttributes.UnstakeLocked.id) {
+        actionMetadata.unstakeLocked = true
+
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
+          ...ItemAttributesById[mod.attributeId],
+          ...branchAttribute,
+          ...mod,
+        }
+      } else if (mod.attributeId === ItemAttributes.SpecificClass.id) {
+        actionMetadata.classRequired = mod.value
+
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
+          ...ItemAttributesById[mod.attributeId],
+          ...branchAttribute,
+          ...mod,
+        }
       } else if (mod.attributeId > 0 && ItemAttributesById[mod.attributeId]) {
-        item.attributes.push({
+
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
           ...branchAttribute,
           ...mod,
-        })
+        }
       }
 
       prevMod = mod
@@ -215,6 +280,21 @@ export function decodeItem(tokenId) {
     if (actionMetadata.harvestBurn) {
       item.meta.harvestBurn = actionMetadata.harvestBurn
     }
+    if (actionMetadata.feeReduction) {
+      item.meta.feeReduction = actionMetadata.feeReduction
+    }
+    if (actionMetadata.randomRuneExchange) {
+      item.meta.randomRuneExchange = actionMetadata.randomRuneExchange
+    }
+    if (actionMetadata.worldstoneShardChance) {
+      item.meta.worldstoneShardChance = actionMetadata.worldstoneShardChance
+    }
+    if (actionMetadata.unstakeLocked) {
+      item.meta.unstakeLocked = actionMetadata.unstakeLocked
+    }
+    if (actionMetadata.classRequired) {
+      item.meta.classRequired = actionMetadata.classRequired
+    }
 
     if (branch && branch.perfection) {
       const perfection = JSON.parse(JSON.stringify(branch.perfection))
@@ -236,24 +316,36 @@ export function decodeItem(tokenId) {
 
           perfection[i] =
             perfection[i] === branch.attributes[i].max
-              ? ((perfection[i] - branch.attributes[i].min) === 0 ? 1 : (item.attributes[i].value - branch.attributes[i].min) / (perfection[i] - branch.attributes[i].min))
-              : ((branch.attributes[i].max - perfection[i]) === 0 ? 1 : 1 - (item.attributes[i].value - perfection[i]) / (branch.attributes[i].max - perfection[i]))
+              ? perfection[i] - branch.attributes[i].min === 0
+                ? 1
+                : (item.attributes[i].value - branch.attributes[i].min) / (perfection[i] - branch.attributes[i].min)
+              : branch.attributes[i].max - perfection[i] === 0
+              ? 1
+              : 1 - (item.attributes[i].value - perfection[i]) / (branch.attributes[i].max - perfection[i])
 
-          item.shorthand.push((branch.attributes[i].map ? branch.attributes[i].map[item.attributes[i].value] : item.attributes[i].value))
+          item.shorthand.push(
+            branch.attributes[i].map ? branch.attributes[i].map[item.attributes[i].value] : item.attributes[i].value,
+          )
         }
 
         item.shorthand = item.shorthand.join('-')
 
-        item.perfection = average(perfection.filter(p => p !== undefined))
+        item.perfection = average(perfection.filter((p) => p !== undefined))
         if (item.tokenId === '1001000041000100015647') {
           console.log(perfection, branch.attributes[0].max, perfection[0], 1)
         }
 
-        if (!Number.isFinite(item.perfection)) item.perfection = null
+        if (Number.isFinite(item.perfection)) {
+          item.perfection = parseFloat((Math.floor(item.perfection * 100) / 100).toFixed(2))
+        } else {
+          item.perfection = null
+        }
+      } else {
+        item.perfection = null
       }
     }
 
-    const slotId = mapIdToSlot[id]
+    const slotId = item.slots[0]
 
     // item.meta = {
     //   harvestYield: 0,
@@ -265,16 +357,27 @@ export function decodeItem(tokenId) {
     //   harvestBurn: 0,
     // }
 
+    if (item.attributes.find(a => a.id === 40)?.value) {
+      item.rarity = RarityMap[item.attributes.find(a => a.id === 40)?.value || 5]
+    } else if (item.perfection === 1) {
+      item.rarity = 'Mythic'
+    } else if (item.perfection >= 0.9) {
+      item.rarity = 'Epic'
+    } else if (item.perfection >= 0.7) {
+      item.rarity = 'Rare'
+    } else if (item.perfection >= 0) {
+      item.rarity = 'Magical'
+    }
+
     return {
       ...item,
       tokenId,
       slotId,
     }
-  } catch(e) {
-    console.log('Token is invalid', tokenId)
-    console.warn(e)
+  } catch (e) {
+    // console.log('Token is invalid', tokenId)
+    // console.warn(e)
   }
 
   return defaultItem
 }
-

@@ -79,6 +79,15 @@ web3Provider.pollingInterval = 15000
 
 const signer = web3Provider.getSigner()
 
+const arcaneItemsContract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
+const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
+const arcaneBarracksContract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
+const arcaneTraderContract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1.abi, signer)
+const arcaneCharacterFactoryContract = new ethers.Contract(getAddress(contracts.characterFactory), ArcaneCharacterFactoryV3.abi, signer)
+const arcaneProfileContract = new ethers.Contract(getAddress(contracts.profile), ArcaneProfile.abi, signer)
+const busdContract = new ethers.Contract(getAddress(contracts.busd), BEP20Contract.abi, signer)
+const wbnbContract = new ethers.Contract(getAddress(contracts.wbnb), BEP20Contract.abi, signer)
+
 process
   .on("unhandledRejection", (reason, p) => {
     console.warn(reason, "Unhandled Rejection at Promise", p)
@@ -95,7 +104,8 @@ process
 
 const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
 
-async function iterateBlocks(name, address, fromBlock, toBlock, event, processLog) {
+async function iterateBlocks(name, address, fromBlock, toBlock, event, processLog, updateConfig) {
+  if (!toBlock) return
   if (fromBlock === toBlock) return
 
   // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
@@ -124,7 +134,11 @@ async function iterateBlocks(name, address, fromBlock, toBlock, event, processLo
 
     // await wait(3 * 1000)
     
-    await iterateBlocks(name, address, toBlock2, toBlock, event, processLog)
+    if (updateConfig && toBlock2 > 0) {
+      updateConfig(toBlock2)
+    }
+
+    await iterateBlocks(name, address, toBlock2, toBlock, event, processLog, updateConfig)
   } catch(e) {
     console.log('error', e)
     console.log(fromBlock, toBlock)
@@ -314,11 +328,16 @@ const saveItem = (item) => {
   jetpack.write(path.resolve(`./db/items/${item.id}/tokens.json`), JSON.stringify(item.tokens, null, 2))
 }
 
-const saveItemOwner = (item, itemData) => {
+const saveItemOwner = async (item, itemData) => {
   if (!item.owners.find(o => o === itemData.owner)) {
     item.owners.push(itemData.owner)
     item.owners = item.owners.filter(o => o != itemData.from)
   }
+
+  if (!stats.items[item.id]) stats.items[item.id] = {}
+
+  stats.items[item.id].total = (await arcaneItemsContract.itemCount(item.id)).toNumber()
+  stats.items[item.id].burned = 0 //(await arcaneItemsContract.itemBurnCount(item.id)).toNumber()
   
   saveItem(item)
 }
@@ -492,13 +511,12 @@ async function getAllBarracksEvents() {
 
   config.barracks.updating = true
 
-  const contract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneBarracksFacetV1.abi)
 
   async function processLog(log, updateConfig = true) {
     const e = iface.parseLog(log)
     
-    console.log(e.name, e)
+    // console.log(e.name, e)
 
     if (e.name === 'Equip') {
       const { user: userAddress, tokenId, itemId } = e.args
@@ -509,7 +527,7 @@ async function getAllBarracksEvents() {
         status: "equipped",
         tokenId: tokenId.toString(),
         updatedAt: new Date().getTime(),
-        ...decodeItem(tokenId.toString())
+        id: decodeItem(tokenId.toString()).id
       }
       
       saveUserItem(user, item)
@@ -525,7 +543,8 @@ async function getAllBarracksEvents() {
         tokenId: tokenId.toString(),
         itemId: itemId,
         updatedAt: new Date().getTime(),
-        ...decodeItem(tokenId.toString())
+        id: decodeItem(tokenId.toString()).id
+        // ...decodeItem(tokenId.toString())
       }
       
       saveUserItem(user, item)
@@ -563,10 +582,10 @@ async function getAllBarracksEvents() {
   
     saveBarracksEvents()
 
-    if (updateConfig) {
-      config.barracks.lastBlock = log.blockNumber
-      saveConfig()
-    }
+    // if (updateConfig && log.blockNumber > config.barracks.lastBlock) {
+    //   config.barracks.lastBlock = log.blockNumber
+    //   saveConfig()
+    // }
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
@@ -582,12 +601,13 @@ async function getAllBarracksEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock, blockNumber, contract.filters[event](), processLog)
+    await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock[event], blockNumber, arcaneBarracksContract.filters[event](), processLog, function (blockNumber) {
+      config.barracks.lastBlock[event] = blockNumber
+      saveConfig()
+    })
   }
 
-  config.barracks.lastBlock = blockNumber
-
-  console.log('Finished', config.barracks.lastBlock)
+  console.log('Finished')
 
   saveBarracksEvents()
   saveConfig()
@@ -597,33 +617,31 @@ async function getAllBarracksEvents() {
 }
 
 async function monitorBarracksEvents() {
-  const contract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
-
-  contract.on('Equip', async () => {
+  arcaneBarracksContract.on('Equip', async () => {
     await getAllBarracksEvents()
   })
 
-  contract.on('Unequip', async () => {
+  arcaneBarracksContract.on('Unequip', async () => {
     await getAllBarracksEvents()
   })
 
-  contract.on('ActionBurn', async () => {
+  arcaneBarracksContract.on('ActionBurn', async () => {
     await getAllBarracksEvents()
   })
 
-  contract.on('ActionBonus', async () => {
+  arcaneBarracksContract.on('ActionBonus', async () => {
     await getAllBarracksEvents()
   })
 
-  contract.on('ActionHiddenPool', async () => {
+  arcaneBarracksContract.on('ActionHiddenPool', async () => {
     await getAllBarracksEvents()
   })
 
-  contract.on('ActionFee', async () => {
+  arcaneBarracksContract.on('ActionFee', async () => {
     await getAllBarracksEvents()
   })
 
-  contract.on('ActionSwap', async () => {
+  arcaneBarracksContract.on('ActionSwap', async () => {
     await getAllBarracksEvents()
   })
 }
@@ -635,7 +653,6 @@ async function getAllMarketEvents() {
 
   config.trades.updating = true
 
-  const contract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneTraderV1.abi);
 
   async function processLog(log, updateConfig = true) {
@@ -667,7 +684,8 @@ async function getAllMarketEvents() {
       trade.createdAt = new Date().getTime()
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
-      trade.item = decodeItem(trade.tokenId)
+      trade.item = { id: decodeItem(tokenId.toString()).id }
+      // trade.item = decodeItem(trade.tokenId)
 
       saveUserTrade(loadUser(seller), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
@@ -689,7 +707,8 @@ async function getAllMarketEvents() {
       trade.price = toShort(price)
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
-      trade.item = decodeItem(trade.tokenId)
+      trade.item = { id: decodeItem(tokenId.toString()).id }
+      // trade.item = decodeItem(trade.tokenId)
 
       saveUserTrade(loadUser(seller), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
@@ -710,7 +729,8 @@ async function getAllMarketEvents() {
       trade.status = "delisted"
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
-      trade.item = decodeItem(trade.tokenId)
+      trade.item = { id: decodeItem(tokenId.toString()).id }
+      // trade.item = decodeItem(trade.tokenId)
 
       saveUserTrade(loadUser(seller), trade)
       saveTokenTrade(loadToken(trade.tokenId), trade)
@@ -732,7 +752,8 @@ async function getAllMarketEvents() {
       trade.buyer = buyer
       trade.updatedAt = new Date().getTime()
       trade.blockNumber = log.blockNumber
-      trade.item = decodeItem(trade.tokenId)
+      trade.item = { id: decodeItem(tokenId.toString()).id }
+      // trade.item = decodeItem(trade.tokenId)
 
       saveUserTrade(loadUser(seller), trade)
       saveUserTrade(loadUser(buyer), trade)
@@ -756,10 +777,10 @@ async function getAllMarketEvents() {
     saveTrades()
     saveTradesEvents()
 
-    if (updateConfig) {
-      config.trades.lastBlock = log.blockNumber
-      saveConfig()
-    }
+    // if (updateConfig) {
+    //   config.trades.lastBlock = log.blockNumber
+    //   saveConfig()
+    // }
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
@@ -772,12 +793,13 @@ async function getAllMarketEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock, blockNumber, contract.filters[event](), processLog)
+    await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock[event], blockNumber, arcaneTraderContract.filters[event](), processLog, function (blockNumber) {
+      config.trades.lastBlock[event] = blockNumber
+      saveConfig()
+    })
   }
 
-  config.trades.lastBlock = blockNumber
-
-  console.log('Finished', config.trades.lastBlock)
+  console.log('Finished')
 
   saveTrades()
   saveConfig()
@@ -794,22 +816,19 @@ async function monitorMarketEvents() {
   // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Recover(address indexed user, address indexed seller, uint256 tokenId);
 
-  const Contract = ArcaneTraderV1
-  const contract = new ethers.Contract(getAddress(contracts.trader), Contract.abi, signer)
-
-  contract.on('List', async () => {
+  arcaneTraderContract.on('List', async () => {
     await getAllMarketEvents()
   })
 
-  contract.on('Update', async () => {
+  arcaneTraderContract.on('Update', async () => {
     await getAllMarketEvents()
   })
 
-  contract.on('Delist', async () => {
+  arcaneTraderContract.on('Delist', async () => {
     await getAllMarketEvents()
   })
 
-  contract.on('Buy', async () => {
+  arcaneTraderContract.on('Buy', async () => {
     await getAllMarketEvents()
   })
 }
@@ -821,13 +840,12 @@ async function getAllCharacterEvents() {
 
   config.characters.updating = true
 
-  const contract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
   const iface = new ethers.utils.Interface(ArcaneCharacters.abi)
 
   async function processLog(log, updateConfig = true) {
     const e = iface.parseLog(log)
     
-    console.log(e.name, e)
+    // console.log(e.name, e)
 
     if (e.name === 'Transfer') {
       const { from, to: userAddress, tokenId } = e.args
@@ -840,7 +858,7 @@ async function getAllCharacterEvents() {
         status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
         tokenId: tokenId.toString(),
         transferredAt: new Date().getTime(),
-        id: await contract.getCharacterId(tokenId.toString())
+        id: await arcaneCharactersContract.getCharacterId(tokenId.toString())
       }
 
       saveUserCharacter(user, characterData)
@@ -865,10 +883,10 @@ async function getAllCharacterEvents() {
   
     saveCharactersEvents()
 
-    if (updateConfig) {
-      config.characters.lastBlock = log.blockNumber
-      saveConfig()
-    }
+    // if (updateConfig) {
+    //   config.characters.lastBlock = log.blockNumber
+    //   saveConfig()
+    // }
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
@@ -878,12 +896,12 @@ async function getAllCharacterEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock, blockNumber, contract.filters[event](), processLog)
+    await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock[event], blockNumber, arcaneCharactersContract.filters[event](), processLog, function (blockNumber) {
+      config.characters.lastBlock[event] = blockNumber
+      saveConfig()
+    })
   }
-
-  config.characters.lastBlock = blockNumber
-
-  console.log('Finished', config.characters.lastBlock)
+  console.log('Finished')
 
   saveCharactersEvents()
   saveConfig()
@@ -913,7 +931,7 @@ async function getAllItemEvents() {
   async function processLog(log, updateConfig = true) {
     const e = iface.parseLog(log)
     
-    console.log(e.name, e)
+    // console.log(e.name, e)
 
     if (e.name === 'Transfer') {
       const { from, to: userAddress, tokenId } = e.args
@@ -926,17 +944,25 @@ async function getAllItemEvents() {
         status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
         tokenId: tokenId.toString(),
         createdAt: new Date().getTime(),
-        ...decodeItem(tokenId.toString())
+        id: decodeItem(tokenId.toString()).id
+      }
+
+      const token = loadToken(itemData.tokenId)
+
+      if (from === '0x0000000000000000000000000000000000000000') {
+        token.owner = itemData.userAddress
+        token.creator = itemData.userAddress
+        token.createdAt = itemData.createdAt
       }
 
       saveUserItem(user, itemData)
-      saveTokenTransfer(loadToken(itemData.tokenId), itemData)
+      saveTokenTransfer(token, itemData)
 
       if (from !== '0x0000000000000000000000000000000000000000') {
         saveUserItem(user, { ...itemData, status: 'transferred_out' })
       }
 
-      saveItemOwner(loadItem(itemData.id), itemData)
+      await saveItemOwner(loadItem(itemData.id), itemData)
     }
 
     const e2 = itemsEvents.find(t => t.transactionHash === log.transactionHash)
@@ -951,10 +977,10 @@ async function getAllItemEvents() {
   
     saveItemsEvents()
 
-    if (updateConfig) {
-      config.items.lastBlock = log.blockNumber
-      saveConfig()
-    }
+    // if (updateConfig) {
+    //   config.items.lastBlock = log.blockNumber
+    //   saveConfig()
+    // }
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
@@ -964,12 +990,13 @@ async function getAllItemEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock, blockNumber, contract.filters[event](), processLog)
+    await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, function (blockNumber) {
+      config.items.lastBlock[event] = blockNumber
+      saveConfig()
+    })
   }
 
-  config.items.lastBlock = blockNumber
-
-  console.log('Finished', config.items.lastBlock)
+  console.log('Finished')
 
   saveItemsEvents()
   saveConfig()
@@ -979,17 +1006,13 @@ async function getAllItemEvents() {
 }
 
 async function monitorItemEvents() {
-  const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
-
-  contract.on('Transfer', async () => {
+  arcaneItemsContract.on('Transfer', async () => {
     await getAllItemEvents()
   })
 }
 
 async function monitorGeneralStats() {
   console.log('[Stats] Updating')
-
-  const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
 
   try {
     stats.totalCharacters = (await arcaneCharactersContract.totalSupply()).toNumber()
@@ -1005,7 +1028,6 @@ async function monitorGeneralStats() {
     console.error(e)
   }
 
-  const arcaneItemsContract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
   try {
     stats.totalItems = (await arcaneItemsContract.totalSupply()).toNumber()
 
@@ -1035,16 +1057,15 @@ async function monitorGeneralStats() {
     for (let i = 0; i < farmsData.length; i++) {
       const farm = farmsData[i]
       try {
-        if (farm.chefKey !== 'SOL') continue
+        if (farm.chefKey !== 'DOL') continue
     
-        console.log(farm.lpSymbol)
+        // console.log(farm.lpSymbol)
       
         if (farm.lpSymbol.indexOf('BUSD') !== -1) {
-          const contract = new ethers.Contract(getAddress(contracts.busd), BEP20Contract.abi, signer)
-          const value = toShort(await contract.balanceOf(getAddress(farm.lpAddresses)))
+          const value = toShort(await busdContract.balanceOf(getAddress(farm.lpAddresses)))
           
           // console.log('has', value)
-          
+
           if (!['USDT-BUSD LP', 'BUSD-BNB LP'].includes(farm.lpSymbol)) {
             if (!stats.liquidity[farm.lpSymbol]) stats.liquidity[farm.lpSymbol] = {}
             stats.liquidity[farm.lpSymbol].value = value
@@ -1052,8 +1073,7 @@ async function monitorGeneralStats() {
             stats.totalBusdLiquidity += value
           }
         } else if (farm.lpSymbol.indexOf('BNB') !== -1) {
-          const contract = new ethers.Contract(getAddress(contracts.wbnb), BEP20Contract.abi, signer)
-          const value = toShort(await contract.balanceOf(getAddress(farm.lpAddresses)))
+          const value = toShort(await wbnbContract.balanceOf(getAddress(farm.lpAddresses)))
           
           // console.log('has', value)
     
@@ -1114,9 +1134,15 @@ async function monitorGeneralStats() {
     
         if (farm.quoteTokenSymbol === QuoteToken.BUSD) {
           const tokenSymbol = farm.tokenSymbol.toLowerCase()
+          // console.log(tokenSymbol, tokenPriceVsQuote.toNumber())
           stats.prices[tokenSymbol] = tokenPriceVsQuote.toNumber()
         }
 
+        if (farm.lpSymbol === 'BUSD-BNB LP') {
+          stats.prices.bnb = 1 / tokenPriceVsQuote.toNumber()
+          stats.prices.wbnb = 1 / tokenPriceVsQuote.toNumber()
+        }
+        
 
         // console.log(tokenAmount)
         // console.log(lpTotalInQuoteToken)
@@ -1304,11 +1330,8 @@ async function monitorGeneralStats() {
     {
       console.log('Updating Profile config')
 
-      const characterFactoryContract = new ethers.Contract(getAddress(contracts.characterFactory), ArcaneCharacterFactoryV3.abi, signer)
-      const profileContract = new ethers.Contract(getAddress(contracts.profile), ArcaneProfile.abi, signer)
-
-      app.config.characterMintCost = toShort((await characterFactoryContract.tokenPrice()).toString())
-      app.config.profileRegisterCost = toShort((await profileContract.numberRuneToRegister()).toString())
+      app.config.characterMintCost = toShort((await arcaneCharacterFactoryContract.tokenPrice()).toString())
+      app.config.profileRegisterCost = toShort((await arcaneProfileContract.numberRuneToRegister()).toString())
     }
 
     saveApp()
@@ -1422,7 +1445,18 @@ async function isConnected() {
 
 }
 
+function migrateTrades() {
+  for (const trade of trades) {
+    delete trade.item
+  }
+
+  saveTrades()
+}
+
 async function run() {
+  // migrateTrades()
+
+  // return
   // await fetchPrices()
 
   // await Bridge.init({

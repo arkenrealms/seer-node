@@ -1,31 +1,5 @@
 import { ItemsMainCategoriesType, ItemCategoriesType } from './items.type.mjs'
 
-// Item Types
-// 1	One-Handed Weapon
-// 2	Two-Handed Weapon
-// 3	Shield
-// 4    Quiver
-// 5	Helm
-// 6	Undercloth
-// 7	BodyArmor
-// 8	ShoulderArmor
-// 9	Glove
-// 10	Belt
-// 11	Boot
-// 12	Ring
-// 13	Amulet
-// 14   Trinket
-// 15	Consumable
-// 16	Gem
-// 17   Rune
-// 18   Ingredient
-// 19   Quest
-// 20   Pet
-// 21   Mount
-// 22   Key
-// 23   Container
-// 24   Misc
-
 export const ItemAttributes = {
   HarvestYield: {
     id: 1,
@@ -73,7 +47,7 @@ export const ItemAttributes = {
     id: 8,
     min: 0,
     max: 100,
-    description: `Remove {value}% Fees`,
+    description: `{value}% Reduced Harvest Fees`,
   },
   UnstakeLocked: {
     id: 9,
@@ -177,54 +151,186 @@ export const ItemAttributes = {
     max: 24,
     description: `Harvest Delayed By {value} Hours`,
   },
-  EarlyUnstakeFee: {
+  HarvestClaimDelay: {
     id: 26,
     min: 0,
     max: 100,
+    description: `{value}% Harvest Claim Delay`,
+  },
+  EarlyUnstakeFee: {
+    id: 27,
+    min: 0,
+    max: 999,
     description: `{value}% Early Unstake Fee`,
   },
   EarlyUnstakeFeeValue: {
-    id: 27,
+    id: 28,
     min: 0,
     max: 999,
     description: `Early Unstake Timeline: {value} Days`,
   },
   FreezeFeesValue: {
-    id: 28,
+    id: 29,
     min: 0,
     max: 999,
     description: `Freeze Fees Timeline: {value} Hours`,
   },
   HarvestLockedLp: {
-    id: 29,
+    id: 30,
     min: 0,
     max: 100,
     description: `{value}% Harvest Buy & Lock LP`,
   },
   DepositLockedLp: {
-    id: 30,
+    id: 31,
     min: 0,
     max: 100,
     description: `{value}% Deposit Buy & Lock LP`,
   },
   WithdrawLockedLp: {
-    id: 31,
+    id: 32,
     min: 0,
     max: 100,
     description: `{value}% Withdraw Buy & Lock LP`,
   },
   TransmuteItem: {
-    id: 32,
+    id: 33,
     min: 0,
     max: 100,
     description: `{value}% Chance To Transmute Item (SOON)`,
+  },
+  AvoidBurn: {
+    id: 34,
+    min: 0,
+    max: 999,
+    description: `{value}% Avoid All Burns`,
+  },
+  EarlyAccess: {
+    id: 35,
+    min: 0,
+    max: 999,
+    description: `Early Rune Access: {value} Minutes`,
+  },
+  NeverHarvestCurrentRune: {
+    id: 36,
+    min: 0,
+    max: 999,
+    description: `Can Never Harvest Current Rune`,
+  },
+  GameLottery: {
+    id: 37,
+    min: 0,
+    max: 999,
+    description: ``,
+  },
+  IncreasePoolMultiplier: {
+    id: 38,
+    min: 0,
+    max: 999,
+    description: `Increases Pool Multiplier {value}%`,
   },
   AddSkill: {
     id: 39,
     min: 0,
     max: 999,
-    description: `Use Skill: {value} (Coming soon)`,
-  }
+    description: `Use Skill: {value} (SOON)`,
+  },
+  Rarity: {
+    id: 40,
+    min: 0,
+    max: 100,
+    description: `Rarity: {value}`,
+  },
+  RandomPerfection1: {
+    id: 41,
+    min: 0,
+    max: 100,
+    description: ``,
+  },
+  RandomPerfection2: {
+    id: 42,
+    min: 0,
+    max: 100,
+    description: ``,
+  },
+  RandomPerfection3: {
+    id: 43,
+    min: 0,
+    max: 100,
+    description: ``,
+  },
+  RandomPerfection4: {
+    id: 44,
+    min: 0,
+    max: 100,
+    description: ``,
+  },
+  RandomPerfection5: {
+    id: 45,
+    min: 0,
+    max: 100,
+    description: ``,
+  },
+  SpecificRuneReward: {
+    id: 46,
+    min: 0,
+    max: 100,
+    description: ``,
+  },
+  ReduceBurn: {
+    id: 47,
+    min: 0,
+    max: 100,
+    description: `{value}% Reduced Burn`,
+  },
+  GuildMemberCapacity: {
+    id: 48,
+    min: 0,
+    max: 100,
+    description: `{value} Increased Inventory Spaces`,
+  },
+  GuildInventorySpaces: {
+    id: 49,
+    min: 0,
+    max: 10,
+    description: `{value} Increased Harvest Yield`,
+  },
+  GuildFarmingYield: {
+    id: 50,
+    min: 0,
+    max: 33,
+    description: `Staked Token: {value}`,
+  },
+  GuildTokenStakeRequired: {
+    id: 51,
+    min: 0,
+    max: 100,
+    description: `{value]% Reduced Burn`,
+  },
+  GuildTokenValueRequired: {
+    id: 52,
+    min: 0,
+    max: 999,
+    description: `Staked Token Amount: {value}`,
+  },
+  GuildRuneStakeRequired: {
+    id: 53,
+    min: 0,
+    max: 999,
+    description: `Staking required: {value} RUNE`,
+  },
+  PetFarmingYield: {
+    id: 54,
+    min: 0,
+    max: 10,
+    description: `{value} Increased Harvest Yield`,
+  },
+  Sockets: {
+    id: 55,
+    min: 0,
+    max: 5,
+    description: `{value} Sockets`,
+  },
 }
 
 export const SkillNames = {
@@ -235,7 +341,19 @@ export const SkillNames = {
   4: 'Wolf Strike',
   5: 'Time Warp',
   6: 'Sacrifice',
-  7: 'Hidden Shot'
+  7: 'Hidden Shot',
+  8: 'Fade',
+  9: 'Fade',
+  10: 'Fade',
+  11: 'Mystic Insight',
+  12: 'Battle Rage',
+  13: 'White Lightning',
+  14: 'Inferno Fire Blast',
+  15: 'Cosmic Flare',
+  16: 'Veil of Night',
+  17: 'Sky Swarm',
+  18: 'Flurry Assault',
+  19: 'Destructive Impact',
 }
 
 export const ClassNames = {
@@ -246,7 +364,7 @@ export const ClassNames = {
   4: 'Necromancer',
   5: 'Paladin',
   6: 'Assassin',
-  7: 'Druid'
+  7: 'Druid',
 }
 
 export const RuneNames = {
@@ -261,7 +379,21 @@ export const RuneNames = {
   8: 'ORT',
   9: 'THUL',
   10: 'AMN',
-  11: 'SOL'
+  11: 'SOL',
+  12: 'SHAEL',
+}
+
+export const RarityMap = {
+  1: 'Legendary',
+  2: 'Unique',
+  3: 'Mythic',
+  4: 'Epic',
+  5: 'Rare',
+  6: 'Magical',
+  7: 'Normal',
+  8: 'Set',
+  9: 'Quest',
+  10: 'Trash'
 }
 
 export const ItemAttributesById = {}
@@ -277,7 +409,7 @@ export const ItemType = {
   Shield: 3,
   Arrow: 4,
   Helm: 5,
-  Undercloth: 6,
+  Pet: 6,
   BodyArmor: 7,
   ShoulderArmor: 8,
   Glove: 9,
@@ -291,40 +423,45 @@ export const ItemType = {
   Rune: 17,
   Ingredient: 18,
   Quest: 19,
-  Pet: 20,
+  Undercloth: 20,
   Mount: 21,
   Key: 22,
   Container: 23,
   Misc: 24,
 }
 
-// Item Slots
-// 1	Left Hand
-// 2	Right Hand
-// 3	Head
-// 4	Body
-// 5	Neck
-// 6	Shoulder
-// 7	Chest
-// 8	Waist
-// 9	Hands
-// 10	Wrists
-// 11	Legs
-// 12	Feet
-// 13	Finger1
-// 14   Finger2
-// 15   Trinket1
-// 16   Trinket2
-// 17   Trinket3
-// 18   Pet
-// 19   Companion
-// 20   Mount
+export const ItemTypeToText = {
+  [ItemType.OneHandedWeapon]: 'One Handed Weapon',
+  [ItemType.TwoHandedWeapon]: 'Two Handed Weapon',
+  [ItemType.Shield]: 'Shield',
+  [ItemType.Arrow]: 'Arrow',
+  [ItemType.Helm]: 'Helm',
+  [ItemType.Pet]: 'Pet',
+  [ItemType.BodyArmor]: 'Body Armor',
+  [ItemType.ShoulderArmor]: 'Shoulder Armor',
+  [ItemType.Glove]: 'Glove',
+  [ItemType.Belt]: 'Belt',
+  [ItemType.Boot]: 'Boot',
+  [ItemType.Ring]: 'Ring',
+  [ItemType.Amulet]: 'Amulet',
+  [ItemType.Trinket]: 'Trinket',
+  [ItemType.Potion]: 'Potion',
+  [ItemType.Gem]: 'Gem',
+  [ItemType.Rune]: 'Rune',
+  [ItemType.Ingredient]: 'Ingredient',
+  [ItemType.Quest]: 'Quest',
+  [ItemType.Undercloth]: 'Undercloth',
+  [ItemType.Mount]: 'Mount',
+  [ItemType.Key]: 'Key',
+  [ItemType.Container]: 'Container',
+  [ItemType.Misc]: 'Misc',
+}
 
 export const ItemSlot = {
   LeftHand: 1,
   RightHand: 2,
   Head: 3,
-  Body: 4,
+  Pet: 4,
   Neck: 5,
   Shoulder: 6,
   Chest: 7,
@@ -338,9 +475,32 @@ export const ItemSlot = {
   Trinket1: 15,
   Trinket2: 16,
   Trinket3: 17,
-  Pet: 18,
+  Body: 18,
   Companion: 19,
   Mount: 20,
+}
+
+export const ItemSlotToText = {
+  [ItemSlot.LeftHand]: 'Left Hand',
+  [ItemSlot.RightHand]: 'Right Hand',
+  [ItemSlot.Head]: 'Head',
+  [ItemSlot.Body]: 'Body',
+  [ItemSlot.Neck]: 'Neck',
+  [ItemSlot.Shoulder]: 'Shoulder',
+  [ItemSlot.Chest]: 'Chest',
+  [ItemSlot.Waist]: 'Waist',
+  [ItemSlot.Hands]: 'Hands',
+  [ItemSlot.Wrists]: 'Wrists',
+  [ItemSlot.Legs]: 'Legs',
+  [ItemSlot.Feet]: 'Feet',
+  [ItemSlot.Finger1]: 'Finger 1',
+  [ItemSlot.Finger2]: 'Finger 2',
+  [ItemSlot.Trinket1]: 'Trinket 1',
+  [ItemSlot.Trinket2]: 'Trinket 2',
+  [ItemSlot.Trinket3]: 'Trinket 3',
+  [ItemSlot.Pet]: 'Pet',
+  [ItemSlot.Companion]: 'Companion',
+  [ItemSlot.Mount]: 'Mount',
 }
 
 export const ItemId = {
@@ -357,7 +517,7 @@ export const ItemId = {
   Grace: 11,
   Genesis: 12,
   Destiny: 13,
-  Royal: 14,
+  Pledge: 19,
 }
 
 export const RuneId = {
@@ -396,22 +556,6 @@ export const RuneId = {
   ZOD: 33,
 }
 
-export const mapIdToSlot = {
-  [ItemId.Steel]: ItemSlot.LeftHand,
-  [ItemId.Fury]: ItemSlot.RightHand,
-  [ItemId.Lorekeeper]: ItemSlot.Head,
-  [ItemId.Flash]: ItemSlot.Feet,
-  [ItemId.Titan]: ItemSlot.Chest,
-  [ItemId.Smoke]: ItemSlot.Hands,
-  [ItemId.Nexus]: ItemSlot.LeftHand,
-  [ItemId.Triumph]: ItemSlot.LeftHand,
-  [ItemId.Glory]: ItemSlot.LeftHand,
-  [ItemId.Grace]: ItemSlot.LeftHand,
-  [ItemId.Genesis]: ItemSlot.LeftHand,
-  [ItemId.Destiny]: ItemSlot.LeftHand,
-  [ItemId.Royal]: ItemSlot.Hands,
-}
-
 export const itemData = {
   [ItemsMainCategoriesType.OTHER]: [
     {
@@ -420,23 +564,26 @@ export const itemData = {
       category: ItemCategoriesType.WEAPON,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00001.png',
       value: '0',
+      type: ItemType.OneHandedWeapon,
+      slots: [ItemSlot.LeftHand, ItemSlot.RightHand],
       isNew: false,
       isEquipable: true,
       isUnequipable: false,
       isTradeable: true,
       isTransferable: true,
-      isCraftable: true,
+      isCraftable: false,
       isDisabled: false,
       isRuneword: true,
+      isRetired: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 6,
       attributes: [],
       details: {
         Type: 'Sword',
         Subtype: 'Night Blade',
         'Rune Word': 'Tir El',
         Distribution: 'Crafted',
-        Date: 'April 20 - Now',
+        Date: 'April 20, 2021 - June 4, 2021',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -447,28 +594,29 @@ export const itemData = {
       },
       branches: {
         1: {
-          description: ['Easy to make and start raiding. It has a yield bonus, with minimal downsides.'],
+          description: ['Made by Men, this blade is common but has minimal downsides.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 5, max: 15 },
-            { ...ItemAttributes.HarvestFee, min: 3, max: 5 },
+            { ...ItemAttributes.HarvestFee, min: 0, max: 5 },
             {
               ...ItemAttributes.HarvestFeeToken,
               min: 0,
               max: 2,
               map: RuneNames,
             },
+            { ...ItemAttributes.Sockets, value: 2, min: 2, max: 2 },
           ],
           perfection: [15, 0],
         },
         2: {
-          description: 'Easy to make, but can be useful to melee characters in the early game.',
+          description: 'Made by Men, this blade is common but has minimal downsides.',
           attributes: [
             { id: 1, min: 16, max: 20, description: `{value}% Increased Attack Speed` },
             { id: 3, min: 6, max: 8, description: `{value}% Less Damage` },
             { id: 4, min: 81, max: 100, description: `{value} Increased Maximum Rage` },
             { id: 5, min: 3, max: 5, description: `{value} Increased Elemental Resists` },
             { id: 7, min: 3, max: 5, description: `{value} Increased Minion Attack Speed` },
-            { id: 8, value: 3, description: `{value} Increased Light Radius` },
+            { id: 8, value: 3, description: `{value} Increased Light Radius` }
           ],
         },
       },
@@ -479,6 +627,8 @@ export const itemData = {
       category: ItemCategoriesType.WEAPON,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00002.png',
       value: '0',
+      type: ItemType.OneHandedWeapon,
+      slots: [ItemSlot.RightHand, ItemSlot.LeftHand],
       isNew: false,
       isEquipable: true,
       isUnequipable: false,
@@ -488,14 +638,14 @@ export const itemData = {
       isDisabled: false,
       isRuneword: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 5,
       attributes: [],
       details: {
         Type: 'Sword',
         Subtype: 'War Sword',
         'Rune Word': 'Nef Eld Tir El',
         Distribution: 'Crafted',
-        Date: 'April 25 - Now',
+        Date: 'April 25, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -508,16 +658,17 @@ export const itemData = {
       },
       branches: {
         1: {
-          description: ['The creator is said to have gone mad.'],
+          description: ['Not much is known about this sword, other than the creator had gone mad.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 3, max: 7 },
             { ...ItemAttributes.SendHarvestHiddenPool, min: 20, max: 40 },
             { ...ItemAttributes.BurnEntireHarvest, min: 20, max: 40 },
+            { ...ItemAttributes.Sockets, value: 4, min: 4, max: 4 },
           ],
           perfection: [7, 40, 20],
         },
         2: {
-          description: 'The creator is said to have gone mad.',
+          description: 'Not much is known about this sword, other than the creator had gone mad.',
           attributes: [
             { id: 1, min: 16, max: 20, description: `{value}% Increased Lightning Spell Damage` },
             { id: 3, min: 6, max: 8, description: `{value}% Decreased Enemy Lightning Resistance` },
@@ -534,23 +685,26 @@ export const itemData = {
       category: ItemCategoriesType.ARMOR,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00003.png',
       value: '0',
+      type: ItemType.Helm,
+      slots: [ItemSlot.Head],
       isNew: false,
       isEquipable: true,
       isUnequipable: false,
       isTradeable: true,
       isTransferable: true,
-      isCraftable: true,
+      isCraftable: false,
       isDisabled: false,
       isRuneword: true,
+      isRetired: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 7,
       attributes: [],
       details: {
         Type: 'Helm',
-        Subtype: 'Full Helm',
+        Subtype: 'Archon Helm',
         'Rune Word': 'Nef Tir',
         Distribution: 'Crafted',
-        Date: 'April 25 - Now',
+        Date: 'April 25, 2021 - June 3, 2021',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -561,16 +715,19 @@ export const itemData = {
       },
       branches: {
         1: {
-          description: ["A once unbreakable helm, it's seen its best days."],
+          description: [
+            'An ancient helm forged by the Archons to seek out powerful shards in the battle between Heaven and Hell.',
+          ],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 1, max: 3 },
             { ...ItemAttributes.HarvestBurn, min: 1, max: 3 },
-            { ...ItemAttributes.FindShard, min: 100, max: 100 },
+            { ...ItemAttributes.FindShard, min: 100, max: 100, value: 100 },
+            { ...ItemAttributes.Sockets, value: 2, min: 2, max: 2 },
           ],
           perfection: [3, 1],
         },
         2: {
-          description: `A once unbreakable helm, it's seen its best days.`,
+          description: `An ancient helm forged by the Archons to seek out powerful shards in the battle between Heaven and Hell.`,
           attributes: [
             { id: 1, value: 5, description: `{value}% Chance to Cast L6 Lion Heart on Taking Damage` },
             { id: 2, value: 100, description: `{value}% Increased Block Speed` },
@@ -587,6 +744,8 @@ export const itemData = {
       category: ItemCategoriesType.ACCESSORY,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00004.png',
       value: '0',
+      type: ItemType.Ingredient,
+      slots: [],
       isNew: false,
       isEquipable: false,
       isTradeable: false,
@@ -594,22 +753,31 @@ export const itemData = {
       isCraftable: false,
       isDisabled: false,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 1,
       attributes: [],
       details: {
-        Type: 'Relic',
+        Type: 'Ingredient',
+        Subtype: 'Relic',
         Distribution: 'Claimable',
-        Date: 'May 3 - Now',
+        Date: 'May 3, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       branches: {
         1: {
-          description: ['A relic of a broken past.'],
-          attributes: [{ ...ItemAttributes.TransmuteItem, description: "100% Chance To Transmute Item", min: 0, max: 0 }],
-          perfection: [0],
+          description: ['A relic from a broken time.'],
+          attributes: [
+            {
+              ...ItemAttributes.TransmuteItem,
+              description: '100% Chance To Transmute Item',
+              min: 0,
+              max: 0,
+              value: 100,
+            },
+          ],
+          perfection: [100],
         },
         2: {
-          description: `A relic of a broken past.`,
+          description: `A relic from a broken time.`,
           attributes: [{ id: 1, value: 0, description: `Used to transmute items.` }],
         },
       },
@@ -620,6 +788,8 @@ export const itemData = {
       category: ItemCategoriesType.ARMOR,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00005.png',
       value: '0',
+      type: ItemType.Boot,
+      slots: [ItemSlot.Feet],
       isNew: false,
       isEquipable: true,
       isUnequipable: false,
@@ -629,14 +799,14 @@ export const itemData = {
       isDisabled: false,
       isRuneword: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 6,
       attributes: [],
       details: {
         Type: 'Greaves',
         Subtype: 'Astral Greaves',
         'Rune Word': 'Ith Eld Ral Tal',
         Distribution: 'Crafted',
-        Date: 'May 17 - Now',
+        Date: 'May 17, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -649,16 +819,17 @@ export const itemData = {
       },
       branches: {
         1: {
-          description: [""],
+          description: ['Although common in another world, these Sourcer boots are considered high quality.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 1, max: 10 },
             { ...ItemAttributes.HarvestBurn, min: 1, max: 5 },
             { ...ItemAttributes.SendHarvestHiddenPool, min: 10, max: 20 },
+            { ...ItemAttributes.Sockets, value: 4, min: 4, max: 4 },
           ],
           perfection: [10, 1, 20],
         },
         2: {
-          description: ``,
+          description: `Although common in another world, these Sourcer boots are considered high quality.`,
           attributes: [
             { id: 1, value: 5, description: `{value}% Chance to Cast L6 Lion Heart on Taking Damage` },
             { id: 2, value: 100, description: `{value}% Increased Block Speed` },
@@ -675,6 +846,8 @@ export const itemData = {
       category: ItemCategoriesType.ARMOR,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00006.png',
       value: '0',
+      type: ItemType.BodyArmor,
+      slots: [ItemSlot.Body],
       isNew: false,
       isEquipable: true,
       isUnequipable: false,
@@ -684,14 +857,14 @@ export const itemData = {
       isDisabled: false,
       isRuneword: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 6,
       attributes: [],
       details: {
         Type: 'Armor',
         Subtype: 'Templar Forge',
         'Rune Word': 'Tal Ort Thul Eld Nef',
         Distribution: 'Crafted',
-        Date: 'May 24 - Now',
+        Date: 'May 24, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -705,16 +878,17 @@ export const itemData = {
       },
       branches: {
         1: {
-          description: [''],
+          description: ['Made from light-weight Templar material, it provides quality protection.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
             { ...ItemAttributes.RemoveFees, min: 10, max: 20 },
             { ...ItemAttributes.RandomRuneExchange, min: 1, max: 2 },
+            { ...ItemAttributes.Sockets, value: 5, min: 5, max: 5 },
           ],
           perfection: [5, 20, 2],
         },
         2: {
-          description: ``,
+          description: `Made from light-weight Templar material, it provides quality protection.`,
           attributes: [],
         },
       },
@@ -725,24 +899,27 @@ export const itemData = {
       category: ItemCategoriesType.ARMOR,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00007.png',
       value: '0',
+      type: ItemType.Glove,
+      slots: [ItemSlot.Hands],
       isNew: false,
       isEquipable: true,
       isUnequipable: false,
       isTradeable: true,
       isTransferable: true,
-      isCraftable: true,
+      isCraftable: false,
       isDisabled: false,
       isRuneword: true,
       isLimited: true,
+      isRetired: true,
       attributes: [],
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 7,
       details: {
         Type: 'Gloves',
         Subtype: 'Shadow Wraps',
         'Rune Word': 'Thul Ith Ort Ral',
         Distribution: 'Crafted',
-        Date: 'May 25 - June 25',
+        Date: 'May 25, 2021 - June 25, 2021',
         'Max Supply': 'Limited',
       },
       recipe: {
@@ -760,11 +937,12 @@ export const itemData = {
             { ...ItemAttributes.HarvestYield, min: 1, max: 5 },
             { ...ItemAttributes.RemoveFees, min: 25, max: 100 },
             { ...ItemAttributes.UnstakeLocked, min: 100, max: 100 },
+            { ...ItemAttributes.Sockets, value: 4, min: 4, max: 4 },
           ],
           perfection: [5, 100],
         },
         2: {
-          description: ``,
+          description: `These handwraps have an unknown origin and emit a dark aura.`,
           attributes: [
             { id: 1, value: 5, description: `{value}% Chance to Cast L6 Lion Heart on Taking Damage` },
             { id: 2, value: 100, description: `{value}% Increased Block Speed` },
@@ -781,6 +959,8 @@ export const itemData = {
       category: ItemCategoriesType.WEAPON,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00008.png',
       value: '0',
+      type: ItemType.Helm,
+      slots: [ItemSlot.Head],
       isNew: false,
       isEquipable: true,
       isUnequipable: false,
@@ -790,14 +970,14 @@ export const itemData = {
       isDisabled: false,
       isRuneword: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 10,
       attributes: [],
       details: {
         Type: 'Helm',
         Subtype: '',
         'Rune Word': 'El Ral Ort Tal',
         Distribution: 'Crafted',
-        Date: 'June 1 - Now',
+        Date: 'June 1, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -815,6 +995,7 @@ export const itemData = {
             { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
             { ...ItemAttributes.RemoveFees, min: 25, max: 75 },
             { ...ItemAttributes.EarlyUnstakeNoReward, min: 100, max: 100 },
+            { ...ItemAttributes.Sockets, value: 4, min: 4, max: 4 },
           ],
           perfection: [5, 75],
         },
@@ -836,6 +1017,8 @@ export const itemData = {
       category: ItemCategoriesType.WEAPON,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00010.png',
       value: '0',
+      type: ItemType.TwoHandedWeapon,
+      slots: [ItemSlot.LeftHand],
       isNew: true,
       isEquipable: true,
       isUnequipable: false,
@@ -845,14 +1028,14 @@ export const itemData = {
       isDisabled: false,
       isRuneword: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 9,
       attributes: [],
       details: {
         Type: 'Sword',
         Subtype: 'Cloudstrike Sword',
         'Rune Word': 'Sol Ral Ith Eld Ort',
         Distribution: 'Crafted',
-        Date: 'June 1 - Now',
+        Date: 'June 1, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -866,7 +1049,9 @@ export const itemData = {
       },
       branches: {
         1: {
-          description: ['Crafted with the finest Kora materials, this Cloudstrike Sword is imbued with the power of wind.'],
+          description: [
+            'Crafted with the finest Koran materials, this Cloudstrike Sword is imbued with the power of wind.',
+          ],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 10, max: 40 },
             { ...ItemAttributes.SendHarvestHiddenPool, min: 15, max: 15 },
@@ -886,6 +1071,7 @@ export const itemData = {
               map: SkillNames,
             },
             { ...ItemAttributes.SpecificClass, min: 1, max: 1, map: ClassNames },
+            { ...ItemAttributes.Sockets, value: 5, min: 5, max: 5 },
           ],
           perfection: [40, undefined, undefined, 10, 5],
         },
@@ -907,6 +1093,8 @@ export const itemData = {
       category: ItemCategoriesType.WEAPON,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00011.png',
       value: '0',
+      type: ItemType.TwoHandedWeapon,
+      slots: [ItemSlot.LeftHand],
       isNew: true,
       isEquipable: true,
       isUnequipable: false,
@@ -916,14 +1104,14 @@ export const itemData = {
       isDisabled: false,
       isRuneword: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 9,
       attributes: [],
       details: {
         Type: 'Bow',
         Subtype: `Sage Bow`,
         'Rune Word': 'Sol Ith Nef El Ort',
         Distribution: 'Crafted',
-        Date: 'June 1 - Now',
+        Date: 'June 1, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -957,6 +1145,7 @@ export const itemData = {
               map: SkillNames,
             },
             { ...ItemAttributes.SpecificClass, min: 3, max: 3, map: ClassNames },
+            { ...ItemAttributes.Sockets, value: 5, min: 5, max: 5 },
           ],
           perfection: [40, undefined, undefined, 10, 5],
         },
@@ -978,6 +1167,8 @@ export const itemData = {
       category: ItemCategoriesType.WEAPON,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00012.png',
       value: '0',
+      type: ItemType.OneHandedWeapon,
+      slots: [ItemSlot.LeftHand, ItemSlot.RightHand],
       isNew: true,
       isEquipable: true,
       isUnequipable: false,
@@ -987,14 +1178,14 @@ export const itemData = {
       isDisabled: false,
       isRuneword: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 10,
       attributes: [],
       details: {
         Type: 'Dagger',
         Subtype: 'Dimensional Dagger',
         'Rune Word': 'Sol Thul Amn Ort',
         Distribution: 'Crafted',
-        Date: 'June 1 - Now',
+        Date: 'June 1, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -1007,9 +1198,11 @@ export const itemData = {
       },
       branches: {
         1: {
-          description: ['Crafted with the finest Archon material, this Dimensional Dagger is imbued with banished sacrificial power.'],
+          description: [
+            'Crafted with the finest Archon material, this Dimensional Dagger is imbued with banished sacrificial power.',
+          ],
           attributes: [
-            { ...ItemAttributes.HarvestYield, min: 2, max: 10 },
+            { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
             { ...ItemAttributes.SendHarvestHiddenPool, min: 10, max: 40 },
             { ...ItemAttributes.RandomRuneExchange, min: 1, max: 2 },
             { ...ItemAttributes.HarvestFee, min: 2, max: 10 },
@@ -1026,8 +1219,9 @@ export const itemData = {
               map: SkillNames,
             },
             { ...ItemAttributes.SpecificClass, min: 4, max: 4, map: ClassNames },
+            { ...ItemAttributes.Sockets, value: 4, min: 4, max: 4 },
           ],
-          perfection: [10, 40, 2, 2],
+          perfection: [5, 40, undefined, 2],
         },
         2: {
           description: ``,
@@ -1047,6 +1241,8 @@ export const itemData = {
       category: ItemCategoriesType.WEAPON,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00013.png',
       value: '0',
+      type: ItemType.TwoHandedWeapon,
+      slots: [ItemSlot.LeftHand],
       isNew: true,
       isEquipable: true,
       isUnequipable: false,
@@ -1056,14 +1252,14 @@ export const itemData = {
       isDisabled: false,
       isRuneword: true,
       createdDate: 12111,
-      hotnessScore: 1,
+      hotness: 9,
       attributes: [],
       details: {
         Type: 'Staff',
         Subtype: `Chrono Staff`,
         'Rune Word': 'Sol Amn Ort Thul Ral',
         Distribution: 'Crafted',
-        Date: 'June 1 - Now',
+        Date: 'June 1, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
@@ -1077,7 +1273,7 @@ export const itemData = {
       },
       branches: {
         1: {
-          description: ['A mysterious staff that appears to be of Archon origin, imbued with what appears to be the power of time.'],
+          description: ['A mysterious staff that appears to be of Archon origin and imbued with the power of time.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 10, max: 40 },
             { ...ItemAttributes.SendHarvestHiddenPool, min: 15, max: 15 },
@@ -1097,6 +1293,7 @@ export const itemData = {
               map: SkillNames,
             },
             { ...ItemAttributes.SpecificClass, min: 2, max: 2, map: ClassNames },
+            { ...ItemAttributes.Sockets, value: 5, min: 5, max: 5 },
           ],
           perfection: [40, undefined, undefined, 10, 5],
         },
@@ -1109,6 +1306,812 @@ export const itemData = {
             { id: 2, min: 41, max: 50, description: `Physical Damage Reduced by {value}` },
             { id: 2, description: 'Half Freeze Duration' },
           ],
+        },
+      },
+    },
+    {
+      id: 19,
+      name: 'Pledge',
+      category: ItemCategoriesType.ARMOR,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00019.png',
+      value: '0',
+      type: ItemType.Helm,
+      slots: [ItemSlot.Head],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: true,
+      isDisabled: false,
+      isRuneword: true,
+      createdDate: 12111,
+      hotness: 10,
+      attributes: [],
+      details: {
+        Type: 'Helm',
+        Subtype: 'Warder Helm',
+        'Rune Word': 'Nef Tir Sol Ort',
+        Distribution: 'Crafted',
+        Date: 'June 3, 2021 - Now',
+        'Max Supply': 'Unknown',
+      },
+      recipe: {
+        requirement: [
+          { id: RuneId.NEF, quantity: 1 },
+          { id: RuneId.TIR, quantity: 1 },
+          { id: RuneId.SOL, quantity: 1 },
+          { id: RuneId.ORT, quantity: 1 },
+        ],
+      },
+      branches: {
+        1: {
+          description: ['A once unbreakable helm, its best days have passed.'],
+          attributes: [
+            { ...ItemAttributes.FindShard, min: 1, max: 15 },
+            { ...ItemAttributes.HarvestBurn, min: 1, max: 3 },
+            { ...ItemAttributes.RandomRuneExchange, min: 1, max: 4 },
+            { ...ItemAttributes.RemoveFees, min: 1, max: 5 },
+            { ...ItemAttributes.Sockets, value: 4, min: 4, max: 4 },
+          ],
+          perfection: [3, 1, null, 5],
+        },
+        2: {
+          description: `A once unbreakable helm, its best days have passed.`,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 14,
+      name: 'Wrath',
+      category: ItemCategoriesType.WEAPON,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00014.png',
+      value: '0',
+      type: ItemType.OneHandedWeapon,
+      slots: [ItemSlot.LeftHand],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: true,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Claw',
+        Subtype: 'Unknown',
+        'Rune Word': 'Shael Ral Ith Nef Sol',
+        Distribution: 'Crafted',
+        Date: 'June 11, 2021 - Now',
+        'Max Supply': 'Unknown',
+      },
+      recipe: {
+        requirement: [
+          { id: RuneId.SHAEL, quantity: 1 },
+          { id: RuneId.RAL, quantity: 1 },
+          { id: RuneId.ITH, quantity: 1 },
+          { id: RuneId.NEF, quantity: 1 },
+          { id: RuneId.SOL, quantity: 1 },
+        ],
+      },
+      branches: {
+        1: {
+          description: ['Originally royal Koran bracers, they have been forged to claws of an unknown material.'],
+          attributes: [
+            { ...ItemAttributes.HarvestYield, min: 2, max: 7 },
+            { ...ItemAttributes.CreateRandomRuneword, min: 1, max: 2 },
+            { ...ItemAttributes.MagicFind, min: 1, max: 15 },
+            { ...ItemAttributes.RandomRuneExchange, min: 1, max: 4 },
+            { ...ItemAttributes.HarvestFee, min: 2, max: 10 },
+            {
+              ...ItemAttributes.HarvestFeeToken,
+              min: 10,
+              max: 12,
+              map: RuneNames,
+            },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 8,
+              max: 8,
+              map: SkillNames,
+            },
+            { ...ItemAttributes.SpecificClass, min: 6, max: 6, map: ClassNames },
+            { ...ItemAttributes.Sockets, value: 5, min: 5, max: 5 },
+          ],
+          perfection: [5, 4, 10, null, 2],
+        },
+        2: {
+          description: `Originally royal Koran bracers, they have been fused with claws of an unknown material.`,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 15,
+      name: 'Fortress',
+      category: ItemCategoriesType.SHIELD,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00015.png',
+      value: '0',
+      type: ItemType.Shield,
+      slots: [ItemSlot.RightHand],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: true,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Shield',
+        Subtype: 'Blessed Koran Shield',
+        'Rune Word': 'Shael El Tir Thul Nef',
+        Distribution: 'Crafted',
+        Date: 'June 11, 2021 - Now',
+        'Max Supply': 'Unknown',
+      },
+      recipe: {
+        requirement: [
+          { id: RuneId.SHAEL, quantity: 1 },
+          { id: RuneId.EL, quantity: 1 },
+          { id: RuneId.TIR, quantity: 1 },
+          { id: RuneId.THUL, quantity: 1 },
+          { id: RuneId.NEF, quantity: 1 },
+        ],
+      },
+      branches: {
+        1: {
+          description: ['A shield designed for Koran royalty, it has been blessed with a protective aura.'],
+          attributes: [
+            { ...ItemAttributes.RemoveFees, min: 2, max: 10 },
+            { ...ItemAttributes.FindGuildToken, min: 1, max: 4 },
+            { ...ItemAttributes.MagicFind, min: 5, max: 10 },
+            { ...ItemAttributes.RandomRuneExchange, min: 1, max: 4 },
+            { ...ItemAttributes.ReduceBurn, min: 2, max: 10 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 3,
+              max: 3,
+              map: SkillNames,
+            },
+            { ...ItemAttributes.SpecificClass, min: 5, max: 5, map: ClassNames },
+            { ...ItemAttributes.Sockets, value: 5, min: 5, max: 5 },
+          ],
+          perfection: [10, 4, 10, null, 10],
+        },
+        2: {
+          description: `A shield designed for Koran royalty, it has been blessed with a protective aura.`,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 16,
+      name: 'Elder',
+      category: ItemCategoriesType.WEAPON,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00016.png',
+      value: '0',
+      type: ItemType.OneHandedWeapon,
+      slots: [ItemSlot.LeftHand],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: true,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Mace',
+        Subtype: 'Worldstone Mace',
+        'Rune Word': 'Shael Amn Thul Ral Tal',
+        Distribution: 'Crafted',
+        Date: 'June 11, 2021 - Now',
+        'Max Supply': 'Unknown',
+      },
+      recipe: {
+        requirement: [
+          { id: RuneId.SHAEL, quantity: 1 },
+          { id: RuneId.AMN, quantity: 1 },
+          { id: RuneId.THUL, quantity: 1 },
+          { id: RuneId.RAL, quantity: 1 },
+          { id: RuneId.TAL, quantity: 1 },
+        ],
+      },
+      branches: {
+        1: {
+          description: [
+            'A mace crafted by Koran using mystical Archon materials during the Battle for the Worldstone.',
+          ],
+          attributes: [
+            { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
+            { ...ItemAttributes.FindShard, min: 1, max: 40 },
+            { ...ItemAttributes.MagicFind, min: 2, max: 2 },
+            { ...ItemAttributes.RandomRuneExchange, min: 1, max: 4 },
+            { ...ItemAttributes.HarvestFee, min: 2, max: 10 },
+            {
+              ...ItemAttributes.HarvestFeeToken,
+              min: 10,
+              max: 12,
+              map: RuneNames,
+            },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 11,
+              max: 11,
+              map: SkillNames,
+            },
+            { ...ItemAttributes.SpecificClass, min: 7, max: 7, map: ClassNames },
+            { ...ItemAttributes.Sockets, value: 5, min: 5, max: 5 },
+          ],
+          perfection: [5, 40, null, null, 2],
+        },
+        2: {
+          description: `A mace crafted by Koran using mystical Archon materials during the Battle for the Worldstone.`,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 1200,
+      name: "Scholar's Codex",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01200.png',
+      value: '0',
+      type: ItemType.Trinket,
+      slots: [ItemSlot.Trinket1, ItemSlot.Trinket2, ItemSlot.Trinket3],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Trinket',
+        Subtype: 'Codex',
+        Distribution: 'Reward',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '10',
+      },
+      branches: {
+        1: {
+          description: [
+            'Rewarded to Rune Scholars for their noble service.',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 1, max: 4 },
+            { ...ItemAttributes.MagicFind, min: 1, max: 20 },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: `Rewarded to Rune Scholars for their noble service.`,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 1201,
+      name: "General's Medallion",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01201.png',
+      value: '0',
+      type: ItemType.Trinket,
+      slots: [ItemSlot.Trinket1, ItemSlot.Trinket2, ItemSlot.Trinket3],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Trinket',
+        Subtype: 'Medallion',
+        Distribution: 'Reward',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '50',
+      },
+      branches: {
+        1: {
+          description: [
+            'Rewarded to Rune Generals for their valiant service.',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 1, max: 5 },
+            { ...ItemAttributes.MagicFind, min: 1, max: 20 },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: `Rewarded to Rune Generals for their valiant service.`,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 1202,
+      name: "Crafting Competition Winner",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01202.png',
+      value: '0',
+      type: ItemType.Misc,
+      slots: [ItemSlot.Trinket1, ItemSlot.Trinket2, ItemSlot.Trinket3],
+      isNew: true,
+      isEquipable: false,
+      isUnequipable: false,
+      isTradeable: false,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Scroll',
+        Subtype: 'Memorabilia',
+        Distribution: 'Reward',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '1',
+      },
+      branches: {
+        1: {
+          description: [
+            'Given as a token of excellence in crafting.',
+          ],
+          attributes: [
+          ],
+          perfection: [],
+        },
+        2: {
+          description: `Given as a token of excellence in crafting.`,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 3000,
+      name: "Golden Lion Cub",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03000.png',
+      value: '0',
+      type: ItemType.Pet,
+      slots: [ItemSlot.Pet],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Pet',
+        Subtype: 'Battle Pet',
+        Distribution: 'Fundraiser',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '4',
+      },
+      branches: {
+        1: {
+          description: [
+            '',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 3, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 20, max: 80 },
+            { ...ItemAttributes.AvoidBurn, min: 3, max: 10 },
+            { ...ItemAttributes.ReduceBurn, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 2, max: 5 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 12,
+              max: 12,
+              map: SkillNames,
+            },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: ``,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 3001,
+      name: "Blue-Eyes White Drake",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03001.png',
+      value: '0',
+      type: ItemType.Pet,
+      slots: [ItemSlot.Pet],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Pet',
+        Subtype: 'Battle Pet',
+        Distribution: 'Fundraiser',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '4',
+      },
+      branches: {
+        1: {
+          description: [
+            '',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 3, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 2, max: 5 },
+            { ...ItemAttributes.AvoidBurn, min: 3, max: 10 },
+            { ...ItemAttributes.ReduceBurn, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 10, max: 50 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 13,
+              max: 13,
+              map: SkillNames,
+            },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: ``,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 3002,
+      name: "Red-Eyes Black Drake",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03002.png',
+      value: '0',
+      type: ItemType.Pet,
+      slots: [ItemSlot.Pet],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Pet',
+        Subtype: 'Battle Pet',
+        Distribution: 'Fundraiser',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '4',
+      },
+      branches: {
+        1: {
+          description: [
+            '',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 3, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 2, max: 5 },
+            { ...ItemAttributes.AvoidBurn, min: 3, max: 10 },
+            { ...ItemAttributes.ReduceBurn, min: 8, max: 20 },
+            { ...ItemAttributes.RemoveFees, min: 2, max: 5 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 14,
+              max: 14,
+              map: SkillNames,
+            },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: ``,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 3003,
+      name: "Fairy Drake",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03003.png',
+      value: '0',
+      type: ItemType.Pet,
+      slots: [ItemSlot.Pet],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Pet',
+        Subtype: 'Battle Pet',
+        Distribution: 'Fundraiser',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '4',
+      },
+      branches: {
+        1: {
+          description: [
+            '',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 3, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 8, max: 20 },
+            { ...ItemAttributes.AvoidBurn, min: 2, max: 5 },
+            { ...ItemAttributes.ReduceBurn, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 2, max: 5 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 15,
+              max: 15,
+              map: SkillNames,
+            },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: ``,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 3004,
+      name: "Goblin Drake",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03004.png',
+      value: '0',
+      type: ItemType.Pet,
+      slots: [ItemSlot.Pet],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Pet',
+        Subtype: 'Battle Pet',
+        Distribution: 'Fundraiser',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '4',
+      },
+      branches: {
+        1: {
+          description: [
+            '',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 3, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 8, max: 20 },
+            { ...ItemAttributes.AvoidBurn, min: 2, max: 5 },
+            { ...ItemAttributes.ReduceBurn, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 2, max: 5 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 16,
+              max: 16,
+              map: SkillNames,
+            },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: ``,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 3005,
+      name: "Hippogryph",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03005.png',
+      value: '0',
+      type: ItemType.Pet,
+      slots: [ItemSlot.Pet],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Pet',
+        Subtype: 'Battle Pet',
+        Distribution: 'Fundraiser',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '4',
+      },
+      branches: {
+        1: {
+          description: [
+            '',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 3, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 8, max: 20 },
+            { ...ItemAttributes.AvoidBurn, min: 2, max: 5 },
+            { ...ItemAttributes.ReduceBurn, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 2, max: 5 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 17,
+              max: 17,
+              map: SkillNames,
+            },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: ``,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 3006,
+      name: "Wyvern",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03006.png',
+      value: '0',
+      type: ItemType.Pet,
+      slots: [ItemSlot.Pet],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Pet',
+        Subtype: 'Battle Pet',
+        Distribution: 'Fundraiser',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '4',
+      },
+      branches: {
+        1: {
+          description: [
+            '',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 3, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 8, max: 20 },
+            { ...ItemAttributes.AvoidBurn, min: 2, max: 5 },
+            { ...ItemAttributes.ReduceBurn, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 2, max: 5 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 18,
+              max: 18,
+              map: SkillNames,
+            },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: ``,
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 3007,
+      name: "Forest Turtle",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03007.png',
+      value: '0',
+      type: ItemType.Pet,
+      slots: [ItemSlot.Pet],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 12111,
+      hotness: 1,
+      attributes: [],
+      details: {
+        Type: 'Pet',
+        Subtype: 'Battle Pet',
+        Distribution: 'Fundraiser',
+        Date: 'June 12, 2021 - June 12, 2021',
+        'Max Supply': '4',
+      },
+      branches: {
+        1: {
+          description: [
+            '',
+          ],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: RarityMap },
+            { ...ItemAttributes.HarvestYield, min: 3, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 8, max: 20 },
+            { ...ItemAttributes.AvoidBurn, min: 2, max: 5 },
+            { ...ItemAttributes.ReduceBurn, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 2, max: 5 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: 19,
+              max: 19,
+              map: SkillNames,
+            },
+          ],
+          perfection: [],
+        },
+        2: {
+          description: ``,
+          attributes: [],
         },
       },
     },
@@ -1129,7 +2132,7 @@ export const itemData = {
       details: {
         Symbol: 'EL',
         Distribution: 'Farmed',
-        Date: 'April 2 - April 9',
+        Date: 'April 2, 2021 - April 9, 2021',
         'Max Supply': 'burned to 40,000',
         Mechanics: 'Used as fee in TIR farms',
         'Planned Rune Words': 'Steel',
@@ -1160,7 +2163,7 @@ export const itemData = {
       details: {
         Symbol: 'ELD',
         Distribution: 'Airdropped on RUNE characters',
-        Date: 'April 10',
+        Date: 'April 10, 2021',
         'Max Supply': '40,000',
         Reward: '57 ELD',
         'Planned Mechanics': 'TBA',
@@ -1192,7 +2195,7 @@ export const itemData = {
       details: {
         Symbol: 'TIR',
         'Planned Distribution': 'farmed',
-        'Planned Date': 'April 11 - April 16',
+        'Planned Date': 'April 11, 2021 - April 16, 2021',
         'Planned Max Supply': 'Burned to 50,000',
         'Planned Mechanics': 'TBA',
         'Planned Rune Words': 'TBA',
@@ -1223,7 +2226,7 @@ export const itemData = {
       details: {
         Symbol: 'NEF',
         'Planned Distribution': 'Farmed by RUNE characters',
-        'Planned Date': 'April 20 - April 26',
+        'Planned Date': 'April 20, 2021 - April 26, 2021',
         'Planned Max Supply': 'burned to 50,000',
         'Planned Mechanics': 'TBA',
         'Planned Rune Words': 'TBA',
@@ -1287,7 +2290,7 @@ export const itemData = {
       details: {
         Symbol: 'ITH',
         'Planned Distribution': 'Farmed',
-        'Planned Date': 'April 26 - May 3',
+        'Planned Date': 'April 26, 2021 - May 3, 2021',
         'Planned Max Supply': 'burned to 50,000',
         'Planned Mechanics': 'TBA',
         'Planned Rune Words': 'TBA',
@@ -1319,7 +2322,7 @@ export const itemData = {
       details: {
         Symbol: 'TAL',
         'Planned Distribution': 'Farmed',
-        'Planned Date': 'May 3 - May 10',
+        'Planned Date': 'May 3, 2021 - May 10, 2021',
         'Planned Max Supply': 'burned to 50,000',
         'Planned Mechanics': 'TBA',
         'Planned Rune Words': 'TBA',
@@ -1341,7 +2344,7 @@ export const itemData = {
       category: ItemCategoriesType.RUNE,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/runes/ral-fg.png',
       value: '0',
-      isNew: true,
+      isNew: false,
       isEquipable: false,
       isTradeable: true,
       isTransferable: false,
@@ -1351,7 +2354,7 @@ export const itemData = {
       details: {
         Symbol: 'RAL',
         'Planned Distribution': 'Farmed',
-        'Planned Date': 'May 10 - May 17',
+        'Planned Date': 'May 10, 2021 - May 17, 2021',
         'Planned Max Supply': 'burned to 50,000',
         'Planned Mechanics': 'TBA',
         'Planned Rune Words': 'TBA',
@@ -1373,7 +2376,7 @@ export const itemData = {
       category: ItemCategoriesType.RUNE,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/runes/ort-fg.png',
       value: '0',
-      isNew: true,
+      isNew: false,
       isEquipable: false,
       isTradeable: true,
       isTransferable: false,
@@ -1405,7 +2408,7 @@ export const itemData = {
       category: ItemCategoriesType.RUNE,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/runes/thul-fg.png',
       value: '0',
-      isNew: true,
+      isNew: false,
       isEquipable: false,
       isTradeable: true,
       isTransferable: false,
@@ -1501,13 +2504,13 @@ export const itemData = {
       category: ItemCategoriesType.RUNE,
       icon: process.env.REACT_APP_PUBLIC_URL + 'images/runes/shael-fg.png',
       value: '0',
-      isNew: false,
+      isNew: true,
       isEquipable: false,
       isTradeable: true,
       isTransferable: false,
       isCraftable: true,
       attributes: [],
-      isDisabled: true,
+      isDisabled: false,
       details: {
         Symbol: 'SHAEL',
         'Planned Distribution': 'TBA',
