@@ -26,6 +26,7 @@ import ArcaneItems from '../contracts/ArcaneItems.json'
 import BEP20Contract from '../contracts/BEP20.json'
 import { QuoteToken } from "./farms.mjs"
 import { decodeItem } from "./util/decodeItem.mjs"
+import { achievementData } from './data/achievements.mjs'
 // import * as Bridge from "./bridge.mjs"
 
 const config = jetpack.read(path.resolve('./db/config.json'), 'json')
@@ -429,7 +430,10 @@ const loadUser = (address) => {
     marketTradeListedCount: 0,
     marketTradeSoldCount: 0,
     transferredOutCount: 0,
+    holdings: {},
+    points: 0,
     ...(jetpack.read(path.resolve(`./db/users/${address}/overview.json`), 'json') || {}),
+    achievements: (jetpack.read(path.resolve(`./db/users/${address}/achievements.json`), 'json') || []),
     characters: (jetpack.read(path.resolve(`./db/users/${address}/characters.json`), 'json') || []),
     inventory: {
       items: [],
@@ -442,12 +446,45 @@ const loadUser = (address) => {
   }
 }
 
+const updateAchievementsByUser = (user) => {
+  if (user.craftedItemCount >= 1) {
+    addUserAchievement(user, 'CRAFT_1')
+  }
+  if (user.craftedItemCount >= 10) {
+    addUserAchievement(user, 'CRAFT_10')
+  }
+  if (user.craftedItemCount >= 100) {
+    addUserAchievement(user, 'CRAFT_100')
+  }
+  if (user.craftedItemCount >= 1000) {
+    addUserAchievement(user, 'CRAFT_1000')
+  }
+  if (user.holdings?.rune >= 1) {
+    addUserAchievement(user, 'ACQUIRED_RUNE')
+  }
+}
+
+const updatePointsByUser = (user) => {
+  const achievements = user.achievements.map(a => achievementData.find(b => b.id === a))
+
+  user.points = 0
+
+  for(const achievement of achievements) {
+    user.points += achievement.points
+  }
+}
+
 const saveUser = (user) => {
+  console.log('Save user', user.address)
+
+  updatePointsByUser(user)
+
   jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), JSON.stringify({
     ...user,
     inventory: undefined,
     market: undefined,
     characters: undefined,
+    achievements: undefined,
     craftedItemCount: user.inventory.items.filter(i => i.status === 'created').length,
     inventoryItemCount: user.inventory.items.filter(i => i.status === 'unequipped').length,
     equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
@@ -456,7 +493,9 @@ const saveUser = (user) => {
   }, null, 2))
 
   updateLeaderboardByUser(user)
+  updateAchievementsByUser(user)
 
+  jetpack.write(path.resolve(`./db/users/${user.address}/achievements.json`), JSON.stringify(user.achievements, null, 2))
   jetpack.write(path.resolve(`./db/users/${user.address}/characters.json`), JSON.stringify(user.characters, null, 2))
   jetpack.write(path.resolve(`./db/users/${user.address}/inventory.json`), JSON.stringify(user.inventory, null, 2))
   jetpack.write(path.resolve(`./db/users/${user.address}/market.json`), JSON.stringify(user.market, null, 2))
@@ -502,6 +541,17 @@ const saveUserTrade = (user, trade) => {
   }
 
   saveUser(user)
+}
+
+const addUserAchievement = (user, achievementKey) => {
+  const id = achievementData.find(i => i.key === achievementKey).id
+  const achievement = user.achievements.find(i => i === id)
+
+  if (!achievement) {
+    user.achievements.push(id)
+  }
+
+  // saveUser(user)
 }
 
 async function getAllBarracksEvents() {
@@ -937,6 +987,7 @@ async function getAllItemEvents() {
       const { from, to: userAddress, tokenId } = e.args
 
       const user = loadUser(userAddress)
+      const decodedItem = decodeItem(tokenId.toString())
 
       const itemData = {
         owner: userAddress,
@@ -944,7 +995,8 @@ async function getAllItemEvents() {
         status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
         tokenId: tokenId.toString(),
         createdAt: new Date().getTime(),
-        id: decodeItem(tokenId.toString()).id
+        id: decodedItem.id,
+        perfection: decodedItem.perfection
       }
 
       const token = loadToken(itemData.tokenId)
