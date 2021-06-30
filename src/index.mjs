@@ -624,7 +624,7 @@ async function getAllBarracksEvents() {
 
     if (!e2) {
       barracksEvents.push({
-        id: ++config.barracks.counter,
+        // id: ++config.barracks.counter,
         ...log,
         ...e
       })
@@ -741,6 +741,7 @@ async function getAllMarketEvents() {
       saveTokenTrade(loadToken(trade.tokenId), trade)
       saveItemTrade(loadItem(trade.item.id), trade)
       saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
+      saveConfig()
       
       console.log('List', trade)
     }
@@ -818,7 +819,7 @@ async function getAllMarketEvents() {
 
     if (!e2) {
       tradesEvents.push({
-        id: ++config.trades.counter,
+        // id: ++config.trades.counter,
         ...log,
         ...e
       })
@@ -1021,13 +1022,14 @@ async function getAllItemEvents() {
 
     if (!e2) {
       itemsEvents.push({
-        id: ++config.items.counter,
+        // id: ++config.items.counter,
         ...log,
         ...e
       })
     }
   
     saveItemsEvents()
+    saveConfig()
 
     // if (updateConfig) {
     //   config.items.lastBlock = log.blockNumber

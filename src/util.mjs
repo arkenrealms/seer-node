@@ -14,8 +14,16 @@ export function round(num, precision) {
 export function removeDupes(list) {
   const seen = {};
   return list.filter(function(item) {
-      const k = item.seller + item.tokenId;
-      return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+      const k1 = item.seller + item.tokenId;
+      const k2 = item.id;
+      const exists = seen.hasOwnProperty(k1) || seen.hasOwnProperty(k2)
+
+      if (!exists) {
+        seen[k1] = true
+        seen[k2] = true
+      }
+
+      return !exists
   })
 }
 
