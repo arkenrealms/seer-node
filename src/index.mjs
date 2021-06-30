@@ -261,7 +261,7 @@ const updateLeaderboardByUser = (user) => {
     leaderboard.mostMarketItemsSold.address = user.address
   }
 
-  if (user.transferredOutCount > leaderboard.mostItemsTransferred.value) {
+  if (user.transferredOutCount > leaderboard.mostItemsTransferred.value && user.address !== '0x85C07b6a475Ee19218D0ef9C278C7e58715Af842') {
     leaderboard.mostItemsTransferred.value = user.transferredOutCount
     leaderboard.mostItemsTransferred.address = user.address
   }
@@ -1225,6 +1225,8 @@ async function monitorGeneralStats() {
     }
 
     saveFarms()
+
+    console.log("Done updating farms")
   }
 
   // Update stats

@@ -302,7 +302,7 @@ export default {
     [TESTNET]: '0x14c6AFcFc9C68922700DC8E3DC87e4FCFf044eCB',
   },
   hel: {
-    [MAINNET]: '',
+    [MAINNET]: '0x0D3877152BaaC86D42A4123ABBeCd1178d784cC7',
     [TESTNET]: '',
   },
   io: {
