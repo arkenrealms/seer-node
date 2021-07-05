@@ -44,7 +44,9 @@ const itemsEvents = jetpack.read(path.resolve('./db/items/events.json'), 'json')
 const charactersEvents = jetpack.read(path.resolve('./db/characters/events.json'), 'json')
 const usersEvents = jetpack.read(path.resolve('./db/users/events.json'), 'json')
 const tradesEvents = jetpack.read(path.resolve('./db/trades/events.json'), 'json')
-
+const evolutionLeaderboardHistory = jetpack.read(path.resolve('./db/evolution/leaderboardHistory.json'), 'json')
+const evolutionRewardHistory = jetpack.read(path.resolve('./db/evolution/rewardHistory.json'), 'json')
+const evolutionRewards = jetpack.read(path.resolve('./db/evolution/rewards.json'), 'json')
 
 config.trades.updating = false
 config.barracks.updating = false
@@ -447,20 +449,57 @@ const loadUser = (address) => {
 }
 
 const updateAchievementsByUser = (user) => {
-  if (user.craftedItemCount >= 1) {
+  if (!hasUserAchievement(user, 'CRAFT_1') && user.craftedItemCount >= 1) {
     addUserAchievement(user, 'CRAFT_1')
   }
-  if (user.craftedItemCount >= 10) {
+  if (!hasUserAchievement(user, 'CRAFT_10') && user.craftedItemCount >= 10) {
     addUserAchievement(user, 'CRAFT_10')
   }
-  if (user.craftedItemCount >= 100) {
+  if (!hasUserAchievement(user, 'CRAFT_100') && user.craftedItemCount >= 100) {
     addUserAchievement(user, 'CRAFT_100')
   }
-  if (user.craftedItemCount >= 1000) {
+  if (!hasUserAchievement(user, 'CRAFT_1000') && user.craftedItemCount >= 1000) {
     addUserAchievement(user, 'CRAFT_1000')
   }
-  if (user.holdings?.rune >= 1) {
+  if (!hasUserAchievement(user, 'ACQUIRED_RUNE') && user.holdings?.rune >= 1) {
     addUserAchievement(user, 'ACQUIRED_RUNE')
+  }
+  if (!hasUserAchievement(user, 'BATTLE_RUNE_EVO')) {
+    const complete = evolutionLeaderboardHistory.filter(l => l.filter(l2 => l2.address === user.address).length > 0).length > 0
+    if (complete) addUserAchievement(user, 'BATTLE_RUNE_EVO')
+  }
+  if (!hasUserAchievement(user, 'MEGA_RUNE_EVO')) {
+    const groupedRoundPlayers = groupBy(evolutionLeaderboardHistory.map((leaderboard) => {
+      let winner = leaderboard[0]
+
+      for (const p of leaderboard) {
+        if (p.points > winner.points) {
+          winner = p
+        }
+      }
+      return { winner }
+    }).filter(p => !!p.winner && p.winner.joinedAt >= 1625322027), 'winner', 'address')
+
+    const complete = groupedRoundPlayers[user.address]?.reduce((total, p) => total + p.winner.kills, 0) >= 10
+
+    if (complete) addUserAchievement(user, 'MEGA_RUNE_EVO')
+  }
+  if (!hasUserAchievement(user, 'DOMINATE_RUNE_EVO')) {
+    let winStreak = 0
+    let totalStreak = 0
+
+    for (const round of evolutionLeaderboardHistory) {
+      if (round.length > 0 && round.sort(((a, b) => b.winner?.kills - a.winner?.kills))[0].address === user.address) {
+        winStreak++
+        
+        if (winStreak > totalStreak) totalStreak = winStreak
+      } else {
+        winStreak = 0
+      }
+    }
+
+    const complete = totalStreak >= 10
+    if (complete) addUserAchievement(user, 'DOMINATE_RUNE_EVO')
   }
 }
 
@@ -543,6 +582,13 @@ const saveUserTrade = (user, trade) => {
   saveUser(user)
 }
 
+const hasUserAchievement = (user, achievementKey) => {
+  const id = achievementData.find(i => i.key === achievementKey).id
+  const achievement = user.achievements.find(i => i === id)
+
+  return !!achievement
+}
+
 const addUserAchievement = (user, achievementKey) => {
   const id = achievementData.find(i => i.key === achievementKey).id
   const achievement = user.achievements.find(i => i === id)
@@ -553,6 +599,14 @@ const addUserAchievement = (user, achievementKey) => {
 
   // saveUser(user)
 }
+
+const groupBy = function(xs, key, subkey) {
+  return xs.reduce(function(rv, x) {
+      if (!x[key][subkey]) return rv;
+      (rv[x[key][subkey]] = rv[x[key][subkey]] || []).push(x);
+      return rv;
+  }, {}) || null;
+};
 
 async function getAllBarracksEvents() {
   if (config.barracks.updating) return
@@ -1222,7 +1276,7 @@ async function monitorGeneralStats() {
       } catch(e) {
         console.log(e)
 
-        i -= 1
+        // i -= 1
       }
     }
 
@@ -1416,6 +1470,8 @@ async function monitorGeneralStats() {
         const raidHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.raid))).toString())
         const botHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.botAddress))).toString())
         const vaultHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.vaultAddress))).toString())
+        const vault2Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault2Address))).toString())
+        const vault3Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault3Address))).toString())
         const devHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.devAddress))).toString())
         const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
 
@@ -1431,6 +1487,8 @@ async function monitorGeneralStats() {
         runes[symbol].holders = {}
         runes[symbol].holders.raid = raidHoldings
         runes[symbol].holders.vault = vaultHoldings
+        runes[symbol].holders.vault2 = vault2Holdings
+        runes[symbol].holders.vault3 = vault3Holdings
         runes[symbol].holders.dev = devHoldings
         runes[symbol].holders.charity = charityHoldings
         runes[symbol].holders.bot = botHoldings
@@ -1450,6 +1508,12 @@ async function monitorGeneralStats() {
         if (!historical.vault) historical.vault = {}
         if (!historical.vault.holdings) historical.vault.holdings = {}
         if (!historical.vault.holdings[symbol]) historical.vault.holdings[symbol] = []
+        if (!historical.vault2) historical.vault2 = {}
+        if (!historical.vault2.holdings) historical.vault2.holdings = {}
+        if (!historical.vault2.holdings[symbol]) historical.vault2.holdings[symbol] = []
+        if (!historical.vault3) historical.vault3 = {}
+        if (!historical.vault3.holdings) historical.vault3.holdings = {}
+        if (!historical.vault3.holdings[symbol]) historical.vault3.holdings[symbol] = []
         if (!historical.dev) historical.dev = {}
         if (!historical.dev.holdings) historical.dev.holdings = {}
         if (!historical.dev.holdings[symbol]) historical.dev.holdings[symbol] = []
@@ -1468,6 +1532,8 @@ async function monitorGeneralStats() {
           historical.raid.holdings[symbol].push([newTime, raidHoldings])
           historical.bot.holdings[symbol].push([newTime, botHoldings])
           historical.vault.holdings[symbol].push([newTime, vaultHoldings])
+          historical.vault2.holdings[symbol].push([newTime, vaultHoldings2])
+          historical.vault3.holdings[symbol].push([newTime, vaultHoldings3])
           historical.dev.holdings[symbol].push([newTime, devHoldings])
           historical.charity.holdings[symbol].push([newTime, charityHoldings])
         }
@@ -1479,9 +1545,273 @@ async function monitorGeneralStats() {
   
   saveHistorical()
   saveConfig()
+
   await updateGit()
 
   setTimeout(monitorGeneralStats, 15 * 60 * 1000)
+}
+
+async function monitorCraftingStats() {
+  // Update crafting competitions
+  {
+    console.log('Update crafting competitions')
+
+    const craftersData = jetpack.read(path.resolve('./db/crafting/overall.json'), 'json')
+    const craftingCompetition1Data = jetpack.read(path.resolve('./db/crafting/competition1.json'), 'json')
+    const craftingCompetition2Data = jetpack.read(path.resolve('./db/crafting/competition2.json'), 'json')
+    const craftingCompetition3Data = jetpack.read(path.resolve('./db/crafting/competition3.json'), 'json')
+
+    const data = {
+      all: [
+        { name: 'Overall', count: 10, data: craftersData.total },
+        { name: 'Genesis', count: 3, data: craftersData.genesis },
+        { name: 'Destiny', count: 3, data: craftersData.destiny },
+        { name: 'Grace', count: 3, data: craftersData.grace },
+        { name: 'Glory', count: 3, data: craftersData.glory },
+        { name: 'Titan', count: 3, data: craftersData.titan },
+        { name: 'Smoke', count: 3, data: craftersData.smoke },
+        { name: 'Flash', count: 3, data: craftersData.flash },
+        { name: 'Lorekeeper', count: 3, data: craftersData.lorekeeper },
+        { name: 'Fury', count: 3, data: craftersData.fury },
+        { name: 'Steel', count: 3, data: craftersData.steel },
+      ],
+      competition1: [
+        { name: 'Overall', count: 10, data: craftingCompetition1Data.total },
+        { name: 'Titan', count: 3, data: craftingCompetition1Data.titan },
+        { name: 'Smoke', count: 3, data: craftingCompetition1Data.smoke },
+        { name: 'Flash', count: 3, data: craftingCompetition1Data.flash },
+      ],
+      competition2: [
+        { name: 'Overall', count: 10, data: craftingCompetition2Data.total },
+        { name: 'Destiny', count: 3, data: craftingCompetition2Data.destiny },
+        { name: 'Grace', count: 3, data: craftingCompetition2Data.grace },
+        { name: 'Glory', count: 3, data: craftingCompetition2Data.glory },
+        { name: 'Titan', count: 3, data: craftingCompetition2Data.titan },
+        { name: 'Flash', count: 3, data: craftingCompetition2Data.flash },
+        { name: 'Fury', count: 3, data: craftingCompetition2Data.fury },
+      ],
+      competition3: [
+        { name: 'Overall', count: 10, data: craftingCompetition3Data.total },
+        { name: 'Fury', count: 3, data: craftingCompetition3Data.fury },
+        { name: 'Flash', count: 3, data: craftingCompetition3Data.flash },
+        { name: 'Titan', count: 3, data: craftingCompetition3Data.titan },
+        { name: 'Glory', count: 3, data: craftingCompetition3Data.glory },
+        { name: 'Grace', count: 3, data: craftingCompetition3Data.grace },
+        { name: 'Genesis', count: 3, data: craftingCompetition3Data.genesis },
+        { name: 'Destiny', count: 3, data: craftingCompetition3Data.destiny },
+        { name: 'Wrath', count: 3, data: craftingCompetition3Data.wrath },
+        { name: 'Fortress', count: 3, data: craftingCompetition3Data.fortress },
+        { name: 'Elder', count: 3, data: craftingCompetition3Data.elder },
+        { name: 'Pledge', count: 3, data: craftingCompetition3Data.pledge }
+      ],
+      competition4: []
+    }
+
+    jetpack.write(path.resolve('./db/crafting/leaderboard.json'), JSON.stringify(data, null, 2))
+  }
+
+  await updateGit()
+
+  setTimeout(monitorCraftingStats, 15 * 60 * 1000)
+}
+
+async function monitorEvolutionStats() {
+  let playerRoundWinners
+  let playerRewardWinners
+
+  // Update evolution leaderboard history
+  {
+    console.log('Update evolution leaderboard history')
+    const rand = Math.floor(Math.random() * Math.floor(999999))
+    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/leaderboardHistory.json?${rand}`)
+  
+    let data = await response.json()
+
+    const lastRoundItem = evolutionLeaderboardHistory[evolutionLeaderboardHistory.length-1]
+    let lastIndex = 0
+
+    for (let i = 0; i < data.length; i++) {
+      if (!data[i][0]) continue
+      if (data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id) { //  && data[i][0].position === lastRoundItem[0].position
+        lastIndex = i
+      }
+    }
+    
+    console.log('Starting from', lastIndex)
+    data = evolutionLeaderboardHistory.concat(data.slice(lastIndex))
+  
+    jetpack.write(path.resolve('./db/evolution/leaderboardHistory.json'), JSON.stringify(data, null, 2))
+
+    playerRoundWinners = data
+  }
+
+  // Update evolution reward history
+  {
+    console.log('Update evolution reward history')
+    const rand = Math.floor(Math.random() * Math.floor(999999))
+    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/rewardHistory.json?${rand}`)
+  
+    let data = await response.json()
+
+    const lastRewardItem = evolutionRewardHistory[evolutionRewardHistory.length-1]
+    let lastIndex = 0
+
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].symbol === lastRewardItem.symbol && data[i].quantity === lastRewardItem.quantity) { //  && data[i].pos.x === lastRewardItem.pos.x && data[i].pos.y === lastRewardItem.pos.y
+        lastIndex = i
+      }
+    }
+
+    console.log('Starting from', lastIndex)
+    data = evolutionRewardHistory.concat(data.slice(lastIndex))
+
+    jetpack.write(path.resolve('./db/evolution/rewardHistory.json'), JSON.stringify(data, null, 2))
+
+    playerRewardWinners = data
+  }
+
+  // Update evolution rewards
+  {
+    console.log('Update evolution rewards')
+    const rand = Math.floor(Math.random() * Math.floor(999999))
+    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/rewards.json?${rand}`)
+  
+    const data = await response.json()
+
+    jetpack.write(path.resolve('./db/evolution/rewards.json'), JSON.stringify(data, null, 2))
+  }
+
+  // Update evolution info
+  {
+    console.log('Update evolution info')
+    const rand = Math.floor(Math.random() * Math.floor(999999))
+    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/info?${rand}`)
+  
+    const data = await response.json()
+
+    jetpack.write(path.resolve('./db/evolution/info.json'), JSON.stringify(data, null, 2))
+  }
+
+  // Update evolution leaderboard
+  {
+    const groupedRoundPlayers = groupBy(playerRoundWinners.map((leaderboard) => {
+      let winner = leaderboard[0]
+
+      for (const p of leaderboard) {
+        if (p.points > winner.points) {
+          winner = p
+        }
+      }
+      return { winner }
+    }).filter(p => !!p.winner && p.winner.address && p.winner.joinedAt >= 1625322027), 'winner', 'address')
+    
+    const groupedRewardPlayers = groupBy(playerRewardWinners.filter(p => !!p.winner && p.winner.address && p.winner.joinedAt >= 1625322027), 'winner', 'address')
+  
+    const data = {
+      // all: [
+      //   {
+      //     name: 'Overall',
+      //     count: 10,
+      //     data: Object.keys(groupedRewardPlayers).map(address => ({
+      //       username: groupedRewardPlayers[address][0].winner.name,
+      //       count: groupedRewardPlayers[address].length
+      //     })).sort(function(a, b) {
+      //       return b.count - a.count;
+      //     })
+      //   }
+      // ],
+      rounds: [
+        {
+          name: 'Rounds',
+          count: 10,
+          data: Object.keys(groupedRoundPlayers).map(address => ({
+            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
+            count: groupedRoundPlayers[address].length
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
+      rewards: [
+        {
+          name: 'Rewards',
+          count: 10,
+          data: Object.keys(groupedRewardPlayers).map(address => ({
+            username: groupedRewardPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRewardPlayers[address][0].winner.name,
+            count: groupedRewardPlayers[address].length
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
+      points: [
+        {
+          name: 'Points',
+          count: 10,
+          data: Object.keys(groupedRoundPlayers).map(address => ({
+            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
+            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.points, 0)
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
+      kills: [
+        {
+          name: 'Kills',
+          count: 10,
+          data: Object.keys(groupedRoundPlayers).map(address => ({
+            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
+            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.kills, 0)
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
+      deaths: [
+        {
+          name: 'Deaths',
+          count: 10,
+          data: Object.keys(groupedRoundPlayers).map(address => ({
+            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
+            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.deaths, 0)
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
+      powerups: [
+        {
+          name: 'Powerups',
+          count: 10,
+          data: Object.keys(groupedRoundPlayers).map(address => ({
+            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
+            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.powerups, 0)
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
+      evolves: [
+        {
+          name: 'Evolves',
+          count: 10,
+          data: Object.keys(groupedRoundPlayers).map(address => ({
+            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
+            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.evolves, 0)
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
+    }
+
+    jetpack.write(path.resolve('./db/evolution/leaderboard.json'), JSON.stringify(data, null, 2))
+  }
+
+  await updateGit()
+
+  setTimeout(monitorEvolutionStats, 1 * 60 * 1000)
 }
 
 async function onCommand() {
@@ -1522,6 +1852,11 @@ async function run() {
   //   isConnected
   // })
 
+
+  // const user = loadUser('0x37470038C615Def104e1bee33c710bD16a09FdEf')
+  // updateAchievementsByUser(user)
+  // saveUser(user)
+
   setInterval(getAllItemEvents, 15 * 60 * 1000)
   setInterval(getAllBarracksEvents, 15 * 60 * 1000)
   setInterval(getAllMarketEvents, 15 * 60 * 1000)
@@ -1538,6 +1873,9 @@ async function run() {
   monitorCharacterEvents()
   
   monitorGeneralStats()
+  monitorCraftingStats()
+  monitorEvolutionStats()
+
 }
 
 run()

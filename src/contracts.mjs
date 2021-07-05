@@ -253,6 +253,14 @@ export default {
     [MAINNET]: '0x602a27bBf954b6945534a84C8c88FB8cA9E92B7F',
     [TESTNET]: '0x602a27bBf954b6945534a84C8c88FB8cA9E92B7F',
   },
+  vault2Address: {
+    [MAINNET]: '0x02BCf51befE0A3b089c08041e5ee20c5C21a59Ce',
+    [TESTNET]: '0x02BCf51befE0A3b089c08041e5ee20c5C21a59Ce',
+  },
+  vault3Address: {
+    [MAINNET]: '0x7FE2114fD6a284cc393496CDb9F26c3396D6b3e8',
+    [TESTNET]: '0x7FE2114fD6a284cc393496CDb9F26c3396D6b3e8',
+  },
   charityAddress: {
     [MAINNET]: '0xA40b29b0DACb37331456c2ca3b65E56a6D79FC9E',
     [TESTNET]: '0xA40b29b0DACb37331456c2ca3b65E56a6D79FC9E',
@@ -306,7 +314,7 @@ export default {
     [TESTNET]: '',
   },
   io: {
-    [MAINNET]: '',
+    [MAINNET]: '0xa00672c2a70E4CD3919afc2043b4b46e95041425',
     [TESTNET]: '',
   },
   lum: {
@@ -374,7 +382,7 @@ export default {
     [TESTNET]: '',
   },
   zod: {
-    [MAINNET]: '',
+    [MAINNET]: '0x3e151ca82b3686f555c381530732df1cfc3c7890',
     [TESTNET]: '',
   },
   rune: {
