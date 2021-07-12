@@ -4,6 +4,7 @@ dotenv.config()
 
 process.env.REACT_APP_PUBLIC_URL = "https://rune.farm/"
 
+import { itemData, ItemAttributes, ItemAttributesById, ItemType, RarityMap } from './data/items.mjs'
 import contracts from "./contracts.mjs"
 import secrets from "../secrets.json"
 import ethers from 'ethers'
@@ -480,7 +481,7 @@ const updateAchievementsByUser = (user) => {
       return { winner }
     }).filter(p => !!p.winner && p.winner.joinedAt >= 1625322027), 'winner', 'address')
 
-    const complete = groupedRoundPlayers[user.address]?.reduce((total, p) => total + p.winner.kills, 0) >= 10
+    const complete = groupedRoundPlayers[user.address]?.reduce((total, p) => total + p.winner.kills, 0) >= 100
 
     if (complete) addUserAchievement(user, 'MEGA_RUNE_EVO')
   }
@@ -498,7 +499,7 @@ const updateAchievementsByUser = (user) => {
       }
     }
 
-    const complete = totalStreak >= 10
+    const complete = totalStreak >= 25
     if (complete) addUserAchievement(user, 'DOMINATE_RUNE_EVO')
   }
 }
@@ -514,7 +515,7 @@ const updatePointsByUser = (user) => {
 }
 
 const saveUser = (user) => {
-  console.log('Save user', user.address)
+  // console.log('Save user', user.address)
 
   updatePointsByUser(user)
 
@@ -1532,8 +1533,8 @@ async function monitorGeneralStats() {
           historical.raid.holdings[symbol].push([newTime, raidHoldings])
           historical.bot.holdings[symbol].push([newTime, botHoldings])
           historical.vault.holdings[symbol].push([newTime, vaultHoldings])
-          historical.vault2.holdings[symbol].push([newTime, vaultHoldings2])
-          historical.vault3.holdings[symbol].push([newTime, vaultHoldings3])
+          historical.vault2.holdings[symbol].push([newTime, vault2Holdings])
+          historical.vault3.holdings[symbol].push([newTime, vault3Holdings])
           historical.dev.holdings[symbol].push([newTime, devHoldings])
           historical.charity.holdings[symbol].push([newTime, charityHoldings])
         }
@@ -1620,7 +1621,7 @@ async function monitorEvolutionStats() {
   let playerRewardWinners
 
   // Update evolution leaderboard history
-  {
+  try {
     console.log('Update evolution leaderboard history')
     const rand = Math.floor(Math.random() * Math.floor(999999))
     const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/leaderboardHistory.json?${rand}`)
@@ -1629,24 +1630,44 @@ async function monitorEvolutionStats() {
 
     const lastRoundItem = evolutionLeaderboardHistory[evolutionLeaderboardHistory.length-1]
     let lastIndex = 0
-
+    console.log('Last round', lastRoundItem)
     for (let i = 0; i < data.length; i++) {
       if (!data[i][0]) continue
-      if (data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id) { //  && data[i][0].position === lastRoundItem[0].position
+      if (data[i].length === lastRoundItem.length && data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id) { //  && data[i][0].position === lastRoundItem[0].position
         lastIndex = i
       }
     }
     
     console.log('Starting from', lastIndex)
-    data = evolutionLeaderboardHistory.concat(data.slice(lastIndex))
-  
-    jetpack.write(path.resolve('./db/evolution/leaderboardHistory.json'), JSON.stringify(data, null, 2))
 
-    playerRoundWinners = data
+    if (lastIndex === 0) {
+      console.warn("Shouldnt start from 0")
+    } else {
+      data = evolutionLeaderboardHistory.concat(data.slice(lastIndex))
+  
+      jetpack.write(path.resolve('./db/evolution/leaderboardHistory.json'), JSON.stringify(data, null, 2))
+  
+      playerRoundWinners = data
+  
+      for (let i = lastIndex; i < data.length; i++) {
+        for (let j = 0; j < data[i].length; j++) {
+          if (!data[i][j].address) continue
+  
+          try {
+            const user = loadUser(data[i][j].address)
+            saveUser(user)
+          } catch(e) {
+            console.log(e)
+          }
+        }
+      }
+    }
+  } catch(e) {
+    console.log(e)
   }
 
   // Update evolution reward history
-  {
+  try {
     console.log('Update evolution reward history')
     const rand = Math.floor(Math.random() * Math.floor(999999))
     const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/rewardHistory.json?${rand}`)
@@ -1668,10 +1689,12 @@ async function monitorEvolutionStats() {
     jetpack.write(path.resolve('./db/evolution/rewardHistory.json'), JSON.stringify(data, null, 2))
 
     playerRewardWinners = data
+  } catch(e) {
+    console.log(e)
   }
 
   // Update evolution rewards
-  {
+  try {
     console.log('Update evolution rewards')
     const rand = Math.floor(Math.random() * Math.floor(999999))
     const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/rewards.json?${rand}`)
@@ -1679,6 +1702,19 @@ async function monitorEvolutionStats() {
     const data = await response.json()
 
     jetpack.write(path.resolve('./db/evolution/rewards.json'), JSON.stringify(data, null, 2))
+  } catch(e) {
+    console.log(e)
+  }
+
+  // Update evolution player rewards
+  {
+    console.log('Update evolution player rewards')
+    const rand = Math.floor(Math.random() * Math.floor(999999))
+    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/playerRewards.json?${rand}`)
+  
+    const data = await response.json()
+
+    jetpack.write(path.resolve('./db/evolution/playerRewards.json'), JSON.stringify(data, null, 2))
   }
 
   // Update evolution info
@@ -1811,7 +1847,93 @@ async function monitorEvolutionStats() {
 
   await updateGit()
 
-  setTimeout(monitorEvolutionStats, 1 * 60 * 1000)
+  setTimeout(monitorEvolutionStats, 10 * 60 * 1000)
+}
+
+
+async function monitorMeta() {
+  try {
+    for (const item of itemData[ItemsMainCategoriesType.OTHER]) {
+      const itemJson = {
+        "name": "Steel",
+        "description": "Made by Men, this blade is common but has minimal downsides.",
+        "home_url": "https://rune.farm",
+        "external_url": "https://rune.farm/catalog/00001",
+        "image_url": "https://rune.farm/images/items/00001.png",
+        "language": "en-US",
+        "slots": [
+            "leftHand",
+            "rightHand"
+        ],
+        "isNew": false,
+        "isEquipable": true,
+        "isUnequipable": false,
+        "isTradeable": true,
+        "isTransferable": true,
+        "isCraftable": false,
+        "isDisabled": false,
+        "isRuneword": true,
+        "isRetired": true,
+        "details": {
+            "Type": "Sword",
+            "Subtype": "Night Blade",
+            "Rune Word": "Tir El",
+            "Distribution": "Crafted",
+            "Date": "April 20, 2021 - June 4, 2021",
+            "Max Supply": "Unknown"
+        },
+        "recipe": [
+            { "id": "TIR", "quantity": 1 },
+            { "id": "EL", "quantity": 1 }
+        ],
+        "branches": {
+          "2": {
+            "description": "Made by Men, this blade is common but has minimal downsides.",
+            "attributes": [
+              { "id": 1, "min": 16, "max": 20, "name": "{value}% Increased Attack Speed" },
+              { "id": 3, "min": 6, "max": 8, "name": "{value}% Less Damage" },
+              { "id": 4, "min": 81, "max": 100, "name": "{value} Increased Maximum Rage" },
+              { "id": 5, "min": 3, "max": 5, "name": "{value} Increased Elemental Resists" },
+              { "id": 7, "min": 3, "max": 5, "name": "{value} Increased Minion Attack Speed" },
+              { "id": 8, "value": 3, "name": "{value} Increased Light Radius" }
+            ]
+          }
+        },
+        "attributes": [
+          {
+              "id": 1,
+              "name": "{value}% Increased Harvest Yield",
+              "min": 5,
+              "max": 15
+          },
+          {
+              "id": 2,
+              "name": "{value}% Harvest Fee",
+              "min": 0,
+              "max": 5
+          },
+          {
+              "id": 3,
+              "name": "Harvest Fee Token",
+              "min": 0,
+              "max": 2,
+              "map": {
+                "0": "EL",
+                "1": "ELD",
+                "2": "TIR"
+              }
+          }
+        ],
+        "perfection": [15, 0]
+      }
+
+      jetpack.write(path.resolve('./db/meta/' + item.id + '.json'), JSON.stringify(itemJson, null, 2))
+    }
+  } catch (e) {
+
+  }
+
+  setTimeout(monitorEvolutionStats, 10 * 60 * 1000)
 }
 
 async function onCommand() {
@@ -1875,6 +1997,7 @@ async function run() {
   monitorGeneralStats()
   monitorCraftingStats()
   monitorEvolutionStats()
+  // monitorMeta()
 
 }
 
