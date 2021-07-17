@@ -1,4 +1,4 @@
-import { itemData, ItemAttributes, ItemAttributesById, ItemType, RarityMap } from '../data/items.mjs'
+import { itemData, ItemAttributes, ItemAttributesById, ItemType, ItemRarity, ItemRarityNameById } from '../data/items.mjs'
 import { ItemsMainCategoriesType } from '../data/items.type.mjs'
 
 const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
@@ -9,10 +9,9 @@ export function decodeItem(tokenId) {
     details: {},
     branches: {},
     shorthand: '',
-    rarity: 'Normal',
     mods: [],
     attributes: [],
-    perfection: [],
+    perfection: null,
     category: ItemsMainCategoriesType.WEAPONS,
     slots: [],
     meta: {
@@ -169,7 +168,8 @@ export function decodeItem(tokenId) {
           ...mod,
         }
       } else if (mod.attributeId === ItemAttributes.HarvestFeeToken.id) {
-        actionMetadata.h
+        actionMetadata.harvestFees[branchAttribute.map[mod.value]] = prevMod.value
+
         item.attributes[i] = {
           ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
@@ -250,8 +250,15 @@ export function decodeItem(tokenId) {
           ...branchAttribute,
           ...mod,
         }
+      } else if (mod.attributeId === ItemAttributes.Rarity.id) {
+        item.rarity = ItemRarity[ItemRarityNameById[mod.value]]
+        item.attributes[i] = {
+          ...(item.attributes[i] || {}),
+          ...ItemAttributesById[mod.attributeId],
+          ...branchAttribute,
+          ...mod,
+        }
       } else if (mod.attributeId > 0 && ItemAttributesById[mod.attributeId]) {
-
         item.attributes[i] = {
           ...(item.attributes[i] || {}),
           ...ItemAttributesById[mod.attributeId],
@@ -266,7 +273,7 @@ export function decodeItem(tokenId) {
     if (actionMetadata.harvestYield) {
       item.meta.harvestYield = actionMetadata.harvestYield
     }
-    if (actionMetadata.harvestFees) {
+    if (Object.keys(actionMetadata.harvestFees).length > 0) {
       item.meta.harvestFees = actionMetadata.harvestFees
       item.meta.harvestFeeToken = Object.keys(actionMetadata.harvestFees)[0]
       item.meta.harvestFeePercent = actionMetadata.harvestFees[Object.keys(actionMetadata.harvestFees)[0]]
@@ -299,11 +306,11 @@ export function decodeItem(tokenId) {
     if (branch && branch.perfection) {
       const perfection = JSON.parse(JSON.stringify(branch.perfection))
 
-      if (item.tokenId === '1001000041000100015647') {
-        console.log(perfection)
-        console.log(item.attributes)
-        console.log(branch.attributes)
-      }
+      // if (item.tokenId === '1001000041000100015647') {
+      //   console.log(perfection)
+      //   console.log(item.attributes)
+      //   console.log(branch.attributes)
+      // }
 
       if (perfection.length) {
         item.shorthand = []
@@ -331,9 +338,10 @@ export function decodeItem(tokenId) {
         item.shorthand = item.shorthand.join('-')
 
         item.perfection = average(perfection.filter((p) => p !== undefined))
-        if (item.tokenId === '1001000041000100015647') {
-          console.log(perfection, branch.attributes[0].max, perfection[0], 1)
-        }
+
+        // if (item.tokenId === '1001000041000100015647') {
+        //   console.log(perfection, branch.attributes[0].max, perfection[0], 1)
+        // }
 
         if (Number.isFinite(item.perfection)) {
           item.perfection = parseFloat((Math.floor(item.perfection * 100) / 100).toFixed(2))
@@ -345,7 +353,9 @@ export function decodeItem(tokenId) {
       }
     }
 
-    const slotId = item.slots[0]
+    if (tokenId === '100300014012001002201900120130012011001200200720030122039008202100600000875') item.perfection = -13
+    if (tokenId === '100301201142040003200100520130200000000000000000000000000000000000000000001')
+      item.branches[1].description[1] = '"So long, I barely knew thee."'
 
     // item.meta = {
     //   harvestYield: 0,
@@ -355,24 +365,24 @@ export function decodeItem(tokenId) {
     //   chanceToSendHarvestToHiddenPool: 0,
     //   chanceToLoseHarvest: 0,
     //   harvestBurn: 0,
-    // }
-
-    if (item.attributes.find(a => a.id === 40)?.value) {
-      item.rarity = RarityMap[item.attributes.find(a => a.id === 40)?.value || 5]
-    } else if (item.perfection === 1) {
-      item.rarity = 'Mythic'
-    } else if (item.perfection >= 0.9) {
-      item.rarity = 'Epic'
-    } else if (item.perfection >= 0.7) {
-      item.rarity = 'Rare'
-    } else if (item.perfection >= 0) {
-      item.rarity = 'Magical'
+    // }a
+    if (!item.rarity) {
+      if (item.attributes.find((a) => a.id === 40)?.value) {
+        item.rarity = ItemRarityNameById[item.attributes.find((a) => a.id === 40)?.value || 5]
+      } else if (item.perfection === 1) {
+        item.rarity = ItemRarity.Mythic
+      } else if (item.perfection >= 0.9) {
+        item.rarity = ItemRarity.Epic
+      } else if (item.perfection >= 0.7) {
+        item.rarity = ItemRarity.Rare
+      } else if (item.perfection >= 0) {
+        item.rarity = ItemRarity.Magical
+      }
     }
 
     return {
       ...item,
       tokenId,
-      slotId,
     }
   } catch (e) {
     // console.log('Token is invalid', tokenId)

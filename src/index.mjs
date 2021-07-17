@@ -4,7 +4,8 @@ dotenv.config()
 
 process.env.REACT_APP_PUBLIC_URL = "https://rune.farm/"
 
-import { itemData, ItemAttributes, ItemAttributesById, ItemType, RarityMap } from './data/items.mjs'
+import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from './data/items.mjs'
+import { ItemsMainCategoriesType } from './data/items.type.mjs'
 import contracts from "./contracts.mjs"
 import secrets from "../secrets.json"
 import ethers from 'ethers'
@@ -14,6 +15,7 @@ import fetch from "node-fetch"
 import path from 'path'
 import networks from "./networks.mjs"
 import jetpack from 'fs-jetpack'
+import ipfsClient, { CID } from 'ipfs-http-client'
 import HDWalletProvider from "@truffle/hdwallet-provider"
 import { wait, round, removeDupes, toLong, toShort, getAddress, updateGit } from './util.mjs'
 import farmsData, { MAINNET, TESTNET } from './farms.mjs'
@@ -48,6 +50,8 @@ const tradesEvents = jetpack.read(path.resolve('./db/trades/events.json'), 'json
 const evolutionLeaderboardHistory = jetpack.read(path.resolve('./db/evolution/leaderboardHistory.json'), 'json')
 const evolutionRewardHistory = jetpack.read(path.resolve('./db/evolution/rewardHistory.json'), 'json')
 const evolutionRewards = jetpack.read(path.resolve('./db/evolution/rewards.json'), 'json')
+const evolutionHistorical = jetpack.read(path.resolve('./db/evolution/historical.json'), 'json')
+const evolutionServers = jetpack.read(path.resolve('./db/evolution/servers.json'), 'json')
 
 config.trades.updating = false
 config.barracks.updating = false
@@ -470,7 +474,7 @@ const updateAchievementsByUser = (user) => {
     if (complete) addUserAchievement(user, 'BATTLE_RUNE_EVO')
   }
   if (!hasUserAchievement(user, 'MEGA_RUNE_EVO')) {
-    const groupedRoundPlayers = groupBy(evolutionLeaderboardHistory.map((leaderboard) => {
+    const groupedRoundPlayers = groupBySub(evolutionLeaderboardHistory.map((leaderboard) => {
       let winner = leaderboard[0]
 
       for (const p of leaderboard) {
@@ -601,10 +605,18 @@ const addUserAchievement = (user, achievementKey) => {
   // saveUser(user)
 }
 
-const groupBy = function(xs, key, subkey) {
+const groupBySub = function(xs, key, subkey) {
   return xs.reduce(function(rv, x) {
       if (!x[key][subkey]) return rv;
       (rv[x[key][subkey]] = rv[x[key][subkey]] || []).push(x);
+      return rv;
+  }, {}) || null;
+};
+
+const groupBy = function(xs, key) {
+  return xs.reduce(function(rv, x) {
+      if (!x[key]) return rv;
+      (rv[x[key]] = rv[x[key]] || []).push(x);
       return rv;
   }, {}) || null;
 };
@@ -762,23 +774,20 @@ async function getAllMarketEvents() {
 
   async function processLog(log, updateConfig = true) {
     const e = iface.parseLog(log)
-    
+    console.log(e.name, e.args.tokenId)
     if (e.name === 'List') {
       const { seller, buyer, tokenId, price } = e.args
 
-      let trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+      let trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
 
-      if (trade) {
-        if (trade.blockNumber >= log.blockNumber) {
-          return
-        }
-      } else {
-        trade = {
-          id: ++config.trades.counter
-        }
+      if (trade?.blockNumber >= log.blockNumber)
+        return
 
-        trades.push(trade)
+      trade = {
+        id: ++config.trades.counter
       }
+
+      trades.push(trade)
 
       trade.seller = seller
       trade.buyer = buyer
@@ -804,7 +813,7 @@ async function getAllMarketEvents() {
     if (e.name === 'Update') {
       const { seller, buyer, tokenId, price } = e.args
 
-      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+      const trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
 
       if (trade.blockNumber >= log.blockNumber)
         return
@@ -827,7 +836,7 @@ async function getAllMarketEvents() {
     if (e.name === 'Delist') {
       const { seller, buyer, tokenId, price } = e.args
 
-      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+      const trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
 
       if (trade.blockNumber >= log.blockNumber)
         return
@@ -849,7 +858,7 @@ async function getAllMarketEvents() {
     if (e.name === 'Buy') {
       const { seller, buyer, tokenId, price } = e.args
 
-      const trade = trades.find(t => t.seller === seller && t.tokenId === tokenId.toString())
+      const trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
 
       if (trade.blockNumber >= log.blockNumber)
         return
@@ -1616,52 +1625,166 @@ async function monitorCraftingStats() {
   setTimeout(monitorCraftingStats, 15 * 60 * 1000)
 }
 
+
+function findPrice(symbol, timestamp) {
+  for (let i = 1; i < historical.price[symbol].length; i++) {
+    if (historical.price[symbol][i][0] > timestamp) {
+      return historical.price[symbol][i][1]
+    }
+  }
+
+  return stats.prices[symbol]
+}
+
 async function monitorEvolutionStats() {
   let playerRoundWinners
   let playerRewardWinners
 
+  // Update evolution historical
+  try {
+    {
+      console.log('Update evolution historical 1')
+
+      if (!evolutionHistorical.playerCount) evolutionHistorical.playerCount = []
+
+      let playerCount = 0
+
+      for (const server of evolutionServers) {
+        try {
+          const rand = Math.floor(Math.random() * Math.floor(999999))
+          const response = await fetch(`https://${server.endpoint}/info?${rand}`)
+        
+          let data = await response.json()
+
+          server.playerCount = data.playerTotal
+          server.speculatorCount = data.speculatorTotal
+          server.version = data.version
+          server.rewardItemAmount = data.rewardItemAmount
+          server.rewardWinnerAmount = data.rewardWinnerAmount
+
+          server.status = "online"
+        } catch(e) {
+          console.log(e)
+
+          server.status = "offline"
+          server.playerCount = 0
+          server.speculatorCount = 0
+          server.rewardItemAmount = 0
+          server.rewardWinnerAmount = 0
+        }
+
+        playerCount += server.playerCount
+      }
+
+      jetpack.write(path.resolve('./db/evolution/servers.json'), JSON.stringify(evolutionServers, null, 2))
+
+      const oldTime = (new Date(evolutionHistorical.playerCount[evolutionHistorical.playerCount.length-1]?.[0] || 0)).getTime()
+      const newTime = (new Date()).getTime()
+      const diff = newTime - oldTime
+      if (diff / (1000 * 60 * 60 * 1) > 1) {
+        evolutionHistorical.playerCount.push([newTime, playerCount])
+      }
+
+      jetpack.write(path.resolve('./db/evolution/historical.json'), JSON.stringify(evolutionHistorical, null, 2))
+    }
+    {
+      console.log('Update evolution historical 2')
+    }
+  } catch(e) {
+    console.log(e)
+  }
+
   // Update evolution leaderboard history
   try {
     console.log('Update evolution leaderboard history')
-    const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/leaderboardHistory.json?${rand}`)
-  
-    let data = await response.json()
 
-    const lastRoundItem = evolutionLeaderboardHistory[evolutionLeaderboardHistory.length-1]
-    let lastIndex = 0
-    console.log('Last round', lastRoundItem)
-    for (let i = 0; i < data.length; i++) {
-      if (!data[i][0]) continue
-      if (data[i].length === lastRoundItem.length && data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id) { //  && data[i][0].position === lastRoundItem[0].position
-        lastIndex = i
+    for (const server of evolutionServers) {
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/data/leaderboardHistory.json?${rand}`)
+      
+        let data = await response.json()
+
+        const lastRoundItem = evolutionLeaderboardHistory.slice(evolutionLeaderboardHistory.length - 10).reverse().filter(r => r.length > 0)[0]
+        let lastIndex = 0
+        console.log('Last round', lastRoundItem)
+        for (let i = 0; i < data.length; i++) {
+          if (!data[i][0]) continue
+          if (data[i].length === lastRoundItem.length && data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id) { //  && data[i][0].position === lastRoundItem[0].position
+            lastIndex = i
+          }
+        }
+        
+        console.log('Starting from', lastIndex)
+
+        if (lastIndex === 0) {
+          console.warn("Shouldnt start from 0")
+
+          playerRoundWinners = evolutionLeaderboardHistory
+        } else {
+          const dupChecker = {}
+
+          data = evolutionLeaderboardHistory.concat(data.slice(lastIndex)).filter(p => {
+            if (p.length === 0) return
+            if (p[0].joinedAt < 1625322027) return
+            if (dupChecker[p[0].position+p[0].joinedAt]) return
+
+            dupChecker[p[0].position+p[0].joinedAt] = true
+
+            return p
+          })
+      
+          jetpack.write(path.resolve('./db/evolution/leaderboardHistory.json'), JSON.stringify(data, null, 2))
+      
+          playerRoundWinners = data
+      
+          for (let i = lastIndex; i < data.length; i++) {
+            for (let j = 0; j < data[i].length; j++) {
+              if (!data[i][j].address) continue
+      
+              try {
+                const user = loadUser(data[i][j].address)
+                saveUser(user)
+              } catch(e) {
+                console.log(e)
+              }
+            }
+          }
+        }
+      } catch(e) {
+        console.log(e)
       }
     }
-    
-    console.log('Starting from', lastIndex)
+  } catch(e) {
+    console.log(e)
+  }
 
-    if (lastIndex === 0) {
-      console.warn("Shouldnt start from 0")
-    } else {
-      data = evolutionLeaderboardHistory.concat(data.slice(lastIndex))
-  
-      jetpack.write(path.resolve('./db/evolution/leaderboardHistory.json'), JSON.stringify(data, null, 2))
-  
-      playerRoundWinners = data
-  
-      for (let i = lastIndex; i < data.length; i++) {
-        for (let j = 0; j < data[i].length; j++) {
-          if (!data[i][j].address) continue
-  
-          try {
-            const user = loadUser(data[i][j].address)
-            saveUser(user)
-          } catch(e) {
-            console.log(e)
+  // Update evolution hash map
+  try {
+    console.log('Update evolution hash map')
+    const data = {
+      toName: {},
+      toHash: {}
+    }
+
+    for (const round of playerRoundWinners) {
+      for (const player of round) {
+        if (player.hash && player.joinedAt >= 1625322027) {
+          if (!data.toName[player.hash]) data.toName[player.hash] = []
+          if (!data.toHash[player.name]) data.toHash[player.name] = []
+
+          if (!data.toName[player.hash].includes(player.name)) {
+            data.toName[player.hash].push(player.name)
+          }
+
+          if (!data.toHash[player.name].includes(player.hash)) {
+            data.toHash[player.name].push(player.hash)
           }
         }
       }
     }
+
+    jetpack.write(path.resolve('./db/evolution/hashmap.json'), JSON.stringify(data, null, 2))
   } catch(e) {
     console.log(e)
   }
@@ -1669,26 +1792,55 @@ async function monitorEvolutionStats() {
   // Update evolution reward history
   try {
     console.log('Update evolution reward history')
-    const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/rewardHistory.json?${rand}`)
-  
-    let data = await response.json()
+    for (const server of evolutionServers) {
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/data/rewardHistory.json?${rand}`)
+      
+        let data = await response.json()
 
-    const lastRewardItem = evolutionRewardHistory[evolutionRewardHistory.length-1]
-    let lastIndex = 0
+        const lastRewardItem = evolutionRewardHistory[evolutionRewardHistory.length-1]
+        let lastIndex = 0
 
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].symbol === lastRewardItem.symbol && data[i].quantity === lastRewardItem.quantity) { //  && data[i].pos.x === lastRewardItem.pos.x && data[i].pos.y === lastRewardItem.pos.y
-        lastIndex = i
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].symbol === lastRewardItem.symbol && data[i].quantity === lastRewardItem.quantity && data[i].winner.address === lastRewardItem.winner.address) { //  && data[i].pos.x === lastRewardItem.pos.x && data[i].pos.y === lastRewardItem.pos.y
+            lastIndex = i
+          }
+        }
+
+        console.log('Starting from', lastIndex)
+
+        if (lastIndex === 0) {
+          console.warn("Shouldnt start from 0")
+
+          playerRewardWinners = evolutionRewardHistory
+        } else {
+          data = evolutionRewardHistory.concat(data.slice(lastIndex)).filter(p => !!p.winner && p.winner.address && (!p.winner.lastUpdate || (p.winner.lastUpdate >= 1625322027 && p.winner.lastUpdate <= 1625903860)))
+
+          for (const win of data) {
+            if (!win.monetary) win.monetary = 0
+
+            if (win.winner.lastUpdate) {
+              if (win.winner.lastUpdate < 1625552384) {
+                win.quantity = 1
+              } else {
+                win.quantity = 0.1
+              }
+            }
+
+            if (win.symbol) {
+              win.monetary = findPrice(win.symbol, win.winner.lastUpdate) * win.quantity
+            }
+          }
+
+          jetpack.write(path.resolve('./db/evolution/rewardHistory.json'), JSON.stringify(data, null, 2))
+
+          playerRewardWinners = data
+        }
+      } catch(e) {
+        console.log(e)
       }
     }
-
-    console.log('Starting from', lastIndex)
-    data = evolutionRewardHistory.concat(data.slice(lastIndex))
-
-    jetpack.write(path.resolve('./db/evolution/rewardHistory.json'), JSON.stringify(data, null, 2))
-
-    playerRewardWinners = data
   } catch(e) {
     console.log(e)
   }
@@ -1697,7 +1849,7 @@ async function monitorEvolutionStats() {
   try {
     console.log('Update evolution rewards')
     const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/rewards.json?${rand}`)
+    const response = await fetch(`https://rune-evolution-europe1.oa.r.appspot.com/data/rewards.json?${rand}`)
   
     const data = await response.json()
 
@@ -1710,7 +1862,7 @@ async function monitorEvolutionStats() {
   {
     console.log('Update evolution player rewards')
     const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/playerRewards.json?${rand}`)
+    const response = await fetch(`https://rune-evolution-europe1.oa.r.appspot.com/data/playerRewards.json?${rand}`)
   
     const data = await response.json()
 
@@ -1721,7 +1873,7 @@ async function monitorEvolutionStats() {
   {
     console.log('Update evolution info')
     const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/info?${rand}`)
+    const response = await fetch(`https://rune-evolution-europe1.oa.r.appspot.com/info?${rand}`)
   
     const data = await response.json()
 
@@ -1730,7 +1882,38 @@ async function monitorEvolutionStats() {
 
   // Update evolution leaderboard
   {
-    const groupedRoundPlayers = groupBy(playerRoundWinners.map((leaderboard) => {
+    const roundsPlayed = {}
+
+    for (const round of playerRoundWinners) {
+      for (const player of round) {
+        if (player.joinedAt >= 1625322027 && player.name.indexOf('Guest') === -1) {
+          if (!roundsPlayed[player.address]) {
+            roundsPlayed[player.address] = {
+              address: player.address,
+              name: player.name,
+              rounds: 0,
+              kills: 0,
+              deaths: 0,
+              points: 0,
+              rewards: 0,
+              evolves: 0,
+              powerups: 0
+            }
+          }
+  
+          roundsPlayed[player.address].kills += player.kills
+          roundsPlayed[player.address].deaths += player.deaths
+          roundsPlayed[player.address].points += player.points
+          roundsPlayed[player.address].powerups += player.powerups
+          roundsPlayed[player.address].rewards += player.rewards
+          roundsPlayed[player.address].evolves += player.evolves
+
+          roundsPlayed[player.address].rounds++
+        }
+      }
+    }
+    
+    const groupedWinPlayers = groupBySub(playerRoundWinners.map((leaderboard) => {
       let winner = leaderboard[0]
 
       for (const p of leaderboard) {
@@ -1739,10 +1922,88 @@ async function monitorEvolutionStats() {
         }
       }
       return { winner }
-    }).filter(p => !!p.winner && p.winner.address && p.winner.joinedAt >= 1625322027), 'winner', 'address')
+    }), 'winner', 'address')
+
+    const findUsername = (address) => {
+      for (const lb of evolutionLeaderboardHistory) {
+        for (const pl of lb) {
+          if (pl.address === address && pl.name.indexOf('Guest') === -1) {
+            return pl.name
+          }
+        }
+      }
+
+      return address.slice(0, 6)
+    }
+
+
+    let evolutionEarningsDistributed = 0
+
+    const groupedRewardPlayers = {}
     
-    const groupedRewardPlayers = groupBy(playerRewardWinners.filter(p => !!p.winner && p.winner.address && p.winner.joinedAt >= 1625322027), 'winner', 'address')
+    for (const reward of playerRewardWinners) {
+      // if (reward.winner.lastUpdate) continue // skip old winners
+      if (!groupedRewardPlayers[reward.winner.address]) groupedRewardPlayers[reward.winner.address] = { monetary: 0 }
+
+      groupedRewardPlayers[reward.winner.address].address = reward.winner.address
+      groupedRewardPlayers[reward.winner.address].name = findUsername(reward.winner.address)
+      groupedRewardPlayers[reward.winner.address].monetary += reward.monetary
+
+      evolutionEarningsDistributed += reward.monetary
+    }
+
+    for (const wins of Object.values(groupedWinPlayers)) {
+      for (const win of wins) {
+        if (win.winner.lastUpdate > 1625903860) continue // skip new winners
+
+        if (!groupedRewardPlayers[win.winner.address]) groupedRewardPlayers[win.winner.address] = { monetary: 0 }
+
+        let quantity = 0
+        if (win.winner.lastUpdate < 1625552384) {
+          quantity = 1
+        } else {
+          quantity = 0.3
+        }
+
+        const monetary = findPrice('zod', win.winner.lastUpdate) * quantity
+
+        groupedRewardPlayers[win.winner.address].address = win.winner.address
+        groupedRewardPlayers[win.winner.address].name = findUsername(win.winner.address)
+        groupedRewardPlayers[win.winner.address].monetary += monetary
   
+        evolutionEarningsDistributed += monetary
+      }
+    }
+
+    stats.evolutionEarningsDistributed = evolutionEarningsDistributed
+
+    const historicalEarnings = historical.evolutionEarningsDistributed
+
+    if (historicalEarnings.length) {
+      const oldTime = (new Date(evolutionEarningsDistributed[historicalEarnings.length-1]?.[0] || 0)).getTime()
+      const newTime = (new Date()).getTime()
+      const diff = newTime - oldTime
+  
+      if (diff / (1000 * 60 * 60 * 24) > 1) {
+        historicalEarnings.push([newTime, stats.evolutionEarningsDistributed])
+      }
+    } else {
+      const newTime = (new Date()).getTime()
+      historicalEarnings.push([newTime, stats.evolutionEarningsDistributed])
+    }
+
+    saveHistorical()
+
+  // {
+  //   "type": "rune",
+  //   "symbol": "ral",
+  //   "quantity": 4.21,
+  //   "winner": {
+  //     "address": "0x545612032BeaDED7E9f5F5Ab611aF6428026E53E"
+  //   },
+  //   "tx": "0x4c2465dbe4fc6a7d774db429d0dd94fd06dfcc36c59e319aaf241da281dd5250"
+  // },
+
     const data = {
       // all: [
       //   {
@@ -1756,13 +2017,37 @@ async function monitorEvolutionStats() {
       //     })
       //   }
       // ],
+      monetary: [
+        {
+          name: 'Earnings',
+          count: 10,
+          data: Object.keys(groupedRewardPlayers).map(address => ({
+            username: groupedRewardPlayers[address].name,
+            count: groupedRewardPlayers[address].monetary
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
+      wins: [
+        {
+          name: 'Wins',
+          count: 10,
+          data: Object.keys(groupedWinPlayers).map(address => ({
+            username: groupedWinPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedWinPlayers[address][0].winner.name,
+            count: groupedWinPlayers[address].length
+          })).sort(function(a, b) {
+            return b.count - a.count;
+          })
+        }
+      ],
       rounds: [
         {
           name: 'Rounds',
           count: 10,
-          data: Object.keys(groupedRoundPlayers).map(address => ({
-            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
-            count: groupedRoundPlayers[address].length
+          data: Object.keys(roundsPlayed).map(address => ({
+            username: roundsPlayed[address].name,
+            count: roundsPlayed[address].rounds
           })).sort(function(a, b) {
             return b.count - a.count;
           })
@@ -1772,9 +2057,9 @@ async function monitorEvolutionStats() {
         {
           name: 'Rewards',
           count: 10,
-          data: Object.keys(groupedRewardPlayers).map(address => ({
-            username: groupedRewardPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRewardPlayers[address][0].winner.name,
-            count: groupedRewardPlayers[address].length
+          data: Object.keys(roundsPlayed).map(address => ({
+            username: roundsPlayed[address].name,
+            count: roundsPlayed[address].rewards
           })).sort(function(a, b) {
             return b.count - a.count;
           })
@@ -1784,9 +2069,9 @@ async function monitorEvolutionStats() {
         {
           name: 'Points',
           count: 10,
-          data: Object.keys(groupedRoundPlayers).map(address => ({
-            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
-            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.points, 0)
+          data: Object.keys(roundsPlayed).map(address => ({
+            username: roundsPlayed[address].name,
+            count: roundsPlayed[address].points
           })).sort(function(a, b) {
             return b.count - a.count;
           })
@@ -1796,9 +2081,9 @@ async function monitorEvolutionStats() {
         {
           name: 'Kills',
           count: 10,
-          data: Object.keys(groupedRoundPlayers).map(address => ({
-            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
-            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.kills, 0)
+          data: Object.keys(roundsPlayed).map(address => ({
+            username: roundsPlayed[address].name,
+            count: roundsPlayed[address].kills
           })).sort(function(a, b) {
             return b.count - a.count;
           })
@@ -1808,9 +2093,9 @@ async function monitorEvolutionStats() {
         {
           name: 'Deaths',
           count: 10,
-          data: Object.keys(groupedRoundPlayers).map(address => ({
-            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
-            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.deaths, 0)
+          data: Object.keys(roundsPlayed).map(address => ({
+            username: roundsPlayed[address].name,
+            count: roundsPlayed[address].deaths
           })).sort(function(a, b) {
             return b.count - a.count;
           })
@@ -1820,9 +2105,9 @@ async function monitorEvolutionStats() {
         {
           name: 'Powerups',
           count: 10,
-          data: Object.keys(groupedRoundPlayers).map(address => ({
-            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
-            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.powerups, 0)
+          data: Object.keys(roundsPlayed).map(address => ({
+            username: roundsPlayed[address].name,
+            count: roundsPlayed[address].powerups
           })).sort(function(a, b) {
             return b.count - a.count;
           })
@@ -1832,9 +2117,9 @@ async function monitorEvolutionStats() {
         {
           name: 'Evolves',
           count: 10,
-          data: Object.keys(groupedRoundPlayers).map(address => ({
-            username: groupedRoundPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedRoundPlayers[address][0].winner.name,
-            count: groupedRoundPlayers[address].reduce((total, p) => total + p.winner.evolves, 0)
+          data: Object.keys(roundsPlayed).map(address => ({
+            username: roundsPlayed[address].name,
+            count: roundsPlayed[address].evolves
           })).sort(function(a, b) {
             return b.count - a.count;
           })
@@ -1845,6 +2130,7 @@ async function monitorEvolutionStats() {
     jetpack.write(path.resolve('./db/evolution/leaderboard.json'), JSON.stringify(data, null, 2))
   }
 
+  await saveStats()
   await updateGit()
 
   setTimeout(monitorEvolutionStats, 10 * 60 * 1000)
@@ -1852,88 +2138,400 @@ async function monitorEvolutionStats() {
 
 
 async function monitorMeta() {
+  console.log('Saving achievement data')
+  jetpack.write(path.resolve('./db/achievements.json'), JSON.stringify(achievementData, null, 2))
+
+  console.log('Saving item data')
+  jetpack.write(path.resolve('./db/items.json'), JSON.stringify(itemData, null, 2))
+
+  console.log('Saving item attribute data')
+  jetpack.write(path.resolve('./db/itemAttributes.json'), JSON.stringify(ItemAttributes, null, 2))
+
+  console.log('Saving skill data')
+  jetpack.write(path.resolve('./db/skills.json'), JSON.stringify(SkillNames, null, 2))
+
+  console.log('Saving class data')
+  jetpack.write(path.resolve('./db/classes.json'), JSON.stringify(ClassNames, null, 2))
+
+  console.log('Saving item rarity data')
+  jetpack.write(path.resolve('./db/itemRarity.json'), JSON.stringify(ItemRarity, null, 2))
+
+  console.log('Saving item type data')
+  jetpack.write(path.resolve('./db/itemTypes.json'), JSON.stringify(ItemTypeToText, null, 2))
+
+  console.log('Saving item slot data')
+  jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText, null, 2))
+
   try {
+    process.env.REACT_APP_PUBLIC_URL = 'https://rune.farm/'
+
     for (const item of itemData[ItemsMainCategoriesType.OTHER]) {
-      const itemJson = {
-        "name": "Steel",
-        "description": "Made by Men, this blade is common but has minimal downsides.",
-        "home_url": "https://rune.farm",
-        "external_url": "https://rune.farm/catalog/00001",
-        "image_url": "https://rune.farm/images/items/00001.png",
-        "language": "en-US",
-        "slots": [
-            "leftHand",
-            "rightHand"
-        ],
-        "isNew": false,
-        "isEquipable": true,
-        "isUnequipable": false,
-        "isTradeable": true,
-        "isTransferable": true,
-        "isCraftable": false,
-        "isDisabled": false,
-        "isRuneword": true,
-        "isRetired": true,
-        "details": {
-            "Type": "Sword",
-            "Subtype": "Night Blade",
-            "Rune Word": "Tir El",
-            "Distribution": "Crafted",
-            "Date": "April 20, 2021 - June 4, 2021",
-            "Max Supply": "Unknown"
-        },
-        "recipe": [
-            { "id": "TIR", "quantity": 1 },
-            { "id": "EL", "quantity": 1 }
-        ],
-        "branches": {
-          "2": {
-            "description": "Made by Men, this blade is common but has minimal downsides.",
-            "attributes": [
-              { "id": 1, "min": 16, "max": 20, "name": "{value}% Increased Attack Speed" },
-              { "id": 3, "min": 6, "max": 8, "name": "{value}% Less Damage" },
-              { "id": 4, "min": 81, "max": 100, "name": "{value} Increased Maximum Rage" },
-              { "id": 5, "min": 3, "max": 5, "name": "{value} Increased Elemental Resists" },
-              { "id": 7, "min": 3, "max": 5, "name": "{value} Increased Minion Attack Speed" },
-              { "id": 8, "value": 3, "name": "{value} Increased Light Radius" }
-            ]
-          }
-        },
-        "attributes": [
-          {
-              "id": 1,
-              "name": "{value}% Increased Harvest Yield",
-              "min": 5,
-              "max": 15
-          },
-          {
-              "id": 2,
-              "name": "{value}% Harvest Fee",
-              "min": 0,
-              "max": 5
-          },
-          {
-              "id": 3,
-              "name": "Harvest Fee Token",
-              "min": 0,
-              "max": 2,
-              "map": {
-                "0": "EL",
-                "1": "ELD",
-                "2": "TIR"
-              }
-          }
-        ],
-        "perfection": [15, 0]
+      item.icon = item.icon.replace('undefined', 'https://rune.farm/')
+
+      if (item.recipe) {
+        item.recipe.requirement = item.recipe.requirement.map(r => ({...r, id: RuneNames[r.id]}))
       }
 
-      jetpack.write(path.resolve('./db/meta/' + item.id + '.json'), JSON.stringify(itemJson, null, 2))
+      item.branches[1].attributes.map(a => ({...a, description: ItemAttributesById[a.id].description }))
+
+      const itemJson = {
+        "description": Array.isArray(item.branches[1].description) ? item.branches[1].description[0] : item.branches[1].description,
+        "home_url": "https://rune.farm",
+        "external_url": "https://rune.farm/catalog/" + item.id,
+        "image_url": item.icon,
+        "language": "en-US",
+        ...item,
+        "type": ItemTypeToText[item.type],
+        "slots": item.slots.map(s => ItemSlotToText[s])
+      }
+      // const itemJson = {
+      //   "id": 1,
+      //   "name": "Steel",
+      //   "icon": "/images/items/00001.png",
+      //   "value": "0",
+      //   "type": 1,
+      //   "isNew": false,
+      //   "isEquipable": true,
+      //   "isUnequipable": false,
+      //   "isTradeable": true,
+      //   "isTransferable": true,
+      //   "isCraftable": false,
+      //   "isDisabled": false,
+      //   "isRuneword": true,
+      //   "isRetired": true,
+      //   "createdDate": 12111,
+      //   "hotness": 6,
+      //   "recipe": {
+      //     "requirement": [
+      //       {
+      //         "id": 2,
+      //         "quantity": 1
+      //       },
+      //       {
+      //         "id": 0,
+      //         "quantity": 1
+      //       }
+      //     ]
+      //   },
+      //   "version": 3,
+      //   "shortTokenId": "10030000101000900030002...694",
+      //   "rarity": {
+      //     "id": 6,
+      //     "name": "Magical"
+      //   },
+      //   "tokenId": "100300001010009000300020000000000000000000000000000000000000000000000000694",
+      //   "details": {
+      //     "Type": "Sword",
+      //     "Subtype": "Night Blade",
+      //     "Rune Word": "Tir El",
+      //     "Distribution": "Crafted",
+      //     "Date": "April 20, 2021 - June 4, 2021",
+      //     "Max Supply": "Unknown"
+      //   },
+      //   "branches": {
+      //     "1": {
+      //       "description": [
+      //         "Made by Men, this blade is common but has minimal downsides."
+      //       ],
+      //       "attributes": [
+      //         {
+      //           "id": 1,
+      //           "min": 5,
+      //           "max": 15,
+      //           "description": "{value}% Increased Harvest Yield"
+      //         },
+      //         {
+      //           "id": 2,
+      //           "min": 0,
+      //           "max": 5,
+      //           "description": "{value}% Harvest Fee"
+      //         },
+      //         {
+      //           "id": 3,
+      //           "min": 0,
+      //           "max": 2,
+      //           "description": "Harvest Fee Token: {value}",
+      //           "map": {
+      //             "0": "EL",
+      //             "1": "ELD",
+      //             "2": "TIR",
+      //             "3": "NEF",
+      //             "4": "ETH",
+      //             "5": "ITH",
+      //             "6": "TAL",
+      //             "7": "RAL",
+      //             "8": "ORT",
+      //             "9": "THUL",
+      //             "10": "AMN",
+      //             "11": "SOL",
+      //             "12": "SHAEL",
+      //             "13": "DOL",
+      //             "14": "HEL",
+      //             "15": "IO",
+      //             "16": "LUM",
+      //             "17": "KO",
+      //             "18": "FAL",
+      //             "19": "LEM",
+      //             "20": "PUL",
+      //             "21": "UM",
+      //             "22": "MAL",
+      //             "23": "IST",
+      //             "24": "GUL",
+      //             "25": "VEX",
+      //             "26": "OHM",
+      //             "27": "LO",
+      //             "28": "SUR",
+      //             "29": "BER",
+      //             "30": "JAH",
+      //             "31": "CHAM",
+      //             "32": "ZOD"
+      //           }
+      //         }
+      //       ],
+      //       "perfection": [
+      //         15,
+      //         0
+      //       ]
+      //     },
+      //     "2": {
+      //       "description": "Made by Men, this blade is common but has minimal downsides.",
+      //       "attributes": [
+      //         {
+      //           "id": 1,
+      //           "min": 16,
+      //           "max": 20,
+      //           "description": "{value}% Increased Attack Speed"
+      //         },
+      //         {
+      //           "id": 3,
+      //           "min": 6,
+      //           "max": 8,
+      //           "description": "{value}% Less Damage"
+      //         },
+      //         {
+      //           "id": 4,
+      //           "min": 81,
+      //           "max": 100,
+      //           "description": "{value} Increased Maximum Rage"
+      //         },
+      //         {
+      //           "id": 5,
+      //           "min": 3,
+      //           "max": 5,
+      //           "description": "{value} Increased Elemental Resists"
+      //         },
+      //         {
+      //           "id": 7,
+      //           "min": 3,
+      //           "max": 5,
+      //           "description": "{value} Increased Minion Attack Speed"
+      //         },
+      //         {
+      //           "id": 8,
+      //           "value": 3,
+      //           "description": "{value} Increased Light Radius"
+      //         }
+      //       ]
+      //     }
+      //   },
+      //   "shorthand": "9-3",
+      //   "mods": [
+      //     {
+      //       "variant": 0,
+      //       "value": 9,
+      //       "attributeId": 1
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 3,
+      //       "attributeId": 2
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 2,
+      //       "attributeId": 3
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 0
+      //     },
+      //     {
+      //       "variant": 0,
+      //       "value": 694
+      //     }
+      //   ],
+      //   "attributes": [
+      //     {
+      //       "id": 1,
+      //       "min": 5,
+      //       "max": 15,
+      //       "description": "{value}% Increased Harvest Yield",
+      //       "variant": 0,
+      //       "value": 9,
+      //       "attributeId": 1
+      //     },
+      //     {
+      //       "id": 2,
+      //       "min": 0,
+      //       "max": 5,
+      //       "description": "{value}% Harvest Fee",
+      //       "variant": 0,
+      //       "value": 3,
+      //       "attributeId": 2
+      //     },
+      //     {
+      //       "id": 3,
+      //       "min": 0,
+      //       "max": 2,
+      //       "description": "Harvest Fee Token: {value}",
+      //       "map": {
+      //         "0": "EL",
+      //         "1": "ELD",
+      //         "2": "TIR",
+      //         "3": "NEF",
+      //         "4": "ETH",
+      //         "5": "ITH",
+      //         "6": "TAL",
+      //         "7": "RAL",
+      //         "8": "ORT",
+      //         "9": "THUL",
+      //         "10": "AMN",
+      //         "11": "SOL",
+      //         "12": "SHAEL",
+      //         "13": "DOL",
+      //         "14": "HEL",
+      //         "15": "IO",
+      //         "16": "LUM",
+      //         "17": "KO",
+      //         "18": "FAL",
+      //         "19": "LEM",
+      //         "20": "PUL",
+      //         "21": "UM",
+      //         "22": "MAL",
+      //         "23": "IST",
+      //         "24": "GUL",
+      //         "25": "VEX",
+      //         "26": "OHM",
+      //         "27": "LO",
+      //         "28": "SUR",
+      //         "29": "BER",
+      //         "30": "JAH",
+      //         "31": "CHAM",
+      //         "32": "ZOD"
+      //       },
+      //       "variant": 0,
+      //       "value": 2,
+      //       "attributeId": 3
+      //     }
+      //   ],
+      //   "perfection": 0.4,
+      //   "category": "weapon",
+      //   "slots": [
+      //     1,
+      //     2
+      //   ],
+      //   "meta": {
+      //     "harvestYield": 9,
+      //     "harvestFeeToken": "TIR",
+      //     "harvestFeePercent": 3,
+      //     "harvestFees": {
+      //       "TIR": 3
+      //     },
+      //     "chanceToSendHarvestToHiddenPool": 0,
+      //     "chanceToLoseHarvest": 0,
+      //     "harvestBurn": 0
+      //   }
+      // }
+      
+      delete itemJson.category
+      delete itemJson.value
+      delete itemJson.hotness
+      delete itemJson.createdDate
+      // delete item.shortTokenId
+      // delete item.shorthand
+
+      // if (!isToken) {
+      //   delete item.tokenId
+      //   delete item.rarity
+      //   delete item.mods
+      //   delete item.attributes
+      //   delete item.perfection
+      //   delete item.meta
+      // }
+
+      console.log('Saving item meta', itemJson.id)
+
+      jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), JSON.stringify(itemJson, null, 2))
+
+      // const ipfs = ipfsClient.create({
+      //   host: 'ipfs.rune.game',
+      //   protocol: 'https',
+      //   port: 443,
+      //   apiPath: '/api/v0'
+      // })
+
+      // await ipfs.files.add('/items/999999.json', Buffer.from(JSON.stringify(itemJson, null, 2)))
+
+      // const cid = await ipfs.add(
+      //   { path: '/items/999999.json', content: JSON.stringify(itemJson, null, 2) }, 
+      //   // { wrapWithDirectory: true }
+      //   // cid: 'QmcZ774UPRJ3Qzuyg76ayc2AFM26ZfZQai8Ub5THKmwtbF', 
+      // )
+
+      // console.log(cid)
+
     }
   } catch (e) {
-
+    console.log(e)
   }
 
-  setTimeout(monitorEvolutionStats, 10 * 60 * 1000)
+  await updateGit()
+
+  setTimeout(monitorMeta, 10 * 60 * 1000)
 }
 
 async function onCommand() {
@@ -1997,7 +2595,7 @@ async function run() {
   monitorGeneralStats()
   monitorCraftingStats()
   monitorEvolutionStats()
-  // monitorMeta()
+  monitorMeta()
 
 }
 
