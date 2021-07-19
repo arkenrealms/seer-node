@@ -49,7 +49,6 @@ const usersEvents = jetpack.read(path.resolve('./db/users/events.json'), 'json')
 const tradesEvents = jetpack.read(path.resolve('./db/trades/events.json'), 'json')
 const evolutionLeaderboardHistory = jetpack.read(path.resolve('./db/evolution/leaderboardHistory.json'), 'json')
 const evolutionRewardHistory = jetpack.read(path.resolve('./db/evolution/rewardHistory.json'), 'json')
-const evolutionRewards = jetpack.read(path.resolve('./db/evolution/rewards.json'), 'json')
 const evolutionHistorical = jetpack.read(path.resolve('./db/evolution/historical.json'), 'json')
 const evolutionServers = jetpack.read(path.resolve('./db/evolution/servers.json'), 'json')
 
@@ -1628,7 +1627,7 @@ async function monitorCraftingStats() {
 
 function findPrice(symbol, timestamp) {
   for (let i = 1; i < historical.price[symbol].length; i++) {
-    if (historical.price[symbol][i][0] > timestamp) {
+    if (historical.price[symbol][i][0] > timestamp * 1000) {
       return historical.price[symbol][i][1]
     }
   }
@@ -1637,8 +1636,8 @@ function findPrice(symbol, timestamp) {
 }
 
 async function monitorEvolutionStats() {
-  let playerRoundWinners
-  let playerRewardWinners
+  const playerRoundWinners = {}
+  const playerRewardWinners = {}
 
   // Update evolution historical
   try {
@@ -1664,7 +1663,7 @@ async function monitorEvolutionStats() {
 
           server.status = "online"
         } catch(e) {
-          console.log(e)
+          if ((e + '').toString().indexOf('invalid json response body') === -1) console.log(e)
 
           server.status = "offline"
           server.playerCount = 0
@@ -1672,6 +1671,19 @@ async function monitorEvolutionStats() {
           server.rewardItemAmount = 0
           server.rewardWinnerAmount = 0
         }
+
+        const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
+
+        if (!hist.playerCount) hist.playerCount = []
+
+        const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
+        const newTime = (new Date()).getTime()
+        const diff = newTime - oldTime
+        if (diff / (1000 * 60 * 60 * 1) > 1) {
+          hist.playerCount.push([newTime, playerCount])
+        }
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), JSON.stringify(hist, null, 2))
 
         playerCount += server.playerCount
       }
@@ -1685,7 +1697,7 @@ async function monitorEvolutionStats() {
         evolutionHistorical.playerCount.push([newTime, playerCount])
       }
 
-      jetpack.write(path.resolve('./db/evolution/historical.json'), JSON.stringify(evolutionHistorical, null, 2))
+      jetpack.write(path.resolve(`./db/evolution/historical.json`), JSON.stringify(evolutionHistorical, null, 2))
     }
     {
       console.log('Update evolution historical 2')
@@ -1699,32 +1711,37 @@ async function monitorEvolutionStats() {
     console.log('Update evolution leaderboard history')
 
     for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
       try {
+        const leaderboardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), 'json') || []
         const rand = Math.floor(Math.random() * Math.floor(999999))
         const response = await fetch(`https://${server.endpoint}/data/leaderboardHistory.json?${rand}`)
       
         let data = await response.json()
-
-        const lastRoundItem = evolutionLeaderboardHistory.slice(evolutionLeaderboardHistory.length - 10).reverse().filter(r => r.length > 0)[0]
         let lastIndex = 0
-        console.log('Last round', lastRoundItem)
-        for (let i = 0; i < data.length; i++) {
-          if (!data[i][0]) continue
-          if (data[i].length === lastRoundItem.length && data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id) { //  && data[i][0].position === lastRoundItem[0].position
-            lastIndex = i
+
+        if (leaderboardHistory.length > 0) {
+          const lastRoundItem = leaderboardHistory.slice(leaderboardHistory.length - 10).reverse().filter(r => r.length > 0)[0]
+
+          console.log('Last round', lastRoundItem)
+          for (let i = 0; i < data.length; i++) {
+            if (!data[i].length || !data[i][0]) continue
+            if (data[i].length === lastRoundItem.length && data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id) { //  && data[i][0].position === lastRoundItem[0].position
+              lastIndex = i
+            }
           }
         }
         
         console.log('Starting from', lastIndex)
 
-        if (lastIndex === 0) {
+        if (lastIndex === 0 && leaderboardHistory.length > 0) {
           console.warn("Shouldnt start from 0")
 
-          playerRoundWinners = evolutionLeaderboardHistory
+          playerRoundWinners[server.key] = leaderboardHistory
         } else {
           const dupChecker = {}
 
-          data = evolutionLeaderboardHistory.concat(data.slice(lastIndex)).filter(p => {
+          data = leaderboardHistory.concat(data.slice(lastIndex)).filter(p => {
             if (p.length === 0) return
             if (p[0].joinedAt < 1625322027) return
             if (dupChecker[p[0].position+p[0].joinedAt]) return
@@ -1734,9 +1751,9 @@ async function monitorEvolutionStats() {
             return p
           })
       
-          jetpack.write(path.resolve('./db/evolution/leaderboardHistory.json'), JSON.stringify(data, null, 2))
+          jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), JSON.stringify(data, null, 2))
       
-          playerRoundWinners = data
+          playerRoundWinners[server.key] = data
       
           for (let i = lastIndex; i < data.length; i++) {
             for (let j = 0; j < data[i].length; j++) {
@@ -1762,29 +1779,38 @@ async function monitorEvolutionStats() {
   // Update evolution hash map
   try {
     console.log('Update evolution hash map')
-    const data = {
-      toName: {},
-      toHash: {}
-    }
 
-    for (const round of playerRoundWinners) {
-      for (const player of round) {
-        if (player.hash && player.joinedAt >= 1625322027) {
-          if (!data.toName[player.hash]) data.toName[player.hash] = []
-          if (!data.toHash[player.name]) data.toHash[player.name] = []
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+      try {
+        const data = {
+          toName: {},
+          toHash: {}
+        }
 
-          if (!data.toName[player.hash].includes(player.name)) {
-            data.toName[player.hash].push(player.name)
-          }
+        for (const round of playerRoundWinners[server.key]) {
+          if (server.status !== 'online') continue
+          for (const player of round) {
+            if (player.hash && player.joinedAt >= 1625322027) {
+              if (!data.toName[player.hash]) data.toName[player.hash] = []
+              if (!data.toHash[player.name]) data.toHash[player.name] = []
 
-          if (!data.toHash[player.name].includes(player.hash)) {
-            data.toHash[player.name].push(player.hash)
+              if (!data.toName[player.hash].includes(player.name)) {
+                data.toName[player.hash].push(player.name)
+              }
+
+              if (!data.toHash[player.name].includes(player.hash)) {
+                data.toHash[player.name].push(player.hash)
+              }
+            }
           }
         }
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/hashmap.json`), JSON.stringify(data, null, 2))
+      } catch(e) {
+        console.log(e)
       }
     }
-
-    jetpack.write(path.resolve('./db/evolution/hashmap.json'), JSON.stringify(data, null, 2))
   } catch(e) {
     console.log(e)
   }
@@ -1793,29 +1819,33 @@ async function monitorEvolutionStats() {
   try {
     console.log('Update evolution reward history')
     for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
       try {
+        const rewardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/rewardHistory.json`), 'json') || []
         const rand = Math.floor(Math.random() * Math.floor(999999))
         const response = await fetch(`https://${server.endpoint}/data/rewardHistory.json?${rand}`)
       
         let data = await response.json()
-
-        const lastRewardItem = evolutionRewardHistory[evolutionRewardHistory.length-1]
         let lastIndex = 0
 
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].symbol === lastRewardItem.symbol && data[i].quantity === lastRewardItem.quantity && data[i].winner.address === lastRewardItem.winner.address) { //  && data[i].pos.x === lastRewardItem.pos.x && data[i].pos.y === lastRewardItem.pos.y
-            lastIndex = i
+        if (rewardHistory.length) {
+          const lastRewardItem = rewardHistory[rewardHistory.length-1]
+
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].symbol === lastRewardItem.symbol && data[i].quantity === lastRewardItem.quantity && data[i].winner.address === lastRewardItem.winner.address) { //  && data[i].pos.x === lastRewardItem.pos.x && data[i].pos.y === lastRewardItem.pos.y
+              lastIndex = i
+            }
           }
         }
 
         console.log('Starting from', lastIndex)
 
-        if (lastIndex === 0) {
+        if (lastIndex === 0 && rewardHistory.length) {
           console.warn("Shouldnt start from 0")
 
-          playerRewardWinners = evolutionRewardHistory
+          playerRewardWinners[server.key] = rewardHistory
         } else {
-          data = evolutionRewardHistory.concat(data.slice(lastIndex)).filter(p => !!p.winner && p.winner.address && (!p.winner.lastUpdate || (p.winner.lastUpdate >= 1625322027 && p.winner.lastUpdate <= 1625903860)))
+          data = rewardHistory.concat(data.slice(lastIndex)).filter(p => !!p.winner && p.winner.address && (!p.winner.lastUpdate || (p.winner.lastUpdate >= 1625322027 && p.winner.lastUpdate <= 1625903860)))
 
           for (const win of data) {
             if (!win.monetary) win.monetary = 0
@@ -1833,9 +1863,9 @@ async function monitorEvolutionStats() {
             }
           }
 
-          jetpack.write(path.resolve('./db/evolution/rewardHistory.json'), JSON.stringify(data, null, 2))
+          jetpack.write(path.resolve(`./db/evolution/${server.key}/rewardHistory.json`), JSON.stringify(data, null, 2))
 
-          playerRewardWinners = data
+          playerRewardWinners[server.key] = data
         }
       } catch(e) {
         console.log(e)
@@ -1848,286 +1878,321 @@ async function monitorEvolutionStats() {
   // Update evolution rewards
   try {
     console.log('Update evolution rewards')
-    const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://rune-evolution-europe1.oa.r.appspot.com/data/rewards.json?${rand}`)
-  
-    const data = await response.json()
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/data/rewards.json?${rand}`)
+          
+        const data = await response.json()
 
-    jetpack.write(path.resolve('./db/evolution/rewards.json'), JSON.stringify(data, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/rewards.json`), JSON.stringify(data, null, 2))
+      } catch(e) {
+        console.log(e)
+      }
+    }
   } catch(e) {
     console.log(e)
   }
 
   // Update evolution player rewards
-  {
+  try {
     console.log('Update evolution player rewards')
-    const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://rune-evolution-europe1.oa.r.appspot.com/data/playerRewards.json?${rand}`)
-  
-    const data = await response.json()
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/data/playerRewards.json?${rand}`)
+      
+        const data = await response.json()
 
-    jetpack.write(path.resolve('./db/evolution/playerRewards.json'), JSON.stringify(data, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), JSON.stringify(data, null, 2))
+      } catch(e) {
+        console.log(e)
+      }
+    }
+  } catch(e) {
+    console.log(e)
   }
 
   // Update evolution info
-  {
+  try {
     console.log('Update evolution info')
-    const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://rune-evolution-europe1.oa.r.appspot.com/info?${rand}`)
-  
-    const data = await response.json()
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/info?${rand}`)
+      
+        const data = await response.json()
 
-    jetpack.write(path.resolve('./db/evolution/info.json'), JSON.stringify(data, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/info.json`), JSON.stringify(data, null, 2))
+      } catch(e) {
+        console.log(e)
+      }
+    }
+  } catch(e) {
+    console.log(e)
   }
 
   // Update evolution leaderboard
   {
-    const roundsPlayed = {}
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+      try {
+        const leaderboardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), 'json') || []
+        const roundsPlayed = {}
 
-    for (const round of playerRoundWinners) {
-      for (const player of round) {
-        if (player.joinedAt >= 1625322027 && player.name.indexOf('Guest') === -1) {
-          if (!roundsPlayed[player.address]) {
-            roundsPlayed[player.address] = {
-              address: player.address,
-              name: player.name,
-              rounds: 0,
-              kills: 0,
-              deaths: 0,
-              points: 0,
-              rewards: 0,
-              evolves: 0,
-              powerups: 0
+        for (const round of playerRoundWinners[server.key]) {
+          for (const player of round) {
+            if (player.joinedAt >= 1625322027 && player.name.indexOf('Guest') === -1) {
+              if (!roundsPlayed[player.address]) {
+                roundsPlayed[player.address] = {
+                  address: player.address,
+                  name: player.name,
+                  rounds: 0,
+                  kills: 0,
+                  deaths: 0,
+                  points: 0,
+                  rewards: 0,
+                  evolves: 0,
+                  powerups: 0
+                }
+              }
+      
+              roundsPlayed[player.address].kills += player.kills
+              roundsPlayed[player.address].deaths += player.deaths
+              roundsPlayed[player.address].points += player.points
+              roundsPlayed[player.address].powerups += player.powerups
+              roundsPlayed[player.address].rewards += player.rewards
+              roundsPlayed[player.address].evolves += player.evolves
+
+              roundsPlayed[player.address].rounds++
             }
           }
-  
-          roundsPlayed[player.address].kills += player.kills
-          roundsPlayed[player.address].deaths += player.deaths
-          roundsPlayed[player.address].points += player.points
-          roundsPlayed[player.address].powerups += player.powerups
-          roundsPlayed[player.address].rewards += player.rewards
-          roundsPlayed[player.address].evolves += player.evolves
-
-          roundsPlayed[player.address].rounds++
         }
-      }
-    }
-    
-    const groupedWinPlayers = groupBySub(playerRoundWinners.map((leaderboard) => {
-      let winner = leaderboard[0]
+        
+        const groupedWinPlayers = groupBySub(playerRoundWinners[server.key].map((leaderboard) => {
+          let winner = leaderboard[0]
 
-      for (const p of leaderboard) {
-        if (p.points > winner.points) {
-          winner = p
+          for (const p of leaderboard) {
+            if (p.points > winner.points) {
+              winner = p
+            }
+          }
+          return { winner }
+        }), 'winner', 'address')
+
+        const findUsername = (address) => {
+          for (const lb of leaderboardHistory) {
+            for (const pl of lb) {
+              if (pl.address === address && pl.name.indexOf('Guest') === -1) {
+                return pl.name
+              }
+            }
+          }
+
+          return address.slice(0, 6)
         }
-      }
-      return { winner }
-    }), 'winner', 'address')
 
-    const findUsername = (address) => {
-      for (const lb of evolutionLeaderboardHistory) {
-        for (const pl of lb) {
-          if (pl.address === address && pl.name.indexOf('Guest') === -1) {
-            return pl.name
+
+        let evolutionEarningsDistributed = 0
+
+        const groupedRewardPlayers = {}
+        
+        for (const reward of playerRewardWinners[server.key]) {
+          // if (reward.winner.lastUpdate) continue // skip old winners
+          if (!groupedRewardPlayers[reward.winner.address]) groupedRewardPlayers[reward.winner.address] = { monetary: 0 }
+
+          groupedRewardPlayers[reward.winner.address].address = reward.winner.address
+          groupedRewardPlayers[reward.winner.address].name = findUsername(reward.winner.address)
+          groupedRewardPlayers[reward.winner.address].monetary += reward.monetary
+
+          evolutionEarningsDistributed += reward.monetary
+        }
+
+        for (const wins of Object.values(groupedWinPlayers)) {
+          for (const win of wins) {
+            if (win.winner.lastUpdate > 1625903860) continue // skip new winners
+
+            if (!groupedRewardPlayers[win.winner.address]) groupedRewardPlayers[win.winner.address] = { monetary: 0 }
+
+            let quantity = 0
+            if (win.winner.lastUpdate < 1625552384) {
+              quantity = 1
+            } else {
+              quantity = 0.3
+            }
+
+            const monetary = findPrice('zod', win.winner.lastUpdate) * quantity
+
+            groupedRewardPlayers[win.winner.address].address = win.winner.address
+            groupedRewardPlayers[win.winner.address].name = findUsername(win.winner.address)
+            groupedRewardPlayers[win.winner.address].monetary += monetary
+      
+            evolutionEarningsDistributed += monetary
           }
         }
-      }
 
-      return address.slice(0, 6)
-    }
+        const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
 
+        if (!hist.earnings) hist.earnings = []
 
-    let evolutionEarningsDistributed = 0
+        const historicalEarnings = hist.earnings
 
-    const groupedRewardPlayers = {}
-    
-    for (const reward of playerRewardWinners) {
-      // if (reward.winner.lastUpdate) continue // skip old winners
-      if (!groupedRewardPlayers[reward.winner.address]) groupedRewardPlayers[reward.winner.address] = { monetary: 0 }
-
-      groupedRewardPlayers[reward.winner.address].address = reward.winner.address
-      groupedRewardPlayers[reward.winner.address].name = findUsername(reward.winner.address)
-      groupedRewardPlayers[reward.winner.address].monetary += reward.monetary
-
-      evolutionEarningsDistributed += reward.monetary
-    }
-
-    for (const wins of Object.values(groupedWinPlayers)) {
-      for (const win of wins) {
-        if (win.winner.lastUpdate > 1625903860) continue // skip new winners
-
-        if (!groupedRewardPlayers[win.winner.address]) groupedRewardPlayers[win.winner.address] = { monetary: 0 }
-
-        let quantity = 0
-        if (win.winner.lastUpdate < 1625552384) {
-          quantity = 1
+        if (historicalEarnings?.length) {
+          const oldTime = (new Date(evolutionEarningsDistributed[historicalEarnings.length-1]?.[0] || 0)).getTime()
+          const newTime = (new Date()).getTime()
+          const diff = newTime - oldTime
+      
+          if (diff / (1000 * 60 * 60 * 24) > 1) {
+            historicalEarnings.push([newTime, evolutionEarningsDistributed])
+          }
         } else {
-          quantity = 0.3
+          const newTime = (new Date()).getTime()
+          historicalEarnings.push([newTime, evolutionEarningsDistributed])
         }
 
-        const monetary = findPrice('zod', win.winner.lastUpdate) * quantity
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), JSON.stringify(hist, null, 2))
 
-        groupedRewardPlayers[win.winner.address].address = win.winner.address
-        groupedRewardPlayers[win.winner.address].name = findUsername(win.winner.address)
-        groupedRewardPlayers[win.winner.address].monetary += monetary
-  
-        evolutionEarningsDistributed += monetary
+      // {
+      //   "type": "rune",
+      //   "symbol": "ral",
+      //   "quantity": 4.21,
+      //   "winner": {
+      //     "address": "0x545612032BeaDED7E9f5F5Ab611aF6428026E53E"
+      //   },
+      //   "tx": "0x4c2465dbe4fc6a7d774db429d0dd94fd06dfcc36c59e319aaf241da281dd5250"
+      // },
+
+        const data = {
+          // all: [
+          //   {
+          //     name: 'Overall',
+          //     count: 10,
+          //     data: Object.keys(groupedRewardPlayers).map(address => ({
+          //       username: groupedRewardPlayers[address][0].winner.name,
+          //       count: groupedRewardPlayers[address].length
+          //     })).sort(function(a, b) {
+          //       return b.count - a.count;
+          //     })
+          //   }
+          // ],
+          monetary: [
+            {
+              name: 'Earnings',
+              count: 10,
+              data: Object.keys(groupedRewardPlayers).map(address => ({
+                username: groupedRewardPlayers[address].name,
+                count: groupedRewardPlayers[address].monetary
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+          wins: [
+            {
+              name: 'Wins',
+              count: 10,
+              data: Object.keys(groupedWinPlayers).map(address => ({
+                username: groupedWinPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedWinPlayers[address][0].winner.name,
+                count: groupedWinPlayers[address].length
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+          rounds: [
+            {
+              name: 'Rounds',
+              count: 10,
+              data: Object.keys(roundsPlayed).map(address => ({
+                username: roundsPlayed[address].name,
+                count: roundsPlayed[address].rounds
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+          rewards: [
+            {
+              name: 'Rewards',
+              count: 10,
+              data: Object.keys(roundsPlayed).map(address => ({
+                username: roundsPlayed[address].name,
+                count: roundsPlayed[address].rewards
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+          points: [
+            {
+              name: 'Points',
+              count: 10,
+              data: Object.keys(roundsPlayed).map(address => ({
+                username: roundsPlayed[address].name,
+                count: roundsPlayed[address].points
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+          kills: [
+            {
+              name: 'Kills',
+              count: 10,
+              data: Object.keys(roundsPlayed).map(address => ({
+                username: roundsPlayed[address].name,
+                count: roundsPlayed[address].kills
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+          deaths: [
+            {
+              name: 'Deaths',
+              count: 10,
+              data: Object.keys(roundsPlayed).map(address => ({
+                username: roundsPlayed[address].name,
+                count: roundsPlayed[address].deaths
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+          powerups: [
+            {
+              name: 'Powerups',
+              count: 10,
+              data: Object.keys(roundsPlayed).map(address => ({
+                username: roundsPlayed[address].name,
+                count: roundsPlayed[address].powerups
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+          evolves: [
+            {
+              name: 'Evolves',
+              count: 10,
+              data: Object.keys(roundsPlayed).map(address => ({
+                username: roundsPlayed[address].name,
+                count: roundsPlayed[address].evolves
+              })).sort(function(a, b) {
+                return b.count - a.count;
+              })
+            }
+          ],
+        }
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboard.json`), JSON.stringify(data, null, 2))
+      } catch(e) {
+        console.log(e)
       }
     }
-
-    stats.evolutionEarningsDistributed = evolutionEarningsDistributed
-
-    const historicalEarnings = historical.evolutionEarningsDistributed
-
-    if (historicalEarnings.length) {
-      const oldTime = (new Date(evolutionEarningsDistributed[historicalEarnings.length-1]?.[0] || 0)).getTime()
-      const newTime = (new Date()).getTime()
-      const diff = newTime - oldTime
-  
-      if (diff / (1000 * 60 * 60 * 24) > 1) {
-        historicalEarnings.push([newTime, stats.evolutionEarningsDistributed])
-      }
-    } else {
-      const newTime = (new Date()).getTime()
-      historicalEarnings.push([newTime, stats.evolutionEarningsDistributed])
-    }
-
-    saveHistorical()
-
-  // {
-  //   "type": "rune",
-  //   "symbol": "ral",
-  //   "quantity": 4.21,
-  //   "winner": {
-  //     "address": "0x545612032BeaDED7E9f5F5Ab611aF6428026E53E"
-  //   },
-  //   "tx": "0x4c2465dbe4fc6a7d774db429d0dd94fd06dfcc36c59e319aaf241da281dd5250"
-  // },
-
-    const data = {
-      // all: [
-      //   {
-      //     name: 'Overall',
-      //     count: 10,
-      //     data: Object.keys(groupedRewardPlayers).map(address => ({
-      //       username: groupedRewardPlayers[address][0].winner.name,
-      //       count: groupedRewardPlayers[address].length
-      //     })).sort(function(a, b) {
-      //       return b.count - a.count;
-      //     })
-      //   }
-      // ],
-      monetary: [
-        {
-          name: 'Earnings',
-          count: 10,
-          data: Object.keys(groupedRewardPlayers).map(address => ({
-            username: groupedRewardPlayers[address].name,
-            count: groupedRewardPlayers[address].monetary
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-      wins: [
-        {
-          name: 'Wins',
-          count: 10,
-          data: Object.keys(groupedWinPlayers).map(address => ({
-            username: groupedWinPlayers[address].find(g => g.winner.name.indexOf('Guest') === -1)?.winner.name || groupedWinPlayers[address][0].winner.name,
-            count: groupedWinPlayers[address].length
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-      rounds: [
-        {
-          name: 'Rounds',
-          count: 10,
-          data: Object.keys(roundsPlayed).map(address => ({
-            username: roundsPlayed[address].name,
-            count: roundsPlayed[address].rounds
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-      rewards: [
-        {
-          name: 'Rewards',
-          count: 10,
-          data: Object.keys(roundsPlayed).map(address => ({
-            username: roundsPlayed[address].name,
-            count: roundsPlayed[address].rewards
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-      points: [
-        {
-          name: 'Points',
-          count: 10,
-          data: Object.keys(roundsPlayed).map(address => ({
-            username: roundsPlayed[address].name,
-            count: roundsPlayed[address].points
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-      kills: [
-        {
-          name: 'Kills',
-          count: 10,
-          data: Object.keys(roundsPlayed).map(address => ({
-            username: roundsPlayed[address].name,
-            count: roundsPlayed[address].kills
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-      deaths: [
-        {
-          name: 'Deaths',
-          count: 10,
-          data: Object.keys(roundsPlayed).map(address => ({
-            username: roundsPlayed[address].name,
-            count: roundsPlayed[address].deaths
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-      powerups: [
-        {
-          name: 'Powerups',
-          count: 10,
-          data: Object.keys(roundsPlayed).map(address => ({
-            username: roundsPlayed[address].name,
-            count: roundsPlayed[address].powerups
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-      evolves: [
-        {
-          name: 'Evolves',
-          count: 10,
-          data: Object.keys(roundsPlayed).map(address => ({
-            username: roundsPlayed[address].name,
-            count: roundsPlayed[address].evolves
-          })).sort(function(a, b) {
-            return b.count - a.count;
-          })
-        }
-      ],
-    }
-
-    jetpack.write(path.resolve('./db/evolution/leaderboard.json'), JSON.stringify(data, null, 2))
   }
 
   await saveStats()
