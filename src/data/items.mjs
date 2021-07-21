@@ -1,5 +1,7 @@
 import { ItemCategoriesType, ItemsMainCategoriesType } from './items.type.mjs'
 
+process.env.REACT_APP_PUBLIC_URL = "https://rune.farm/"
+
 export const ItemAttributes = {
   HarvestYield: {
     id: 1,

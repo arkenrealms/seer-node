@@ -1560,6 +1560,22 @@ async function monitorGeneralStats() {
   setTimeout(monitorGeneralStats, 15 * 60 * 1000)
 }
 
+function median(values) {
+  if(values.length ===0) return 0;
+
+  values.sort(function(a,b){
+    return a-b;
+  });
+
+  var half = Math.floor(values.length / 2);
+
+  if (values.length % 2)
+    return values[half];
+
+  return (values[half - 1] + values[half]) / 2.0;
+}
+
+
 async function monitorCraftingStats() {
   // Update crafting competitions
   {
@@ -1680,7 +1696,7 @@ async function monitorEvolutionStats() {
         const newTime = (new Date()).getTime()
         const diff = newTime - oldTime
         if (diff / (1000 * 60 * 60 * 1) > 1) {
-          hist.playerCount.push([newTime, playerCount])
+          hist.playerCount.push([newTime, server.playerCount])
         }
 
         jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), JSON.stringify(hist, null, 2))
@@ -1741,7 +1757,7 @@ async function monitorEvolutionStats() {
         } else {
           const dupChecker = {}
 
-          data = leaderboardHistory.concat(data.slice(lastIndex)).filter(p => {
+          data = leaderboardHistory.concat(data.slice(lastIndex+1)).filter(p => {
             if (p.length === 0) return
             if (p[0].joinedAt < 1625322027) return
             if (dupChecker[p[0].position+p[0].joinedAt]) return
@@ -1815,6 +1831,59 @@ async function monitorEvolutionStats() {
     console.log(e)
   }
 
+  // Update evolution stats
+  try {
+    console.log('Update evolution stats')
+
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+      try {
+        const stats = {
+          averagePlayerLatency: 0,
+          averageWinnerLatency: 0,
+          medianPlayerLatency: 0,
+          medianWinnerLatency: 0
+        }
+
+        const playerLatencyList = []
+        const winnerLatencyList = []
+
+        for (const round of playerRoundWinners[server.key]) {
+          if (server.status !== 'online') continue
+
+          let winner
+          for (const player of round) {
+            if (!player.isDead && !player.isSpectating && player.latency && player.latency > 5 && player.latency < 600) {
+              if (!winner || (player.winner && winner.winner && player.winner.points > winner.winner.points)) {
+                winner = player
+              }
+            }
+          }
+          for (const player of round) {
+            if (!player.isDead && !player.isSpectating && player.latency && player.latency > 5 && player.latency < 600 && winner !== player) {
+              playerLatencyList.push(player.latency)
+            }
+          }
+
+          if (winner) {
+            winnerLatencyList.push(winner.latency)
+          }
+        }
+
+        stats.medianPlayerLatency = median(playerLatencyList)
+        stats.medianWinnerLatency = median(winnerLatencyList)
+        stats.averagePlayerLatency = average(playerLatencyList)
+        stats.averageWinnerLatency = average(winnerLatencyList)
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/stats.json`), JSON.stringify(stats, null, 2))
+      } catch(e) {
+        console.log(e)
+      }
+    }
+  } catch(e) {
+    console.log(e)
+  }
+
   // Update evolution reward history
   try {
     console.log('Update evolution reward history')
@@ -1825,6 +1894,7 @@ async function monitorEvolutionStats() {
         const rand = Math.floor(Math.random() * Math.floor(999999))
         const response = await fetch(`https://${server.endpoint}/data/rewardHistory.json?${rand}`)
       
+        const dupChecker = {}
         let data = await response.json()
         let lastIndex = 0
 
@@ -1845,7 +1915,13 @@ async function monitorEvolutionStats() {
 
           playerRewardWinners[server.key] = rewardHistory
         } else {
-          data = rewardHistory.concat(data.slice(lastIndex)).filter(p => !!p.winner && p.winner.address && (!p.winner.lastUpdate || (p.winner.lastUpdate >= 1625322027 && p.winner.lastUpdate <= 1625903860)))
+          data = rewardHistory.concat(data.slice(lastIndex+1)).filter(p => {
+            if (!p.winner.lastUpdate && dupChecker[p.tx]) return
+
+            dupChecker[p.tx] = true
+
+            return !!p.winner && p.winner.address && (!p.winner.lastUpdate || (p.winner.lastUpdate >= 1625322027 && p.winner.lastUpdate <= 1625903860))
+          })
 
           for (const win of data) {
             if (!win.monetary) win.monetary = 0

@@ -1,3 +1,6 @@
+
+process.env.REACT_APP_PUBLIC_URL = "https://rune.farm/"
+
 export const achievementData = [
     {
       id: 1,
