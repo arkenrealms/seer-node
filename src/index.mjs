@@ -30,6 +30,7 @@ import BEP20Contract from '../contracts/BEP20.json'
 import { QuoteToken } from "./farms.mjs"
 import { decodeItem } from "./util/decodeItem.mjs"
 import { achievementData } from './data/achievements.mjs'
+import { stat } from 'fs'
 // import * as Bridge from "./bridge.mjs"
 
 const config = jetpack.read(path.resolve('./db/config.json'), 'json')
@@ -110,6 +111,8 @@ process
   })
 
 const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
+const ordinalise = n => n+(n%10==1&&n%100!=11?'st':n%10==2&&n%100!=12?'nd':n%10==3&&n%100!=13?'rd':'th')
+const commarise = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 
 async function iterateBlocks(name, address, fromBlock, toBlock, event, processLog, updateConfig) {
   if (!toBlock) return
@@ -441,6 +444,7 @@ const loadUser = (address) => {
     ...(jetpack.read(path.resolve(`./db/users/${address}/overview.json`), 'json') || {}),
     achievements: (jetpack.read(path.resolve(`./db/users/${address}/achievements.json`), 'json') || []),
     characters: (jetpack.read(path.resolve(`./db/users/${address}/characters.json`), 'json') || []),
+    evolution: (jetpack.read(path.resolve(`./db/users/${address}/evolution.json`), 'json') || {}),
     inventory: {
       items: [],
       ...(jetpack.read(path.resolve(`./db/users/${address}/inventory.json`), 'json') || {})
@@ -469,41 +473,13 @@ const updateAchievementsByUser = (user) => {
     addUserAchievement(user, 'ACQUIRED_RUNE')
   }
   if (!hasUserAchievement(user, 'BATTLE_RUNE_EVO')) {
-    const complete = evolutionLeaderboardHistory.filter(l => l.filter(l2 => l2.address === user.address).length > 0).length > 0
-    if (complete) addUserAchievement(user, 'BATTLE_RUNE_EVO')
+    if (user.evolution?.overall?.rounds > 0) addUserAchievement(user, 'BATTLE_RUNE_EVO')
   }
   if (!hasUserAchievement(user, 'MEGA_RUNE_EVO')) {
-    const groupedRoundPlayers = groupBySub(evolutionLeaderboardHistory.map((leaderboard) => {
-      let winner = leaderboard[0]
-
-      for (const p of leaderboard) {
-        if (p.points > winner.points) {
-          winner = p
-        }
-      }
-      return { winner }
-    }).filter(p => !!p.winner && p.winner.joinedAt >= 1625322027), 'winner', 'address')
-
-    const complete = groupedRoundPlayers[user.address]?.reduce((total, p) => total + p.winner.kills, 0) >= 100
-
-    if (complete) addUserAchievement(user, 'MEGA_RUNE_EVO')
+    if (user.evolution?.overall?.wins > 0) addUserAchievement(user, 'MEGA_RUNE_EVO')
   }
   if (!hasUserAchievement(user, 'DOMINATE_RUNE_EVO')) {
-    let winStreak = 0
-    let totalStreak = 0
-
-    for (const round of evolutionLeaderboardHistory) {
-      if (round.length > 0 && round.sort(((a, b) => b.winner?.kills - a.winner?.kills))[0].address === user.address) {
-        winStreak++
-        
-        if (winStreak > totalStreak) totalStreak = winStreak
-      } else {
-        winStreak = 0
-      }
-    }
-
-    const complete = totalStreak >= 25
-    if (complete) addUserAchievement(user, 'DOMINATE_RUNE_EVO')
+    if (user.evolution?.overall?.winStreak > 25) addUserAchievement(user, 'DOMINATE_RUNE_EVO')
   }
 }
 
@@ -528,6 +504,7 @@ const saveUser = (user) => {
     market: undefined,
     characters: undefined,
     achievements: undefined,
+    evolution: undefined,
     craftedItemCount: user.inventory.items.filter(i => i.status === 'created').length,
     inventoryItemCount: user.inventory.items.filter(i => i.status === 'unequipped').length,
     equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
@@ -538,6 +515,7 @@ const saveUser = (user) => {
   updateLeaderboardByUser(user)
   updateAchievementsByUser(user)
 
+  jetpack.write(path.resolve(`./db/users/${user.address}/evolution.json`), JSON.stringify(user.evolution, null, 2))
   jetpack.write(path.resolve(`./db/users/${user.address}/achievements.json`), JSON.stringify(user.achievements, null, 2))
   jetpack.write(path.resolve(`./db/users/${user.address}/characters.json`), JSON.stringify(user.characters, null, 2))
   jetpack.write(path.resolve(`./db/users/${user.address}/inventory.json`), JSON.stringify(user.inventory, null, 2))
@@ -1722,14 +1700,26 @@ async function monitorEvolutionStats() {
     console.log(e)
   }
 
+  const leaderboards = {
+    europe1: {},
+    na1: {},
+    overall: {}
+  }
+
   // Update evolution leaderboard history
   try {
     console.log('Update evolution leaderboard history')
 
+    const evolutionPlayers = jetpack.read(path.resolve(`./db/evolution/players.json`), 'json') || []
+
+    const mapAddressToUsername = {}
+
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+      console.log('Server', server.key)
+
       try {
-        const leaderboardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), 'json') || []
+        let leaderboardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), 'json') || []
         const rand = Math.floor(Math.random() * Math.floor(999999))
         const response = await fetch(`https://${server.endpoint}/data/leaderboardHistory.json?${rand}`)
       
@@ -1742,7 +1732,7 @@ async function monitorEvolutionStats() {
           console.log('Last round', lastRoundItem)
           for (let i = 0; i < data.length; i++) {
             if (!data[i].length || !data[i][0]) continue
-            if (data[i].length === lastRoundItem.length && data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id) { //  && data[i][0].position === lastRoundItem[0].position
+            if (data[i].length === lastRoundItem.length && data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id && (typeof(data[i][0].position) === 'string' || !data[i][0].position ? data[i][0].position : data[i][0].position.x.toFixed(4) === lastRoundItem[0].position.x.toFixed(4) && data[i][0].position.y.toFixed(4) === lastRoundItem[0].position.y.toFixed(4))) { //  && data[i][0].position === lastRoundItem[0].position
               lastIndex = i
             }
           }
@@ -1757,37 +1747,337 @@ async function monitorEvolutionStats() {
         } else {
           const dupChecker = {}
 
-          data = leaderboardHistory.concat(data.slice(lastIndex+1)).filter(p => {
+          leaderboardHistory = leaderboardHistory.concat(data.slice(lastIndex+1)).filter(p => {
             if (p.length === 0) return
             if (p[0].joinedAt < 1625322027) return
-            if (dupChecker[p[0].position+p[0].joinedAt]) return
 
-            dupChecker[p[0].position+p[0].joinedAt] = true
+            const key = (typeof(p[0].position) === 'string' || !p[0].position ? p[0].position : p[0].position.x.toFixed(4) + p[0].position.y.toFixed(4))+p[0].joinedAt
+            if (dupChecker[key]) return
+
+            dupChecker[key] = true
 
             return p
           })
       
-          jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), JSON.stringify(data, null, 2))
+          jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), JSON.stringify(leaderboardHistory, null, 2))
       
-          playerRoundWinners[server.key] = data
+          playerRoundWinners[server.key] = leaderboardHistory
+
+          const recentPlayerAddresses = []
       
-          for (let i = lastIndex; i < data.length; i++) {
-            for (let j = 0; j < data[i].length; j++) {
-              if (!data[i][j].address) continue
-      
-              try {
-                const user = loadUser(data[i][j].address)
-                saveUser(user)
-              } catch(e) {
-                console.log(e)
-              }
+          for (let i = lastIndex; i < leaderboardHistory.length; i++) {
+            for (let j = 0; j < leaderboardHistory[i].length; j++) {
+              if (!leaderboardHistory[i][j].address) continue
+              if (recentPlayerAddresses.includes(leaderboardHistory[i][j].address)) continue
+              
+              recentPlayerAddresses.push(leaderboardHistory[i][j].address)
             }
           }
+
+          leaderboards[server.key] = {
+            kills: [],
+            deaths: [],
+            powerups: [],
+            evolves: [],
+            points: [],
+            rewards: [],
+            orbs: [],
+            revenges: [],
+            rounds: [],
+            wins: [],
+            timeSpent: [],
+            winRatio: [],
+            killDeathRatio: [],
+            roundPointRatio: [],
+            averageLatency: []
+          }
+
+          const playerAddresses = evolutionPlayers.map(p => p.address) // or recentPlayerAddresses
+
+          for (const address of playerAddresses) {
+            if (address.toLowerCase() === "0xc84ce216fef4EC8957bD0Fb966Bb3c3E2c938082".toLowerCase()) continue
+
+            try {
+              const user = loadUser(address)
+
+              if (!evolutionPlayers.find(p => p.address === address)) {
+                evolutionPlayers.push({
+                  address
+                })
+              }
+
+              {
+                let winStreak = 0
+                let savedWinStreak = 0
+                let rounds = 0
+                let wins = 0
+                let kills = 0
+                let deaths = 0
+                let powerups = 0
+                let evolves = 0
+                let points = 0
+                let rewards = 0
+                let orbs = 0
+                let revenges = 0
+                const latency = []
+
+                for (const round of leaderboardHistory) {
+                  if (round.length === 0) continue
+
+                  const currentPlayer = round.find(r => r.address === address)
+                  if (currentPlayer && (currentPlayer.latency === undefined || (currentPlayer.latency >= 10 && currentPlayer.latency <= 1000))) {
+                    kills += currentPlayer.kills || 0
+                    deaths += currentPlayer.deaths || 0
+                    powerups += currentPlayer.powerups || 0
+                    evolves += currentPlayer.evolves || 0
+                    points += currentPlayer.points || 0
+                    rewards += currentPlayer.rewards || 0
+                    orbs += currentPlayer.orbs || 0
+                    revenges += (currentPlayer.log?.revenge ? currentPlayer.log.revenge : 0)
+
+                    if (currentPlayer.latency && currentPlayer.latency >= 10 && currentPlayer.latency <= 1000) {
+                      latency.push(currentPlayer.latency)
+                    }
+
+                    mapAddressToUsername[address] = currentPlayer.name
+
+                    rounds++
+                  }
+
+                  const winner = round.sort(((a, b) => b.kills - a.kills))[0]
+
+                  if (winner.address === user.address) {
+                    wins++
+                    winStreak++
+        
+                    if (winStreak > savedWinStreak) savedWinStreak = winStreak
+                  } else {
+                    winStreak = 0
+                  }
+                }
+
+                if (!user.evolution) user.evolution = {}
+                if (!user.evolution.servers) user.evolution.servers = {}
+                if (!user.evolution.servers[server.key]) user.evolution.servers[server.key] = {}
+                if (!user.evolution.servers[server.key].winStreak) user.evolution.servers[server.key].winStreak = 0
+                if (!user.evolution.overall) user.evolution.overall = {}
+                if (!user.evolution.overall.winStreak) user.evolution.overall.winStreak = 0
+
+                delete user.evolution.winStreak
+
+                if (savedWinStreak > user.evolution.servers[server.key].winStreak) {
+                  user.evolution.servers[server.key].winStreak = savedWinStreak
+                }
+                if (savedWinStreak > user.evolution.overall.winStreak) {
+                  user.evolution.overall.winStreak = savedWinStreak
+                }
+
+                user.evolution.servers[server.key].kills = kills
+                user.evolution.servers[server.key].deaths = deaths
+                user.evolution.servers[server.key].powerups = powerups
+                user.evolution.servers[server.key].evolves = evolves
+                user.evolution.servers[server.key].points = points
+                user.evolution.servers[server.key].rewards = rewards
+                user.evolution.servers[server.key].orbs = orbs
+                user.evolution.servers[server.key].revenges = revenges
+                user.evolution.servers[server.key].wins = wins
+                user.evolution.servers[server.key].rounds = rounds
+                user.evolution.servers[server.key].winRatio = rounds > 0 ? wins / rounds : 0
+                user.evolution.servers[server.key].killDeathRatio = rounds >= 5 && deaths > 0 ? kills / deaths : kills
+                user.evolution.servers[server.key].roundPointRatio = rounds >= 5 && rounds > 0 ? points / rounds : 0
+                user.evolution.servers[server.key].averageLatency = rounds >= 5 ? average(latency) : 0
+                user.evolution.servers[server.key].timeSpent = parseFloat((rounds * 5 / 60).toFixed(1))
+
+                delete user.evolution.servers[server.key].kdRatio
+
+                for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
+                  leaderboards[server.key][statKey].push({
+                    name: mapAddressToUsername[user.address],
+                    address: user.address,
+                    count: user.evolution.servers[server.key][statKey]
+                  })
+                }
+              }
+
+              user.evolution.lastUpdated = (new Date()).getTime()
+              
+              saveUser(user)
+            } catch(e) {
+              console.log(e)
+            }
+          }
+
+          for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio']) {
+            leaderboards[server.key][statKey] = leaderboards[server.key][statKey].filter(a => !!a.count).sort((a, b) => b.count - a.count)
+          }
+
+          for (const statKey of ['averageLatency']) {
+            leaderboards[server.key][statKey] = leaderboards[server.key][statKey].filter(a => !!a.count).sort((a, b) => a.count - b.count)
+          }
+
+          for (const address of playerAddresses) {
+            if (address.toLowerCase() === "0xc84ce216fef4EC8957bD0Fb966Bb3c3E2c938082".toLowerCase()) continue
+
+            const user = loadUser(address)
+
+            user.evolution.servers[server.key].ranking = {}
+
+            for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
+              user.evolution.servers[server.key].ranking[statKey] = {
+                position: leaderboards[server.key][statKey].findIndex(item => item.address == user.address) + 1,
+                total: leaderboards[server.key][statKey].length
+              }
+            }
+
+            saveUser(user)
+          }
+
+          leaderboards[server.key].lastUpdated = (new Date()).getTime()
+
+          jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboard2.json`), JSON.stringify(leaderboards[server.key], null, 2))
         }
       } catch(e) {
         console.log(e)
       }
     }
+
+    leaderboards.overall = {
+      kills: [],
+      deaths: [],
+      powerups: [],
+      evolves: [],
+      points: [],
+      rewards: [],
+      orbs: [],
+      revenges: [],
+      rounds: [],
+      wins: [],
+      timeSpent: [],
+      winRatio: [],
+      killDeathRatio: [],
+      roundPointRatio: [],
+      averageLatency: []
+    }
+
+    for (const player of evolutionPlayers) {
+      const user = loadUser(player.address)
+
+      user.evolution.overall.kills = 0
+      user.evolution.overall.deaths = 0
+      user.evolution.overall.powerups = 0
+      user.evolution.overall.evolves = 0
+      user.evolution.overall.points = 0
+      user.evolution.overall.rewards = 0
+      user.evolution.overall.orbs = 0
+      user.evolution.overall.revenges = 0
+      user.evolution.overall.rounds = 0
+      user.evolution.overall.wins = 0
+      user.evolution.overall.timeSpent = 0
+
+      let latency = []
+
+      for (const key in user.evolution.servers) {
+        const server = user.evolution.servers[key]
+        user.evolution.overall.kills += server.kills || 0
+        user.evolution.overall.deaths += server.deaths || 0
+        user.evolution.overall.powerups += server.powerups || 0
+        user.evolution.overall.evolves += server.evolves || 0
+        user.evolution.overall.points += server.points || 0
+        user.evolution.overall.rewards += server.rewards || 0
+        user.evolution.overall.orbs += server.orbs || 0
+        user.evolution.overall.revenges += server.revenges || 0
+        user.evolution.overall.rounds += server.rounds || 0
+        user.evolution.overall.wins += server.wins || 0
+        user.evolution.overall.timeSpent += server.timeSpent || 0
+
+        if (server.averageLatency) {
+          latency.push(server.averageLatency)
+        }
+      }
+
+      user.evolution.overall.winRatio = user.evolution.overall.rounds >= 5 ? user.evolution.overall.wins / user.evolution.overall.rounds : 0
+      user.evolution.overall.killDeathRatio = user.evolution.overall.rounds >= 5 && user.evolution.overall.deaths > 0 ? user.evolution.overall.kills / user.evolution.overall.deaths : user.evolution.overall.kills
+      user.evolution.overall.roundPointRatio = user.evolution.overall.rounds >= 5 ? user.evolution.overall.points / user.evolution.overall.rounds : 0
+      user.evolution.overall.averageLatency = latency.length > 0 ? average(latency) : 0
+
+      delete user.evolution.overall.kdRatio
+
+      for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
+        if (user.evolution.overall[statKey] && user.evolution.overall[statKey] > 0 && user.evolution.overall[statKey] !== null) {
+          leaderboards.overall[statKey].push({
+            name: mapAddressToUsername[user.address],
+            address: user.address,
+            count: user.evolution.overall[statKey]
+          })
+        }
+      }
+    
+      saveUser(user)
+    }
+
+    // Sort descending
+    for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio']) {
+      leaderboards.overall[statKey] = leaderboards.overall[statKey].filter(a => !!a.count).sort((a, b) => b.count - a.count)
+    }
+
+    // Sort ascending
+    for (const statKey of ['averageLatency']) {
+      leaderboards.overall[statKey] = leaderboards.overall[statKey].filter(a => !!a.count).sort((a, b) => a.count - b.count)
+    }
+
+    for (const player of evolutionPlayers) {
+      const user = loadUser(player.address)
+
+      user.evolution.overall.ranking = {}
+
+      for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
+        user.evolution.overall.ranking[statKey] = {
+          position: leaderboards.overall[statKey].findIndex(item => item.address == user.address) + 1,
+          total: leaderboards.overall[statKey].length
+        }
+      }
+
+      saveUser(user)
+    }
+
+    jetpack.write(path.resolve(`./db/evolution/players.json`), JSON.stringify(evolutionPlayers, null, 2))
+
+      // const mapKeyToName = {
+      //   kills: "Kills",
+      //   deaths: "Deaths",
+      //   powerups: "Powerups",
+      //   evolves: "Evolves",
+      //   points: "Points",
+      //   rewards: "Rewards",
+      //   orbs: "Orbs",
+      //   revenges: "Revenges",
+      //   rounds: "Rounds",
+      //   wins: "Wins",
+      //   timeSpent: "Time Spent",
+      //   winRatio: "Win Ratio",
+      //   killDeathRatio: "Kill Death Ratio",
+      //   roundPointRatio: "Round Point Ratio",
+      //   averageLatency: "Average Latency"
+      // }
+
+      // const reformattedLeaderboard = {}
+
+      // for (const key in Object.keys(leaderboards.overall)) {
+      //   const stat = leaderboards.overall[key]
+
+      //   reformattedLeaderboard[key] = [{
+      //     "name": mapKeyToName[key],
+      //     "count": 10,
+      //     "data": stat.map(s => ({
+      //       username: mapAddressToUsername[s.address],
+      //       count: s.count
+      //     }))
+      //   }]
+      // }
+
+    leaderboards.overall.lastUpdated = (new Date()).getTime()
+
+    jetpack.write(path.resolve(`./db/evolution/leaderboard.json`), JSON.stringify(leaderboards.overall, null, 2))
   } catch(e) {
     console.log(e)
   }
@@ -2056,8 +2346,11 @@ async function monitorEvolutionStats() {
               winner = p
             }
           }
+
+          if (!winner) return
+
           return { winner }
-        }), 'winner', 'address')
+        }).filter(p => !!p), 'winner', 'address')
 
         const findUsername = (address) => {
           for (const lb of leaderboardHistory) {
@@ -2304,8 +2597,6 @@ async function monitorMeta() {
   jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText, null, 2))
 
   try {
-    process.env.REACT_APP_PUBLIC_URL = 'https://rune.farm/'
-
     for (const item of itemData[ItemsMainCategoriesType.OTHER]) {
       item.icon = item.icon.replace('undefined', 'https://rune.farm/')
 
