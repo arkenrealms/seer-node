@@ -14,7 +14,7 @@ export function round(num, precision) {
 export function removeDupes(list) {
   const seen = {};
   return list.filter(function(item) {
-      const k1 = item.seller + item.tokenId;
+      const k1 = item.seller + item.tokenId + item.blockNumber;
       const k2 = item.id;
       const exists = seen.hasOwnProperty(k1) || seen.hasOwnProperty(k2)
 

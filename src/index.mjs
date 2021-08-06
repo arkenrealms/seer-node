@@ -15,6 +15,7 @@ import fetch from "node-fetch"
 import path from 'path'
 import networks from "./networks.mjs"
 import jetpack from 'fs-jetpack'
+import beautify from 'json-beautify'
 import ipfsClient, { CID } from 'ipfs-http-client'
 import HDWalletProvider from "@truffle/hdwallet-provider"
 import { wait, round, removeDupes, toLong, toShort, getAddress, updateGit } from './util.mjs'
@@ -38,6 +39,8 @@ const app = jetpack.read(path.resolve('./db/app.json'), 'json')
 const trades = removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json'))
 const farms = jetpack.read(path.resolve('./db/farms.json'), 'json')
 const runes = jetpack.read(path.resolve('./db/runes.json'), 'json')
+const classes = jetpack.read(path.resolve('./db/classes.json'), 'json')
+const guilds = jetpack.read(path.resolve('./db/guilds.json'), 'json')
 const stats = jetpack.read(path.resolve('./db/stats.json'), 'json')
 const historical = jetpack.read(path.resolve('./db/historical.json'), 'json')
 const barracksEvents = jetpack.read(path.resolve('./db/barracks/events.json'), 'json')
@@ -82,8 +85,16 @@ const blocknativeApiKey = '58a45321-bf96-485c-ab9b-e0610e181d26'
 let provider = getRandomProvider()
 const web3 = new Web3(provider)
 
-const web3Provider = new ethers.providers.Web3Provider(getRandomProvider())
+const web3Provider = new ethers.providers.Web3Provider(getRandomProvider(), "any")
 web3Provider.pollingInterval = 15000
+
+web3Provider.on("network", (newNetwork, oldNetwork) => {
+  // When a Provider makes its initial connection, it emits a "network"
+  // event with a null oldNetwork along with the newNetwork. So, if the
+  // oldNetwork exists, it represents a changing network
+  // process.exit()
+});
+
 
 const signer = web3Provider.getSigner()
 
@@ -157,47 +168,51 @@ async function iterateBlocks(name, address, fromBlock, toBlock, event, processLo
 }
   
 const saveConfig = () => {
-  jetpack.write(path.resolve('./db/config.json'), JSON.stringify(config, null, 2))
+  jetpack.write(path.resolve('./db/config.json'), beautify(config, null, 2, 100), { atomic: true })
 }
 
 const saveTrades = () => {
-  jetpack.write(path.resolve('./db/trades.json'), JSON.stringify(trades, null, 2))
+  jetpack.write(path.resolve('./db/trades.json'), beautify(trades, null, 2, 100), { atomic: true })
 }
 
 const saveTradesEvents = () => {
-  jetpack.write(path.resolve('./db/trades/events.json'), JSON.stringify(tradesEvents, null, 2))
+  jetpack.write(path.resolve('./db/trades/events.json'), beautify(tradesEvents, null, 2, 100), { atomic: true })
 }
 
 const saveBarracksEvents = () => {
-  jetpack.write(path.resolve('./db/barracks/events.json'), JSON.stringify(barracksEvents, null, 2))
+  jetpack.write(path.resolve('./db/barracks/events.json'), beautify(barracksEvents, null, 2, 100), { atomic: true })
 }
 
 const saveCharactersEvents = () => {
-  jetpack.write(path.resolve('./db/characters/events.json'), JSON.stringify(charactersEvents, null, 2))
+  jetpack.write(path.resolve('./db/characters/events.json'), beautify(charactersEvents, null, 2, 100), { atomic: true })
 }
 
 const saveItemsEvents = () => {
-  jetpack.write(path.resolve('./db/items/events.json'), JSON.stringify(itemsEvents, null, 2))
+  jetpack.write(path.resolve('./db/items/events.json'), beautify(itemsEvents, null, 2, 100), { atomic: true })
 }
 
 const saveFarms = () => {
-  jetpack.write(path.resolve('./db/farms.json'), JSON.stringify(farms, null, 2))
+  jetpack.write(path.resolve('./db/farms.json'), beautify(farms, null, 2, 100), { atomic: true })
+}
+
+const saveGuilds = () => {
+  jetpack.write(path.resolve('./db/guilds.json'), beautify(guilds, null, 2, 100), { atomic: true })
 }
 
 const saveRunes = () => {
-  jetpack.write(path.resolve('./db/runes.json'), JSON.stringify(runes, null, 2))
+  jetpack.write(path.resolve('./db/runes.json'), beautify(runes, null, 2, 100), { atomic: true })
 }
 
 const saveStats = () => {
-  jetpack.write(path.resolve('./db/stats.json'), JSON.stringify(stats, null, 2))
+  jetpack.write(path.resolve('./db/stats.json'), beautify(stats, null, 2, 100), { atomic: true })
 }
 
 const saveHistorical = () => {
-  jetpack.write(path.resolve('./db/historical.json'), JSON.stringify(historical, null, 2))
+  jetpack.write(path.resolve('./db/historical.json'), beautify(historical, null, 2, 100), { atomic: true })
 }
 
 const saveApp = () => {
-  jetpack.write(path.resolve('./db/app.json'), JSON.stringify(app, null, 2))
+  jetpack.write(path.resolve('./db/app.json'), beautify(app, null, 2, 100), { atomic: true })
 }
 
 const updateLeaderboardByUser = (user) => {
@@ -275,7 +290,7 @@ const updateLeaderboardByUser = (user) => {
     leaderboard.mostItemsTransferred.address = user.address
   }
 
-  jetpack.write(path.resolve(`./db/leaderboard.json`), JSON.stringify(leaderboard, null, 2))
+  jetpack.write(path.resolve(`./db/leaderboard.json`), beautify(leaderboard, null, 2), { atomic: true })
 }
 
 const loadCharacter = (characterId) => {
@@ -288,13 +303,13 @@ const loadCharacter = (characterId) => {
 }
 
 const saveCharacter = (character) => {
-  jetpack.write(path.resolve(`./db/characters/${character.id}/overview.json`), JSON.stringify({
+  jetpack.write(path.resolve(`./db/characters/${character.id}/overview.json`), beautify({
     ...character,
     owners: undefined,
     ownersCount: character.owners.length,
-  }, null, 2))
+  }, null, 2), { atomic: true })
 
-  jetpack.write(path.resolve(`./db/characters/${character.id}/owners.json`), JSON.stringify(character.owners, null, 2))
+  jetpack.write(path.resolve(`./db/characters/${character.id}/owners.json`), beautify(character.owners, null, 2), { atomic: true })
 }
 
 const saveCharacterOwner = (character, characterData) => {
@@ -321,7 +336,7 @@ const loadItem = (itemId) => {
 }
 
 const saveItem = (item) => {
-  jetpack.write(path.resolve(`./db/items/${item.id}/overview.json`), JSON.stringify({
+  jetpack.write(path.resolve(`./db/items/${item.id}/overview.json`), beautify({
     ...item,
     owners: undefined,
     market: undefined,
@@ -331,11 +346,11 @@ const saveItem = (item) => {
     marketTradesPerfectCount: item.market.filter(i => i.item.perfection === 1).length,
     marketTradesListedCount: item.market.filter(i => i.status === 'listed').length,
     marketTradesSoldCount: item.market.filter(i => i.status === 'sold').length
-  }, null, 2))
+  }, null, 2), { atomic: true })
 
-  jetpack.write(path.resolve(`./db/items/${item.id}/owners.json`), JSON.stringify(item.owners, null, 2))
-  jetpack.write(path.resolve(`./db/items/${item.id}/market.json`), JSON.stringify(item.market, null, 2))
-  jetpack.write(path.resolve(`./db/items/${item.id}/tokens.json`), JSON.stringify(item.tokens, null, 2))
+  jetpack.write(path.resolve(`./db/items/${item.id}/owners.json`), beautify(item.owners, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/items/${item.id}/market.json`), beautify(item.market, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/items/${item.id}/tokens.json`), beautify(item.tokens, null, 2), { atomic: true })
 }
 
 const saveItemOwner = async (item, itemData) => {
@@ -393,14 +408,14 @@ const loadToken = (tokenId) => {
 }
 
 const saveToken = (token) => {
-  jetpack.write(path.resolve(`./db/tokens/${token.id}/overview.json`), JSON.stringify({
+  jetpack.write(path.resolve(`./db/tokens/${token.id}/overview.json`), beautify({
     ...token,
     transfers: undefined,
     trades: undefined
-  }, null, 2))
+  }, null, 2), { atomic: true })
 
-  jetpack.write(path.resolve(`./db/tokens/${token.id}/transfers.json`), JSON.stringify(token.transfers, null, 2))
-  jetpack.write(path.resolve(`./db/tokens/${token.id}/trades.json`), JSON.stringify(token.trades, null, 2))
+  jetpack.write(path.resolve(`./db/tokens/${token.id}/transfers.json`), beautify(token.transfers, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/tokens/${token.id}/trades.json`), beautify(token.trades, null, 2), { atomic: true })
 }
 
 const saveTokenTrade = (token, trade) => {
@@ -441,6 +456,11 @@ const loadUser = (address) => {
     transferredOutCount: 0,
     holdings: {},
     points: 0,
+    username: undefined,
+    guildId: undefined,
+    joinedGuildAt: undefined,
+    isGuildMembershipActive: false,
+    guildMembershipTokenId: null,
     ...(jetpack.read(path.resolve(`./db/users/${address}/overview.json`), 'json') || {}),
     achievements: (jetpack.read(path.resolve(`./db/users/${address}/achievements.json`), 'json') || []),
     characters: (jetpack.read(path.resolve(`./db/users/${address}/characters.json`), 'json') || []),
@@ -454,6 +474,122 @@ const loadUser = (address) => {
       ...(jetpack.read(path.resolve(`./db/users/${address}/market.json`), 'json') || {})
     }
   }
+}
+
+const guildInfoMap = {
+  1: {
+    name: "The First Ones",
+    description: `Formed after the discovery of a cache of hidden texts in an abandoned, secret Horadric meeting place. This group of scholars was brought together by Bin Zy.`,
+    icon: 'https://rune.farm/images/teams/the-first-ones.png',
+    backgroundColor: '#fff',
+    discord: {
+      role: '862170863827025950',
+      channel: '862153263804448769'
+    }
+  },
+  2: {
+    name: "The Archivists",
+    description: `The Archivists are an order based in Westmarch. These brave souls wade into battle wielding tome and quill, armored not in ensorcelled plate or links of chain, but in the knowledge of generations past. These archivists fight not only for the future of humanity, but for mankind's past as well. The members of their honored fraternity are many, and their numbers grow every day.`,
+    icon: 'https://rune.farm/images/teams/the-first-ones.png',
+    backgroundColor: '#fff',
+    discord: {
+      role: '862171000446779394',
+      channel: '862153353264627732'
+    }
+  },
+  3: {
+    name: "Knights of Westmarch",
+    description: `Pure at heart, during the Darkening of Tristrum, the knights closely followed the teachings of the Zakaram. The knights have since become a largely secular order, more focused on defending Westmarch from physical rather than spiritual harm. They are led by a knight commander.`,
+    icon: 'https://rune.farm/images/teams/knights-of-westmarch.png',
+    backgroundColor: '#fff',
+    discord: {
+      role: '862171051450040320',
+      channel: '862153403030700062'
+    }
+  },
+  4: {
+    name: "The Protectors",
+    description: `After the destruction of the Worldstone, these survivors banded together to find and protect the Worldstone shards from falling into the hands of evil.`,
+    icon: 'https://rune.farm/images/teams/the-protectors.png',
+    backgroundColor: '#fff',
+    discord: {
+      role: '',
+      channel: ''
+    }
+  },
+  5: {
+    name: "The Destroyers",
+    description: `After the destruction of the Worldstone, these dark souls serve Hell in the destruction of all living things.`,
+    icon: 'https://rune.farm/images/teams/the-destroyers.png',
+    backgroundColor: '#fff',
+    discord: {
+      role: '',
+      channel: ''
+    }
+  }
+}
+
+const loadGuild = (id) => {
+  console.log('Loading guild', id)
+  return {
+    id,
+    memberCount: 0,
+    activeMemberCount: 0,
+    points: 0,
+    ...guildInfoMap[id],
+    ...(jetpack.read(path.resolve(`./db/guilds/${id}/overview.json`), 'json') || {}),
+    members: (jetpack.read(path.resolve(`./db/guilds/${id}/members.json`), 'json') || []),
+    memberDetails: (jetpack.read(path.resolve(`./db/guilds/${id}/memberDetails.json`), 'json') || []),
+  }
+}
+
+const addGuildMember = (guild, user) => {
+  if (!guild.members.includes(user.address)) {
+    guild.members.push(user.address)
+  }
+}
+
+const saveGuild = (guild) => {
+  console.log('Saving guild', guild)
+  updateAchievementsByGuild(guild)
+
+  jetpack.write(path.resolve(`./db/guilds/${guild.id}/overview.json`), beautify({
+    ...guild,
+    memberCount: guild.members.length,
+    activeMemberCount: guild.memberDetails.filter(m => m.achievementCount > 0).length,
+    members: undefined,
+  }, null, 2), { atomic: true })
+  
+  jetpack.write(path.resolve(`./db/guilds/${guild.id}/members.json`), beautify(guild.members, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/guilds/${guild.id}/memberDetails.json`), beautify(guild.memberDetails, null, 2), { atomic: true })
+
+  let g = guilds.find(g2 => g2.id === guild.id)
+
+  if (!g) {
+    g = {}
+
+    guilds.push(g)
+  }
+
+  g.id = guild.id
+  g.memberCount = guild.memberCount
+  g.activeMemberCount = guild.activeMemberCount
+
+  saveGuilds()
+}
+
+const updateAchievementsByGuild = (guild) => {
+  let points = 0
+
+  for (const member of guild.members) {
+    const user = loadUser(member)
+
+    if (!user?.points || user.points === null) continue
+
+    points += user.points
+  }
+
+  guild.points = points
 }
 
 const updateAchievementsByUser = (user) => {
@@ -493,12 +629,78 @@ const updatePointsByUser = (user) => {
   }
 }
 
-const saveUser = (user) => {
+const updateGuildByUser = async (user) => {
+  if (user.joinedGuildAt === undefined) {
+    const abi = [{
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_userAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getUserProfile",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }]
+
+    const bscProvider = new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/')
+    const contract = new ethers.Contract('0x2C51b570B11dA6c0852aADD059402E390a936B39', abi, bscProvider)
+
+    try {
+      const result = await contract.getUserProfile(user.address)
+      user.guildId = ethers.BigNumber.from(result[2]).toNumber()
+      user.joinedGuildAt = new Date().getTime()
+
+      const guild = loadGuild(user.guildId)
+
+      addGuildMember(guild, user)
+
+      saveGuild(guild)
+    } catch (e) {
+    }
+  }
+}
+
+const saveUser = async (user) => {
   // console.log('Save user', user.address)
 
+  await updateGuildByUser(user)
   updatePointsByUser(user)
 
-  jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), JSON.stringify({
+  jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
     ...user,
     inventory: undefined,
     market: undefined,
@@ -510,19 +712,19 @@ const saveUser = (user) => {
     equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
     transferredOutCount: user.inventory.items.filter(i => i.status === 'transferred_out').length,
     transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
-  }, null, 2))
+  }, null, 2), { atomic: true })
 
   updateLeaderboardByUser(user)
   updateAchievementsByUser(user)
 
-  jetpack.write(path.resolve(`./db/users/${user.address}/evolution.json`), JSON.stringify(user.evolution, null, 2))
-  jetpack.write(path.resolve(`./db/users/${user.address}/achievements.json`), JSON.stringify(user.achievements, null, 2))
-  jetpack.write(path.resolve(`./db/users/${user.address}/characters.json`), JSON.stringify(user.characters, null, 2))
-  jetpack.write(path.resolve(`./db/users/${user.address}/inventory.json`), JSON.stringify(user.inventory, null, 2))
-  jetpack.write(path.resolve(`./db/users/${user.address}/market.json`), JSON.stringify(user.market, null, 2))
+  jetpack.write(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/users/${user.address}/characters.json`), beautify(user.characters, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2), { atomic: true })
 }
 
-const saveUserItem = (user, item) => {
+const saveUserItem = async (user, item) => {
   const savedItem = user.inventory.items.find(i => i.tokenId === item.tokenId)
 
   if (savedItem) {
@@ -533,10 +735,10 @@ const saveUserItem = (user, item) => {
     user.inventory.items.push(item)
   }
 
-  saveUser(user)
+  await saveUser(user)
 }
 
-const saveUserCharacter = (user, character) => {
+const saveUserCharacter = async (user, character) => {
   const savedItem = user.characters.find(i => i.tokenId === character.tokenId)
 
   if (savedItem) {
@@ -547,10 +749,10 @@ const saveUserCharacter = (user, character) => {
     user.characters.push(character)
   }
 
-  saveUser(user)
+  await saveUser(user)
 }
 
-const saveUserTrade = (user, trade) => {
+const saveUserTrade = async (user, trade) => {
   const marketTrade = user.market.trades.find(i => i.tokenId === trade.tokenId)
 
   if (marketTrade) {
@@ -561,7 +763,7 @@ const saveUserTrade = (user, trade) => {
     user.market.trades.push(trade)
   }
 
-  saveUser(user)
+  await saveUser(user)
 }
 
 const hasUserAchievement = (user, achievementKey) => {
@@ -624,7 +826,7 @@ async function getAllBarracksEvents() {
         id: decodeItem(tokenId.toString()).id
       }
       
-      saveUserItem(user, item)
+      await saveUserItem(user, item)
     }
 
     if (e.name === 'Unequip') {
@@ -641,7 +843,7 @@ async function getAllBarracksEvents() {
         // ...decodeItem(tokenId.toString())
       }
       
-      saveUserItem(user, item)
+      await saveUserItem(user, item)
     }
 
     if (e.name === 'ActionBurn') {
@@ -705,9 +907,10 @@ async function getAllBarracksEvents() {
 
   saveBarracksEvents()
   saveConfig()
-  await updateGit()
 
   config.barracks.updating = false
+
+  setTimeout(getAllBarracksEvents, 15 * 60 * 1000)
 }
 
 async function monitorBarracksEvents() {
@@ -757,103 +960,99 @@ async function getAllMarketEvents() {
 
       let trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
 
-      if (trade?.blockNumber >= log.blockNumber)
-        return
+      if (!trade || trade.blockNumber < log.blockNumber) {
+        trade = {
+          id: ++config.trades.counter
+        }
 
-      trade = {
-        id: ++config.trades.counter
+        trade.seller = seller
+        trade.buyer = buyer
+        trade.tokenId = tokenId.toString()
+        trade.price = toShort(price)
+        trade.status = "available"
+        trade.hotness = 0
+        trade.createdAt = new Date().getTime()
+        trade.updatedAt = new Date().getTime()
+        trade.blockNumber = log.blockNumber
+        trade.item = { id: decodeItem(tokenId.toString()).id }
+        // trade.item = decodeItem(trade.tokenId)
+
+        trades.push(trade)
+
+        await saveUserTrade(loadUser(seller), trade)
+        saveTokenTrade(loadToken(trade.tokenId), trade)
+        saveItemTrade(loadItem(trade.item.id), trade)
+        saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
+        saveConfig()
+        
+        console.log('List', trade)
       }
-
-      trades.push(trade)
-
-      trade.seller = seller
-      trade.buyer = buyer
-      trade.tokenId = tokenId.toString()
-      trade.price = toShort(price)
-      trade.status = "available"
-      trade.hotness = 0
-      trade.createdAt = new Date().getTime()
-      trade.updatedAt = new Date().getTime()
-      trade.blockNumber = log.blockNumber
-      trade.item = { id: decodeItem(tokenId.toString()).id }
-      // trade.item = decodeItem(trade.tokenId)
-
-      saveUserTrade(loadUser(seller), trade)
-      saveTokenTrade(loadToken(trade.tokenId), trade)
-      saveItemTrade(loadItem(trade.item.id), trade)
-      saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
-      saveConfig()
-      
-      console.log('List', trade)
     }
 
     if (e.name === 'Update') {
       const { seller, buyer, tokenId, price } = e.args
 
-      const trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
+      const specificTrades = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
 
-      if (trade.blockNumber >= log.blockNumber)
-        return
+      for (const specificTrade of specificTrades) {
+        specificTrade.buyer = buyer
+        specificTrade.price = toShort(price)
+        specificTrade.updatedAt = new Date().getTime()
+        specificTrade.blockNumber = log.blockNumber
+        specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+        // specificTrade.item = decodeItem(specificTrade.tokenId)
 
-      trade.buyer = buyer
-      trade.price = toShort(price)
-      trade.updatedAt = new Date().getTime()
-      trade.blockNumber = log.blockNumber
-      trade.item = { id: decodeItem(tokenId.toString()).id }
-      // trade.item = decodeItem(trade.tokenId)
-
-      saveUserTrade(loadUser(seller), trade)
-      saveTokenTrade(loadToken(trade.tokenId), trade)
-      saveItemTrade(loadItem(trade.item.id), trade)
-      saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
-      
-      console.log('Update', trade)
+        await saveUserTrade(loadUser(seller), specificTrade)
+        saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+        saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+        saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+        
+        console.log('Update', specificTrade)
+      }
     }
 
     if (e.name === 'Delist') {
       const { seller, buyer, tokenId, price } = e.args
 
-      const trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
-
-      if (trade.blockNumber >= log.blockNumber)
-        return
-  
-      trade.status = "delisted"
-      trade.updatedAt = new Date().getTime()
-      trade.blockNumber = log.blockNumber
-      trade.item = { id: decodeItem(tokenId.toString()).id }
-      // trade.item = decodeItem(trade.tokenId)
-
-      saveUserTrade(loadUser(seller), trade)
-      saveTokenTrade(loadToken(trade.tokenId), trade)
-      saveItemTrade(loadItem(trade.item.id), trade)
-      saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
+      const specificTrades = trades.filter(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
       
-      console.log('Delist', trade)
+      for (const specificTrade of specificTrades) {
+        specificTrade.status = "delisted"
+        specificTrade.updatedAt = new Date().getTime()
+        specificTrade.blockNumber = log.blockNumber
+        specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+        // specificTrade.item = decodeItem(specificTrade.tokenId)
+
+        await saveUserTrade(loadUser(seller), specificTrade)
+        saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+        saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+        saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+        
+        console.log('Delist', specificTrade)
+      }
     }
 
     if (e.name === 'Buy') {
       const { seller, buyer, tokenId, price } = e.args
 
-      const trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
+      const specificTrades = trades.filter(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
 
-      if (trade.blockNumber >= log.blockNumber)
-        return
-
-      trade.status = "sold"
-      trade.buyer = buyer
-      trade.updatedAt = new Date().getTime()
-      trade.blockNumber = log.blockNumber
-      trade.item = { id: decodeItem(tokenId.toString()).id }
-      // trade.item = decodeItem(trade.tokenId)
-
-      saveUserTrade(loadUser(seller), trade)
-      saveUserTrade(loadUser(buyer), trade)
-      saveTokenTrade(loadToken(trade.tokenId), trade)
-      saveItemTrade(loadItem(trade.item.id), trade)
-      saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
-      
-      console.log('Buy', trade)
+      for (const specificTrade of specificTrades) {
+        specificTrade.status = "sold"
+        specificTrade.buyer = buyer
+        specificTrade.updatedAt = new Date().getTime()
+        specificTrade.blockNumber = log.blockNumber
+        specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+        // specificTrade.item = decodeItem(specificTrade.tokenId)
+  
+        await saveUserTrade(loadUser(seller), specificTrade)
+        await saveUserTrade(loadUser(buyer), specificTrade)
+        saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+        saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+        saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+        
+        console.log('Buy', specificTrade)
+      }
     }
 
     const e2 = tradesEvents.find(t => t.transactionHash === log.transactionHash)
@@ -895,10 +1094,10 @@ async function getAllMarketEvents() {
 
   saveTrades()
   saveConfig()
-  await updateGit()
 
   config.trades.updating = false
   // setTimeout(getAllMarketEvents, 2 * 60 * 1000) // Manually update every 5 mins
+  setTimeout(getAllMarketEvents, 2 * 60 * 1000)
 }
 
 async function monitorMarketEvents() {
@@ -953,11 +1152,11 @@ async function getAllCharacterEvents() {
         id: await arcaneCharactersContract.getCharacterId(tokenId.toString())
       }
 
-      saveUserCharacter(user, characterData)
+      await saveUserCharacter(user, characterData)
       // saveTokenTransfer(loadToken(characterData.tokenId), characterData)
 
       if (from !== '0x0000000000000000000000000000000000000000') {
-        saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
+        await saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
       }
 
       saveCharacterOwner(loadCharacter(characterData.id), characterData)
@@ -997,9 +1196,10 @@ async function getAllCharacterEvents() {
 
   saveCharactersEvents()
   saveConfig()
-  await updateGit()
 
   config.characters.updating = false
+
+  setTimeout(getAllCharacterEvents, 2 * 60 * 1000)
 }
 
 async function monitorCharacterEvents() {
@@ -1049,11 +1249,11 @@ async function getAllItemEvents() {
         token.createdAt = itemData.createdAt
       }
 
-      saveUserItem(user, itemData)
+      await saveUserItem(user, itemData)
       saveTokenTransfer(token, itemData)
 
       if (from !== '0x0000000000000000000000000000000000000000') {
-        saveUserItem(user, { ...itemData, status: 'transferred_out' })
+        await saveUserItem(user, { ...itemData, status: 'transferred_out' })
       }
 
       await saveItemOwner(loadItem(itemData.id), itemData)
@@ -1095,9 +1295,10 @@ async function getAllItemEvents() {
 
   saveItemsEvents()
   saveConfig()
-  await updateGit()
 
   config.items.updating = false
+
+  setTimeout(getAllItemEvents, 2 * 60 * 1000)
 }
 
 async function monitorItemEvents() {
@@ -1368,8 +1569,8 @@ async function monitorGeneralStats() {
     {
       console.log('Update game info')
 
-      stats.totalGuilds = 3
-      stats.totalClasses = 7
+      stats.totalGuilds = guilds.length
+      stats.totalClasses = Object.keys(classes).length
       stats.totalRunewords = 7
     }
     
@@ -1533,9 +1734,7 @@ async function monitorGeneralStats() {
   saveHistorical()
   saveConfig()
 
-  await updateGit()
-
-  setTimeout(monitorGeneralStats, 15 * 60 * 1000)
+  setTimeout(monitorGeneralStats, 2 * 60 * 1000)
 }
 
 function median(values) {
@@ -1610,12 +1809,10 @@ async function monitorCraftingStats() {
       competition4: []
     }
 
-    jetpack.write(path.resolve('./db/crafting/leaderboard.json'), JSON.stringify(data, null, 2))
+    jetpack.write(path.resolve('./db/crafting/leaderboard.json'), beautify(data, null, 2), { atomic: true })
   }
 
-  await updateGit()
-
-  setTimeout(monitorCraftingStats, 15 * 60 * 1000)
+  setTimeout(monitorCraftingStats, 2 * 60 * 1000)
 }
 
 
@@ -1633,76 +1830,11 @@ async function monitorEvolutionStats() {
   const playerRoundWinners = {}
   const playerRewardWinners = {}
 
-  // Update evolution historical
-  try {
-    {
-      console.log('Update evolution historical 1')
-
-      if (!evolutionHistorical.playerCount) evolutionHistorical.playerCount = []
-
-      let playerCount = 0
-
-      for (const server of evolutionServers) {
-        try {
-          const rand = Math.floor(Math.random() * Math.floor(999999))
-          const response = await fetch(`https://${server.endpoint}/info?${rand}`)
-        
-          let data = await response.json()
-
-          server.playerCount = data.playerTotal
-          server.speculatorCount = data.speculatorTotal
-          server.version = data.version
-          server.rewardItemAmount = data.rewardItemAmount
-          server.rewardWinnerAmount = data.rewardWinnerAmount
-
-          server.status = "online"
-        } catch(e) {
-          if ((e + '').toString().indexOf('invalid json response body') === -1) console.log(e)
-
-          server.status = "offline"
-          server.playerCount = 0
-          server.speculatorCount = 0
-          server.rewardItemAmount = 0
-          server.rewardWinnerAmount = 0
-        }
-
-        const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
-
-        if (!hist.playerCount) hist.playerCount = []
-
-        const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
-        const newTime = (new Date()).getTime()
-        const diff = newTime - oldTime
-        if (diff / (1000 * 60 * 60 * 1) > 1) {
-          hist.playerCount.push([newTime, server.playerCount])
-        }
-
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), JSON.stringify(hist, null, 2))
-
-        playerCount += server.playerCount
-      }
-
-      jetpack.write(path.resolve('./db/evolution/servers.json'), JSON.stringify(evolutionServers, null, 2))
-
-      const oldTime = (new Date(evolutionHistorical.playerCount[evolutionHistorical.playerCount.length-1]?.[0] || 0)).getTime()
-      const newTime = (new Date()).getTime()
-      const diff = newTime - oldTime
-      if (diff / (1000 * 60 * 60 * 1) > 1) {
-        evolutionHistorical.playerCount.push([newTime, playerCount])
-      }
-
-      jetpack.write(path.resolve(`./db/evolution/historical.json`), JSON.stringify(evolutionHistorical, null, 2))
-    }
-    {
-      console.log('Update evolution historical 2')
-    }
-  } catch(e) {
-    console.log(e)
-  }
 
   const leaderboards = {
     europe1: {},
     na1: {},
+    asia1: {},
     overall: {}
   }
 
@@ -1727,11 +1859,13 @@ async function monitorEvolutionStats() {
         let lastIndex = 0
 
         if (leaderboardHistory.length > 0) {
-          const lastRoundItem = leaderboardHistory.slice(leaderboardHistory.length - 10).reverse().filter(r => r.length > 0)[0]
+          const lastRoundItem = leaderboardHistory.slice(leaderboardHistory.length - 10).reverse().filter(r => r.filter(p => p.name.indexOf('Unknown') !== 0).length > 0)[0]
 
-          console.log('Last round', lastRoundItem)
+          // console.log('Last round', lastRoundItem)
           for (let i = 0; i < data.length; i++) {
             if (!data[i].length || !data[i][0]) continue
+            // if (data[i][0].name.indexOf('Unknown') === 0) continue
+
             if (data[i].length === lastRoundItem.length && data[i][0].joinedAt === lastRoundItem[0].joinedAt && data[i][0].id === lastRoundItem[0].id && (typeof(data[i][0].position) === 'string' || !data[i][0].position ? data[i][0].position : data[i][0].position.x.toFixed(4) === lastRoundItem[0].position.x.toFixed(4) && data[i][0].position.y.toFixed(4) === lastRoundItem[0].position.y.toFixed(4))) { //  && data[i][0].position === lastRoundItem[0].position
               lastIndex = i
             }
@@ -1741,7 +1875,7 @@ async function monitorEvolutionStats() {
         console.log('Starting from', lastIndex)
 
         if (lastIndex === 0 && leaderboardHistory.length > 0) {
-          console.warn("Shouldnt start from 0")
+          console.warn("Shouldnt start from 0", server.key)
 
           playerRoundWinners[server.key] = leaderboardHistory
         } else {
@@ -1759,7 +1893,7 @@ async function monitorEvolutionStats() {
             return p
           })
       
-          jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), JSON.stringify(leaderboardHistory, null, 2))
+          jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), beautify(leaderboardHistory, null, 2), { atomic: true })
       
           playerRoundWinners[server.key] = leaderboardHistory
 
@@ -1792,14 +1926,18 @@ async function monitorEvolutionStats() {
             averageLatency: []
           }
 
-          const playerAddresses = evolutionPlayers.map(p => p.address) // or recentPlayerAddresses
+          const playerAddresses = recentPlayerAddresses // evolutionPlayers.map(p => p.address)
 
           for (const address of playerAddresses) {
-            if (address.toLowerCase() === "0xc84ce216fef4EC8957bD0Fb966Bb3c3E2c938082".toLowerCase()) continue
+            if (address.toLowerCase() === "0xc84ce216fef4EC8957bD0Fb966Bb3c3E2c938082".toLowerCase() ||
+            address.toLowerCase() === "0xa987f487639920A3c2eFe58C8FBDedB96253ed9B".toLowerCase()) continue
 
             try {
               const user = loadUser(address)
 
+              if (address === '0x9aAe5CBe5C124e1BE62BD83eD07367d57F8998E0') {
+                console.log(user)
+              }
               if (!evolutionPlayers.find(p => p.address === address)) {
                 evolutionPlayers.push({
                   address
@@ -1820,33 +1958,54 @@ async function monitorEvolutionStats() {
                 let orbs = 0
                 let revenges = 0
                 const latency = []
+                const hashHistory = {}
+                const hashHistory2 = {}
 
                 for (const round of leaderboardHistory) {
                   if (round.length === 0) continue
 
                   const currentPlayer = round.find(r => r.address === address)
-                  if (currentPlayer && (currentPlayer.latency === undefined || (currentPlayer.latency >= 10 && currentPlayer.latency <= 1000))) {
-                    kills += currentPlayer.kills || 0
-                    deaths += currentPlayer.deaths || 0
-                    powerups += currentPlayer.powerups || 0
-                    evolves += currentPlayer.evolves || 0
-                    points += currentPlayer.points || 0
-                    rewards += currentPlayer.rewards || 0
-                    orbs += currentPlayer.orbs || 0
-                    revenges += (currentPlayer.log?.revenge ? currentPlayer.log.revenge : 0)
+                  const wasConnected = currentPlayer ? (currentPlayer.latency === undefined || (currentPlayer.latency >= 10 && currentPlayer.latency <= 1000)) : false
+                  const wasActive = currentPlayer ? (currentPlayer.powerups >= 100) : false
+                  if (currentPlayer) {
+                    mapAddressToUsername[address] = currentPlayer.name
 
-                    if (currentPlayer.latency && currentPlayer.latency >= 10 && currentPlayer.latency <= 1000) {
+                    if (wasConnected) { 
                       latency.push(currentPlayer.latency)
                     }
 
-                    mapAddressToUsername[address] = currentPlayer.name
+                    if (wasActive) {
+                      kills += currentPlayer.kills || 0
+                      deaths += currentPlayer.deaths || 0
+                      powerups += currentPlayer.powerups || 0
+                      evolves += currentPlayer.evolves || 0
+                      points += currentPlayer.points || 0
+                      rewards += currentPlayer.rewards || 0
+                      orbs += currentPlayer.orbs || 0
+                      revenges += (currentPlayer.log?.revenge ? currentPlayer.log.revenge : 0)
+                      rounds++
+                    }
 
-                    rounds++
+                    if (currentPlayer.log?.kills) {
+                      for (const hash of currentPlayer.log.kills) {
+                        if (!hashHistory[hash]) hashHistory[hash] = 0
+
+                        hashHistory[hash]++
+                      }
+
+                      for (const player of round) {
+                        if (!hashHistory2[player.hash]) hashHistory2[player.hash] = 0
+                        if (player.hash === currentPlayer.hash) continue
+                        if (currentPlayer.log.kills.includes(player.hash)) continue
+
+                        hashHistory2[player.hash]++
+                      }
+                    }
                   }
 
-                  const winner = round.sort(((a, b) => b.kills - a.kills))[0]
+                  const winner = round.sort(((a, b) => b.points - a.points))[0]
 
-                  if (winner.address === user.address) {
+                  if (winner.address === address) {
                     wins++
                     winStreak++
         
@@ -1863,14 +2022,9 @@ async function monitorEvolutionStats() {
                 if (!user.evolution.overall) user.evolution.overall = {}
                 if (!user.evolution.overall.winStreak) user.evolution.overall.winStreak = 0
 
-                delete user.evolution.winStreak
-
-                if (savedWinStreak > user.evolution.servers[server.key].winStreak) {
+                // if (savedWinStreak > user.evolution.servers[server.key].winStreak) {
                   user.evolution.servers[server.key].winStreak = savedWinStreak
-                }
-                if (savedWinStreak > user.evolution.overall.winStreak) {
-                  user.evolution.overall.winStreak = savedWinStreak
-                }
+                // }
 
                 user.evolution.servers[server.key].kills = kills
                 user.evolution.servers[server.key].deaths = deaths
@@ -1882,13 +2036,13 @@ async function monitorEvolutionStats() {
                 user.evolution.servers[server.key].revenges = revenges
                 user.evolution.servers[server.key].wins = wins
                 user.evolution.servers[server.key].rounds = rounds
-                user.evolution.servers[server.key].winRatio = rounds > 0 ? wins / rounds : 0
+                user.evolution.servers[server.key].winRatio = rounds > 5 ? wins / rounds : 0
                 user.evolution.servers[server.key].killDeathRatio = rounds >= 5 && deaths > 0 ? kills / deaths : kills
                 user.evolution.servers[server.key].roundPointRatio = rounds >= 5 && rounds > 0 ? points / rounds : 0
                 user.evolution.servers[server.key].averageLatency = rounds >= 5 ? average(latency) : 0
                 user.evolution.servers[server.key].timeSpent = parseFloat((rounds * 5 / 60).toFixed(1))
-
-                delete user.evolution.servers[server.key].kdRatio
+                user.evolution.servers[server.key].hashHistory = hashHistory
+                user.evolution.servers[server.key].hashHistory2 = hashHistory2
 
                 for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
                   leaderboards[server.key][statKey].push({
@@ -1901,7 +2055,10 @@ async function monitorEvolutionStats() {
 
               user.evolution.lastUpdated = (new Date()).getTime()
               
-              saveUser(user)
+            if (address === '0x9aAe5CBe5C124e1BE62BD83eD07367d57F8998E0') {
+              console.log(user)
+            }
+              await saveUser(user)
             } catch(e) {
               console.log(e)
             }
@@ -1920,6 +2077,8 @@ async function monitorEvolutionStats() {
 
             const user = loadUser(address)
 
+            if (!user.evolution.servers[server.key]) user.evolution.servers[server.key] = {}
+
             user.evolution.servers[server.key].ranking = {}
 
             for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
@@ -1929,12 +2088,12 @@ async function monitorEvolutionStats() {
               }
             }
 
-            saveUser(user)
+            await saveUser(user)
           }
 
           leaderboards[server.key].lastUpdated = (new Date()).getTime()
 
-          jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboard2.json`), JSON.stringify(leaderboards[server.key], null, 2))
+          jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboard2.json`), beautify(leaderboards[server.key], null, 2), { atomic: true })
         }
       } catch(e) {
         console.log(e)
@@ -1961,6 +2120,9 @@ async function monitorEvolutionStats() {
 
     for (const player of evolutionPlayers) {
       const user = loadUser(player.address)
+
+      if (!user.evolution) user.evolution = {}
+      if (!user.evolution.overall) user.evolution.overall = {}
 
       user.evolution.overall.kills = 0
       user.evolution.overall.deaths = 0
@@ -1990,6 +2152,9 @@ async function monitorEvolutionStats() {
         user.evolution.overall.wins += server.wins || 0
         user.evolution.overall.timeSpent += server.timeSpent || 0
 
+        if (server.winStreak > user.evolution.overall.winStreak) {
+          user.evolution.overall.winStreak = server.winStreak
+        }
         if (server.averageLatency) {
           latency.push(server.averageLatency)
         }
@@ -1999,8 +2164,6 @@ async function monitorEvolutionStats() {
       user.evolution.overall.killDeathRatio = user.evolution.overall.rounds >= 5 && user.evolution.overall.deaths > 0 ? user.evolution.overall.kills / user.evolution.overall.deaths : user.evolution.overall.kills
       user.evolution.overall.roundPointRatio = user.evolution.overall.rounds >= 5 ? user.evolution.overall.points / user.evolution.overall.rounds : 0
       user.evolution.overall.averageLatency = latency.length > 0 ? average(latency) : 0
-
-      delete user.evolution.overall.kdRatio
 
       for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
         if (user.evolution.overall[statKey] && user.evolution.overall[statKey] > 0 && user.evolution.overall[statKey] !== null) {
@@ -2012,7 +2175,7 @@ async function monitorEvolutionStats() {
         }
       }
     
-      saveUser(user)
+      await saveUser(user)
     }
 
     // Sort descending
@@ -2028,6 +2191,9 @@ async function monitorEvolutionStats() {
     for (const player of evolutionPlayers) {
       const user = loadUser(player.address)
 
+      if (!user.evolution) user.evolution = {}
+      if (!user.evolution.overall) user.evolution.overall = {}
+
       user.evolution.overall.ranking = {}
 
       for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
@@ -2037,10 +2203,10 @@ async function monitorEvolutionStats() {
         }
       }
 
-      saveUser(user)
+      await saveUser(user)
     }
 
-    jetpack.write(path.resolve(`./db/evolution/players.json`), JSON.stringify(evolutionPlayers, null, 2))
+    jetpack.write(path.resolve(`./db/evolution/players.json`), beautify(evolutionPlayers, null, 2), { atomic: true })
 
       // const mapKeyToName = {
       //   kills: "Kills",
@@ -2077,7 +2243,7 @@ async function monitorEvolutionStats() {
 
     leaderboards.overall.lastUpdated = (new Date()).getTime()
 
-    jetpack.write(path.resolve(`./db/evolution/leaderboard.json`), JSON.stringify(leaderboards.overall, null, 2))
+    jetpack.write(path.resolve(`./db/evolution/leaderboard.json`), beautify(leaderboards.overall, null, 2), { atomic: true })
   } catch(e) {
     console.log(e)
   }
@@ -2088,6 +2254,7 @@ async function monitorEvolutionStats() {
 
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+      if (!playerRoundWinners[server.key]) continue
       try {
         const data = {
           toName: {},
@@ -2112,7 +2279,7 @@ async function monitorEvolutionStats() {
           }
         }
 
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/hashmap.json`), JSON.stringify(data, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/hashmap.json`), beautify(data, null, 2), { atomic: true })
       } catch(e) {
         console.log(e)
       }
@@ -2127,6 +2294,7 @@ async function monitorEvolutionStats() {
 
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+      if (!playerRoundWinners[server.key]) continue
       try {
         const stats = {
           averagePlayerLatency: 0,
@@ -2165,7 +2333,7 @@ async function monitorEvolutionStats() {
         stats.averagePlayerLatency = average(playerLatencyList)
         stats.averageWinnerLatency = average(winnerLatencyList)
 
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/stats.json`), JSON.stringify(stats, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/stats.json`), beautify(stats, null, 2), { atomic: true })
       } catch(e) {
         console.log(e)
       }
@@ -2187,6 +2355,8 @@ async function monitorEvolutionStats() {
         const dupChecker = {}
         let data = await response.json()
         let lastIndex = 0
+
+        if (!Array.isArray(data)) continue
 
         if (rewardHistory.length) {
           const lastRewardItem = rewardHistory[rewardHistory.length-1]
@@ -2229,7 +2399,7 @@ async function monitorEvolutionStats() {
             }
           }
 
-          jetpack.write(path.resolve(`./db/evolution/${server.key}/rewardHistory.json`), JSON.stringify(data, null, 2))
+          jetpack.write(path.resolve(`./db/evolution/${server.key}/rewardHistory.json`), beautify(data, null, 2), { atomic: true })
 
           playerRewardWinners[server.key] = data
         }
@@ -2252,7 +2422,27 @@ async function monitorEvolutionStats() {
           
         const data = await response.json()
 
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/rewards.json`), JSON.stringify(data, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/rewards.json`), beautify(data, null, 2), { atomic: true })
+      } catch(e) {
+        console.log(e)
+      }
+    }
+  } catch(e) {
+    console.log(e)
+  }
+
+  // Update evolution ban list
+  try {
+    console.log('Update evolution ban list')
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/data/banList.json?${rand}`)
+          
+        const data = await response.json()
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/bans.json`), beautify(data, null, 2), { atomic: true })
       } catch(e) {
         console.log(e)
       }
@@ -2272,27 +2462,7 @@ async function monitorEvolutionStats() {
       
         const data = await response.json()
 
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), JSON.stringify(data, null, 2))
-      } catch(e) {
-        console.log(e)
-      }
-    }
-  } catch(e) {
-    console.log(e)
-  }
-
-  // Update evolution info
-  try {
-    console.log('Update evolution info')
-    for (const server of evolutionServers) {
-      if (server.status !== 'online') continue
-      try {
-        const rand = Math.floor(Math.random() * Math.floor(999999))
-        const response = await fetch(`https://${server.endpoint}/info?${rand}`)
-      
-        const data = await response.json()
-
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/info.json`), JSON.stringify(data, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), beautify(data, null, 2), { atomic: true })
       } catch(e) {
         console.log(e)
       }
@@ -2305,6 +2475,7 @@ async function monitorEvolutionStats() {
   {
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+      if (!playerRoundWinners[server.key] || !Array.isArray(playerRewardWinners[server.key])) continue
       try {
         const leaderboardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), 'json') || []
         const roundsPlayed = {}
@@ -2403,6 +2574,25 @@ async function monitorEvolutionStats() {
           }
         }
 
+        for (const address of Object.keys(groupedRewardPlayers)) {
+          if (groupedRewardPlayers[address].monetary > 0) {
+            const user = loadUser(address)
+
+            if (user?.evolution?.servers?.[server.key]) {
+              user.evolution.servers[server.key].earnings = groupedRewardPlayers[address].monetary
+  
+              let earnings = 0
+              for (const s of Object.keys(user.evolution.servers)) {
+                if (Number.isFinite(user.evolution.servers[s].earnings)) earnings += user.evolution.servers[s].earnings
+              }
+  
+              user.evolution.overall.earnings = earnings
+    
+              await saveUser(user)
+            }
+          }
+        }
+
         const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
 
         if (!hist.earnings) hist.earnings = []
@@ -2422,7 +2612,7 @@ async function monitorEvolutionStats() {
           historicalEarnings.push([newTime, evolutionEarningsDistributed])
         }
 
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), JSON.stringify(hist, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
 
       // {
       //   "type": "rune",
@@ -2557,7 +2747,7 @@ async function monitorEvolutionStats() {
           ],
         }
 
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboard.json`), JSON.stringify(data, null, 2))
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboard.json`), beautify(data, null, 2), { atomic: true })
       } catch(e) {
         console.log(e)
       }
@@ -2565,36 +2755,148 @@ async function monitorEvolutionStats() {
   }
 
   await saveStats()
-  await updateGit()
 
-  setTimeout(monitorEvolutionStats, 10 * 60 * 1000)
+  setTimeout(monitorEvolutionStats, 5 * 60 * 1000)
 }
 
 
+
+async function monitorEvolutionStats2() {
+
+  // Update evolution historical
+  try {
+    {
+      console.log('Update evolution historical 1')
+
+      if (!evolutionHistorical.playerCount) evolutionHistorical.playerCount = []
+
+      let playerCount = 0
+
+      for (const server of evolutionServers) {
+        try {
+          const rand = Math.floor(Math.random() * Math.floor(999999))
+          const response = await fetch(`https://${server.endpoint}/info?${rand}`)
+        
+          let data = await response.json()
+
+          server.playerCount = data.playerTotal
+          server.speculatorCount = data.speculatorTotal
+          server.version = data.version
+          server.rewardItemAmount = data.rewardItemAmount
+          server.rewardWinnerAmount = data.rewardWinnerAmount
+
+          server.status = "online"
+        } catch(e) {
+          if ((e + '').toString().indexOf('invalid json response body') === -1) console.log(e)
+
+          // server.status = "offline"
+          // server.playerCount = 0
+          // server.speculatorCount = 0
+          // server.rewardItemAmount = 0
+          // server.rewardWinnerAmount = 0
+        }
+
+        const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
+
+        if (!hist.playerCount) hist.playerCount = []
+
+        const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
+        const newTime = (new Date()).getTime()
+        const diff = newTime - oldTime
+        if (diff / (1000 * 60 * 60 * 1) > 1) {
+          hist.playerCount.push([newTime, server.playerCount])
+        }
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
+
+        playerCount += server.playerCount
+      }
+
+      jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(evolutionServers, null, 2), { atomic: true })
+
+      const oldTime = (new Date(evolutionHistorical.playerCount[evolutionHistorical.playerCount.length-1]?.[0] || 0)).getTime()
+      const newTime = (new Date()).getTime()
+      const diff = newTime - oldTime
+      if (diff / (1000 * 60 * 60 * 1) > 1) {
+        evolutionHistorical.playerCount.push([newTime, playerCount])
+      }
+
+      jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(evolutionHistorical, null, 2), { atomic: true })
+    }
+    {
+      console.log('Update evolution historical 2')
+    }
+  } catch(e) {
+    console.log(e)
+  }
+
+  // Update evolution info
+  try {
+    console.log('Update evolution info')
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/info?${rand}`)
+      
+        const data = await response.json()
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/info.json`), beautify(data, null, 2), { atomic: true })
+      } catch(e) {
+        console.log(e)
+      }
+    }
+  } catch(e) {
+    console.log(e)
+  }
+
+  await saveStats()
+  setTimeout(monitorEvolutionStats2, 2 * 60 * 1000)
+}
+
+async function monitorCoordinator() {
+  // Update coordinator refers
+  try {
+    console.log('Update coordinator refers')
+    const rand = Math.floor(Math.random() * Math.floor(999999))
+    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/refers.json?${rand}`)
+
+    const data = await response.json()
+
+    jetpack.write(path.resolve(`./db/affiliate/refers.json`), beautify(data, null, 2), { atomic: true })
+  } catch(e) {
+    console.log(e)
+  }
+
+  await saveStats()
+
+  setTimeout(monitorCoordinator, 2 * 60 * 1000)
+}
+
 async function monitorMeta() {
   console.log('Saving achievement data')
-  jetpack.write(path.resolve('./db/achievements.json'), JSON.stringify(achievementData, null, 2))
+  jetpack.write(path.resolve('./db/achievements.json'), beautify(achievementData, null, 2), { atomic: true })
 
   console.log('Saving item data')
-  jetpack.write(path.resolve('./db/items.json'), JSON.stringify(itemData, null, 2))
+  jetpack.write(path.resolve('./db/items.json'), beautify(itemData, null, 2), { atomic: true })
 
   console.log('Saving item attribute data')
-  jetpack.write(path.resolve('./db/itemAttributes.json'), JSON.stringify(ItemAttributes, null, 2))
+  jetpack.write(path.resolve('./db/itemAttributes.json'), beautify(ItemAttributes, null, 2), { atomic: true })
 
   console.log('Saving skill data')
-  jetpack.write(path.resolve('./db/skills.json'), JSON.stringify(SkillNames, null, 2))
+  jetpack.write(path.resolve('./db/skills.json'), beautify(SkillNames, null, 2), { atomic: true })
 
   console.log('Saving class data')
-  jetpack.write(path.resolve('./db/classes.json'), JSON.stringify(ClassNames, null, 2))
+  jetpack.write(path.resolve('./db/classes.json'), beautify(ClassNames, null, 2), { atomic: true })
 
   console.log('Saving item rarity data')
-  jetpack.write(path.resolve('./db/itemRarity.json'), JSON.stringify(ItemRarity, null, 2))
+  jetpack.write(path.resolve('./db/itemRarity.json'), beautify(ItemRarity, null, 2), { atomic: true })
 
   console.log('Saving item type data')
-  jetpack.write(path.resolve('./db/itemTypes.json'), JSON.stringify(ItemTypeToText, null, 2))
+  jetpack.write(path.resolve('./db/itemTypes.json'), beautify(ItemTypeToText, null, 2), { atomic: true })
 
   console.log('Saving item slot data')
-  jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText, null, 2))
+  jetpack.write(path.resolve('./db/itemSlots.json'), beautify(ItemSlotToText, null, 2), { atomic: true })
 
   try {
     for (const item of itemData[ItemsMainCategoriesType.OTHER]) {
@@ -2937,7 +3239,7 @@ async function monitorMeta() {
 
       console.log('Saving item meta', itemJson.id)
 
-      jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), JSON.stringify(itemJson, null, 2))
+      jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), beautify(itemJson, null, 2), { atomic: true })
 
       // const ipfs = ipfsClient.create({
       //   host: 'ipfs.rune.game',
@@ -2946,10 +3248,10 @@ async function monitorMeta() {
       //   apiPath: '/api/v0'
       // })
 
-      // await ipfs.files.add('/items/999999.json', Buffer.from(JSON.stringify(itemJson, null, 2)))
+      // await ipfs.files.add('/items/999999.json', Buffer.from(beautify(itemJson, null, 2)))
 
       // const cid = await ipfs.add(
-      //   { path: '/items/999999.json', content: JSON.stringify(itemJson, null, 2) }, 
+      //   { path: '/items/999999.json', content: beautify(itemJson, null, 2) }, 
       //   // { wrapWithDirectory: true }
       //   // cid: 'QmcZ774UPRJ3Qzuyg76ayc2AFM26ZfZQai8Ub5THKmwtbF', 
       // )
@@ -2961,9 +3263,75 @@ async function monitorMeta() {
     console.log(e)
   }
 
-  await updateGit()
 
   setTimeout(monitorMeta, 10 * 60 * 1000)
+}
+
+
+async function monitorGuildMemberDetails() {
+  const transformProfileResponse = (profileResponse) => {
+    const { 0: userId, 1: numberPoints, 2: teamId, 3: nftAddress, 4: tokenId, 5: isActive } = profileResponse
+
+    return {
+      userId: Number(userId),
+      points: Number(numberPoints),
+      teamId: Number(teamId),
+      tokenId: Number(tokenId),
+      nftAddress,
+      isActive,
+    }
+  }
+
+  console.log(guilds)
+  for (const g of guilds) {
+    console.log(g)
+    const guild = loadGuild(g.id)
+
+    guild.memberDetails = []
+
+    for (const member of guild.members) {
+      const user = loadUser(member)
+
+      if (!user.username) {
+        const usernameSearch = await ((await fetch(`https://rune-api.binzy.workers.dev/users/${user.address}`)).json())
+  
+        if (!!usernameSearch.message && usernameSearch.message === "No user exists" || !(usernameSearch.username)) {
+          continue
+        } else {
+          user.username = usernameSearch.username
+        }
+      }
+
+      const hasRegistered = (await arcaneProfileContract.hasRegistered(user.address))
+
+      if (!hasRegistered) continue
+
+      const profileResponse = await arcaneProfileContract.getUserProfile(user.address)
+      const { userId, teamId, tokenId, nftAddress, isActive } = transformProfileResponse(profileResponse)
+
+      if (teamId !== guild.id) continue
+
+      user.isGuildMembershipActive = isActive
+      user.guildMembershipTokenId = tokenId
+
+      guild.memberDetails.push({
+        address: user.address,
+        username: user.username,
+        points: user.points,
+        achievementCount: user.achievements.length,
+        isActive: user.isGuildMembershipActive,
+        characterId: await arcaneCharactersContract.getCharacterId(tokenId)
+      })
+
+      console.log(`Sync guild ${guild.id} member ${guild.memberDetails.length} / ${guild.memberCount}`)
+
+      await saveUser(user)
+    }
+
+    saveGuild(guild)
+  }
+
+  setTimeout(monitorGuildMemberDetails, 10 * 60 * 1000)
 }
 
 async function onCommand() {
@@ -2991,6 +3359,12 @@ function migrateTrades() {
   saveTrades()
 }
 
+async function monitorGit() {
+  await updateGit()
+
+  setTimeout(monitorGit, 2 * 60 * 1000)
+}
+
 async function run() {
   // migrateTrades()
 
@@ -3008,16 +3382,13 @@ async function run() {
   // const user = loadUser('0x37470038C615Def104e1bee33c710bD16a09FdEf')
   // updateAchievementsByUser(user)
   // saveUser(user)
+  
 
-  setInterval(getAllItemEvents, 15 * 60 * 1000)
-  setInterval(getAllBarracksEvents, 15 * 60 * 1000)
-  setInterval(getAllMarketEvents, 15 * 60 * 1000)
-  setInterval(getAllCharacterEvents, 15 * 60 * 1000)
-
-  getAllItemEvents()
-  getAllBarracksEvents()
+  setTimeout(getAllItemEvents, 1 * 60 * 1000)
+  setTimeout(getAllBarracksEvents, 1 * 60 * 1000)
+  // setTimeout(getAllMarketEvents, 1 * 60 * 1000)
+  setTimeout(getAllCharacterEvents, 1 * 60 * 1000)
   getAllMarketEvents()
-  getAllCharacterEvents()
 
   monitorItemEvents()
   monitorBarracksEvents()
@@ -3027,13 +3398,18 @@ async function run() {
   monitorGeneralStats()
   monitorCraftingStats()
   monitorEvolutionStats()
+  monitorEvolutionStats2()
   monitorMeta()
+  monitorCoordinator()
+  
+  setTimeout(monitorGuildMemberDetails, 30 * 60 * 1000)
 
+  setTimeout(monitorGit, 2 * 60 * 1000)
 }
 
 run()
 
-// Force restart after 15 mins
+// Force restart after an hour
 setTimeout(() => {
   process.exit(1)
-}, 30 * 60 * 1000)
+}, 2 * 60 * 60 * 1000)

@@ -318,7 +318,7 @@ export default {
     [TESTNET]: '',
   },
   lum: {
-    [MAINNET]: '',
+    [MAINNET]: '0xD481F4eA902e207AAda9Fa093f80d50B19444253',
     [TESTNET]: '',
   },
   ko: {
