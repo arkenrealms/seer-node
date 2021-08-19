@@ -63,6 +63,7 @@ config.items.updating = false
 config.characters.updating = false
 config.test.updating = false
 
+
 const fetchPrice = async (id, vs = 'usd') => {
   const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=${vs}`)
 
@@ -116,9 +117,9 @@ process
 
     //provider = getRandomProvider()
     // run()
-    setTimeout(() => {
-      process.exit(1)
-    }, 60 * 1000)
+    // setTimeout(() => {
+    //   process.exit(1)
+    // }, 60 * 1000)
   })
 
 const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
@@ -150,13 +151,13 @@ async function iterateBlocks(name, address, fromBlock, toBlock, event, processLo
     const logs = await web3Provider.getLogs(filter)
 
     for(let i = 0; i < logs.length; i++) {
-      processLog(logs[i], false)
+      await processLog(logs[i], false)
     }
 
     // await wait(3 * 1000)
     
     if (updateConfig && toBlock2 > 0) {
-      updateConfig(toBlock2)
+      await updateConfig(toBlock2)
     }
 
     await iterateBlocks(name, address, toBlock2, toBlock, event, processLog, updateConfig)
@@ -167,55 +168,55 @@ async function iterateBlocks(name, address, fromBlock, toBlock, event, processLo
   }
 }
   
-const saveConfig = () => {
+const saveConfig = async () => {
   jetpack.write(path.resolve('./db/config.json'), beautify(config, null, 2, 100), { atomic: true })
 }
 
-const saveTrades = () => {
+const saveTrades = async () => {
   jetpack.write(path.resolve('./db/trades.json'), beautify(trades, null, 2, 100), { atomic: true })
 }
 
-const saveTradesEvents = () => {
+const saveTradesEvents = async () => {
   jetpack.write(path.resolve('./db/trades/events.json'), beautify(tradesEvents, null, 2, 100), { atomic: true })
 }
 
-const saveBarracksEvents = () => {
+const saveBarracksEvents = async () => {
   jetpack.write(path.resolve('./db/barracks/events.json'), beautify(barracksEvents, null, 2, 100), { atomic: true })
 }
 
-const saveCharactersEvents = () => {
+const saveCharactersEvents = async () => {
   jetpack.write(path.resolve('./db/characters/events.json'), beautify(charactersEvents, null, 2, 100), { atomic: true })
 }
 
-const saveItemsEvents = () => {
+const saveItemsEvents = async () => {
   jetpack.write(path.resolve('./db/items/events.json'), beautify(itemsEvents, null, 2, 100), { atomic: true })
 }
 
-const saveFarms = () => {
+const saveFarms = async () => {
   jetpack.write(path.resolve('./db/farms.json'), beautify(farms, null, 2, 100), { atomic: true })
 }
 
-const saveGuilds = () => {
+const saveGuilds = async () => {
   jetpack.write(path.resolve('./db/guilds.json'), beautify(guilds, null, 2, 100), { atomic: true })
 }
 
-const saveRunes = () => {
+const saveRunes = async () => {
   jetpack.write(path.resolve('./db/runes.json'), beautify(runes, null, 2, 100), { atomic: true })
 }
 
-const saveStats = () => {
+const saveStats = async () => {
   jetpack.write(path.resolve('./db/stats.json'), beautify(stats, null, 2, 100), { atomic: true })
 }
 
-const saveHistorical = () => {
+const saveHistorical = async () => {
   jetpack.write(path.resolve('./db/historical.json'), beautify(historical, null, 2, 100), { atomic: true })
 }
 
-const saveApp = () => {
+const saveApp = async () => {
   jetpack.write(path.resolve('./db/app.json'), beautify(app, null, 2, 100), { atomic: true })
 }
 
-const updateLeaderboardByUser = (user) => {
+const updateLeaderboardByUser = async (user) => {
   const leaderboard = {
     mostInventoryItems: {
       value: 0,
@@ -302,7 +303,7 @@ const loadCharacter = (characterId) => {
   }
 }
 
-const saveCharacter = (character) => {
+const saveCharacter = async (character) => {
   jetpack.write(path.resolve(`./db/characters/${character.id}/overview.json`), beautify({
     ...character,
     owners: undefined,
@@ -312,13 +313,13 @@ const saveCharacter = (character) => {
   jetpack.write(path.resolve(`./db/characters/${character.id}/owners.json`), beautify(character.owners, null, 2), { atomic: true })
 }
 
-const saveCharacterOwner = (character, characterData) => {
+const saveCharacterOwner = async (character, characterData) => {
   if (!character.owners.find(o => o === characterData.owner)) {
     character.owners.push(characterData.owner)
     character.owners = character.owners.filter(o => o != characterData.from)
   }
   
-  saveCharacter(character)
+  await saveCharacter(character)
 }
 
 const loadItem = (itemId) => {
@@ -335,7 +336,7 @@ const loadItem = (itemId) => {
   }
 }
 
-const saveItem = (item) => {
+const saveItem = async (item) => {
   jetpack.write(path.resolve(`./db/items/${item.id}/overview.json`), beautify({
     ...item,
     owners: undefined,
@@ -364,10 +365,10 @@ const saveItemOwner = async (item, itemData) => {
   stats.items[item.id].total = (await arcaneItemsContract.itemCount(item.id)).toNumber()
   stats.items[item.id].burned = 0 //(await arcaneItemsContract.itemBurnCount(item.id)).toNumber()
   
-  saveItem(item)
+  await saveItem(item)
 }
 
-const saveItemTrade = (item, trade) => {
+const saveItemTrade = async (item, trade) => {
   const found = item.market.find(i => i.seller === trade.seller && i.buyer === trade.buyer && i.tokenId === trade.tokenId)
 
   if (found) {
@@ -378,10 +379,10 @@ const saveItemTrade = (item, trade) => {
     item.market.push(trade)
   }
 
-  saveItem(item)
+  await saveItem(item)
 }
 
-const saveItemToken = (item, token) => {
+const saveItemToken = async (item, token) => {
   const found = item.tokens.find(i => i.id === token.id)
 
   if (found) {
@@ -392,7 +393,7 @@ const saveItemToken = (item, token) => {
     item.tokens.push(token)
   }
 
-  saveItem(item)
+  await saveItem(item)
 }
 
 const loadToken = (tokenId) => {
@@ -407,7 +408,7 @@ const loadToken = (tokenId) => {
   }
 }
 
-const saveToken = (token) => {
+const saveToken = async (token) => {
   jetpack.write(path.resolve(`./db/tokens/${token.id}/overview.json`), beautify({
     ...token,
     transfers: undefined,
@@ -418,7 +419,7 @@ const saveToken = (token) => {
   jetpack.write(path.resolve(`./db/tokens/${token.id}/trades.json`), beautify(token.trades, null, 2), { atomic: true })
 }
 
-const saveTokenTrade = (token, trade) => {
+const saveTokenTrade = async (token, trade) => {
   const found = token.trades.find(i => i.seller === trade.seller && i.buyer === trade.buyer && i.tokenId === trade.tokenId)
 
   if (found) {
@@ -429,10 +430,10 @@ const saveTokenTrade = (token, trade) => {
     token.trades.push(trade)
   }
 
-  saveToken(token)
+  await saveToken(token)
 }
 
-const saveTokenTransfer = (token, itemData) => {
+const saveTokenTransfer = async (token, itemData) => {
   const found = token.transfers.find(i => i.owner === itemData.owner && i.tokenId === itemData.tokenId)
 
   if (found) {
@@ -443,7 +444,7 @@ const saveTokenTransfer = (token, itemData) => {
     token.transfers.push(itemData)
   }
 
-  saveToken(token)
+  await saveToken(token)
 }
 
 const loadUser = (address) => {
@@ -549,7 +550,7 @@ const addGuildMember = (guild, user) => {
   }
 }
 
-const saveGuild = (guild) => {
+const saveGuild = async (guild) => {
   console.log('Saving guild', guild)
   updateAchievementsByGuild(guild)
 
@@ -575,7 +576,6 @@ const saveGuild = (guild) => {
   g.memberCount = guild.memberCount
   g.activeMemberCount = guild.activeMemberCount
 
-  saveGuilds()
 }
 
 const updateAchievementsByGuild = (guild) => {
@@ -592,7 +592,7 @@ const updateAchievementsByGuild = (guild) => {
   guild.points = points
 }
 
-const updateAchievementsByUser = (user) => {
+const updateAchievementsByUser = async (user) => {
   if (!hasUserAchievement(user, 'CRAFT_1') && user.craftedItemCount >= 1) {
     addUserAchievement(user, 'CRAFT_1')
   }
@@ -619,7 +619,7 @@ const updateAchievementsByUser = (user) => {
   }
 }
 
-const updatePointsByUser = (user) => {
+const updatePointsByUser = async (user) => {
   const achievements = user.achievements.map(a => achievementData.find(b => b.id === a))
 
   user.points = 0
@@ -688,7 +688,7 @@ const updateGuildByUser = async (user) => {
 
       addGuildMember(guild, user)
 
-      saveGuild(guild)
+      await saveGuild(guild)
     } catch (e) {
     }
   }
@@ -698,7 +698,7 @@ const saveUser = async (user) => {
   // console.log('Save user', user.address)
 
   await updateGuildByUser(user)
-  updatePointsByUser(user)
+  await updatePointsByUser(user)
 
   jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
     ...user,
@@ -714,8 +714,8 @@ const saveUser = async (user) => {
     transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
   }, null, 2), { atomic: true })
 
-  updateLeaderboardByUser(user)
-  updateAchievementsByUser(user)
+  await updateLeaderboardByUser(user)
+  await updateAchievementsByUser(user)
 
   jetpack.write(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2), { atomic: true })
   jetpack.write(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2), { atomic: true })
@@ -876,7 +876,6 @@ async function getAllBarracksEvents() {
       })
     }
   
-    saveBarracksEvents()
 
     // if (updateConfig && log.blockNumber > config.barracks.lastBlock) {
     //   config.barracks.lastBlock = log.blockNumber
@@ -897,18 +896,18 @@ async function getAllBarracksEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock[event], blockNumber, arcaneBarracksContract.filters[event](), processLog, function (blockNumber) {
+    await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock[event], blockNumber, arcaneBarracksContract.filters[event](), processLog, async function (blockNumber) {
       config.barracks.lastBlock[event] = blockNumber
-      saveConfig()
+      // await saveConfig()
     })
   }
 
   console.log('Finished')
 
-  saveBarracksEvents()
-  saveConfig()
-
   config.barracks.updating = false
+
+  // await saveBarracksEvents()
+  // await saveConfig()
 
   setTimeout(getAllBarracksEvents, 15 * 60 * 1000)
 }
@@ -943,6 +942,18 @@ async function monitorBarracksEvents() {
   })
 }
 
+function getHighestId(arr) {
+  let highest = 0
+
+  for (const item of arr) {
+    if (item.id > highest) {
+      highest = item.id
+    }
+  }
+
+  return highest
+}
+
 async function getAllMarketEvents() {
   if (config.trades.updating) return
 
@@ -962,7 +973,7 @@ async function getAllMarketEvents() {
 
       if (!trade || trade.blockNumber < log.blockNumber) {
         trade = {
-          id: ++config.trades.counter
+          id: getHighestId(trades) + 1
         }
 
         trade.seller = seller
@@ -980,10 +991,10 @@ async function getAllMarketEvents() {
         trades.push(trade)
 
         await saveUserTrade(loadUser(seller), trade)
-        saveTokenTrade(loadToken(trade.tokenId), trade)
-        saveItemTrade(loadItem(trade.item.id), trade)
-        saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
-        saveConfig()
+        await saveTokenTrade(loadToken(trade.tokenId), trade)
+        await saveItemTrade(loadItem(trade.item.id), trade)
+        await saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
+        // await saveConfig()
         
         console.log('List', trade)
       }
@@ -1003,9 +1014,9 @@ async function getAllMarketEvents() {
         // specificTrade.item = decodeItem(specificTrade.tokenId)
 
         await saveUserTrade(loadUser(seller), specificTrade)
-        saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
-        saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
-        saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+        await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+        await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+        await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
         
         console.log('Update', specificTrade)
       }
@@ -1024,9 +1035,9 @@ async function getAllMarketEvents() {
         // specificTrade.item = decodeItem(specificTrade.tokenId)
 
         await saveUserTrade(loadUser(seller), specificTrade)
-        saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
-        saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
-        saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+        await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+        await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+        await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
         
         console.log('Delist', specificTrade)
       }
@@ -1047,9 +1058,9 @@ async function getAllMarketEvents() {
   
         await saveUserTrade(loadUser(seller), specificTrade)
         await saveUserTrade(loadUser(buyer), specificTrade)
-        saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
-        saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
-        saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+        await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+        await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+        await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
         
         console.log('Buy', specificTrade)
       }
@@ -1065,8 +1076,6 @@ async function getAllMarketEvents() {
       })
     }
 
-    saveTrades()
-    saveTradesEvents()
 
     // if (updateConfig) {
     //   config.trades.lastBlock = log.blockNumber
@@ -1084,18 +1093,19 @@ async function getAllMarketEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock[event], blockNumber, arcaneTraderContract.filters[event](), processLog, function (blockNumber) {
+    await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock[event], blockNumber, arcaneTraderContract.filters[event](), processLog, async function (blockNumber) {
       config.trades.lastBlock[event] = blockNumber
-      saveConfig()
+      // await saveConfig()
     })
   }
 
   console.log('Finished')
 
-  saveTrades()
-  saveConfig()
-
   config.trades.updating = false
+
+  // await saveTrades()
+  // await saveConfig()
+
   // setTimeout(getAllMarketEvents, 2 * 60 * 1000) // Manually update every 5 mins
   setTimeout(getAllMarketEvents, 2 * 60 * 1000)
 }
@@ -1159,20 +1169,19 @@ async function getAllCharacterEvents() {
         await saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
       }
 
-      saveCharacterOwner(loadCharacter(characterData.id), characterData)
+      await saveCharacterOwner(loadCharacter(characterData.id), characterData)
     }
 
     const e2 = charactersEvents.find(t => t.transactionHash === log.transactionHash)
 
     if (!e2) {
       charactersEvents.push({
-        id: ++config.characters.counter,
+        id: getHighestId(charactersEvents) + 1,
         ...log,
         ...e
       })
     }
   
-    saveCharactersEvents()
 
     // if (updateConfig) {
     //   config.characters.lastBlock = log.blockNumber
@@ -1187,17 +1196,17 @@ async function getAllCharacterEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock[event], blockNumber, arcaneCharactersContract.filters[event](), processLog, function (blockNumber) {
+    await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock[event], blockNumber, arcaneCharactersContract.filters[event](), processLog, async function (blockNumber) {
       config.characters.lastBlock[event] = blockNumber
-      saveConfig()
+      // await saveConfig()
     })
   }
   console.log('Finished')
 
-  saveCharactersEvents()
-  saveConfig()
-
   config.characters.updating = false
+
+  // await saveCharactersEvents()
+  // await saveConfig()
 
   setTimeout(getAllCharacterEvents, 2 * 60 * 1000)
 }
@@ -1250,7 +1259,7 @@ async function getAllItemEvents() {
       }
 
       await saveUserItem(user, itemData)
-      saveTokenTransfer(token, itemData)
+      await saveTokenTransfer(token, itemData)
 
       if (from !== '0x0000000000000000000000000000000000000000') {
         await saveUserItem(user, { ...itemData, status: 'transferred_out' })
@@ -1269,8 +1278,7 @@ async function getAllItemEvents() {
       })
     }
   
-    saveItemsEvents()
-    saveConfig()
+    // await saveConfig()
 
     // if (updateConfig) {
     //   config.items.lastBlock = log.blockNumber
@@ -1285,18 +1293,18 @@ async function getAllItemEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, function (blockNumber) {
+    await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber) {
       config.items.lastBlock[event] = blockNumber
-      saveConfig()
+      // await saveConfig()
     })
   }
 
   console.log('Finished')
 
-  saveItemsEvents()
-  saveConfig()
-
   config.items.updating = false
+
+  // await saveItemsEvents()
+  // await saveConfig()
 
   setTimeout(getAllItemEvents, 2 * 60 * 1000)
 }
@@ -1468,7 +1476,6 @@ async function monitorGeneralStats() {
       }
     }
 
-    saveFarms()
 
     console.log("Done updating farms")
   }
@@ -1617,8 +1624,6 @@ async function monitorGeneralStats() {
       }
     }
 
-    saveStats()
-    saveHistorical()
   }
 
   // Update app
@@ -1632,7 +1637,6 @@ async function monitorGeneralStats() {
       app.config.profileRegisterCost = toShort((await arcaneProfileContract.numberRuneToRegister()).toString())
     }
 
-    saveApp()
   }
 
   // Update runes
@@ -1728,11 +1732,9 @@ async function monitorGeneralStats() {
       }
     }
     
-    saveRunes()
   }
   
-  saveHistorical()
-  saveConfig()
+  // await saveConfig()
 
   setTimeout(monitorGeneralStats, 2 * 60 * 1000)
 }
@@ -1872,7 +1874,7 @@ async function monitorEvolutionStats() {
           }
         }
         
-        console.log('Starting from', lastIndex)
+        console.log('Starting from', lastIndex, server.key)
 
         if (lastIndex === 0 && leaderboardHistory.length > 0) {
           console.warn("Shouldnt start from 0", server.key)
@@ -2255,6 +2257,9 @@ async function monitorEvolutionStats() {
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
       if (!playerRoundWinners[server.key]) continue
+
+      console.log('Server', server.key)
+
       try {
         const data = {
           toName: {},
@@ -2294,6 +2299,8 @@ async function monitorEvolutionStats() {
 
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+
+
       if (!playerRoundWinners[server.key]) continue
       try {
         const stats = {
@@ -2347,6 +2354,9 @@ async function monitorEvolutionStats() {
     console.log('Update evolution reward history')
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+
+      console.log('Server', server.key)
+
       try {
         const rewardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/rewardHistory.json`), 'json') || []
         const rand = Math.floor(Math.random() * Math.floor(999999))
@@ -2416,6 +2426,9 @@ async function monitorEvolutionStats() {
     console.log('Update evolution rewards')
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+
+      console.log('Server', server.key)
+
       try {
         const rand = Math.floor(Math.random() * Math.floor(999999))
         const response = await fetch(`https://${server.endpoint}/data/rewards.json?${rand}`)
@@ -2436,6 +2449,9 @@ async function monitorEvolutionStats() {
     console.log('Update evolution ban list')
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+
+      console.log('Server', server.key)
+
       try {
         const rand = Math.floor(Math.random() * Math.floor(999999))
         const response = await fetch(`https://${server.endpoint}/data/banList.json?${rand}`)
@@ -2456,6 +2472,9 @@ async function monitorEvolutionStats() {
     console.log('Update evolution player rewards')
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
+
+      console.log('Server', server.key)
+
       try {
         const rand = Math.floor(Math.random() * Math.floor(999999))
         const response = await fetch(`https://${server.endpoint}/data/playerRewards.json?${rand}`)
@@ -2476,6 +2495,9 @@ async function monitorEvolutionStats() {
     for (const server of evolutionServers) {
       if (server.status !== 'online') continue
       if (!playerRoundWinners[server.key] || !Array.isArray(playerRewardWinners[server.key])) continue
+
+      console.log('Server', server.key)
+
       try {
         const leaderboardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), 'json') || []
         const roundsPlayed = {}
@@ -2754,7 +2776,6 @@ async function monitorEvolutionStats() {
     }
   }
 
-  await saveStats()
 
   setTimeout(monitorEvolutionStats, 5 * 60 * 1000)
 }
@@ -2850,7 +2871,6 @@ async function monitorEvolutionStats2() {
     console.log(e)
   }
 
-  await saveStats()
   setTimeout(monitorEvolutionStats2, 2 * 60 * 1000)
 }
 
@@ -2867,8 +2887,6 @@ async function monitorCoordinator() {
   } catch(e) {
     console.log(e)
   }
-
-  await saveStats()
 
   setTimeout(monitorCoordinator, 2 * 60 * 1000)
 }
@@ -3263,7 +3281,6 @@ async function monitorMeta() {
     console.log(e)
   }
 
-
   setTimeout(monitorMeta, 10 * 60 * 1000)
 }
 
@@ -3328,7 +3345,7 @@ async function monitorGuildMemberDetails() {
       await saveUser(user)
     }
 
-    saveGuild(guild)
+    await saveGuild(guild)
   }
 
   setTimeout(monitorGuildMemberDetails, 10 * 60 * 1000)
@@ -3351,18 +3368,34 @@ async function isConnected() {
 
 }
 
-function migrateTrades() {
+async function migrateTrades() {
   for (const trade of trades) {
     delete trade.item
   }
 
-  saveTrades()
+  await saveTrades()
 }
 
 async function monitorGit() {
-  await updateGit()
+  try {
+    await saveTrades()
+    await saveTradesEvents()
+    await saveItemsEvents()
+    await saveCharactersEvents()
+    await saveBarracksEvents()
+    await saveFarms()
+    await saveGuilds()
+    await saveStats()
+    await saveRunes()
+    await saveHistorical()
+    await saveApp()
+    await saveConfig()
+    await updateGit()
+  } catch(e) {
+    console.log('Git error', e)
+  }
 
-  setTimeout(monitorGit, 2 * 60 * 1000)
+  setTimeout(monitorGit, 5 * 60 * 1000)
 }
 
 async function run() {
@@ -3388,23 +3421,20 @@ async function run() {
   setTimeout(getAllBarracksEvents, 1 * 60 * 1000)
   // setTimeout(getAllMarketEvents, 1 * 60 * 1000)
   setTimeout(getAllCharacterEvents, 1 * 60 * 1000)
-  getAllMarketEvents()
-
-  monitorItemEvents()
-  monitorBarracksEvents()
-  monitorMarketEvents()
-  monitorCharacterEvents()
-  
-  monitorGeneralStats()
-  monitorCraftingStats()
-  monitorEvolutionStats()
-  monitorEvolutionStats2()
-  monitorMeta()
-  monitorCoordinator()
-  
   setTimeout(monitorGuildMemberDetails, 30 * 60 * 1000)
+  setTimeout(monitorGit, 5 * 60 * 1000)
 
-  setTimeout(monitorGit, 2 * 60 * 1000)
+  await getAllMarketEvents()
+  await monitorItemEvents()
+  await monitorBarracksEvents()
+  await monitorMarketEvents()
+  await monitorCharacterEvents()
+  await monitorGeneralStats()
+  await monitorCraftingStats()
+  await monitorEvolutionStats()
+  await monitorEvolutionStats2()
+  await monitorMeta()
+  await monitorCoordinator()
 }
 
 run()
@@ -3412,4 +3442,4 @@ run()
 // Force restart after an hour
 setTimeout(() => {
   process.exit(1)
-}, 2 * 60 * 60 * 1000)
+}, 9 * 60 * 60 * 1000)
