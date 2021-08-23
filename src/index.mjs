@@ -2055,6 +2055,9 @@ async function monitorEvolutionStats() {
                 }
               }
 
+              if (!user.evolution.hashes) user.evolution.hashes = []
+              if (!user.evolution.hashes.includes(player.hash)) user.evolution.hashes.push(player.hash)
+
               user.evolution.lastUpdated = (new Date()).getTime()
               
             if (address === '0x9aAe5CBe5C124e1BE62BD83eD07367d57F8998E0') {
@@ -2879,7 +2882,7 @@ async function monitorCoordinator() {
   try {
     console.log('Update coordinator refers')
     const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://evident-ethos-317302.wn.r.appspot.com/data/refers.json?${rand}`)
+    const response = await fetch(`https://coordinator.rune.game/data/refers.json?${rand}`)
 
     const data = await response.json()
 
