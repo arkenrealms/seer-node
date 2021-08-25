@@ -1946,6 +1946,9 @@ async function monitorEvolutionStats() {
                 })
               }
 
+              if (!user.evolution) user.evolution = {}
+              if (!user.evolution.hashes) user.evolution.hashes = []
+
               {
                 let winStreak = 0
                 let savedWinStreak = 0
@@ -1971,6 +1974,8 @@ async function monitorEvolutionStats() {
                   const wasActive = currentPlayer ? (currentPlayer.powerups >= 100) : false
                   if (currentPlayer) {
                     mapAddressToUsername[address] = currentPlayer.name
+
+                    if (!user.evolution.hashes.includes(currentPlayer.hash)) user.evolution.hashes.push(currentPlayer.hash)
 
                     if (wasConnected) { 
                       latency.push(currentPlayer.latency)
@@ -2017,7 +2022,6 @@ async function monitorEvolutionStats() {
                   }
                 }
 
-                if (!user.evolution) user.evolution = {}
                 if (!user.evolution.servers) user.evolution.servers = {}
                 if (!user.evolution.servers[server.key]) user.evolution.servers[server.key] = {}
                 if (!user.evolution.servers[server.key].winStreak) user.evolution.servers[server.key].winStreak = 0
@@ -2055,8 +2059,6 @@ async function monitorEvolutionStats() {
                 }
               }
 
-              if (!user.evolution.hashes) user.evolution.hashes = []
-              if (!user.evolution.hashes.includes(player.hash)) user.evolution.hashes.push(player.hash)
 
               user.evolution.lastUpdated = (new Date()).getTime()
               
@@ -3393,7 +3395,7 @@ async function monitorGit() {
     await saveHistorical()
     await saveApp()
     await saveConfig()
-    await updateGit()
+    // await updateGit()
   } catch(e) {
     console.log('Git error', e)
   }

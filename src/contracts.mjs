@@ -322,15 +322,15 @@ export default {
     [TESTNET]: '',
   },
   ko: {
-    [MAINNET]: '',
+    [MAINNET]: '0x2a74b7d7d44025Bcc344E7dA80d542e7b0586330',
     [TESTNET]: '',
   },
   fal: {
-    [MAINNET]: '',
+    [MAINNET]: '0xcd06c743a1628fB02C15946a56037CD7020F3Bd2',
     [TESTNET]: '',
   },
   lem: {
-    [MAINNET]: '',
+    [MAINNET]: '0xFF0682D330C7a6381214fa541d8D288dD0D098ED',
     [TESTNET]: '',
   },
   pul: {
@@ -354,7 +354,7 @@ export default {
     [TESTNET]: '',
   },
   vex: {
-    [MAINNET]: '',
+    [MAINNET]: '0x60E3538610e9f4974A36670842044CB4936e5232',
     [TESTNET]: '',
   },
   ohm: {
@@ -362,7 +362,7 @@ export default {
     [TESTNET]: '',
   },
   lo: {
-    [MAINNET]: '',
+    [MAINNET]: '0x08fb6740Cc5170e48B2Ad8Cc07422d3302EF5e78',
     [TESTNET]: '',
   },
   sur: {
