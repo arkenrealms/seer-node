@@ -3395,7 +3395,7 @@ async function monitorGit() {
     await saveHistorical()
     await saveApp()
     await saveConfig()
-    // await updateGit()
+    await updateGit()
   } catch(e) {
     console.log('Git error', e)
   }
