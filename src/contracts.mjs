@@ -273,6 +273,10 @@ export default {
     [MAINNET]: '0x9b229c01eEf692A780d8Fee2558AaEa9873C032f',
     [TESTNET]: '',
   },
+  lockedLiquidityAddress: {
+    [MAINNET]: '0xf9444c39bbdcc3673033609204f8da00d1ae3f52',
+    [TESTNET]: '',
+  },
   evolutionAddress: {
     [MAINNET]: '0xc84ce216fef4EC8957bD0Fb966Bb3c3E2c938082',
     [TESTNET]: '',

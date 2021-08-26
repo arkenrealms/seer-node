@@ -1668,6 +1668,7 @@ async function monitorGeneralStats() {
         const devHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.devAddress))).toString())
         const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
         const characterFactoryHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.characterFactory))).toString())
+        const lockedLiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString()) * 0.75
 
         const totalSupply = farm.tokenTotalSupply
         const circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
@@ -1688,6 +1689,7 @@ async function monitorGeneralStats() {
         runes[symbol].holders.charity = charityHoldings
         runes[symbol].holders.bot = botHoldings
         runes[symbol].holders.bot2 = bot2Holdings
+        runes[symbol].holders.lockedLiquidity = lockedLiquidityHoldings
         runes[symbol].holders.org = vaultHoldings + vault2Holdings + vault3Holdings + characterFactoryHoldings + botHoldings + bot2Holdings
 
         if (!historical.totalSupply) historical.totalSupply = {}
@@ -1726,6 +1728,9 @@ async function monitorGeneralStats() {
         if (!historical.charity) historical.charity = {}
         if (!historical.charity.holdings) historical.charity.holdings = {}
         if (!historical.charity.holdings[symbol]) historical.charity.holdings[symbol] = []
+        if (!historical.lockedLiquidity) historical.lockedLiquidity = {}
+        if (!historical.lockedLiquidity.holdings) historical.lockedLiquidity.holdings = {}
+        if (!historical.lockedLiquidity.holdings[symbol]) historical.lockedLiquidity.holdings[symbol] = []
 
         const oldTime = (new Date(historical.totalSupply[symbol][historical.totalSupply[symbol].length-1]?.[0] || 0)).getTime()
         const newTime = (new Date()).getTime()
@@ -1745,6 +1750,7 @@ async function monitorGeneralStats() {
           historical.characterFactory.holdings[symbol].push([newTime, characterFactoryHoldings])
           historical.dev.holdings[symbol].push([newTime, devHoldings])
           historical.charity.holdings[symbol].push([newTime, charityHoldings])
+          historical.lockedLiquidity.holdings[symbol].push([newTime, lockedLiquidityHoldings])
         }
       }
     }
