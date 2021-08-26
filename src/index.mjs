@@ -1666,6 +1666,7 @@ async function monitorGeneralStats() {
         const vault3Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault3Address))).toString())
         const devHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.devAddress))).toString())
         const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
+        const characterFactoryHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.characterFactory))).toString())
 
         const totalSupply = farm.tokenTotalSupply
         const circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
@@ -1681,6 +1682,8 @@ async function monitorGeneralStats() {
         runes[symbol].holders.vault = vaultHoldings
         runes[symbol].holders.vault2 = vault2Holdings
         runes[symbol].holders.vault3 = vault3Holdings
+        runes[symbol].holders.characterFactory = characterFactoryHoldings
+        runes[symbol].holders.vaultTotal = vaultHoldings + vault2Holdings + vault3Holdings + characterFactoryHoldings
         runes[symbol].holders.dev = devHoldings
         runes[symbol].holders.charity = charityHoldings
         runes[symbol].holders.bot = botHoldings
@@ -1706,6 +1709,12 @@ async function monitorGeneralStats() {
         if (!historical.vault3) historical.vault3 = {}
         if (!historical.vault3.holdings) historical.vault3.holdings = {}
         if (!historical.vault3.holdings[symbol]) historical.vault3.holdings[symbol] = []
+        if (!historical.vaultTotal) historical.vaultTotal = {}
+        if (!historical.vaultTotal.holdings) historical.vaultTotal.holdings = {}
+        if (!historical.vaultTotal.holdings[symbol]) historical.vaultTotal.holdings[symbol] = []
+        if (!historical.characterFactory) historical.characterFactory = {}
+        if (!historical.characterFactory.holdings) historical.characterFactory.holdings = {}
+        if (!historical.characterFactory.holdings[symbol]) historical.characterFactory.holdings[symbol] = []
         if (!historical.dev) historical.dev = {}
         if (!historical.dev.holdings) historical.dev.holdings = {}
         if (!historical.dev.holdings[symbol]) historical.dev.holdings[symbol] = []
@@ -1726,6 +1735,8 @@ async function monitorGeneralStats() {
           historical.vault.holdings[symbol].push([newTime, vaultHoldings])
           historical.vault2.holdings[symbol].push([newTime, vault2Holdings])
           historical.vault3.holdings[symbol].push([newTime, vault3Holdings])
+          historical.vaultTotal.holdings[symbol].push([newTime, vaultTotalHoldings])
+          historical.characterFactory.holdings[symbol].push([newTime, characterFactoryHoldings])
           historical.dev.holdings[symbol].push([newTime, devHoldings])
           historical.charity.holdings[symbol].push([newTime, charityHoldings])
         }
