@@ -1778,17 +1778,17 @@ async function monitorGeneralStats() {
     for (const rune in Object.keys(runes)) {
       if (runes[rune].holdings) {
         runes.totals.raid += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.vault += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.vault2 += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.vault3 += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.characterFactory += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.dev += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.charity += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.bot += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.bot2 += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.lockedLiquidity += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.v2Liquidity += runes[rune].holdings.raid * runes[rune].price
-        runes.totals.org += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.vault += runes[rune].holdings.vault * runes[rune].price
+        runes.totals.vault2 += runes[rune].holdings.vault2 * runes[rune].price
+        runes.totals.vault3 += runes[rune].holdings.vault3 * runes[rune].price
+        runes.totals.characterFactory += runes[rune].holdings.characterFactory * runes[rune].price
+        runes.totals.dev += runes[rune].holdings.dev * runes[rune].price
+        runes.totals.charity += runes[rune].holdings.charity * runes[rune].price
+        runes.totals.bot += runes[rune].holdings.bot * runes[rune].price
+        runes.totals.bot2 += runes[rune].holdings.bot2 * runes[rune].price
+        runes.totals.lockedLiquidity += runes[rune].holdings.lockedLiquidity * runes[rune].price
+        runes.totals.v2Liquidity += runes[rune].holdings.v2Liquidity * runes[rune].price
+        runes.totals.org += runes[rune].holdings.org * runes[rune].price
       }
     }
   }
