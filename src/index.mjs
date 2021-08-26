@@ -1669,6 +1669,7 @@ async function monitorGeneralStats() {
         const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
         const characterFactoryHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.characterFactory))).toString())
         const lockedLiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString()) * 0.75
+        const v2LiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString())
 
         const totalSupply = farm.tokenTotalSupply
         const circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
@@ -1690,7 +1691,8 @@ async function monitorGeneralStats() {
         runes[symbol].holders.bot = botHoldings
         runes[symbol].holders.bot2 = bot2Holdings
         runes[symbol].holders.lockedLiquidity = lockedLiquidityHoldings
-        runes[symbol].holders.org = vaultHoldings + vault2Holdings + vault3Holdings + characterFactoryHoldings + botHoldings + bot2Holdings
+        runes[symbol].holders.v2Liquidity = v2LiquidityHoldings
+        runes[symbol].holders.org = vaultHoldings + vault2Holdings + vault3Holdings + characterFactoryHoldings + botHoldings + bot2Holdings + v2LiquidityHoldings
 
         if (!historical.totalSupply) historical.totalSupply = {}
         if (!historical.totalSupply[symbol]) historical.totalSupply[symbol] = []
@@ -1731,6 +1733,9 @@ async function monitorGeneralStats() {
         if (!historical.lockedLiquidity) historical.lockedLiquidity = {}
         if (!historical.lockedLiquidity.holdings) historical.lockedLiquidity.holdings = {}
         if (!historical.lockedLiquidity.holdings[symbol]) historical.lockedLiquidity.holdings[symbol] = []
+        if (!historical.v2Liquidity) historical.v2Liquidity = {}
+        if (!historical.v2Liquidity.holdings) historical.v2Liquidity.holdings = {}
+        if (!historical.v2Liquidity.holdings[symbol]) historical.v2Liquidity.holdings[symbol] = []
 
         const oldTime = (new Date(historical.totalSupply[symbol][historical.totalSupply[symbol].length-1]?.[0] || 0)).getTime()
         const newTime = (new Date()).getTime()
@@ -1751,10 +1756,41 @@ async function monitorGeneralStats() {
           historical.dev.holdings[symbol].push([newTime, devHoldings])
           historical.charity.holdings[symbol].push([newTime, charityHoldings])
           historical.lockedLiquidity.holdings[symbol].push([newTime, lockedLiquidityHoldings])
+          historical.v2Liquidity.holdings[symbol].push([newTime, v2LiquidityHoldings])
         }
       }
     }
-    
+
+    runes.totals = {}
+    runes.totals.raid = 0
+    runes.totals.vault = 0
+    runes.totals.vault2 = 0
+    runes.totals.vault3 = 0
+    runes.totals.characterFactory = 0
+    runes.totals.dev = 0
+    runes.totals.charity = 0
+    runes.totals.bot = 0
+    runes.totals.bot2 = 0
+    runes.totals.lockedLiquidity = 0
+    runes.totals.v2Liquidity = 0
+    runes.totals.org = 0
+
+    for (const rune in Object.keys(runes)) {
+      if (runes[rune].holdings) {
+        runes.totals.raid += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.vault += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.vault2 += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.vault3 += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.characterFactory += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.dev += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.charity += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.bot += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.bot2 += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.lockedLiquidity += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.v2Liquidity += runes[rune].holdings.raid * runes[rune].price
+        runes.totals.org += runes[rune].holdings.raid * runes[rune].price
+      }
+    }
   }
   
   // await saveConfig()
