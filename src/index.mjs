@@ -1857,6 +1857,8 @@ async function monitorEvolutionStats() {
         const rand = Math.floor(Math.random() * Math.floor(999999))
         const response = await fetch(`https://${server.endpoint}/data/leaderboardHistory.json?${rand}`)
       
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboardHistoryLiveLatest.json`), beautify(leaderboardHistory, null, 2), { atomic: true })
+
         let data = await response.json()
         let lastIndex = 0
 
