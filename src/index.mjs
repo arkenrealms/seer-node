@@ -1776,19 +1776,19 @@ async function monitorGeneralStats() {
     runes.totals.org = 0
 
     for (const rune in Object.keys(runes)) {
-      if (runes[rune].holdings) {
-        runes.totals.raid += runes[rune].raid.holdings * runes[rune].price
-        runes.totals.vault += runes[rune].vault.holdings * runes[rune].price
-        runes.totals.vault2 += runes[rune].vault2.holdings * runes[rune].price
-        runes.totals.vault3 += runes[rune].vault3.holdings * runes[rune].price
-        runes.totals.characterFactory += runes[rune].characterFactory.holdings * runes[rune].price
-        runes.totals.dev += runes[rune].dev.holdings * runes[rune].price
-        runes.totals.charity += runes[rune].charity.holdings * runes[rune].price
-        runes.totals.bot += runes[rune].bot.holdings * runes[rune].price
-        runes.totals.bot2 += runes[rune].bot2.holdings * runes[rune].price
-        runes.totals.lockedLiquidity += runes[rune].lockedLiquidity.holdings * runes[rune].price
-        runes.totals.v2Liquidity += runes[rune].v2Liquidity.holdings * runes[rune].price
-        runes.totals.org += runes[rune].org.holdings * runes[rune].price
+      if (runes[rune].holders) {
+        runes.totals.raid += runes[rune].raid.holders * runes[rune].price
+        runes.totals.vault += runes[rune].vault.holders * runes[rune].price
+        runes.totals.vault2 += runes[rune].vault2.holders * runes[rune].price
+        runes.totals.vault3 += runes[rune].vault3.holders * runes[rune].price
+        runes.totals.characterFactory += runes[rune].characterFactory.holders * runes[rune].price
+        runes.totals.dev += runes[rune].dev.holders * runes[rune].price
+        runes.totals.charity += runes[rune].charity.holders * runes[rune].price
+        runes.totals.bot += runes[rune].bot.holders * runes[rune].price
+        runes.totals.bot2 += runes[rune].bot2.holders * runes[rune].price
+        runes.totals.lockedLiquidity += runes[rune].lockedLiquidity.holders * runes[rune].price
+        runes.totals.v2Liquidity += runes[rune].v2Liquidity.holders * runes[rune].price
+        runes.totals.org += runes[rune].org.holders * runes[rune].price
       }
     }
   }
