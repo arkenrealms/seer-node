@@ -1777,18 +1777,18 @@ async function monitorGeneralStats() {
 
     for (const rune in Object.keys(runes)) {
       if (runes[rune].holders) {
-        runes.totals.raid += runes[rune].raid.holders * runes[rune].price
-        runes.totals.vault += runes[rune].vault.holders * runes[rune].price
-        runes.totals.vault2 += runes[rune].vault2.holders * runes[rune].price
-        runes.totals.vault3 += runes[rune].vault3.holders * runes[rune].price
-        runes.totals.characterFactory += runes[rune].characterFactory.holders * runes[rune].price
-        runes.totals.dev += runes[rune].dev.holders * runes[rune].price
-        runes.totals.charity += runes[rune].charity.holders * runes[rune].price
-        runes.totals.bot += runes[rune].bot.holders * runes[rune].price
-        runes.totals.bot2 += runes[rune].bot2.holders * runes[rune].price
-        runes.totals.lockedLiquidity += runes[rune].lockedLiquidity.holders * runes[rune].price
-        runes.totals.v2Liquidity += runes[rune].v2Liquidity.holders * runes[rune].price
-        runes.totals.org += runes[rune].org.holders * runes[rune].price
+        runes.totals.raid += runes[rune].holders.raid * runes[rune].price
+        runes.totals.vault += runes[rune].holders.vault * runes[rune].price
+        runes.totals.vault2 += runes[rune].holders.vault2 * runes[rune].price
+        runes.totals.vault3 += runes[rune].holders.vault3 * runes[rune].price
+        runes.totals.characterFactory += runes[rune].holders.characterFactory * runes[rune].price
+        runes.totals.dev += runes[rune].holders.dev * runes[rune].price
+        runes.totals.charity += runes[rune].holders.charity * runes[rune].price
+        runes.totals.bot += runes[rune].holders.bot * runes[rune].price
+        runes.totals.bot2 += runes[rune].holders.bot2 * runes[rune].price
+        runes.totals.lockedLiquidity += runes[rune].holders.lockedLiquidity * runes[rune].price
+        runes.totals.v2Liquidity += runes[rune].holders.v2Liquidity * runes[rune].price
+        runes.totals.org += runes[rune].holders.org * runes[rune].price
       }
     }
   }
