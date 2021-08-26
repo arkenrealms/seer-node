@@ -1775,7 +1775,7 @@ async function monitorGeneralStats() {
     runes.totals.v2Liquidity = 0
     runes.totals.org = 0
 
-    for (const rune in Object.keys(runes)) {
+    for (const rune of Object.keys(runes)) {
       if (runes[rune].holders) {
         runes.totals.raid += runes[rune].holders.raid * runes[rune].price
         runes.totals.vault += runes[rune].holders.vault * runes[rune].price
