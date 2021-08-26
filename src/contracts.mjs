@@ -269,6 +269,14 @@ export default {
     [MAINNET]: '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B',
     [TESTNET]: '',
   },
+  bot2Address: {
+    [MAINNET]: '0x9b229c01eEf692A780d8Fee2558AaEa9873C032f',
+    [TESTNET]: '',
+  },
+  evolutionAddress: {
+    [MAINNET]: '0xc84ce216fef4EC8957bD0Fb966Bb3c3E2c938082',
+    [TESTNET]: '',
+  },
   senderTestAddress: {
     [MAINNET]: '0x62c79c01c33a3761fe2d2aD6f8df324225b8073b',
     [TESTNET]: '0x62c79c01c33a3761fe2d2aD6f8df324225b8073b',

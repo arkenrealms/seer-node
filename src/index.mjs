@@ -1661,6 +1661,7 @@ async function monitorGeneralStats() {
 
         const raidHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.raid))).toString())
         const botHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.botAddress))).toString())
+        const bot2Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.bot2Address))).toString())
         const vaultHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.vaultAddress))).toString())
         const vault2Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault2Address))).toString())
         const vault3Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault3Address))).toString())
@@ -1683,10 +1684,11 @@ async function monitorGeneralStats() {
         runes[symbol].holders.vault2 = vault2Holdings
         runes[symbol].holders.vault3 = vault3Holdings
         runes[symbol].holders.characterFactory = characterFactoryHoldings
-        runes[symbol].holders.vaultTotal = vaultHoldings + vault2Holdings + vault3Holdings + characterFactoryHoldings
         runes[symbol].holders.dev = devHoldings
         runes[symbol].holders.charity = charityHoldings
         runes[symbol].holders.bot = botHoldings
+        runes[symbol].holders.bot2 = bot2Holdings
+        runes[symbol].holders.org = vaultHoldings + vault2Holdings + vault3Holdings + characterFactoryHoldings + botHoldings + bot2Holdings
 
         if (!historical.totalSupply) historical.totalSupply = {}
         if (!historical.totalSupply[symbol]) historical.totalSupply[symbol] = []
@@ -1700,6 +1702,9 @@ async function monitorGeneralStats() {
         if (!historical.bot) historical.bot = {}
         if (!historical.bot.holdings) historical.bot.holdings = {}
         if (!historical.bot.holdings[symbol]) historical.bot.holdings[symbol] = []
+        if (!historical.bot2) historical.bot2 = {}
+        if (!historical.bot2.holdings) historical.bot2.holdings = {}
+        if (!historical.bot2.holdings[symbol]) historical.bot2.holdings[symbol] = []
         if (!historical.vault) historical.vault = {}
         if (!historical.vault.holdings) historical.vault.holdings = {}
         if (!historical.vault.holdings[symbol]) historical.vault.holdings[symbol] = []
@@ -1732,6 +1737,7 @@ async function monitorGeneralStats() {
           historical.totalBurned[symbol].push([newTime, totalBurned])
           historical.raid.holdings[symbol].push([newTime, raidHoldings])
           historical.bot.holdings[symbol].push([newTime, botHoldings])
+          historical.bot2.holdings[symbol].push([newTime, bot2Holdings])
           historical.vault.holdings[symbol].push([newTime, vaultHoldings])
           historical.vault2.holdings[symbol].push([newTime, vault2Holdings])
           historical.vault3.holdings[symbol].push([newTime, vault3Holdings])
