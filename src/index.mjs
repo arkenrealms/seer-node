@@ -1805,10 +1805,11 @@ async function monitorGeneralStats() {
 
     if (!historical.total) historical.total = {}
     if (!historical.total.totals) historical.total.totals = {}
-    if (!historical.total.totals[symbol]) historical.total.totals[symbol] = []
 
 
     for (const symbol of Object.keys(runes.totals)) {
+      if (!historical.total.totals[symbol]) historical.total.totals[symbol] = []
+
       const oldTime = (new Date(historical.total.totals[symbol][historical.total.totals[symbol].length-1]?.[0] || 0)).getTime()
       const newTime = (new Date()).getTime()
       const diff = newTime - oldTime
