@@ -1667,9 +1667,11 @@ async function monitorGeneralStats() {
         const vault3Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault3Address))).toString())
         const devHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.devAddress))).toString())
         const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
+        const deployerHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.deployerAddress))).toString())
         const characterFactoryHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.characterFactory))).toString())
         const lockedLiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString()) * 0.75
         const v2LiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString())
+        const vaultTotalHoldings = vaultHoldings + vault2Holdings + vault3Holdings
 
         const totalSupply = farm.tokenTotalSupply
         const circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
@@ -1685,9 +1687,11 @@ async function monitorGeneralStats() {
         runes[symbol].holders.vault = vaultHoldings
         runes[symbol].holders.vault2 = vault2Holdings
         runes[symbol].holders.vault3 = vault3Holdings
+        runes[symbol].holders.vaultTotal = vaultTotalHoldings
         runes[symbol].holders.characterFactory = characterFactoryHoldings
         runes[symbol].holders.dev = devHoldings
         runes[symbol].holders.charity = charityHoldings
+        runes[symbol].holders.deployer = deployerHoldings
         runes[symbol].holders.bot = botHoldings
         runes[symbol].holders.bot2 = bot2Holdings
         runes[symbol].holders.lockedLiquidity = lockedLiquidityHoldings
@@ -1730,6 +1734,9 @@ async function monitorGeneralStats() {
         if (!historical.charity) historical.charity = {}
         if (!historical.charity.holdings) historical.charity.holdings = {}
         if (!historical.charity.holdings[symbol]) historical.charity.holdings[symbol] = []
+        if (!historical.deployer) historical.deployer = {}
+        if (!historical.deployer.holdings) historical.deployer.holdings = {}
+        if (!historical.deployer.holdings[symbol]) historical.deployer.holdings[symbol] = []
         if (!historical.lockedLiquidity) historical.lockedLiquidity = {}
         if (!historical.lockedLiquidity.holdings) historical.lockedLiquidity.holdings = {}
         if (!historical.lockedLiquidity.holdings[symbol]) historical.lockedLiquidity.holdings[symbol] = []
@@ -1755,6 +1762,7 @@ async function monitorGeneralStats() {
           historical.characterFactory.holdings[symbol].push([newTime, characterFactoryHoldings])
           historical.dev.holdings[symbol].push([newTime, devHoldings])
           historical.charity.holdings[symbol].push([newTime, charityHoldings])
+          historical.deployer.holdings[symbol].push([newTime, deployerHoldings])
           historical.lockedLiquidity.holdings[symbol].push([newTime, lockedLiquidityHoldings])
           historical.v2Liquidity.holdings[symbol].push([newTime, v2LiquidityHoldings])
         }
@@ -1769,6 +1777,7 @@ async function monitorGeneralStats() {
     runes.totals.characterFactory = 0
     runes.totals.dev = 0
     runes.totals.charity = 0
+    runes.totals.deployer = 0
     runes.totals.bot = 0
     runes.totals.bot2 = 0
     runes.totals.lockedLiquidity = 0
@@ -1776,6 +1785,7 @@ async function monitorGeneralStats() {
     runes.totals.org = 0
 
     for (const rune of Object.keys(runes)) {
+      // if (rune === 'totals') continue
       if (runes[rune].holders) {
         runes.totals.raid += runes[rune].holders.raid * runes[rune].price
         runes.totals.vault += runes[rune].holders.vault * runes[rune].price
@@ -1784,11 +1794,27 @@ async function monitorGeneralStats() {
         runes.totals.characterFactory += runes[rune].holders.characterFactory * runes[rune].price
         runes.totals.dev += runes[rune].holders.dev * runes[rune].price
         runes.totals.charity += runes[rune].holders.charity * runes[rune].price
+        runes.totals.deployer += runes[rune].holders.deployer * runes[rune].price
         runes.totals.bot += runes[rune].holders.bot * runes[rune].price
         runes.totals.bot2 += runes[rune].holders.bot2 * runes[rune].price
         runes.totals.lockedLiquidity += runes[rune].holders.lockedLiquidity * runes[rune].price
         runes.totals.v2Liquidity += runes[rune].holders.v2Liquidity * runes[rune].price
         runes.totals.org += runes[rune].holders.org * runes[rune].price
+      }
+    }
+
+    if (!historical.total) historical.total = {}
+    if (!historical.total.totals) historical.total.totals = {}
+    if (!historical.total.totals[symbol]) historical.total.totals[symbol] = []
+
+
+    for (const symbol of Object.keys(runes.totals)) {
+      const oldTime = (new Date(historical.total.totals[symbol][historical.total.totals[symbol].length-1]?.[0] || 0)).getTime()
+      const newTime = (new Date()).getTime()
+      const diff = newTime - oldTime
+
+      if (diff / (1000 * 60 * 60 * 24) > 1) {
+        historical.total.totals[symbol].push([newTime, runes.totals[symbol]])
       }
     }
   }
