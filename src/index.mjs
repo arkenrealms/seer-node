@@ -163,8 +163,8 @@ async function iterateBlocks(name, address, fromBlock, toBlock, event, processLo
     await iterateBlocks(name, address, toBlock2, toBlock, event, processLog, updateConfig)
   } catch(e) {
     console.log('error', e)
-    console.log(fromBlock, toBlock)
-    process.exit(1)
+    console.log(name, address, fromBlock, toBlock, event)
+    // process.exit(1)
   }
 }
   
@@ -1230,60 +1230,65 @@ async function getAllItemEvents() {
   const iface = new ethers.utils.Interface(ArcaneItems.abi)
 
   async function processLog(log, updateConfig = true) {
-    const e = iface.parseLog(log)
+    try {
+      const e = iface.parseLog(log)
+      
+      // console.log(e.name, e)
+
+      if (e.name === 'Transfer') {
+        const { from, to: userAddress, tokenId } = e.args
+
+        const user = loadUser(userAddress)
+        const decodedItem = decodeItem(tokenId.toString())
+
+        const itemData = {
+          owner: userAddress,
+          from,
+          status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
+          tokenId: tokenId.toString(),
+          createdAt: new Date().getTime(),
+          id: decodedItem.id,
+          perfection: decodedItem.perfection
+        }
+
+        const token = loadToken(itemData.tokenId)
+
+        if (from === '0x0000000000000000000000000000000000000000') {
+          token.owner = itemData.userAddress
+          token.creator = itemData.userAddress
+          token.createdAt = itemData.createdAt
+        }
+
+        await saveUserItem(user, itemData)
+        await saveTokenTransfer(token, itemData)
+
+        if (from !== '0x0000000000000000000000000000000000000000') {
+          await saveUserItem(user, { ...itemData, status: 'transferred_out' })
+        }
+
+        await saveItemOwner(loadItem(itemData.id), itemData)
+      }
+
+      const e2 = itemsEvents.find(t => t.transactionHash === log.transactionHash)
+
+      if (!e2) {
+        itemsEvents.push({
+          // id: ++config.items.counter,
+          ...log,
+          ...e
+        })
+      }
     
-    // console.log(e.name, e)
+      // await saveConfig()
 
-    if (e.name === 'Transfer') {
-      const { from, to: userAddress, tokenId } = e.args
-
-      const user = loadUser(userAddress)
-      const decodedItem = decodeItem(tokenId.toString())
-
-      const itemData = {
-        owner: userAddress,
-        from,
-        status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
-        tokenId: tokenId.toString(),
-        createdAt: new Date().getTime(),
-        id: decodedItem.id,
-        perfection: decodedItem.perfection
-      }
-
-      const token = loadToken(itemData.tokenId)
-
-      if (from === '0x0000000000000000000000000000000000000000') {
-        token.owner = itemData.userAddress
-        token.creator = itemData.userAddress
-        token.createdAt = itemData.createdAt
-      }
-
-      await saveUserItem(user, itemData)
-      await saveTokenTransfer(token, itemData)
-
-      if (from !== '0x0000000000000000000000000000000000000000') {
-        await saveUserItem(user, { ...itemData, status: 'transferred_out' })
-      }
-
-      await saveItemOwner(loadItem(itemData.id), itemData)
+      // if (updateConfig) {
+      //   config.items.lastBlock = log.blockNumber
+      //   saveConfig()
+      // }
+    } catch (ex) {
+      console.log(ex)
+      console.log("Error parsing log: ", log)
     }
-
-    const e2 = itemsEvents.find(t => t.transactionHash === log.transactionHash)
-
-    if (!e2) {
-      itemsEvents.push({
-        // id: ++config.items.counter,
-        ...log,
-        ...e
-      })
-    }
-  
-    // await saveConfig()
-
-    // if (updateConfig) {
-    //   config.items.lastBlock = log.blockNumber
-    //   saveConfig()
-    // }
   }
 
   const blockNumber = await web3.eth.getBlockNumber()
@@ -1671,7 +1676,7 @@ async function monitorGeneralStats() {
           const deployerHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.deployerAddress))).toString())
           const characterFactoryHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.characterFactory))).toString())
           const lockedLiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString()) * 0.75
-          const v2LiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString())
+          const v2LiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.v2LiquidityAddress))).toString())
           const vaultTotalHoldings = vaultHoldings + vault2Holdings + vault3Holdings
 
           const totalSupply = farm.tokenTotalSupply
