@@ -1854,7 +1854,7 @@ async function monitorGeneralStats() {
 
           if (rune === 'BUSD' || rune === 'USDT' || rune === 'USDC') {
             runes.totals.orgCash += runes[rune].holders.orgCash * runes[rune].price
-          } else
+          } else {
             runes.totals.orgToken += runes[rune].holders.orgToken * runes[rune].price
           }
         }
