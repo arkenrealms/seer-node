@@ -1981,8 +1981,14 @@ async function monitorEvolutionStats() {
 
   const leaderboards = {
     europe1: {},
+    europe2: {},
     na1: {},
+    sa1: {},
     asia1: {},
+    asia2: {},
+    asia3: {},
+    asia4: {},
+    oceanic1: {},
     overall: {}
   }
 
