@@ -1345,7 +1345,7 @@ async function monitorGeneralStats() {
 
       if (!stats.items) stats.items = {}
     
-      for (let i = 1; i <= 20; i++) {
+      for (let i = 1; i <= 30; i++) {
         if (!stats.items[i]) stats.items[i] = {}
 
         stats.items[i].total = (await arcaneItemsContract.itemCount(i)).toNumber()
@@ -1660,159 +1660,163 @@ async function monitorGeneralStats() {
       }
       
       for (const tokenSymbol of Object.keys(farms)) {
-        const farm = farms[tokenSymbol]
+        try {
+          const farm = farms[tokenSymbol]
 
-        if (farm.isTokenOnly) {
-          const symbol = tokenSymbol.toLowerCase()
+          if (farm.isTokenOnly) {
+            const symbol = tokenSymbol.toLowerCase()
 
-          const tokenContract = new ethers.Contract(getAddress(contracts[symbol]), BEP20Contract.abi, signer)
+            const tokenContract = new ethers.Contract(getAddress(contracts[symbol]), BEP20Contract.abi, signer)
 
-          const raidHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.raid))).toString())
-          const botHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.botAddress))).toString())
-          const bot2Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.bot2Address))).toString())
-          const bot3Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.bot3Address))).toString())
-          const vaultHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.vaultAddress))).toString())
-          const vault2Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault2Address))).toString())
-          const vault3Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault3Address))).toString())
-          const devHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.devAddress))).toString())
-          const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
-          const deployerHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.deployerAddress))).toString())
-          const characterFactoryHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.characterFactory))).toString())
-          const lockedLiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString()) * 2 * 0.75
-          const v2LiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.v2LiquidityAddress))).toString()) * 2
-          const evolutionHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.evolutionAddress))).toString())
-          // const cashHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.cashAddress))).toString())
-          const vaultTotalHoldings = vaultHoldings + vault2Holdings + vault3Holdings
-          const botTotalHoldings = botHoldings + bot2Holdings + bot3Holdings
-          const orgCashHoldings = v2LiquidityHoldings / 2 + lockedLiquidityHoldings / 2
-          const orgTokenHoldings = vaultTotalHoldings + characterFactoryHoldings + botTotalHoldings + v2LiquidityHoldings / 2 + lockedLiquidityHoldings / 2 + evolutionHoldings
-          const orgHoldings = orgCashHoldings + orgTokenHoldings
+            const raidHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.raid))).toString())
+            const botHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.botAddress))).toString())
+            const bot2Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.bot2Address))).toString())
+            const bot3Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.bot3Address))).toString())
+            const vaultHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.vaultAddress))).toString())
+            const vault2Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault2Address))).toString())
+            const vault3Holdings = toShort((await tokenContract.balanceOf(getAddress(contracts.vault3Address))).toString())
+            const devHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.devAddress))).toString())
+            const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
+            const deployerHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.deployerAddress))).toString())
+            const characterFactoryHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.characterFactory))).toString())
+            const lockedLiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString()) * 2 * 0.75
+            const v2LiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.v2LiquidityAddress))).toString()) * 2
+            const evolutionHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.evolutionAddress))).toString())
+            // const cashHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.cashAddress))).toString())
+            const vaultTotalHoldings = vaultHoldings + vault2Holdings + vault3Holdings
+            const botTotalHoldings = botHoldings + bot2Holdings + bot3Holdings
+            const orgCashHoldings = v2LiquidityHoldings / 2 + lockedLiquidityHoldings / 2
+            const orgTokenHoldings = vaultTotalHoldings + characterFactoryHoldings + botTotalHoldings + v2LiquidityHoldings / 2 + lockedLiquidityHoldings / 2 + evolutionHoldings
+            const orgHoldings = orgCashHoldings + orgTokenHoldings
 
-          const totalSupply = farm.tokenTotalSupply
-          const circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
-          const totalBurned = farm.tokenTotalBurned
+            const totalSupply = farm.tokenTotalSupply
+            const circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
+            const totalBurned = farm.tokenTotalBurned
 
-          if (!runes[symbol]) runes[symbol] = {}
+            if (!runes[symbol]) runes[symbol] = {}
 
-          runes[symbol].totalSupply = totalSupply
-          runes[symbol].circulatingSupply = circulatingSupply
-          runes[symbol].totalBurned = totalBurned
-          runes[symbol].holders = {}
-          runes[symbol].holders.raid = raidHoldings
-          runes[symbol].holders.vault = vaultHoldings
-          runes[symbol].holders.vault2 = vault2Holdings
-          runes[symbol].holders.vault3 = vault3Holdings
-          runes[symbol].holders.vaultTotal = vaultTotalHoldings
-          runes[symbol].holders.characterFactory = characterFactoryHoldings
-          runes[symbol].holders.dev = devHoldings
-          runes[symbol].holders.charity = charityHoldings
-          runes[symbol].holders.deployer = deployerHoldings
-          runes[symbol].holders.bot = botHoldings
-          runes[symbol].holders.bot2 = bot2Holdings
-          runes[symbol].holders.bot3 = bot3Holdings
-          runes[symbol].holders.botTotal = botTotalHoldings
-          runes[symbol].holders.lockedLiquidity = lockedLiquidityHoldings
-          runes[symbol].holders.v2Liquidity = v2LiquidityHoldings
-          runes[symbol].holders.orgCash = orgCashHoldings
-          runes[symbol].holders.orgToken = orgTokenHoldings
-          runes[symbol].holders.org = orgHoldings
-          runes[symbol].holders.evolution = evolutionHoldings
+            runes[symbol].totalSupply = totalSupply
+            runes[symbol].circulatingSupply = circulatingSupply
+            runes[symbol].totalBurned = totalBurned
+            runes[symbol].holders = {}
+            runes[symbol].holders.raid = raidHoldings
+            runes[symbol].holders.vault = vaultHoldings
+            runes[symbol].holders.vault2 = vault2Holdings
+            runes[symbol].holders.vault3 = vault3Holdings
+            runes[symbol].holders.vaultTotal = vaultTotalHoldings
+            runes[symbol].holders.characterFactory = characterFactoryHoldings
+            runes[symbol].holders.dev = devHoldings
+            runes[symbol].holders.charity = charityHoldings
+            runes[symbol].holders.deployer = deployerHoldings
+            runes[symbol].holders.bot = botHoldings
+            runes[symbol].holders.bot2 = bot2Holdings
+            runes[symbol].holders.bot3 = bot3Holdings
+            runes[symbol].holders.botTotal = botTotalHoldings
+            runes[symbol].holders.lockedLiquidity = lockedLiquidityHoldings
+            runes[symbol].holders.v2Liquidity = v2LiquidityHoldings
+            runes[symbol].holders.orgCash = orgCashHoldings
+            runes[symbol].holders.orgToken = orgTokenHoldings
+            runes[symbol].holders.org = orgHoldings
+            runes[symbol].holders.evolution = evolutionHoldings
 
-          if (!historical.totalSupply) historical.totalSupply = {}
-          if (!historical.totalSupply[symbol]) historical.totalSupply[symbol] = []
-          if (!historical.circulatingSupply) historical.circulatingSupply = {}
-          if (!historical.circulatingSupply[symbol]) historical.circulatingSupply[symbol] = []
-          if (!historical.totalBurned) historical.totalBurned = {}
-          if (!historical.totalBurned[symbol]) historical.totalBurned[symbol] = []
-          if (!historical.raid) historical.raid = {}
-          if (!historical.raid.holdings) historical.raid.holdings = {}
-          if (!historical.raid.holdings[symbol]) historical.raid.holdings[symbol] = []
-          if (!historical.bot) historical.bot = {}
-          if (!historical.bot.holdings) historical.bot.holdings = {}
-          if (!historical.bot.holdings[symbol]) historical.bot.holdings[symbol] = []
-          if (!historical.bot2) historical.bot2 = {}
-          if (!historical.bot2.holdings) historical.bot2.holdings = {}
-          if (!historical.bot2.holdings[symbol]) historical.bot2.holdings[symbol] = []
-          if (!historical.bot3) historical.bot3 = {}
-          if (!historical.bot3.holdings) historical.bot3.holdings = {}
-          if (!historical.bot3.holdings[symbol]) historical.bot3.holdings[symbol] = []
-          if (!historical.botTotal) historical.botTotal = {}
-          if (!historical.botTotal.holdings) historical.botTotal.holdings = {}
-          if (!historical.botTotal.holdings[symbol]) historical.botTotal.holdings[symbol] = []
-          if (!historical.vault) historical.vault = {}
-          if (!historical.vault.holdings) historical.vault.holdings = {}
-          if (!historical.vault.holdings[symbol]) historical.vault.holdings[symbol] = []
-          if (!historical.vault2) historical.vault2 = {}
-          if (!historical.vault2.holdings) historical.vault2.holdings = {}
-          if (!historical.vault2.holdings[symbol]) historical.vault2.holdings[symbol] = []
-          if (!historical.vault3) historical.vault3 = {}
-          if (!historical.vault3.holdings) historical.vault3.holdings = {}
-          if (!historical.vault3.holdings[symbol]) historical.vault3.holdings[symbol] = []
-          if (!historical.vaultTotal) historical.vaultTotal = {}
-          if (!historical.vaultTotal.holdings) historical.vaultTotal.holdings = {}
-          if (!historical.vaultTotal.holdings[symbol]) historical.vaultTotal.holdings[symbol] = []
-          if (!historical.characterFactory) historical.characterFactory = {}
-          if (!historical.characterFactory.holdings) historical.characterFactory.holdings = {}
-          if (!historical.characterFactory.holdings[symbol]) historical.characterFactory.holdings[symbol] = []
-          if (!historical.dev) historical.dev = {}
-          if (!historical.dev.holdings) historical.dev.holdings = {}
-          if (!historical.dev.holdings[symbol]) historical.dev.holdings[symbol] = []
-          if (!historical.charity) historical.charity = {}
-          if (!historical.charity.holdings) historical.charity.holdings = {}
-          if (!historical.charity.holdings[symbol]) historical.charity.holdings[symbol] = []
-          if (!historical.deployer) historical.deployer = {}
-          if (!historical.deployer.holdings) historical.deployer.holdings = {}
-          if (!historical.deployer.holdings[symbol]) historical.deployer.holdings[symbol] = []
-          if (!historical.lockedLiquidity) historical.lockedLiquidity = {}
-          if (!historical.lockedLiquidity.holdings) historical.lockedLiquidity.holdings = {}
-          if (!historical.lockedLiquidity.holdings[symbol]) historical.lockedLiquidity.holdings[symbol] = []
-          if (!historical.v2Liquidity) historical.v2Liquidity = {}
-          if (!historical.v2Liquidity.holdings) historical.v2Liquidity.holdings = {}
-          if (!historical.v2Liquidity.holdings[symbol]) historical.v2Liquidity.holdings[symbol] = []
-          if (!historical.org) historical.org = {}
-          if (!historical.org.holdings) historical.org.holdings = {}
-          if (!historical.org.holdings[symbol]) historical.org.holdings[symbol] = []
-          if (!historical.orgCash) historical.orgCash = {}
-          if (!historical.orgCash.holdings) historical.orgCash.holdings = {}
-          if (!historical.orgCash.holdings[symbol]) historical.orgCash.holdings[symbol] = []
-          if (!historical.orgToken) historical.orgToken = {}
-          if (!historical.orgToken.holdings) historical.orgToken.holdings = {}
-          if (!historical.orgToken.holdings[symbol]) historical.orgToken.holdings[symbol] = []
-          if (!historical.evolution) historical.evolution = {}
-          if (!historical.evolution.holdings) historical.evolution.holdings = {}
-          if (!historical.evolution.holdings[symbol]) historical.evolution.holdings[symbol] = []
+            if (!historical.totalSupply) historical.totalSupply = {}
+            if (!historical.totalSupply[symbol]) historical.totalSupply[symbol] = []
+            if (!historical.circulatingSupply) historical.circulatingSupply = {}
+            if (!historical.circulatingSupply[symbol]) historical.circulatingSupply[symbol] = []
+            if (!historical.totalBurned) historical.totalBurned = {}
+            if (!historical.totalBurned[symbol]) historical.totalBurned[symbol] = []
+            if (!historical.raid) historical.raid = {}
+            if (!historical.raid.holdings) historical.raid.holdings = {}
+            if (!historical.raid.holdings[symbol]) historical.raid.holdings[symbol] = []
+            if (!historical.bot) historical.bot = {}
+            if (!historical.bot.holdings) historical.bot.holdings = {}
+            if (!historical.bot.holdings[symbol]) historical.bot.holdings[symbol] = []
+            if (!historical.bot2) historical.bot2 = {}
+            if (!historical.bot2.holdings) historical.bot2.holdings = {}
+            if (!historical.bot2.holdings[symbol]) historical.bot2.holdings[symbol] = []
+            if (!historical.bot3) historical.bot3 = {}
+            if (!historical.bot3.holdings) historical.bot3.holdings = {}
+            if (!historical.bot3.holdings[symbol]) historical.bot3.holdings[symbol] = []
+            if (!historical.botTotal) historical.botTotal = {}
+            if (!historical.botTotal.holdings) historical.botTotal.holdings = {}
+            if (!historical.botTotal.holdings[symbol]) historical.botTotal.holdings[symbol] = []
+            if (!historical.vault) historical.vault = {}
+            if (!historical.vault.holdings) historical.vault.holdings = {}
+            if (!historical.vault.holdings[symbol]) historical.vault.holdings[symbol] = []
+            if (!historical.vault2) historical.vault2 = {}
+            if (!historical.vault2.holdings) historical.vault2.holdings = {}
+            if (!historical.vault2.holdings[symbol]) historical.vault2.holdings[symbol] = []
+            if (!historical.vault3) historical.vault3 = {}
+            if (!historical.vault3.holdings) historical.vault3.holdings = {}
+            if (!historical.vault3.holdings[symbol]) historical.vault3.holdings[symbol] = []
+            if (!historical.vaultTotal) historical.vaultTotal = {}
+            if (!historical.vaultTotal.holdings) historical.vaultTotal.holdings = {}
+            if (!historical.vaultTotal.holdings[symbol]) historical.vaultTotal.holdings[symbol] = []
+            if (!historical.characterFactory) historical.characterFactory = {}
+            if (!historical.characterFactory.holdings) historical.characterFactory.holdings = {}
+            if (!historical.characterFactory.holdings[symbol]) historical.characterFactory.holdings[symbol] = []
+            if (!historical.dev) historical.dev = {}
+            if (!historical.dev.holdings) historical.dev.holdings = {}
+            if (!historical.dev.holdings[symbol]) historical.dev.holdings[symbol] = []
+            if (!historical.charity) historical.charity = {}
+            if (!historical.charity.holdings) historical.charity.holdings = {}
+            if (!historical.charity.holdings[symbol]) historical.charity.holdings[symbol] = []
+            if (!historical.deployer) historical.deployer = {}
+            if (!historical.deployer.holdings) historical.deployer.holdings = {}
+            if (!historical.deployer.holdings[symbol]) historical.deployer.holdings[symbol] = []
+            if (!historical.lockedLiquidity) historical.lockedLiquidity = {}
+            if (!historical.lockedLiquidity.holdings) historical.lockedLiquidity.holdings = {}
+            if (!historical.lockedLiquidity.holdings[symbol]) historical.lockedLiquidity.holdings[symbol] = []
+            if (!historical.v2Liquidity) historical.v2Liquidity = {}
+            if (!historical.v2Liquidity.holdings) historical.v2Liquidity.holdings = {}
+            if (!historical.v2Liquidity.holdings[symbol]) historical.v2Liquidity.holdings[symbol] = []
+            if (!historical.org) historical.org = {}
+            if (!historical.org.holdings) historical.org.holdings = {}
+            if (!historical.org.holdings[symbol]) historical.org.holdings[symbol] = []
+            if (!historical.orgCash) historical.orgCash = {}
+            if (!historical.orgCash.holdings) historical.orgCash.holdings = {}
+            if (!historical.orgCash.holdings[symbol]) historical.orgCash.holdings[symbol] = []
+            if (!historical.orgToken) historical.orgToken = {}
+            if (!historical.orgToken.holdings) historical.orgToken.holdings = {}
+            if (!historical.orgToken.holdings[symbol]) historical.orgToken.holdings[symbol] = []
+            if (!historical.evolution) historical.evolution = {}
+            if (!historical.evolution.holdings) historical.evolution.holdings = {}
+            if (!historical.evolution.holdings[symbol]) historical.evolution.holdings[symbol] = []
 
-          const oldTime = (new Date(historical.totalSupply[symbol][historical.totalSupply[symbol].length-1]?.[0] || 0)).getTime()
-          const newTime = (new Date()).getTime()
-          const diff = newTime - oldTime
+            const oldTime = (new Date(historical.totalSupply[symbol][historical.totalSupply[symbol].length-1]?.[0] || 0)).getTime()
+            const newTime = (new Date()).getTime()
+            const diff = newTime - oldTime
 
-          if (diff / (1000 * 60 * 60 * 24) > 1) {
-            historical.totalSupply[symbol].push([newTime, totalSupply])
-            historical.circulatingSupply[symbol].push([newTime, circulatingSupply])
-            historical.totalBurned[symbol].push([newTime, totalBurned])
-            historical.raid.holdings[symbol].push([newTime, raidHoldings])
-            historical.bot.holdings[symbol].push([newTime, botHoldings])
-            historical.bot2.holdings[symbol].push([newTime, bot2Holdings])
-            historical.bot3.holdings[symbol].push([newTime, bot3Holdings])
-            historical.botTotal.holdings[symbol].push([newTime, botTotalHoldings])
-            historical.vault.holdings[symbol].push([newTime, vaultHoldings])
-            historical.vault2.holdings[symbol].push([newTime, vault2Holdings])
-            historical.vault3.holdings[symbol].push([newTime, vault3Holdings])
-            historical.vaultTotal.holdings[symbol].push([newTime, vaultTotalHoldings])
-            historical.characterFactory.holdings[symbol].push([newTime, characterFactoryHoldings])
-            historical.dev.holdings[symbol].push([newTime, devHoldings])
-            historical.charity.holdings[symbol].push([newTime, charityHoldings])
-            historical.deployer.holdings[symbol].push([newTime, deployerHoldings])
-            historical.lockedLiquidity.holdings[symbol].push([newTime, lockedLiquidityHoldings])
-            historical.v2Liquidity.holdings[symbol].push([newTime, v2LiquidityHoldings])
-            historical.org.holdings[symbol].push([newTime, orgHoldings])
-            historical.orgCash.holdings[symbol].push([newTime, orgCashHoldings])
-            historical.orgToken.holdings[symbol].push([newTime, orgTokenHoldings])
-            historical.evolution.holdings[symbol].push([newTime, evolutionHoldings])
+            if (diff / (1000 * 60 * 60 * 24) > 1) {
+              historical.totalSupply[symbol].push([newTime, totalSupply])
+              historical.circulatingSupply[symbol].push([newTime, circulatingSupply])
+              historical.totalBurned[symbol].push([newTime, totalBurned])
+              historical.raid.holdings[symbol].push([newTime, raidHoldings])
+              historical.bot.holdings[symbol].push([newTime, botHoldings])
+              historical.bot2.holdings[symbol].push([newTime, bot2Holdings])
+              historical.bot3.holdings[symbol].push([newTime, bot3Holdings])
+              historical.botTotal.holdings[symbol].push([newTime, botTotalHoldings])
+              historical.vault.holdings[symbol].push([newTime, vaultHoldings])
+              historical.vault2.holdings[symbol].push([newTime, vault2Holdings])
+              historical.vault3.holdings[symbol].push([newTime, vault3Holdings])
+              historical.vaultTotal.holdings[symbol].push([newTime, vaultTotalHoldings])
+              historical.characterFactory.holdings[symbol].push([newTime, characterFactoryHoldings])
+              historical.dev.holdings[symbol].push([newTime, devHoldings])
+              historical.charity.holdings[symbol].push([newTime, charityHoldings])
+              historical.deployer.holdings[symbol].push([newTime, deployerHoldings])
+              historical.lockedLiquidity.holdings[symbol].push([newTime, lockedLiquidityHoldings])
+              historical.v2Liquidity.holdings[symbol].push([newTime, v2LiquidityHoldings])
+              historical.org.holdings[symbol].push([newTime, orgHoldings])
+              historical.orgCash.holdings[symbol].push([newTime, orgCashHoldings])
+              historical.orgToken.holdings[symbol].push([newTime, orgTokenHoldings])
+              historical.evolution.holdings[symbol].push([newTime, evolutionHoldings])
+            }
           }
+        } catch(e) {
+          console.log(e)
         }
       }
-
+    
       runes.totals = {}
       runes.totals.raid = 0
       runes.totals.vault = 0
