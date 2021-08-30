@@ -2966,6 +2966,8 @@ async function monitorEvolutionStats2() {
           server.version = data.version
           server.rewardItemAmount = data.rewardItemAmount
           server.rewardWinnerAmount = data.rewardWinnerAmount
+          server.gameMode = data.gameMode
+          // server.totalLegitPlayers = data.totalLegitPlayers
 
           server.status = "online"
         } catch(e) {
