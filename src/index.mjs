@@ -2942,7 +2942,24 @@ async function monitorEvolutionStats() {
 }
 
 
+function fancyTimeFormat(duration)
+{   
+    // Hours, minutes and seconds
+    var hrs = ~~(duration / 3600);
+    var mins = ~~((duration % 3600) / 60);
+    var secs = ~~duration % 60;
 
+    // Output like "1:01" or "4:03:59" or "123:03:59"
+    var ret = "";
+
+    if (hrs > 0) {
+        ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+    }
+
+    ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+    ret += "" + secs;
+    return ret;
+}
 async function monitorEvolutionStats2() {
 
   // Update evolution historical
@@ -2970,6 +2987,7 @@ async function monitorEvolutionStats2() {
           server.roundId = data.round.id
           server.roundStartedAt = data.round.startedAt
           server.roundStartedDate = new Date(data.round.startedAt * 1000).toString()
+          server.timeLeft = fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
           // server.totalLegitPlayers = data.totalLegitPlayers
 
           server.status = "online"
