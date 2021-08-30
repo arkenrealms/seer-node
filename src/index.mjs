@@ -169,6 +169,8 @@ async function iterateBlocks(name, address, fromBlock, toBlock, event, processLo
 }
   
 const saveConfig = async () => {
+  config.updatedDate = (new Date()).toString()
+  config.updatedTimestamp = new Date().getTime()
   jetpack.write(path.resolve('./db/config.json'), beautify(config, null, 2, 100), { atomic: true })
 }
 
