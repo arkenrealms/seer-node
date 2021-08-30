@@ -2969,6 +2969,7 @@ async function monitorEvolutionStats2() {
           server.gameMode = data.gameMode
           server.roundId = data.round.id
           server.roundStartedAt = data.round.startedAt
+          server.roundStartedDate = new Date(data.round.startedAt * 1000).toString()
           // server.totalLegitPlayers = data.totalLegitPlayers
 
           server.status = "online"
