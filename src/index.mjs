@@ -3582,6 +3582,7 @@ async function run() {
   setTimeout(getAllCharacterEvents, 1 * 60 * 1000)
   setTimeout(monitorGuildMemberDetails, 30 * 60 * 1000)
   setTimeout(monitorSaves, 5 * 60 * 1000)
+  setTimeout(monitorEvolutionStats2, 10 * 1000)
 
   await getAllMarketEvents()
   await monitorItemEvents()
@@ -3591,7 +3592,6 @@ async function run() {
   await monitorGeneralStats()
   await monitorCraftingStats()
   await monitorEvolutionStats()
-  await monitorEvolutionStats2()
   await monitorMeta()
   await monitorCoordinator()
 }
