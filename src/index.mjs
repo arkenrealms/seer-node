@@ -3034,7 +3034,7 @@ async function monitorEvolutionStats2() {
     console.log(e)
   }
 
-  setTimeout(monitorEvolutionStats2, 2 * 60 * 1000)
+  setTimeout(monitorEvolutionStats2, 30 * 1000)
 }
 
 async function monitorCoordinator() {
