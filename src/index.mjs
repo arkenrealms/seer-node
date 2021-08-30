@@ -2987,7 +2987,8 @@ async function monitorEvolutionStats2() {
           server.roundId = data.round.id
           server.roundStartedAt = data.round.startedAt
           server.roundStartedDate = new Date(data.round.startedAt * 1000).toString()
-          server.timeLeft = fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
+          server.timeLeft = 5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt))
+          server.timeLeftFancy = fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
           // server.totalLegitPlayers = data.totalLegitPlayers
 
           server.status = "online"
