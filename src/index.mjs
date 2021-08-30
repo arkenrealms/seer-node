@@ -551,7 +551,7 @@ const addGuildMember = (guild, user) => {
 }
 
 const saveGuild = async (guild) => {
-  console.log('Saving guild', guild)
+  console.log('Saving guild', guild.name)
   updateAchievementsByGuild(guild)
 
   jetpack.write(path.resolve(`./db/guilds/${guild.id}/overview.json`), beautify({
@@ -3535,7 +3535,7 @@ async function migrateTrades() {
   await saveTrades()
 }
 
-async function monitorGit() {
+async function monitorSaves() {
   try {
     await saveTrades()
     await saveTradesEvents()
@@ -3549,12 +3549,12 @@ async function monitorGit() {
     await saveHistorical()
     await saveApp()
     await saveConfig()
-    await updateGit()
+    // await updateGit()
   } catch(e) {
     console.log('Git error', e)
   }
 
-  setTimeout(monitorGit, 5 * 60 * 1000)
+  setTimeout(monitorSaves, 5 * 60 * 1000)
 }
 
 async function run() {
@@ -3581,7 +3581,7 @@ async function run() {
   // setTimeout(getAllMarketEvents, 1 * 60 * 1000)
   setTimeout(getAllCharacterEvents, 1 * 60 * 1000)
   setTimeout(monitorGuildMemberDetails, 30 * 60 * 1000)
-  setTimeout(monitorGit, 5 * 60 * 1000)
+  setTimeout(monitorSaves, 5 * 60 * 1000)
 
   await getAllMarketEvents()
   await monitorItemEvents()
