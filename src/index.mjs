@@ -175,7 +175,7 @@ const saveConfig = async () => {
 }
 
 const saveTrades = async () => {
-  jetpack.write(path.resolve('./db/trades.json'), beautify(trades, null, 2, 100), { atomic: true })
+  jetpack.write(path.resolve('./db/trades.json'), beautify(removeDupes(trades), null, 2, 100), { atomic: true })
 }
 
 const saveTradesEvents = async () => {
@@ -992,6 +992,8 @@ async function getAllMarketEvents() {
 
         trades.push(trade)
 
+        console.log('Adding trade', trade)
+
         await saveUserTrade(loadUser(seller), trade)
         await saveTokenTrade(loadToken(trade.tokenId), trade)
         await saveItemTrade(loadItem(trade.item.id), trade)
@@ -1035,6 +1037,8 @@ async function getAllMarketEvents() {
         specificTrade.blockNumber = log.blockNumber
         specificTrade.item = { id: decodeItem(tokenId.toString()).id }
         // specificTrade.item = decodeItem(specificTrade.tokenId)
+
+        console.log('Delisting trade', specificTrade)
 
         await saveUserTrade(loadUser(seller), specificTrade)
         await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
