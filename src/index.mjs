@@ -898,8 +898,8 @@ async function getAllBarracksEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock[event], blockNumber, arcaneBarracksContract.filters[event](), processLog, async function (blockNumber) {
-      config.barracks.lastBlock[event] = blockNumber
+    await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock[event], blockNumber, arcaneBarracksContract.filters[event](), processLog, async function (blockNumber2) {
+      config.barracks.lastBlock[event] = blockNumber2
       // await saveConfig()
     })
   }
@@ -1099,8 +1099,8 @@ async function getAllMarketEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock[event], blockNumber, arcaneTraderContract.filters[event](), processLog, async function (blockNumber) {
-      config.trades.lastBlock[event] = blockNumber
+    await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock[event], blockNumber, arcaneTraderContract.filters[event](), processLog, async function (blockNumber2) {
+      config.trades.lastBlock[event] = blockNumber2
       // await saveConfig()
     })
   }
@@ -1202,8 +1202,8 @@ async function getAllCharacterEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock[event], blockNumber, arcaneCharactersContract.filters[event](), processLog, async function (blockNumber) {
-      config.characters.lastBlock[event] = blockNumber
+    await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock[event], blockNumber, arcaneCharactersContract.filters[event](), processLog, async function (blockNumber2) {
+      config.characters.lastBlock[event] = blockNumber2
       // await saveConfig()
     })
   }
@@ -1304,8 +1304,8 @@ async function getAllItemEvents() {
   ]
   
   for (const event of events) {
-    await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber) {
-      config.items.lastBlock[event] = blockNumber
+    await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber2) {
+      config.items.lastBlock[event] = blockNumber2
       // await saveConfig()
     })
   }
@@ -3002,11 +3002,11 @@ async function monitorEvolutionStats2() {
         } catch(e) {
           if ((e + '').toString().indexOf('invalid json response body') === -1) console.log(e)
 
-          // server.status = "offline"
-          // server.playerCount = 0
-          // server.speculatorCount = 0
-          // server.rewardItemAmount = 0
-          // server.rewardWinnerAmount = 0
+          server.status = "offline"
+          server.playerCount = 0
+          server.speculatorCount = 0
+          server.rewardItemAmount = 0
+          server.rewardWinnerAmount = 0
         }
 
         const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
