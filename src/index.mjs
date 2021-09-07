@@ -406,19 +406,64 @@ const loadToken = (tokenId) => {
     marketTradesSoldCount: 0,
     ...(jetpack.read(path.resolve(`./db/tokens/${tokenId}/overview.json`), 'json') || {}),
     transfers: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/transfers.json`), 'json') || []),
-    trades: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/trades.json`), 'json') || [])
+    trades: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/trades.json`), 'json') || []),
+    meta: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/meta.json`), 'json') || {})
+  }
+}
+
+const updateTokenMeta = async (token) => {
+  try {
+    const item = decodeItem(token.id)
+
+    item.icon = item.icon.replace('undefined', 'https://rune.game/')
+
+    if (item.recipe) {
+      item.recipe.requirement = item.recipe.requirement.map(r => ({...r, id: RuneNames[r.id]}))
+    }
+
+    item.branches[1].attributes.map(a => ({
+      ...a,
+      description: ItemAttributesById[a.id].description
+    }))
+
+    token.meta = {
+      "description": Array.isArray(item.branches[1].description) ? item.branches[1].description[0] : item.branches[1].description,
+      "home_url": "https://rune.game",
+      "external_url": "https://rune.game/token/" + token.id,
+      "image_url": item.icon,
+      "language": "en-US",
+      ...item,
+      "type": ItemTypeToText[item.type],
+      "slots": item.slots.map(s => ItemSlotToText[s])
+    }
+
+    delete token.meta.category
+    delete token.meta.value
+    delete token.meta.hotness
+    delete token.meta.createdDate
+
+    token.meta.attributes = token.meta.attributes.map(a => ({
+      ...a,
+      trait_type: a.description.replace('{value}% ', '').replace(': {value}', '').replace('{value} ', '')
+    }))
+  } catch(e) {
+    
   }
 }
 
 const saveToken = async (token) => {
+  updateTokenMeta(token)
+
   jetpack.write(path.resolve(`./db/tokens/${token.id}/overview.json`), beautify({
     ...token,
     transfers: undefined,
-    trades: undefined
+    trades: undefined,
+    meta: undefined
   }, null, 2), { atomic: true })
 
   jetpack.write(path.resolve(`./db/tokens/${token.id}/transfers.json`), beautify(token.transfers, null, 2), { atomic: true })
   jetpack.write(path.resolve(`./db/tokens/${token.id}/trades.json`), beautify(token.trades, null, 2), { atomic: true })
+  jetpack.write(path.resolve(`./db/tokens/${token.id}/meta.json`), beautify(token.meta, null, 2), { atomic: true })
 }
 
 const saveTokenTrade = async (token, trade) => {
@@ -3607,6 +3652,9 @@ async function run() {
   // const user = loadUser('0x37470038C615Def104e1bee33c710bD16a09FdEf')
   // updateAchievementsByUser(user)
   // saveUser(user)
+
+  // const token = loadToken('100300001010009000300020000000000000000000000000000000000000000000000000694')
+  // saveToken(token)
   
 
   setTimeout(getAllItemEvents, 1 * 60 * 1000)
