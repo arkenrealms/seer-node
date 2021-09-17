@@ -786,12 +786,17 @@ const saveUserItem = async (user, item) => {
 }
 
 const saveUserCharacter = async (user, character) => {
-  const savedItem = user.characters.find(i => i.tokenId === character.tokenId)
+  // Wipe char list for old format (no block number)
+  if (!user.characters.filter(i => i.blockNumber && i.blockNumber > 0).length) {
+    user.characters = []
+  }
+
+  const savedItem = user.characters.find(i => i.tokenId === character.tokenId && i.blockNumber === character.blockNumber)
 
   if (savedItem) {
-    for (const key of Object.keys(character)) {
-      savedItem[key] = character[key]
-    }
+    // for (const key of Object.keys(character)) {
+    //   savedItem[key] = character[key]
+    // }
   } else {
     user.characters.push(character)
   }
@@ -1204,12 +1209,18 @@ async function getAllCharacterEvents() {
 
       const user = loadUser(userAddress)
 
+      if (!user.characters.length) {
+        console.log('New user: ' + userAddress)
+      }
+
       const characterData = {
         owner: userAddress,
         from,
         status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
         tokenId: tokenId.toString(),
         transferredAt: new Date().getTime(),
+        blockNumber: log.blockNumber,
+        tx: log.transactionHash,
         id: await arcaneCharactersContract.getCharacterId(tokenId.toString())
       }
 
@@ -2673,6 +2684,19 @@ async function monitorEvolutionStats() {
         const data = await response.json()
 
         jetpack.write(path.resolve(`./db/evolution/${server.key}/bans.json`), beautify(data, null, 2), { atomic: true })
+
+        for (const banItem of data) {
+          const user = loadUser(banItem)
+
+          if (!user.evolution) user.evolution = {}
+          if (!user.evolution.servers) user.evolution.servers = {}
+          if (!user.evolution.servers[server.key]) user.evolution.servers[server.key] = {}
+
+          user.evolution.servers[server.key].isBanned = true
+          user.evolution.isBanned = true
+
+          await saveUser(user)
+        }
       } catch(e) {
         console.log(e)
       }
@@ -2680,6 +2704,8 @@ async function monitorEvolutionStats() {
   } catch(e) {
     console.log(e)
   }
+
+  
 
   // Update evolution player rewards
   try {
@@ -2696,6 +2722,55 @@ async function monitorEvolutionStats() {
         const data = await response.json()
 
         jetpack.write(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), beautify(data, null, 2), { atomic: true })
+      } catch(e) {
+        console.log(e)
+      }
+    }
+  } catch(e) {
+    console.log(e)
+  }
+
+  
+
+  // Update evolution player rewards
+  try {
+    console.log('Update evolution player rewards')
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+
+      console.log('Server', server.key)
+
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/data/log.json?${rand}`)
+      
+        const data = await response.json()
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/log.json`), beautify(data, null, 2), { atomic: true })
+      } catch(e) {
+        console.log(e)
+      }
+    }
+  } catch(e) {
+    console.log(e)
+  }
+
+
+  // Update evolution player rewards
+  try {
+    console.log('Update evolution player rewards')
+    for (const server of evolutionServers) {
+      if (server.status !== 'online') continue
+
+      console.log('Server', server.key)
+
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`https://${server.endpoint}/data/playerReports.json?${rand}`)
+      
+        const data = await response.json()
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/playerReports.json`), beautify(data, null, 2), { atomic: true })
       } catch(e) {
         console.log(e)
       }
@@ -3680,6 +3755,6 @@ async function run() {
 run()
 
 // Force restart after an hour
-setTimeout(() => {
-  process.exit(1)
-}, 9 * 60 * 60 * 1000)
+// setTimeout(() => {
+//   process.exit(1)
+// }, 9 * 60 * 60 * 1000)

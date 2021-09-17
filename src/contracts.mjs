@@ -270,7 +270,7 @@ export default {
     [TESTNET]: '',
   },
   bot2Address: {
-    [MAINNET]: '0x9b229c01eEf692A780d8Fee2558AaEa9873C032f',
+    [MAINNET]: '0xF2616ac222660436867e52B6521A9424550A1E6D',
     [TESTNET]: '',
   },
   bot3Address: {
