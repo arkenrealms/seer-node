@@ -1429,8 +1429,6 @@ async function monitorGeneralStats() {
       for (let i = 0; i < farmsData.length; i++) {
         const farm = farmsData[i]
         try {
-          if (farm.chefKey !== 'DOL') continue
-      
           // console.log(farm.lpSymbol)
         
           if (farm.lpSymbol.indexOf('BUSD') !== -1) {
