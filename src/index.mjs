@@ -859,102 +859,106 @@ async function getAllBarracksEvents() {
 
   config.barracks.updating = true
 
-  const iface = new ethers.utils.Interface(ArcaneBarracksFacetV1.abi)
+  try {
+    const iface = new ethers.utils.Interface(ArcaneBarracksFacetV1.abi)
 
-  async function processLog(log, updateConfig = true) {
-    const e = iface.parseLog(log)
+    async function processLog(log, updateConfig = true) {
+      const e = iface.parseLog(log)
+      
+      // console.log(e.name, e)
+
+      if (e.name === 'Equip') {
+        const { user: userAddress, tokenId, itemId } = e.args
+
+        const user = loadUser(userAddress)
+
+        const item = {
+          status: "equipped",
+          tokenId: tokenId.toString(),
+          updatedAt: new Date().getTime(),
+          id: decodeItem(tokenId.toString()).id
+        }
+        
+        await saveUserItem(user, item)
+      }
+
+      if (e.name === 'Unequip') {
+        const { user: userAddress, tokenId, itemId } = e.args
+
+        const user = loadUser(userAddress)
+
+        const item = {
+          status: "unequipped",
+          tokenId: tokenId.toString(),
+          itemId: itemId,
+          updatedAt: new Date().getTime(),
+          id: decodeItem(tokenId.toString()).id
+          // ...decodeItem(tokenId.toString())
+        }
+        
+        await saveUserItem(user, item)
+      }
+
+      if (e.name === 'ActionBurn') {
+        
+      }
+
+      if (e.name === 'ActionBonus') {
+        
+      }
+
+      if (e.name === 'ActionHiddenPool') {
+        
+      }
+
+      if (e.name === 'ActionFee') {
+        
+      }
+
+      if (e.name === 'ActionSwap') {
+        
+      }
+
+      const e2 = barracksEvents.find(t => t.transactionHash === log.transactionHash)
+
+      if (!e2) {
+        barracksEvents.push({
+          // id: ++config.barracks.counter,
+          ...log,
+          ...e
+        })
+      }
     
-    // console.log(e.name, e)
 
-    if (e.name === 'Equip') {
-      const { user: userAddress, tokenId, itemId } = e.args
-
-      const user = loadUser(userAddress)
-
-      const item = {
-        status: "equipped",
-        tokenId: tokenId.toString(),
-        updatedAt: new Date().getTime(),
-        id: decodeItem(tokenId.toString()).id
-      }
-      
-      await saveUserItem(user, item)
+      // if (updateConfig && log.blockNumber > config.barracks.lastBlock) {
+      //   config.barracks.lastBlock = log.blockNumber
+      //   saveConfig()
+      // }
     }
 
-    if (e.name === 'Unequip') {
-      const { user: userAddress, tokenId, itemId } = e.args
+    const blockNumber = await web3.eth.getBlockNumber()
 
-      const user = loadUser(userAddress)
-
-      const item = {
-        status: "unequipped",
-        tokenId: tokenId.toString(),
-        itemId: itemId,
-        updatedAt: new Date().getTime(),
-        id: decodeItem(tokenId.toString()).id
-        // ...decodeItem(tokenId.toString())
-      }
-      
-      await saveUserItem(user, item)
-    }
-
-    if (e.name === 'ActionBurn') {
-      
-    }
-
-    if (e.name === 'ActionBonus') {
-      
-    }
-
-    if (e.name === 'ActionHiddenPool') {
-      
-    }
-
-    if (e.name === 'ActionFee') {
-      
-    }
-
-    if (e.name === 'ActionSwap') {
-      
-    }
-
-    const e2 = barracksEvents.find(t => t.transactionHash === log.transactionHash)
-
-    if (!e2) {
-      barracksEvents.push({
-        // id: ++config.barracks.counter,
-        ...log,
-        ...e
+    const events = [
+      'Equip(address,uint256,uint16)',
+      'Unequip(address,uint256,uint16)',
+      'ActionBurn(address,uint256)',
+      'ActionBonus(address,uint256)',
+      'ActionHiddenPool(address,uint256)',
+      'ActionFee(address,address,uint256)',
+      'ActionSwap(address,address,uint256)',
+    ]
+    
+    for (const event of events) {
+      await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock[event], blockNumber, arcaneBarracksContract.filters[event](), processLog, async function (blockNumber2) {
+        config.barracks.lastBlock[event] = blockNumber2
+        // await saveConfig()
       })
     }
-  
 
-    // if (updateConfig && log.blockNumber > config.barracks.lastBlock) {
-    //   config.barracks.lastBlock = log.blockNumber
-    //   saveConfig()
-    // }
+    console.log('Finished')
+  } catch(e) {
+    console.log(e)
   }
-
-  const blockNumber = await web3.eth.getBlockNumber()
-
-  const events = [
-    'Equip(address,uint256,uint16)',
-    'Unequip(address,uint256,uint16)',
-    'ActionBurn(address,uint256)',
-    'ActionBonus(address,uint256)',
-    'ActionHiddenPool(address,uint256)',
-    'ActionFee(address,address,uint256)',
-    'ActionSwap(address,address,uint256)',
-  ]
-  
-  for (const event of events) {
-    await iterateBlocks(`Barracks Events: ${event}`, getAddress(contracts.barracks), config.barracks.lastBlock[event], blockNumber, arcaneBarracksContract.filters[event](), processLog, async function (blockNumber2) {
-      config.barracks.lastBlock[event] = blockNumber2
-      // await saveConfig()
-    })
-  }
-
-  console.log('Finished')
 
   config.barracks.updating = false
 
@@ -1013,149 +1017,153 @@ async function getAllMarketEvents() {
 
   config.trades.updating = true
 
-  const iface = new ethers.utils.Interface(ArcaneTraderV1.abi);
+  try {
+    const iface = new ethers.utils.Interface(ArcaneTraderV1.abi);
 
-  async function processLog(log, updateConfig = true) {
-    const e = iface.parseLog(log)
-    console.log(e.name, e.args.tokenId)
-    if (e.name === 'List') {
-      const { seller, buyer, tokenId, price } = e.args
+    async function processLog(log, updateConfig = true) {
+      const e = iface.parseLog(log)
+      console.log(e.name, e.args.tokenId)
+      if (e.name === 'List') {
+        const { seller, buyer, tokenId, price } = e.args
 
-      let trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
+        let trade = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
 
-      if (!trade || trade.blockNumber < log.blockNumber) {
-        trade = {
-          id: getHighestId(trades) + 1
+        if (!trade || trade.blockNumber < log.blockNumber) {
+          trade = {
+            id: getHighestId(trades) + 1
+          }
+
+          trade.seller = seller
+          trade.buyer = buyer
+          trade.tokenId = tokenId.toString()
+          trade.price = toShort(price)
+          trade.status = "available"
+          trade.hotness = 0
+          trade.createdAt = new Date().getTime()
+          trade.updatedAt = new Date().getTime()
+          trade.blockNumber = log.blockNumber
+          trade.item = { id: decodeItem(tokenId.toString()).id }
+          // trade.item = decodeItem(trade.tokenId)
+
+          trades.push(trade)
+
+          console.log('Adding trade', trade)
+
+          await saveUserTrade(loadUser(seller), trade)
+          await saveTokenTrade(loadToken(trade.tokenId), trade)
+          await saveItemTrade(loadItem(trade.item.id), trade)
+          await saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
+          // await saveConfig()
+          
+          console.log('List', trade)
         }
+      }
 
-        trade.seller = seller
-        trade.buyer = buyer
-        trade.tokenId = tokenId.toString()
-        trade.price = toShort(price)
-        trade.status = "available"
-        trade.hotness = 0
-        trade.createdAt = new Date().getTime()
-        trade.updatedAt = new Date().getTime()
-        trade.blockNumber = log.blockNumber
-        trade.item = { id: decodeItem(tokenId.toString()).id }
-        // trade.item = decodeItem(trade.tokenId)
+      if (e.name === 'Update') {
+        const { seller, buyer, tokenId, price } = e.args
 
-        trades.push(trade)
+        const specificTrades = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
 
-        console.log('Adding trade', trade)
+        for (const specificTrade of specificTrades) {
+          specificTrade.buyer = buyer
+          specificTrade.price = toShort(price)
+          specificTrade.updatedAt = new Date().getTime()
+          specificTrade.blockNumber = log.blockNumber
+          specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+          // specificTrade.item = decodeItem(specificTrade.tokenId)
 
-        await saveUserTrade(loadUser(seller), trade)
-        await saveTokenTrade(loadToken(trade.tokenId), trade)
-        await saveItemTrade(loadItem(trade.item.id), trade)
-        await saveItemToken(loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
+          await saveUserTrade(loadUser(seller), specificTrade)
+          await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+          await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+          await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+          
+          console.log('Update', specificTrade)
+        }
+      }
+
+      if (e.name === 'Delist') {
+        const { seller, buyer, tokenId, price } = e.args
+
+        const specificTrades = trades.filter(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
+        
+        for (const specificTrade of specificTrades) {
+          specificTrade.status = "delisted"
+          specificTrade.updatedAt = new Date().getTime()
+          specificTrade.blockNumber = log.blockNumber
+          specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+          // specificTrade.item = decodeItem(specificTrade.tokenId)
+
+          console.log('Delisting trade', specificTrade)
+
+          await saveUserTrade(loadUser(seller), specificTrade)
+          await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+          await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+          await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+          
+          console.log('Delist', specificTrade)
+        }
+      }
+
+      if (e.name === 'Buy') {
+        const { seller, buyer, tokenId, price } = e.args
+
+        const specificTrades = trades.filter(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
+
+        for (const specificTrade of specificTrades) {
+          specificTrade.status = "sold"
+          specificTrade.buyer = buyer
+          specificTrade.updatedAt = new Date().getTime()
+          specificTrade.blockNumber = log.blockNumber
+          specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+          // specificTrade.item = decodeItem(specificTrade.tokenId)
+    
+          await saveUserTrade(loadUser(seller), specificTrade)
+          await saveUserTrade(loadUser(buyer), specificTrade)
+          await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
+          await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
+          await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+          
+          console.log('Buy', specificTrade)
+        }
+      }
+
+      const e2 = tradesEvents.find(t => t.transactionHash === log.transactionHash)
+
+      if (!e2) {
+        tradesEvents.push({
+          // id: ++config.trades.counter,
+          ...log,
+          ...e
+        })
+      }
+
+
+      // if (updateConfig) {
+      //   config.trades.lastBlock = log.blockNumber
+      //   saveConfig()
+      // }
+    }
+
+    const blockNumber = await web3.eth.getBlockNumber()
+
+    const events = [
+      'List(address,address,uint256,uint256)',
+      'Update(address,address,uint256,uint256)',
+      'Delist(address,uint256)',
+      'Buy(address,address,uint256,uint256)',
+    ]
+    
+    for (const event of events) {
+      await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock[event], blockNumber, arcaneTraderContract.filters[event](), processLog, async function (blockNumber2) {
+        config.trades.lastBlock[event] = blockNumber2
         // await saveConfig()
-        
-        console.log('List', trade)
-      }
-    }
-
-    if (e.name === 'Update') {
-      const { seller, buyer, tokenId, price } = e.args
-
-      const specificTrades = trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
-
-      for (const specificTrade of specificTrades) {
-        specificTrade.buyer = buyer
-        specificTrade.price = toShort(price)
-        specificTrade.updatedAt = new Date().getTime()
-        specificTrade.blockNumber = log.blockNumber
-        specificTrade.item = { id: decodeItem(tokenId.toString()).id }
-        // specificTrade.item = decodeItem(specificTrade.tokenId)
-
-        await saveUserTrade(loadUser(seller), specificTrade)
-        await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
-        await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
-        await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
-        
-        console.log('Update', specificTrade)
-      }
-    }
-
-    if (e.name === 'Delist') {
-      const { seller, buyer, tokenId, price } = e.args
-
-      const specificTrades = trades.filter(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
-      
-      for (const specificTrade of specificTrades) {
-        specificTrade.status = "delisted"
-        specificTrade.updatedAt = new Date().getTime()
-        specificTrade.blockNumber = log.blockNumber
-        specificTrade.item = { id: decodeItem(tokenId.toString()).id }
-        // specificTrade.item = decodeItem(specificTrade.tokenId)
-
-        console.log('Delisting trade', specificTrade)
-
-        await saveUserTrade(loadUser(seller), specificTrade)
-        await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
-        await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
-        await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
-        
-        console.log('Delist', specificTrade)
-      }
-    }
-
-    if (e.name === 'Buy') {
-      const { seller, buyer, tokenId, price } = e.args
-
-      const specificTrades = trades.filter(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < log.blockNumber)
-
-      for (const specificTrade of specificTrades) {
-        specificTrade.status = "sold"
-        specificTrade.buyer = buyer
-        specificTrade.updatedAt = new Date().getTime()
-        specificTrade.blockNumber = log.blockNumber
-        specificTrade.item = { id: decodeItem(tokenId.toString()).id }
-        // specificTrade.item = decodeItem(specificTrade.tokenId)
-  
-        await saveUserTrade(loadUser(seller), specificTrade)
-        await saveUserTrade(loadUser(buyer), specificTrade)
-        await saveTokenTrade(loadToken(specificTrade.tokenId), specificTrade)
-        await saveItemTrade(loadItem(specificTrade.item.id), specificTrade)
-        await saveItemToken(loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
-        
-        console.log('Buy', specificTrade)
-      }
-    }
-
-    const e2 = tradesEvents.find(t => t.transactionHash === log.transactionHash)
-
-    if (!e2) {
-      tradesEvents.push({
-        // id: ++config.trades.counter,
-        ...log,
-        ...e
       })
     }
 
-
-    // if (updateConfig) {
-    //   config.trades.lastBlock = log.blockNumber
-    //   saveConfig()
-    // }
+    console.log('Finished')
+  } catch(e) {
+    console.log(e)
   }
-
-  const blockNumber = await web3.eth.getBlockNumber()
-
-  const events = [
-    'List(address,address,uint256,uint256)',
-    'Update(address,address,uint256,uint256)',
-    'Delist(address,uint256)',
-    'Buy(address,address,uint256,uint256)',
-  ]
-  
-  for (const event of events) {
-    await iterateBlocks(`Market Events: ${event}`, getAddress(contracts.trader), config.trades.lastBlock[event], blockNumber, arcaneTraderContract.filters[event](), processLog, async function (blockNumber2) {
-      config.trades.lastBlock[event] = blockNumber2
-      // await saveConfig()
-    })
-  }
-
-  console.log('Finished')
 
   config.trades.updating = false
 
@@ -1197,73 +1205,77 @@ async function getAllCharacterEvents() {
 
   config.characters.updating = true
 
-  const iface = new ethers.utils.Interface(ArcaneCharacters.abi)
+  try {
+    const iface = new ethers.utils.Interface(ArcaneCharacters.abi)
 
-  async function processLog(log, updateConfig = true) {
-    const e = iface.parseLog(log)
+    async function processLog(log, updateConfig = true) {
+      const e = iface.parseLog(log)
+      
+      // console.log(e.name, e)
+
+      if (e.name === 'Transfer') {
+        const { from, to: userAddress, tokenId } = e.args
+
+        const user = loadUser(userAddress)
+
+        if (!user.characters.length) {
+          console.log('New user: ' + userAddress)
+        }
+
+        const characterData = {
+          owner: userAddress,
+          from,
+          status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
+          tokenId: tokenId.toString(),
+          transferredAt: new Date().getTime(),
+          blockNumber: log.blockNumber,
+          tx: log.transactionHash,
+          id: await arcaneCharactersContract.getCharacterId(tokenId.toString())
+        }
+
+        await saveUserCharacter(user, characterData)
+        // saveTokenTransfer(loadToken(characterData.tokenId), characterData)
+
+        if (from !== '0x0000000000000000000000000000000000000000') {
+          await saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
+        }
+
+        await saveCharacterOwner(loadCharacter(characterData.id), characterData)
+      }
+
+      const e2 = charactersEvents.find(t => t.transactionHash === log.transactionHash)
+
+      if (!e2) {
+        charactersEvents.push({
+          id: getHighestId(charactersEvents) + 1,
+          ...log,
+          ...e
+        })
+      }
     
-    // console.log(e.name, e)
 
-    if (e.name === 'Transfer') {
-      const { from, to: userAddress, tokenId } = e.args
-
-      const user = loadUser(userAddress)
-
-      if (!user.characters.length) {
-        console.log('New user: ' + userAddress)
-      }
-
-      const characterData = {
-        owner: userAddress,
-        from,
-        status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
-        tokenId: tokenId.toString(),
-        transferredAt: new Date().getTime(),
-        blockNumber: log.blockNumber,
-        tx: log.transactionHash,
-        id: await arcaneCharactersContract.getCharacterId(tokenId.toString())
-      }
-
-      await saveUserCharacter(user, characterData)
-      // saveTokenTransfer(loadToken(characterData.tokenId), characterData)
-
-      if (from !== '0x0000000000000000000000000000000000000000') {
-        await saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
-      }
-
-      await saveCharacterOwner(loadCharacter(characterData.id), characterData)
+      // if (updateConfig) {
+      //   config.characters.lastBlock = log.blockNumber
+      //   saveConfig()
+      // }
     }
 
-    const e2 = charactersEvents.find(t => t.transactionHash === log.transactionHash)
+    const blockNumber = await web3.eth.getBlockNumber()
 
-    if (!e2) {
-      charactersEvents.push({
-        id: getHighestId(charactersEvents) + 1,
-        ...log,
-        ...e
+    const events = [
+      'Transfer'
+    ]
+    
+    for (const event of events) {
+      await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock[event], blockNumber, arcaneCharactersContract.filters[event](), processLog, async function (blockNumber2) {
+        config.characters.lastBlock[event] = blockNumber2
+        // await saveConfig()
       })
     }
-  
-
-    // if (updateConfig) {
-    //   config.characters.lastBlock = log.blockNumber
-    //   saveConfig()
-    // }
+    console.log('Finished')
+  } catch(e) {
+    console.log(e)
   }
-
-  const blockNumber = await web3.eth.getBlockNumber()
-
-  const events = [
-    'Transfer'
-  ]
-  
-  for (const event of events) {
-    await iterateBlocks(`Characters Events: ${event}`, getAddress(contracts.characters), config.characters.lastBlock[event], blockNumber, arcaneCharactersContract.filters[event](), processLog, async function (blockNumber2) {
-      config.characters.lastBlock[event] = blockNumber2
-      // await saveConfig()
-    })
-  }
-  console.log('Finished')
 
   config.characters.updating = false
 
@@ -1288,85 +1300,89 @@ async function getAllItemEvents() {
 
   config.items.updating = true
 
-  const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
-  const iface = new ethers.utils.Interface(ArcaneItems.abi)
+  try {
+    const contract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
+    const iface = new ethers.utils.Interface(ArcaneItems.abi)
 
-  async function processLog(log, updateConfig = true) {
-    try {
-      const e = iface.parseLog(log)
+    async function processLog(log, updateConfig = true) {
+      try {
+        const e = iface.parseLog(log)
+        
+        // console.log(e.name, e)
+
+        if (e.name === 'Transfer') {
+          const { from, to: userAddress, tokenId } = e.args
+
+          const user = loadUser(userAddress)
+          const decodedItem = decodeItem(tokenId.toString())
+
+          const itemData = {
+            owner: userAddress,
+            from,
+            status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
+            tokenId: tokenId.toString(),
+            createdAt: new Date().getTime(),
+            id: decodedItem.id,
+            perfection: decodedItem.perfection
+          }
+
+          const token = loadToken(itemData.tokenId)
+
+          if (from === '0x0000000000000000000000000000000000000000') {
+            token.owner = itemData.userAddress
+            token.creator = itemData.userAddress
+            token.createdAt = itemData.createdAt
+          }
+
+          await saveUserItem(user, itemData)
+          await saveTokenTransfer(token, itemData)
+
+          if (from !== '0x0000000000000000000000000000000000000000') {
+            await saveUserItem(user, { ...itemData, status: 'transferred_out' })
+          }
+
+          await saveItemOwner(loadItem(itemData.id), itemData)
+        }
+
+        const e2 = itemsEvents.find(t => t.transactionHash === log.transactionHash)
+
+        if (!e2) {
+          itemsEvents.push({
+            // id: ++config.items.counter,
+            ...log,
+            ...e
+          })
+        }
       
-      // console.log(e.name, e)
+        // await saveConfig()
 
-      if (e.name === 'Transfer') {
-        const { from, to: userAddress, tokenId } = e.args
-
-        const user = loadUser(userAddress)
-        const decodedItem = decodeItem(tokenId.toString())
-
-        const itemData = {
-          owner: userAddress,
-          from,
-          status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
-          tokenId: tokenId.toString(),
-          createdAt: new Date().getTime(),
-          id: decodedItem.id,
-          perfection: decodedItem.perfection
-        }
-
-        const token = loadToken(itemData.tokenId)
-
-        if (from === '0x0000000000000000000000000000000000000000') {
-          token.owner = itemData.userAddress
-          token.creator = itemData.userAddress
-          token.createdAt = itemData.createdAt
-        }
-
-        await saveUserItem(user, itemData)
-        await saveTokenTransfer(token, itemData)
-
-        if (from !== '0x0000000000000000000000000000000000000000') {
-          await saveUserItem(user, { ...itemData, status: 'transferred_out' })
-        }
-
-        await saveItemOwner(loadItem(itemData.id), itemData)
+        // if (updateConfig) {
+        //   config.items.lastBlock = log.blockNumber
+        //   saveConfig()
+        // }
+      } catch (ex) {
+        console.log(ex)
+        console.log("Error parsing log: ", log)
       }
-
-      const e2 = itemsEvents.find(t => t.transactionHash === log.transactionHash)
-
-      if (!e2) {
-        itemsEvents.push({
-          // id: ++config.items.counter,
-          ...log,
-          ...e
-        })
-      }
-    
-      // await saveConfig()
-
-      // if (updateConfig) {
-      //   config.items.lastBlock = log.blockNumber
-      //   saveConfig()
-      // }
-    } catch (ex) {
-      console.log(ex)
-      console.log("Error parsing log: ", log)
     }
+
+    const blockNumber = await web3.eth.getBlockNumber()
+
+    const events = [
+      'Transfer'
+    ]
+    
+    for (const event of events) {
+      await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber2) {
+        config.items.lastBlock[event] = blockNumber2
+        // await saveConfig()
+      })
+    }
+
+    console.log('Finished')
+  } catch(e) {
+    console.log(e)
   }
-
-  const blockNumber = await web3.eth.getBlockNumber()
-
-  const events = [
-    'Transfer'
-  ]
-  
-  for (const event of events) {
-    await iterateBlocks(`Items Events: ${event}`, getAddress(contracts.items), config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber2) {
-      config.items.lastBlock[event] = blockNumber2
-      // await saveConfig()
-    })
-  }
-
-  console.log('Finished')
 
   config.items.updating = false
 
