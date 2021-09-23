@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
-process.env.REACT_APP_PUBLIC_URL = "https://rune.farm/"
+process.env.REACT_APP_PUBLIC_URL = "https://rune.game/"
 
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from './data/items.mjs'
 import { ItemsMainCategoriesType } from './data/items.type.mjs'
@@ -56,23 +56,18 @@ const evolutionRewardHistory = jetpack.read(path.resolve('./db/evolution/rewardH
 const evolutionHistorical = jetpack.read(path.resolve('./db/evolution/historical.json'), 'json')
 const evolutionServers = jetpack.read(path.resolve('./db/evolution/servers.json'), 'json')
 
-config.trades.updating = false
-config.barracks.updating = false
-config.blacksmith.updating = false
-config.items.updating = false
-config.characters.updating = false
-config.test.updating = false
 
+console.log('STARTING...')
 
-const fetchPrice = async (id, vs = 'usd') => {
-  const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=${vs}`)
+// const fetchPrice = async (id, vs = 'usd') => {
+//   const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=${vs}`)
 
-  return parseFloat((await response.json())[id][vs])
-}
-const fetchPrices = async () => {
+//   return parseFloat((await response.json())[id][vs])
+// }
+// const fetchPrices = async () => {
   // const response = await fetch('https://api.coingecko.com/api/v3/coins/list')
   // prices = (await response.json())
-}
+// }
 
 const getRandomProvider = () => {
   return new HDWalletProvider(
@@ -81,32 +76,62 @@ const getRandomProvider = () => {
   )
 }
 
-const blocknativeApiKey = '58a45321-bf96-485c-ab9b-e0610e181d26'
+// const blocknativeApiKey = '58a45321-bf96-485c-ab9b-e0610e181d26'
 
-let provider = getRandomProvider()
-const web3 = new Web3(provider)
+let provider
+let web3
+let web3Provider 
+let signer
+let arcaneItemsContract
+let arcaneCharactersContract
+let arcaneBarracksContract
+let arcaneTraderContract
+let arcaneCharacterFactoryContract
+let arcaneProfileContract
+let busdContract
+let wbnbContract
 
-const web3Provider = new ethers.providers.Web3Provider(getRandomProvider(), "any")
-web3Provider.pollingInterval = 15000
+const setupProvider = () => {
+  provider = getRandomProvider()
+  web3 = new Web3(provider)
 
-web3Provider.on("network", (newNetwork, oldNetwork) => {
+  web3Provider = new ethers.providers.Web3Provider(getRandomProvider(), "any")
+  web3Provider.pollingInterval = 15000
+
+  signer = web3Provider.getSigner()
+
+  arcaneItemsContract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
+  arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
+  arcaneBarracksContract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
+  arcaneTraderContract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1.abi, signer)
+  arcaneCharacterFactoryContract = new ethers.Contract(getAddress(contracts.characterFactory), ArcaneCharacterFactoryV3.abi, signer)
+  arcaneProfileContract = new ethers.Contract(getAddress(contracts.profile), ArcaneProfile.abi, signer)
+  busdContract = new ethers.Contract(getAddress(contracts.busd), BEP20Contract.abi, signer)
+  wbnbContract = new ethers.Contract(getAddress(contracts.wbnb), BEP20Contract.abi, signer)
+
+  config.trades.updating = false
+  config.barracks.updating = false
+  config.blacksmith.updating = false
+  config.items.updating = false
+  config.characters.updating = false
+  config.test.updating = false
+}
+
+setupProvider()
+
+setInterval(() => {
+  // Something happened, lets restart the provider
+  if (new Date().getTime() > config.trades.updatedTimestamp + 10 * 60 * 1000) {
+    setupProvider()
+  }
+}, 15 * 60 * 1000)
+
+// web3Provider.on("network", (newNetwork, oldNetwork) => {
   // When a Provider makes its initial connection, it emits a "network"
   // event with a null oldNetwork along with the newNetwork. So, if the
   // oldNetwork exists, it represents a changing network
   // process.exit()
-});
-
-
-const signer = web3Provider.getSigner()
-
-const arcaneItemsContract = new ethers.Contract(getAddress(contracts.items), ArcaneItems.abi, signer)
-const arcaneCharactersContract = new ethers.Contract(getAddress(contracts.characters), ArcaneCharacters.abi, signer)
-const arcaneBarracksContract = new ethers.Contract(getAddress(contracts.barracks), ArcaneBarracksFacetV1.abi, signer)
-const arcaneTraderContract = new ethers.Contract(getAddress(contracts.trader), ArcaneTraderV1.abi, signer)
-const arcaneCharacterFactoryContract = new ethers.Contract(getAddress(contracts.characterFactory), ArcaneCharacterFactoryV3.abi, signer)
-const arcaneProfileContract = new ethers.Contract(getAddress(contracts.profile), ArcaneProfile.abi, signer)
-const busdContract = new ethers.Contract(getAddress(contracts.busd), BEP20Contract.abi, signer)
-const wbnbContract = new ethers.Contract(getAddress(contracts.wbnb), BEP20Contract.abi, signer)
+// });
 
 process
   .on("unhandledRejection", (reason, p) => {
@@ -114,6 +139,8 @@ process
   })
   .on("uncaughtException", (err) => {
     console.warn(err, "Uncaught Exception thrown.")
+
+    // process.exit(1)
 
     //provider = getRandomProvider()
     // run()
@@ -528,7 +555,7 @@ const guildInfoMap = {
   1: {
     name: "The First Ones",
     description: `Formed after the discovery of a cache of hidden texts in an abandoned, secret Horadric meeting place. This group of scholars was brought together by Bin Zy.`,
-    icon: 'https://rune.farm/images/teams/the-first-ones.png',
+    icon: 'https://rune.game/images/teams/the-first-ones.png',
     backgroundColor: '#fff',
     discord: {
       role: '862170863827025950',
@@ -538,7 +565,7 @@ const guildInfoMap = {
   2: {
     name: "The Archivists",
     description: `The Archivists are an order based in Westmarch. These brave souls wade into battle wielding tome and quill, armored not in ensorcelled plate or links of chain, but in the knowledge of generations past. These archivists fight not only for the future of humanity, but for mankind's past as well. The members of their honored fraternity are many, and their numbers grow every day.`,
-    icon: 'https://rune.farm/images/teams/the-first-ones.png',
+    icon: 'https://rune.game/images/teams/the-first-ones.png',
     backgroundColor: '#fff',
     discord: {
       role: '862171000446779394',
@@ -548,7 +575,7 @@ const guildInfoMap = {
   3: {
     name: "Knights of Westmarch",
     description: `Pure at heart, during the Darkening of Tristrum, the knights closely followed the teachings of the Zakaram. The knights have since become a largely secular order, more focused on defending Westmarch from physical rather than spiritual harm. They are led by a knight commander.`,
-    icon: 'https://rune.farm/images/teams/knights-of-westmarch.png',
+    icon: 'https://rune.game/images/teams/knights-of-westmarch.png',
     backgroundColor: '#fff',
     discord: {
       role: '862171051450040320',
@@ -558,7 +585,7 @@ const guildInfoMap = {
   4: {
     name: "The Protectors",
     description: `After the destruction of the Worldstone, these survivors banded together to find and protect the Worldstone shards from falling into the hands of evil.`,
-    icon: 'https://rune.farm/images/teams/the-protectors.png',
+    icon: 'https://rune.game/images/teams/the-protectors.png',
     backgroundColor: '#fff',
     discord: {
       role: '',
@@ -568,7 +595,7 @@ const guildInfoMap = {
   5: {
     name: "The Destroyers",
     description: `After the destruction of the Worldstone, these dark souls serve Hell in the destruction of all living things.`,
-    icon: 'https://rune.farm/images/teams/the-destroyers.png',
+    icon: 'https://rune.game/images/teams/the-destroyers.png',
     backgroundColor: '#fff',
     discord: {
       role: '',
@@ -961,6 +988,8 @@ async function getAllBarracksEvents() {
   }
 
   config.barracks.updating = false
+  config.barracks.updatedDate = (new Date()).toString()
+  config.barracks.updatedTimestamp = new Date().getTime()
 
   // await saveBarracksEvents()
   // await saveConfig()
@@ -1166,11 +1195,12 @@ async function getAllMarketEvents() {
   }
 
   config.trades.updating = false
+  config.trades.updatedDate = (new Date()).toString()
+  config.trades.updatedTimestamp = new Date().getTime()
 
   // await saveTrades()
   // await saveConfig()
 
-  // setTimeout(getAllMarketEvents, 2 * 60 * 1000) // Manually update every 5 mins
   setTimeout(getAllMarketEvents, 2 * 60 * 1000)
 }
 
@@ -1181,21 +1211,41 @@ async function monitorMarketEvents() {
   // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
   // event Recover(address indexed user, address indexed seller, uint256 tokenId);
 
-  arcaneTraderContract.on('List', async () => {
-    await getAllMarketEvents()
-  })
+  try {
+    arcaneTraderContract.on('List', async () => {
+      try {
+        await getAllMarketEvents()
+      } catch(e) {
+        console.log(e)
+      }
+    })
 
-  arcaneTraderContract.on('Update', async () => {
-    await getAllMarketEvents()
-  })
+    arcaneTraderContract.on('Update', async () => {
+      try {
+        await getAllMarketEvents()
+      } catch(e) {
+        console.log(e)
+      }
+    })
 
-  arcaneTraderContract.on('Delist', async () => {
-    await getAllMarketEvents()
-  })
+    arcaneTraderContract.on('Delist', async () => {
+      try {
+        await getAllMarketEvents()
+      } catch(e) {
+        console.log(e)
+      }
+    })
 
-  arcaneTraderContract.on('Buy', async () => {
-    await getAllMarketEvents()
-  })
+    arcaneTraderContract.on('Buy', async () => {
+      try {
+        await getAllMarketEvents()
+      } catch(e) {
+        console.log(e)
+      }
+    })
+  } catch(e) {
+    console.log(e)
+  }
 }
 
 async function getAllCharacterEvents() {
@@ -1278,6 +1328,8 @@ async function getAllCharacterEvents() {
   }
 
   config.characters.updating = false
+  config.characters.updatedDate = (new Date()).toString()
+  config.characters.updatedTimestamp = new Date().getTime()
 
   // await saveCharactersEvents()
   // await saveConfig()
@@ -1385,6 +1437,8 @@ async function getAllItemEvents() {
   }
 
   config.items.updating = false
+  config.items.updatedDate = (new Date()).toString()
+  config.items.updatedTimestamp = new Date().getTime()
 
   // await saveItemsEvents()
   // await saveConfig()
@@ -3244,7 +3298,7 @@ async function monitorMeta() {
 
   try {
     for (const item of itemData[ItemsMainCategoriesType.OTHER]) {
-      item.icon = item.icon.replace('undefined', 'https://rune.farm/')
+      item.icon = item.icon.replace('undefined', 'https://rune.game/')
 
       if (item.recipe) {
         item.recipe.requirement = item.recipe.requirement.map(r => ({...r, id: RuneNames[r.id]}))
@@ -3254,8 +3308,8 @@ async function monitorMeta() {
 
       const itemJson = {
         "description": Array.isArray(item.branches[1].description) ? item.branches[1].description[0] : item.branches[1].description,
-        "home_url": "https://rune.farm",
-        "external_url": "https://rune.farm/catalog/" + item.id,
+        "home_url": "https://rune.game",
+        "external_url": "https://rune.game/catalog/" + item.id,
         "image_url": item.icon,
         "language": "en-US",
         ...item,
