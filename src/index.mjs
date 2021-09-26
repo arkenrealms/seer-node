@@ -92,6 +92,8 @@ let busdContract
 let wbnbContract
 
 const setupProvider = () => {
+  console.log('Setting up provider')
+
   provider = getRandomProvider()
   web3 = new Web3(provider)
 
@@ -3823,6 +3825,6 @@ async function run() {
 run()
 
 // Force restart after an hour
-// setTimeout(() => {
-//   process.exit(1)
-// }, 9 * 60 * 60 * 1000)
+setTimeout(() => {
+  process.exit(1)
+}, 1 * 60 * 60 * 1000)
