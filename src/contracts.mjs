@@ -354,7 +354,7 @@ export default {
     [TESTNET]: '',
   },
   pul: {
-    [MAINNET]: '',
+    [MAINNET]: '0xfa3f14C55adaDDC2035083146c1cF768bD035E06',
     [TESTNET]: '',
   },
   um: {
