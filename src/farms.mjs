@@ -1550,9 +1550,8 @@ const farms = [
   },
   // {
   //   fid: 0,
-  //   pid: 70,
+  //   pid: 72,
   //   risk: 6,
-  //   chefKey: CURRENT_FARM_SYMBOL,
   //   isFinished: false,
   //   isStarting: false,
   //   multiplier: '48X',
@@ -1571,9 +1570,8 @@ const farms = [
   // },
   // {
   //   fid: 0,
-  //   pid: 71,
+  //   pid: 73,
   //   risk: 6,
-  //   chefKey: CURRENT_FARM_SYMBOL,
   //   isFinished: false,
   //   isStarting: false,
   //   multiplier: '2X',

@@ -1809,15 +1809,15 @@ async function monitorGeneralStats() {
             const charityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.charityAddress))).toString())
             const deployerHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.deployerAddress))).toString())
             const characterFactoryHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.characterFactory))).toString())
-            const lockedLiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString()) * 2 * 0.75
-            const v2LiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.v2LiquidityAddress))).toString()) * 2
+            const lockedLiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.lockedLiquidityAddress))).toString()) * 0.61
+            const v2LiquidityHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.v2LiquidityAddress))).toString()) * 0.99
             const evolutionHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.evolutionAddress))).toString())
             // const cashHoldings = toShort((await tokenContract.balanceOf(getAddress(contracts.cashAddress))).toString())
             const vaultTotalHoldings = vaultHoldings + vault2Holdings + vault3Holdings
             const botTotalHoldings = botHoldings + bot2Holdings + bot3Holdings
-            const orgCashHoldings = v2LiquidityHoldings / 2 + lockedLiquidityHoldings / 2
-            const orgTokenHoldings = vaultTotalHoldings + characterFactoryHoldings + botTotalHoldings + v2LiquidityHoldings / 2 + lockedLiquidityHoldings / 2 + evolutionHoldings
-            const orgHoldings = orgCashHoldings + orgTokenHoldings
+            const orgCashHoldings = 0
+            const orgTokenHoldings = vaultTotalHoldings + characterFactoryHoldings + botTotalHoldings + v2LiquidityHoldings + lockedLiquidityHoldings + evolutionHoldings
+            const orgHoldings = vaultTotalHoldings + characterFactoryHoldings + botTotalHoldings + v2LiquidityHoldings + evolutionHoldings
 
             const totalSupply = farm.tokenTotalSupply
             const circulatingSupply = farm.tokenTotalSupply - farm.tokenTotalBurned
@@ -1987,12 +1987,11 @@ async function monitorGeneralStats() {
           runes.totals.lockedLiquidity += runes[rune].holders.lockedLiquidity * runes[rune].price
           runes.totals.v2Liquidity += runes[rune].holders.v2Liquidity * runes[rune].price
           runes.totals.org += runes[rune].holders.org * runes[rune].price
+          runes.totals.orgToken += runes[rune].holders.orgToken * runes[rune].price
+          runes.totals.orgCash += runes[rune].holders.orgCash
 
-          if (rune === 'BUSD' || rune === 'USDT' || rune === 'USDC') {
-            runes.totals.orgCash += runes[rune].holders.orgCash * runes[rune].price
-          } else {
-            runes.totals.orgToken += runes[rune].holders.orgToken * runes[rune].price
-          }
+          // if (rune === 'BUSD' || rune === 'USDT' || rune === 'USDC') {
+          // }
         }
       }
 

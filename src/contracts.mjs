@@ -318,7 +318,7 @@ export default {
     [TESTNET]: '0x1D36e6AB16A16b8D25D6DA8Da5a61FcA6659B92C',
   },
   eth: {
-    [MAINNET]: '',
+    [MAINNET]: '0x919676B73a8d124597cBbA2E400f81Aa91Aa2450',
     [TESTNET]: '',
   },
   ith: {
@@ -358,19 +358,19 @@ export default {
     [TESTNET]: '',
   },
   um: {
-    [MAINNET]: '',
+    [MAINNET]: '0x7e8a6d548a68339481c500f2B56367698A9F7213',
     [TESTNET]: '',
   },
   mal: {
-    [MAINNET]: '',
+    [MAINNET]: '0xdfFeB26FbaCF79823C50a4e7DCF69378667c9941',
     [TESTNET]: '',
   },
   ist: {
-    [MAINNET]: '',
+    [MAINNET]: '0x90132915EbDe0CF93283D55AB3fBBA15449f95A9',
     [TESTNET]: '',
   },
   gul: {
-    [MAINNET]: '',
+    [MAINNET]: '0xa89805AB2ca5B70c89B74b3B0346a88a5B8eAc85',
     [TESTNET]: '',
   },
   vex: {
@@ -378,7 +378,7 @@ export default {
     [TESTNET]: '',
   },
   ohm: {
-    [MAINNET]: '',
+    [MAINNET]: '0x9449D198AB998388a577D4eBfDa4656D9fa3468a',
     [TESTNET]: '',
   },
   lo: {
@@ -386,19 +386,19 @@ export default {
     [TESTNET]: '',
   },
   sur: {
-    [MAINNET]: '',
+    [MAINNET]: '0x191472E8E899E98048AeB82faa1AE4Ec3801b936',
     [TESTNET]: '',
   },
   ber: {
-    [MAINNET]: '',
+    [MAINNET]: '0x1656f8d69F2354a9989Fe705c0107190A4815287',
     [TESTNET]: '',
   },
   jah: {
-    [MAINNET]: '',
+    [MAINNET]: '0xBC996F2f6703cc13AA494F846A1c563A4A0f1A80',
     [TESTNET]: '',
   },
   cham: {
-    [MAINNET]: '',
+    [MAINNET]: '0xfb134f1721bc602Eb14148f89e1225dC7C93D8d4',
     [TESTNET]: '',
   },
   zod: {
