@@ -31,7 +31,6 @@
     "ethers": "^5.1.4",
     "fs-jetpack": "^4.1.0",
     "ganache-cli": "^6.9.1",
-    "hardhat": "^2.0.3",
     "mocha": "^8.1.1",
     "node-fetch": "^2.6.1",
     "prettier": "^2.0.5",
