@@ -21,6 +21,8 @@ export const QuoteToken = {
 export const MAINNET = 56
 export const TESTNET = 97
 
+export const CURRENT_FARM_SYMBOL = ''
+
 const farms = [
   {
     fid: 0,
