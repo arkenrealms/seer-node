@@ -12,8 +12,8 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.decodeItem = void 0;
-var items_mjs_1 = require("../data/items.mjs");
-var items_type_mjs_1 = require("../data/items.type.mjs");
+var items_1 = require("../data/items");
+var items_type_1 = require("../data/items.type");
 var average = function (arr) { return arr.reduce(function (p, c) { return p + c; }, 0) / arr.length; };
 function decodeItem(tokenId) {
     var _a, _b;
@@ -25,7 +25,7 @@ function decodeItem(tokenId) {
         mods: [],
         attributes: [],
         perfection: null,
-        category: items_type_mjs_1.ItemsMainCategoriesType.WEAPONS,
+        category: items_type_1.ItemsMainCategoriesType.WEAPONS,
         slots: [],
         meta: {
             harvestYield: 0,
@@ -78,7 +78,8 @@ function decodeItem(tokenId) {
                 modIndex += 4;
             }
         }
-        var item = __assign(__assign(__assign(__assign({}, defaultItem), { id: id_1 }), items_mjs_1.itemData[items_type_mjs_1.ItemsMainCategoriesType.OTHER].find(function (i) { return i.id === id_1; })), { type: type, version: version, mods: mods, shortTokenId: "".concat(tokenId.slice(0, 23), "...").concat(tokenId.slice(-3)) });
+        var item = __assign(__assign(__assign(__assign({}, defaultItem), { id: id_1 }), items_1.itemData[items_type_1.ItemsMainCategoriesType.OTHER].find(function (i) { return i.id === id_1; })), { // TODO: fix
+            type: type, version: version, mods: mods, shortTokenId: "".concat(tokenId.slice(0, 23), "...").concat(tokenId.slice(-3)) });
         var branch = item.branches[1];
         var branchAttributes = branch ? JSON.parse(JSON.stringify(branch.attributes)) : {};
         var actionMetadata = {
@@ -120,81 +121,81 @@ function decodeItem(tokenId) {
         item.attributes = branchAttributes;
         var prevMod = null;
         if (item.id === 1) {
-            item.mods[0].attributeId = items_mjs_1.ItemAttributes.HarvestYield.id;
-            item.mods[1].attributeId = items_mjs_1.ItemAttributes.HarvestFee.id;
-            item.mods[2].attributeId = items_mjs_1.ItemAttributes.HarvestFeeToken.id;
+            item.mods[0].attributeId = items_1.ItemAttributes.HarvestYield.id;
+            item.mods[1].attributeId = items_1.ItemAttributes.HarvestFee.id;
+            item.mods[2].attributeId = items_1.ItemAttributes.HarvestFeeToken.id;
         }
         else if (item.id === 2) {
-            item.mods[0].attributeId = items_mjs_1.ItemAttributes.HarvestYield.id;
-            item.mods[1].attributeId = items_mjs_1.ItemAttributes.SendHarvestHiddenPool.id;
-            item.mods[2].attributeId = items_mjs_1.ItemAttributes.BurnEntireHarvest.id;
+            item.mods[0].attributeId = items_1.ItemAttributes.HarvestYield.id;
+            item.mods[1].attributeId = items_1.ItemAttributes.SendHarvestHiddenPool.id;
+            item.mods[2].attributeId = items_1.ItemAttributes.BurnEntireHarvest.id;
         }
         else if (item.id === 3) {
-            item.mods[0].attributeId = items_mjs_1.ItemAttributes.HarvestYield.id;
-            item.mods[1].attributeId = items_mjs_1.ItemAttributes.HarvestBurn.id;
-            item.mods[2].attributeId = items_mjs_1.ItemAttributes.FindShard.id;
+            item.mods[0].attributeId = items_1.ItemAttributes.HarvestYield.id;
+            item.mods[1].attributeId = items_1.ItemAttributes.HarvestBurn.id;
+            item.mods[2].attributeId = items_1.ItemAttributes.FindShard.id;
             if (item.mods[2].value === 0)
                 item.mods[2].value = 100;
         }
         else if (item.id === 4) {
-            item.mods[0].attributeId = items_mjs_1.ItemAttributes.FindShard.id;
+            item.mods[0].attributeId = items_1.ItemAttributes.FindShard.id;
             if (item.mods[0].value === 0)
                 item.mods[0].value = 100;
         }
         for (var i in item.mods) {
             var mod = item.mods[i];
             var branchAttribute = branchAttributes[i];
-            if (mod.attributeId === items_mjs_1.ItemAttributes.HarvestYield.id) {
+            if (mod.attributeId === items_1.ItemAttributes.HarvestYield.id) {
                 actionMetadata.harvestYield += mod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.HarvestFee.id) {
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+            else if (mod.attributeId === items_1.ItemAttributes.HarvestFee.id) {
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.HarvestFeeToken.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.HarvestFeeToken.id) {
                 actionMetadata.harvestFees[branchAttribute.map[mod.value]] = prevMod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.SendHarvestHiddenPool.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.SendHarvestHiddenPool.id) {
                 actionMetadata.chanceToSendHarvestToHiddenPool += mod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.BurnEntireHarvest.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.BurnEntireHarvest.id) {
                 actionMetadata.chanceToLoseHarvest += mod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.HarvestBurn.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.HarvestBurn.id) {
                 actionMetadata.harvestBurn += mod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.FindShard.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.FindShard.id) {
                 if (branchAttribute.value !== undefined)
                     mod.value = branchAttribute.value;
                 actionMetadata.worldstoneShardChance += mod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.RemoveFees.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.RemoveFees.id) {
                 actionMetadata.feeReduction += mod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.RandomRuneExchange.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.RandomRuneExchange.id) {
                 actionMetadata.randomRuneExchange += mod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.UnstakeLocked.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.UnstakeLocked.id) {
                 actionMetadata.unstakeLocked = true;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.SpecificClass.id) {
+            else if (mod.attributeId === items_1.ItemAttributes.SpecificClass.id) {
                 actionMetadata.classRequired = mod.value;
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId === items_mjs_1.ItemAttributes.Rarity.id) {
-                item.rarity = items_mjs_1.ItemRarity[items_mjs_1.ItemRarityNameById[mod.value]];
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+            else if (mod.attributeId === items_1.ItemAttributes.Rarity.id) {
+                item.rarity = items_1.ItemRarity[items_1.ItemRarityNameById[mod.value]];
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
-            else if (mod.attributeId > 0 && items_mjs_1.ItemAttributesById[mod.attributeId]) {
-                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_mjs_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
+            else if (mod.attributeId > 0 && items_1.ItemAttributesById[mod.attributeId]) {
+                item.attributes[i] = __assign(__assign(__assign(__assign({}, (item.attributes[i] || {})), items_1.ItemAttributesById[mod.attributeId]), branchAttribute), mod);
             }
             prevMod = mod;
         }
@@ -285,19 +286,19 @@ function decodeItem(tokenId) {
         // }a
         if (!item.rarity) {
             if ((_a = item.attributes.find(function (a) { return a.id === 40; })) === null || _a === void 0 ? void 0 : _a.value) {
-                item.rarity = items_mjs_1.ItemRarityNameById[((_b = item.attributes.find(function (a) { return a.id === 40; })) === null || _b === void 0 ? void 0 : _b.value) || 5];
+                item.rarity = items_1.ItemRarityNameById[((_b = item.attributes.find(function (a) { return a.id === 40; })) === null || _b === void 0 ? void 0 : _b.value) || 5];
             }
             else if (item.perfection === 1) {
-                item.rarity = items_mjs_1.ItemRarity.Mythic;
+                item.rarity = items_1.ItemRarity.Mythic;
             }
             else if (item.perfection >= 0.9) {
-                item.rarity = items_mjs_1.ItemRarity.Epic;
+                item.rarity = items_1.ItemRarity.Epic;
             }
             else if (item.perfection >= 0.7) {
-                item.rarity = items_mjs_1.ItemRarity.Rare;
+                item.rarity = items_1.ItemRarity.Rare;
             }
             else if (item.perfection >= 0) {
-                item.rarity = items_mjs_1.ItemRarity.Magical;
+                item.rarity = items_1.ItemRarity.Magical;
             }
         }
         return __assign(__assign({}, item), { tokenId: tokenId });

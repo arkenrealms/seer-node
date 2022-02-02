@@ -1,5 +1,7 @@
 secrets.json
 db
+public/data/log.json
+public/data/errors.json
 
 # Logs
 logs

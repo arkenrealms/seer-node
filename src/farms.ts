@@ -1,4 +1,4 @@
-import contracts from './contracts.mjs'
+import contracts from './contracts'
 
 export const QuoteToken = {
     'BNB': 'BNB',

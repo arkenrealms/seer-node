@@ -1,5 +1,22 @@
-import { ItemCategoriesType, ItemsMainCategoriesType } from './items.type.mjs'
+import { ItemCategoriesType, ItemsMainCategoriesType } from './items.type'
 
+export const Games = {
+  Raid: {
+    id: 1,
+  },
+  Evolution: {
+    id: 2,
+  },
+  Infinite: {
+    id: 3,
+  },
+  Sanctuary: {
+    id: 4,
+  },
+  Guardians: {
+    id: 5,
+  },
+}
 export const ItemAttributes = {
   HarvestYield: {
     id: 1,
@@ -371,7 +388,7 @@ export const ItemAttributes = {
     id: 63,
     min: 0,
     max: 5,
-    description: `Add {value}% to harvest, vested over time (Not Implemented)`,
+    description: `Add {value}% To Harvest, Vested Over Time (Not Implemented)`,
   },
   HarvestVestmentReduction: {
     id: 64,
@@ -413,7 +430,7 @@ export const ItemAttributes = {
     id: 69,
     min: 0,
     max: 5,
-    description: `{value}% bonus yield given as a random rune (Not Implemented)`,
+    description: `{value}% Bonus Yield Given as a Random Rune (Not Implemented)`,
   },
   YieldBonusSpecificWeapon: {
     id: 70,
@@ -431,19 +448,19 @@ export const ItemAttributes = {
     id: 72,
     min: 0,
     max: 5,
-    description: `Specific weapon: {value} (Not Implemented)`,
+    description: `Specific Weapon: {value} (Not Implemented)`,
   },
   HarvestTheftDefense: {
     id: 73,
     min: 0,
     max: 5,
-    description: `{value}% chance to defend harvest theft, taking the thief's runes instead (Not Implemented)`,
+    description: `{value}% Theft Counter Chance (Not Implemented)`,
   },
   RandomRuneExchangeSpecific: {
     id: 74,
     min: 0,
     max: 5,
-    description: `{value}% chance that random rune exchange gives a specific rune (Not Implemented)`,
+    description: `{value}% Chance That Random Rune Exchange Gives a Specific Rune (Not Implemented)`,
   },
   RandomRuneToken: {
     id: 75,
@@ -797,7 +814,7 @@ export const ItemAttributes = {
     id: 205,
     min: 0,
     max: 100,
-    description: `Damage Reduced By {value}%`,
+    description: `Physical Damage Reduced By {value}%`,
   },
   MagicDamageReduced: {
     id: 206,
@@ -805,6 +822,127 @@ export const ItemAttributes = {
     max: 100,
     description: `Magic Damage Reduced By {value}%`,
   },
+  EvolutionMovementSpeedIncrease: {
+    id: 1030,
+    min: 0,
+    max: 100,
+    description: `{Value}% Faster Movement`,
+  },
+  InfiniteMovementSpeedIncrease: {
+    id: 1030,
+    min: 0,
+    max: 100,
+    description: `{Value}% Faster Movement`,
+  },
+  DeathPenaltyAvoid: {
+    id: 1102,
+    min: 0,
+    max: 100,
+    description: `{Value}% To Avoid Losing Points On Death`,
+  },
+  DodgeChance: {
+    id: 2159,
+    min: 0,
+    max: 100,
+    description: `{value}% Dodge Chance`,
+  },
+  ReduceSkillCooldown: {
+    id: 1329,
+    min: 0,
+    max: 100,
+    description: `{Value}% Skill Cooldown Reduction`,
+  },
+  EnergyDecayDecrease: {
+    id: 1104,
+    min: 0,
+    max: 100,
+    description: `{Value}% Decrease To Energy Decay Speed`,
+  },
+  EarlyOrbPickup: {
+    id: 1114,
+    min: 0,
+    max: 0,
+    description: `Can Pick Up Orbs Early.`,
+  },
+  DamageReduce: {
+    id: 2316,
+    min: 0,
+    max: 100,
+    description: `{Value}% Damage Reduction`,
+  },
+  DoublePickupChance: {
+    id: 2914,
+    min: 0,
+    max: 100,
+    description: `{Value}% Chance To Double Item Pickup`,
+  },
+  AttackSpeed: {
+    id: 2153,
+    min: 0,
+    max: 100,
+    description: `{Value}% Attack Speed`,
+  },
+  CriticalHitChance: {
+    id: 2006,
+    min: 0,
+    max: 100,
+    description: `{Value}% Critical Hit Chance`,
+  },
+  IncreaseAbsorb: {
+    id: 2307,
+    min: 0,
+    max: 100,
+    description: `Increase Absorb`,
+  },
+  IncreaseRandomStat: {
+    id: 2600,
+    min: 0,
+    max: 100,
+    description: `{param1} {param2}`,
+  },
+  IncreaseAilmentChance: {
+    id: 2914,
+    min: 0,
+    max: 100,
+    description: `Increase Ailment Chance`,
+  },
+  UnlockSkills: {
+    id: 3801,
+    min: 0,
+    max: 100,
+    description: `{Value} Unlocked`,
+  },
+  IncreaseDamage: {
+    id: 3801,
+    min: 0,
+    max: 100,
+    description: `{parameter1} {parameter2} damage`,
+  },
+  SelfEffectOnCondition: {
+    id: 3801,
+    min: 0,
+    max: 100,
+    description: `{parameter1} {parameter2} damage`,
+  },
+  IncreaseRankRewardBonus: {
+    id: 3801,
+    min: 0,
+    max: 100,
+    description: `{Value}% Increase To Rank Reward Bonuses`,
+  },
+  IncreaseDamageTaken: {
+    id: 3801,
+    min: 0,
+    max: 100,
+    description: `{parameter1} Additional Damage Taken ({parameter2})`,
+  },
+  IncreaseStat: {
+    id: 3801,
+    min: 0,
+    max: 100,
+    description: `{parameter1} {parameter2} {parameter3}`,
+  },
+  
 }
 
 export const SkillNames = {
@@ -829,9 +967,18 @@ export const SkillNames = {
   18: 'Flurry Assault',
   19: 'Destructive Impact',
   20: 'Nova Breath',
+  24: 'Shadow Strike',
+  512: 'Evasion',
+  499: 'Arcane Orbs',
 }
 
-export const SkillIdByName = {}
+for (let i = 0; i < 1000; i++) {
+  if (!SkillNames[i]) {
+    SkillNames[i] = ''
+  }
+}
+
+export const SkillIdByName: any = {}
 
 for (const key of Object.keys(SkillNames)) {
   // @ts-ignore
@@ -850,7 +997,7 @@ export const ClassNames = {
   8: 'Bard',
 }
 
-export const ClassIdByName = {}
+export const ClassIdByName: any = {}
 
 for (const key of Object.keys(ClassNames)) {
   // @ts-ignore
@@ -863,7 +1010,25 @@ export const CraftingCompetitionWinner = {
   3: 'Crafting Competition #3 Winner X',
 }
 
-export const ItemRarity = {
+type ItemRarityKeyType =
+  | 'Legendary'
+  | 'Unique'
+  | 'Mythic'
+  | 'Epic'
+  | 'Rare'
+  | 'Magical'
+  | 'Normal'
+  | 'Set'
+  | 'Quest'
+  | 'Trash'
+type ItemRarityValueType = {
+  id: number
+  name: ItemRarityKeyType
+}
+
+type ItemRarityType = Record<ItemRarityKeyType, ItemRarityValueType>
+
+export const ItemRarity: ItemRarityType = {
   Legendary: { id: 1, name: 'Legendary' },
   Unique: { id: 2, name: 'Unique' },
   Mythic: { id: 3, name: 'Mythic' },
@@ -876,14 +1041,14 @@ export const ItemRarity = {
   Trash: { id: 10, name: 'Trash' },
 }
 
-export const ItemRarityNameById = {}
+export const ItemRarityNameById: any = {}
 
 for (const key of Object.keys(ItemRarity)) {
   // @ts-ignore
   ItemRarityNameById[ItemRarity[key].id] = ItemRarity[key].name
 }
 
-export const ItemAttributesById = {}
+export const ItemAttributesById: any = {}
 
 for (const key of Object.keys(ItemAttributes)) {
   // @ts-ignore
@@ -1054,7 +1219,7 @@ export const RuneId = {
   ZOD: 32,
 }
 
-export const RuneNames = {}
+export const RuneNames: any = {}
 
 for (const key of Object.keys(RuneId)) {
   // @ts-ignore
@@ -1099,7 +1264,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Made by Men, this blade is common but has minimal downsides.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 5, max: 15 },
@@ -1114,15 +1279,13 @@ export const itemData = {
           ],
           perfection: [15, 0],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: 'Made by Men, this blade is common but has minimal downsides.',
           attributes: [
             { id: 1, min: 16, max: 20, description: `{value}% Increased Attack Speed` },
@@ -1173,7 +1336,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Not much is known about this sword, other than the creator had gone mad.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 3, max: 7 },
@@ -1183,15 +1346,13 @@ export const itemData = {
           ],
           perfection: [7, 40, 20],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: 'Not much is known about this sword, other than the creator had gone mad.',
           attributes: [
             { id: 1, min: 16, max: 20, description: `{value}% Increased Lightning Spell Damage` },
@@ -1239,7 +1400,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             'An ancient helm forged by the Archons to seek out powerful shards in the battle between Heaven and Hell.',
           ],
@@ -1251,15 +1412,13 @@ export const itemData = {
           ],
           perfection: [3, 1],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: `An ancient helm forged by the Archons to seek out powerful shards in the battle between Heaven and Hell.`,
           attributes: [
             { id: 1, value: 5, description: `{value}% Chance to Cast L6 Lion Heart on Taking Damage` },
@@ -1296,7 +1455,7 @@ export const itemData = {
         'Max Supply': 'Unknown',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['A relic from a broken time.'],
           attributes: [
             {
@@ -1309,15 +1468,13 @@ export const itemData = {
           ],
           perfection: [100],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: `A relic from a broken time.`,
           attributes: [{ id: 1, value: 0, description: `Used to transmute items.` }],
         },
@@ -1361,7 +1518,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Although common in another world, these Sourcer boots are considered high quality.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 1, max: 10 },
@@ -1371,16 +1528,16 @@ export const itemData = {
           ],
           perfection: [10, 1, 20],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -1424,7 +1581,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Made from light-weight Templar material, it provides quality protection.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
@@ -1434,16 +1591,16 @@ export const itemData = {
           ],
           perfection: [5, 20, 2],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -1487,7 +1644,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['These handwraps have an unknown origin and emit a dark aura.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 1, max: 5 },
@@ -1497,16 +1654,16 @@ export const itemData = {
           ],
           perfection: [5, 100],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -1540,15 +1697,21 @@ export const itemData = {
         'Max Supply': 'Unknown',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 3, map: ItemRarityNameById },
             {
               id: 1,
+              min: 0,
+              max: 0,
+              description: `{value}% Chance She Will Be Your Waifu`,
+            },
+            {
+              id: 1,
               min: 100,
               max: 100,
-              description: `{value}% Chance she will not be your waifu`,
+              description: `{value}% Chance Of Ban Hammer`,
             },
             {
               id: 39,
@@ -1559,16 +1722,16 @@ export const itemData = {
           ],
           perfection: [5, 75],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -1611,7 +1774,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             'Crafted with the finest Vira materials, this Cloudstrike Sword is imbued with the power of wind.',
           ],
@@ -1643,16 +1806,16 @@ export const itemData = {
           ],
           perfection: [40, undefined, undefined, 10, 5],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -1695,7 +1858,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: `Crafted with the finest Druid material, this Sage Bow is imbued to seek out what is hidden.`,
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 10, max: 40 },
@@ -1720,16 +1883,16 @@ export const itemData = {
           ],
           perfection: [40, undefined, undefined, 10, 5],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -1771,7 +1934,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             'Crafted with the finest Archon material, this Dimensional Dagger is imbued with banished sacrificial power.',
           ],
@@ -1801,16 +1964,16 @@ export const itemData = {
           ],
           perfection: [5, 40, undefined, 2],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -1853,7 +2016,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['A mysterious staff that appears to be of Archon origin and imbued with the power of time.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 10, max: 40 },
@@ -1883,16 +2046,16 @@ export const itemData = {
           ],
           perfection: [40, undefined, undefined, 10, 5],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -1935,7 +2098,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Originally royal Vira bracers, they have been forged to claws of an unknown material.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 2, max: 7 },
@@ -1965,16 +2128,16 @@ export const itemData = {
           ],
           perfection: [7, 2, 15, null, 2],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2017,7 +2180,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['A shield designed for Vira royalty, it has been blessed with a protective aura.'],
           attributes: [
             { ...ItemAttributes.RemoveFees, min: 2, max: 10 },
@@ -2041,16 +2204,16 @@ export const itemData = {
           ],
           perfection: [10, 4, 10, null, 10],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2093,7 +2256,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['A mace crafted by Vira using mystical Archon materials during the Battle for the Worldstone.'],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
@@ -2118,16 +2281,16 @@ export const itemData = {
           ],
           perfection: [5, 20, null, null, 2],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2169,7 +2332,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['A once unbreakable helm, its best days have passed.'],
           attributes: [
             { ...ItemAttributes.FindShard, min: 1, max: 15 },
@@ -2180,16 +2343,16 @@ export const itemData = {
           ],
           perfection: [15, 1, 4, 5],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2231,7 +2394,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             'Lightweight Templar materials fashioned into plated chausses. These provide excellent leg protection.',
           ],
@@ -2245,16 +2408,16 @@ export const itemData = {
           ],
           perfection: [10, 10, null, null, 1, 0],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2298,7 +2461,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `Taken from a Paladin whose fall from grace was legendary, the soft glow of this weapon's blade promises power and fortune to its wielder.`,
           ],
@@ -2320,7 +2483,6 @@ export const itemData = {
           perfection: [100, 100, 10, 50, 0, 0, 0, undefined],
         },
         2: {
-          description: ['To be announced.'],
           attributes: [],
           // attributes: [
           //   { ...ItemAttributes.PhysicalDamage, min: 0, max: 100 },
@@ -2340,11 +2502,9 @@ export const itemData = {
           // perfection: [100, 100, 10, 50, 5, 100, 100, undefined],
         },
         3: {
-          description: ['To be announced.'],
           attributes: [],
         },
         4: {
-          description: ['To be announced.'],
           attributes: [],
         },
       },
@@ -2387,7 +2547,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `A keen blade crafted in Templar forges, this weapon is imbued with magics which benefit the allies of the wielder.`,
           ],
@@ -2412,16 +2572,16 @@ export const itemData = {
           ],
           perfection: [12, undefined, 4, 5, 0, undefined, undefined],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2463,7 +2623,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `Made en masse by another world's crafters, these gauntlets are relatively exceptional compared to the work of humans.`,
           ],
@@ -2476,16 +2636,16 @@ export const itemData = {
           ],
           perfection: [5, 5, 5, 10, 1],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2528,7 +2688,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `Lightweight Templar materials fashioned into bracers. These provide excellent arm protection.`,
           ],
@@ -2546,16 +2706,16 @@ export const itemData = {
           ],
           perfection: [10, 3, 15, 3],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2597,7 +2757,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [`Soft yet resilient Wyrmhide skillfully shaped into a belt after Sage fashion.`],
           attributes: [
             { ...ItemAttributes.RemoveFees, min: 1, max: 3 },
@@ -2608,16 +2768,16 @@ export const itemData = {
           ],
           perfection: [3, 5, 0, 20],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2660,7 +2820,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `The method and materials used to create this object of transcendant beauty and power have long been lost to the world.`,
           ],
@@ -2682,16 +2842,16 @@ export const itemData = {
           ],
           perfection: [4, 3, null, 1, 5, null, 0, null],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2734,7 +2894,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `Wearers of this masterfully-crafted ring display a preternatural ability to find fortune and avoid harm.`,
           ],
@@ -2748,16 +2908,16 @@ export const itemData = {
           ],
           perfection: [3, 3, 3, 4, 5, 0],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2799,7 +2959,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `The light emitted from this brilliant stone highlights the latent arcane potential of objects in the environment.`,
           ],
@@ -2812,16 +2972,16 @@ export const itemData = {
           ],
           perfection: [3, 3, 3, 4, 0],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2855,7 +3015,7 @@ export const itemData = {
         'Max Supply': '1000',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `Captured during the last breath of a dragon, this brilliant stone is imbued with energy that protects the owner, and is said to bring great furtune.`,
           ],
@@ -2868,16 +3028,16 @@ export const itemData = {
           ],
           perfection: [undefined, 5, 50, 20, undefined],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2920,7 +3080,7 @@ export const itemData = {
         ],
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [
             `A hood of unknown origin and fabric. Preternatural darkness clouds the appearance of the wearer.`,
           ],
@@ -2936,16 +3096,16 @@ export const itemData = {
           ],
           perfection: [15, 2, 3, 2, undefined, undefined, undefined, undefined],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -2965,55 +3125,468 @@ export const itemData = {
       isTransferable: true,
       isUpgradable: true,
       isCraftable: true,
+      isDisabled: false,
+      isRuneword: true,
+      createdDate: 0,
+      hotness: 9,
+      attributes: [],
+      details: {
+        Type: 'Body Armor',
+        Subtype: 'Dragonforged Cuirass',
+        'Rune Word': 'Fal Mal Pul Um Zod',
+        Distribution: 'Crafted',
+        Date: 'Jan 16, 2022 - Now',
+        'Max Supply': 'Unknown',
+      },
+      recipe: {
+        requirement: [
+          { id: RuneId.FAL, quantity: 1 },
+          { id: RuneId.MAL, quantity: 1 },
+          { id: RuneId.PUL, quantity: 1 },
+          { id: RuneId.UM, quantity: 1 },
+          { id: RuneId.ZOD, quantity: 1 },
+        ],
+      },
+      description: [
+        `Produced on one of the rare occasions that dragons lended their energies to crafting, this armor is always hot to the touch.`,
+      ],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [
+            { ...ItemAttributes.RemoveFees, min: 5, max: 10 },
+            { ...ItemAttributes.RandomRuneExchange, min: 0, max: 2 },
+            { ...ItemAttributes.HarvestOverTime, min: 0, max: 3 },
+            { ...ItemAttributes.MagicFind, min: 0, max: 4 },
+            { ...ItemAttributes.HarvestBurn, min: 0, max: 3 }
+          ],
+          perfection: [10, 2, 3, 4, 0],
+        },
+        [Games.Evolution.id]: {
+          attributes: [],
+        },
+        [Games.Infinite.id]: {
+          attributes: [
+            { ...ItemAttributes.DamageReduce, min: 10, max: 14, description: "{Value}% Reduced Fire Damage" },
+            { ...ItemAttributes.IncreaseAbsorb, min: 4, max: 10, description: '{Value}% Increased Fire Absorb' },
+            { ...ItemAttributes.IncreaseRandomStat, min: 0, max: 3, description: "Increase Stat: {Value}", map: {0: "+10% Magic Find", 1: "+5% Movement Speed", 2: "+10% Energy", 3: "+14% Health"} },
+            { ...ItemAttributes.IncreaseAilmentChance, min: 4, max: 8, description: '{Value}% Increased Burn Ailment Chance' },
+            { ...ItemAttributes.UnlockSkills, min: 1, max: 1, description: "Unlocks Fire Nova and Infernal Cascade" }
+          ],
+        },
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 32,
+      name: 'Luminous Flywings',
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00032.png',
+      value: '0',
+      type: ItemType.Trinket,
+      slots: [ItemSlot.Trinket1, ItemSlot.Trinket2, ItemSlot.Trinket3],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 0,
+      hotness: 9,
+      attributes: [],
+      // rarity: ItemRarity.Unique,
+      details: {
+        Type: 'Trinket',
+        Subtype: '',
+        Distribution: 'Airdrop',
+        Date: 'November 11, 2021',
+        'Max Supply': '1000',
+      },
+      description: [
+        `The voracious nature of Mage Isles fauna leave the defenseless glow flies unlikely to reach maturity, a point at which their body parts are coveted for their strange magical effects. These wings are one such example, bestowing the holder with periodic bursts of speed and agility.`,
+      ],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
+            { ...ItemAttributes.AvoidBurn, min: 0, max: 2 },
+            { ...ItemAttributes.HarvestTheftDefense, min: 1, max: 3 },
+            { ...ItemAttributes.MagicFind, min: 14, max: 20 },
+          ],
+          perfection: [undefined, 2, 3, 20],
+          rarity: {
+            [ItemRarity.Magical.id]: [6, 0, 1, 14],
+            [ItemRarity.Rare.id]: [5, 1, 2, 16],
+            [ItemRarity.Epic.id]: [4, 1, 3, 18],
+            [ItemRarity.Mythic.id]: [3, 2, 3, 20],
+          },
+        },
+        [Games.Evolution.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
+            { ...ItemAttributes.EvolutionMovementSpeedIncrease, min: 0, max: 2 },
+            { ...ItemAttributes.DeathPenaltyAvoid, min: 1, max: 3 },
+            { ...ItemAttributes.MagicFind, min: 14, max: 20 },
+          ],
+          perfection: [undefined, 2, 3, 20],
+          rarity: {
+            [ItemRarity.Magical.id]: [6, 0, 1, 14],
+            [ItemRarity.Rare.id]: [5, 1, 2, 16],
+            [ItemRarity.Epic.id]: [4, 1, 3, 18],
+            [ItemRarity.Mythic.id]: [3, 2, 3, 20],
+          },
+        },
+        [Games.Infinite.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
+            { ...ItemAttributes.InfiniteMovementSpeedIncrease, min: 0, max: 2 },
+            { ...ItemAttributes.DodgeChance, min: 1, max: 3 },
+            { ...ItemAttributes.MagicFind, min: 14, max: 20 },
+          ],
+          perfection: [undefined, 2, 3, 20],
+          rarity: {
+            [ItemRarity.Magical.id]: [6, 0, 1, 14],
+            [ItemRarity.Rare.id]: [5, 1, 2, 16],
+            [ItemRarity.Epic.id]: [4, 1, 3, 18],
+            [ItemRarity.Mythic.id]: [3, 2, 3, 20],
+          },
+        },
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 34,
+      name: 'Blur',
+      category: ItemCategoriesType.ARMOR,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00034.png',
+      value: '0',
+      type: ItemType.BodyArmor,
+      slots: [ItemSlot.Chest],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: true,
+      isCraftable: true,
+      isDisabled: false,
+      isRuneword: true,
+      createdDate: 0,
+      hotness: 9,
+      attributes: [],
+      details: {
+        Type: 'Body Armor',
+        Subtype: 'Drakehide Vestments',
+        'Rune Word': 'Pul Lo Um Zod',
+        Distribution: 'Crafted',
+        Date: 'Jan 16, 2022 - Now',
+        'Max Supply': 'Unknown',
+      },
+      recipe: {
+        requirement: [
+          { id: RuneId.PUL, quantity: 1 },
+          { id: RuneId.LO, quantity: 1 },
+          { id: RuneId.UM, quantity: 1 },
+          { id: RuneId.ZOD, quantity: 1 },
+        ],
+      },
+      description: [
+        `Enchanted with evasive magics, even the surest of strikes have trouble finding purchase on this finely-crafted armor.`,
+      ],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [
+            { ...ItemAttributes.RemoveFees, min: 0, max: 10 },
+            { ...ItemAttributes.AvoidBurn, min: 0, max: 1 },
+            { ...ItemAttributes.SendHarvestHiddenPool, min: 0, max: 5 },
+            { ...ItemAttributes.HarvestCritMultiplier, min: 0, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 5, max: 5, value: 5 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: SkillIdByName['Evasion'],
+              max: SkillIdByName['Evasion'],
+              value: SkillIdByName['Evasion'],
+              map: SkillNames,
+            }
+          ],
+          perfection: [10, 1, 5, 10]
+        },
+        [Games.Evolution.id]: {
+          attributes: [],
+        },
+        [Games.Infinite.id]: {
+          attributes: [
+            { ...ItemAttributes.DamageReduce, min: 5, max: 10, description: "{Value}% Reduced Physical Damage" },
+            { ...ItemAttributes.DoublePickupChance, min: 0, max: 1 },
+            { ...ItemAttributes.AttackSpeed, min: 0, max: 5 },
+            { ...ItemAttributes.CriticalHitChance, min: 4, max: 10 },
+            { ...ItemAttributes.MagicFind, min: 10, max: 10, value: 10 },
+            {
+              ...ItemAttributes.AddSkill,
+              min: SkillIdByName['Arcane Orbs'],
+              max: SkillIdByName['Arcane Orbs'],
+              value: SkillIdByName['Arcane Orbs'],
+              map: SkillNames,
+            }
+          ],
+        },
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 35,
+      name: 'Mercy',
+      category: ItemCategoriesType.WEAPON,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00035.png',
+      value: '0',
+      type: ItemType.OneHandedWeapon,
+      slots: [ItemSlot.LeftHand, ItemSlot.RightHand],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: true,
+      isCraftable: true,
       isDisabled: true,
       isRuneword: true,
       createdDate: 0,
       hotness: 9,
       attributes: [],
       details: {
-        Type: 'Armor',
-        Subtype: 'Dragonforged Cuirass',
-        // 'Rune Word': 'Hel Thul Tal Ko Lo',
+        Type: 'Dagger',
+        Subtype: 'Fanged Dagger',
+        // 'Rune Word': 'Hel Thul Tal Ko Lo',Thul Tal Sol Hel Lo     El Tir Thul Hel Sol  Thul El Sol Hel Tir
         Distribution: 'Crafted',
-        Date: 'October 31, 2021 - Now',
+        Date: 'December 5, 2021 - Now',
         'Max Supply': 'Unknown',
       },
       recipe: {
         requirement: [
-          { id: RuneId.HEL, quantity: 1 },
           { id: RuneId.THUL, quantity: 1 },
-          { id: RuneId.PUL, quantity: 1 },
-          { id: RuneId.KO, quantity: 1 },
-          { id: RuneId.LO, quantity: 1 },
+          { id: RuneId.EL, quantity: 1 },
+          { id: RuneId.SOL, quantity: 1 },
+          { id: RuneId.HEL, quantity: 1 },
+          { id: RuneId.TIR, quantity: 1 },
         ],
       },
+      description: [
+        `The an aura of menace surrounds this dagger, its prominent serrations promising a quick and bloody end to the foes of its wielder.`,
+      ],
       branches: {
-        1: {
-          description: [
-            `Produced on one of the rare occasions that dragons lended their energies to crafting, this armor is always hot to the touch.`,
-          ],
+        [Games.Raid.id]: {
           attributes: [
-            { ...ItemAttributes.RemoveFees, min: 5, max: 15 },
-            { ...ItemAttributes.DebuffToBuffAttributeRange, min: 0, max: 5 },
-            { ...ItemAttributes.RandomRuneExchange, min: 0, max: 2 },
-            { ...ItemAttributes.HarvestOverTime, min: 0, max: 2 },
-            { ...ItemAttributes.MagicFind, min: 0, max: 4 },
-            { ...ItemAttributes.AttributeDebuffToBuffOnEquipTime, min: 336, max: 336, map: RuneNames },
-            { ...ItemAttributes.DebuffAttributeToChange, min: 336, max: 336 },
-            { ...ItemAttributes.TargetAttributeToUnlock, value: 1, min: 1, max: 1, map: ['1', '2'] },
+            { ...ItemAttributes.HarvestYield, min: 2, max: 7 },
+            { ...ItemAttributes.SendHarvestHiddenPool, min: 10, max: 15 },
+            { ...ItemAttributes.AvoidBurn, min: 0, max: 1 },
+            { ...ItemAttributes.CreateRandomRuneword, min: 0, max: 2 },
+            { ...ItemAttributes.HarvestFee, min: 10, max: 15 },
+            { ...ItemAttributes.HarvestFeeToken, min: RuneId.NEF, max: RuneId.ITH, map: RuneNames },
+            {
+              ...ItemAttributes.AddSkill,
+              min: SkillIdByName['Shadow Strike'],
+              max: SkillIdByName['Shadow Strike'],
+              value: SkillIdByName['Shadow Strike'],
+              map: SkillNames,
+            },
+            {
+              ...ItemAttributes.SpecificClass,
+              min: ClassIdByName.Assassin,
+              max: ClassIdByName.Assassin,
+              value: ClassIdByName.Assassin,
+              map: ClassNames,
+            },
           ],
-          perfection: [15, 2, 3, 2, undefined, undefined, undefined, undefined],
+          perfection: [7, 15, 1, 2, 10, undefined, undefined, undefined],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
+          attributes: [
+            { ...ItemAttributes.HarvestYield, min: 2, max: 7 },
+            { ...ItemAttributes.SendHarvestHiddenPool, min: 10, max: 15 },
+            { ...ItemAttributes.AvoidBurn, min: 0, max: 1 },
+            { ...ItemAttributes.CreateRandomRuneword, min: 0, max: 2 },
+            { ...ItemAttributes.HarvestFee, min: 10, max: 15 },
+            { ...ItemAttributes.HarvestFeeToken, min: RuneId.NEF, max: RuneId.ITH, value: RuneId.ITH, map: RuneNames },
+            {
+              ...ItemAttributes.AddSkill,
+              min: SkillIdByName['Shadow Strike'],
+              max: SkillIdByName['Shadow Strike'],
+              value: SkillIdByName['Shadow Strike'],
+              map: SkillNames,
+            },
+            {
+              ...ItemAttributes.SpecificClass,
+              min: ClassIdByName.Assassin,
+              max: ClassIdByName.Assassin,
+              value: ClassIdByName.Assassin,
+              map: ClassNames,
+            },
+          ],
+          perfection: [7, 15, 1, 2, 10, undefined, undefined, undefined],
+        },
+        [Games.Infinite.id]: {
+          attributes: [
+            { ...ItemAttributes.HarvestYield, min: 2, max: 7 },
+            { ...ItemAttributes.SendHarvestHiddenPool, min: 10, max: 15 },
+            { ...ItemAttributes.AvoidBurn, min: 0, max: 1 },
+            { ...ItemAttributes.CreateRandomRuneword, min: 0, max: 2 },
+            { ...ItemAttributes.HarvestFee, min: 10, max: 15 },
+            { ...ItemAttributes.HarvestFeeToken, min: RuneId.NEF, max: RuneId.ITH, value: RuneId.ITH, map: RuneNames },
+            {
+              ...ItemAttributes.AddSkill,
+              min: SkillIdByName['Shadow Strike'],
+              max: SkillIdByName['Shadow Strike'],
+              value: SkillIdByName['Shadow Strike'],
+              map: SkillNames,
+            },
+            {
+              ...ItemAttributes.SpecificClass,
+              min: ClassIdByName.Assassin,
+              max: ClassIdByName.Assassin,
+              value: ClassIdByName.Assassin,
+              map: ClassNames,
+            },
+          ],
+          perfection: [7, 15, 1, 2, 10, undefined, undefined, undefined],
+        },
+        [Games.Guardians.id]: {
+          attributes: [
+            { ...ItemAttributes.HarvestYield, min: 2, max: 7 },
+            { ...ItemAttributes.SendHarvestHiddenPool, min: 10, max: 15 },
+            { ...ItemAttributes.AvoidBurn, min: 0, max: 1 },
+            { ...ItemAttributes.CreateRandomRuneword, min: 0, max: 2 },
+            { ...ItemAttributes.HarvestFee, min: 10, max: 15 },
+            { ...ItemAttributes.HarvestFeeToken, min: RuneId.NEF, max: RuneId.ITH, value: RuneId.ITH, map: RuneNames },
+            {
+              ...ItemAttributes.AddSkill,
+              min: SkillIdByName['Shadow Strike'],
+              max: SkillIdByName['Shadow Strike'],
+              value: SkillIdByName['Shadow Strike'],
+              map: SkillNames,
+            },
+            {
+              ...ItemAttributes.SpecificClass,
+              min: ClassIdByName.Assassin,
+              max: ClassIdByName.Assassin,
+              value: ClassIdByName.Assassin,
+              map: ClassNames,
+            },
+          ],
+          perfection: [7, 15, 1, 2, 10, undefined, undefined, undefined],
+        },
+        [Games.Sanctuary.id]: {
+          attributes: [
+            { ...ItemAttributes.HarvestYield, min: 2, max: 7 },
+            { ...ItemAttributes.SendHarvestHiddenPool, min: 10, max: 15 },
+            { ...ItemAttributes.AvoidBurn, min: 0, max: 1 },
+            { ...ItemAttributes.CreateRandomRuneword, min: 0, max: 2 },
+            { ...ItemAttributes.HarvestFee, min: 10, max: 15 },
+            { ...ItemAttributes.HarvestFeeToken, min: RuneId.NEF, max: RuneId.ITH, value: RuneId.ITH, map: RuneNames },
+            {
+              ...ItemAttributes.AddSkill,
+              min: SkillIdByName['Shadow Strike'],
+              max: SkillIdByName['Shadow Strike'],
+              value: SkillIdByName['Shadow Strike'],
+              map: SkillNames,
+            },
+            {
+              ...ItemAttributes.SpecificClass,
+              min: ClassIdByName.Assassin,
+              max: ClassIdByName.Assassin,
+              value: ClassIdByName.Assassin,
+              map: ClassNames,
+            },
+          ],
+          perfection: [7, 15, 1, 2, 10, undefined, undefined],
+        },
+      },
+    },
+    {
+      id: 112,
+      name: 'Animus',
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00112.png',
+      value: '0',
+      type: ItemType.Ring,
+      slots: [ItemSlot.Finger1, ItemSlot.Finger2],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: true,
+      isCraftable: true,
+      isDisabled: true,
+      isRuneword: true,
+      createdDate: 0,
+      hotness: 9,
+      attributes: [],
+      details: {
+        Type: 'Ring',
+        Subtype: 'Overwrought Iron Ring',
+        // 'Rune Word': 'Pul Ith Mal Um Zod',
+        Distribution: 'Crafted',
+        Date: 'Jan 16, 2022 - Now',
+        'Max Supply': 'Unknown',
+      },
+      recipe: {
+        requirement: [
+          { id: RuneId.PUL, quantity: 1 },
+          { id: RuneId.ITH, quantity: 1 },
+          { id: RuneId.MAL, quantity: 1 },
+          { id: RuneId.UM, quantity: 1 },
+          { id: RuneId.ZOD, quantity: 1 },
+        ],
+      },
+      description: [
+        `A blackened, abrasive circle of metal said to be the product of an ancient barbarian blacksmith. In addition to being brutal to look upon, its wearer becomes imbued with boundless aggression in battle, becoming heedless of danger or pain.`,
+      ],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [
+            { ...ItemAttributes.HarvestYield, min: 0, max: 4 },
+            { ...ItemAttributes.RandomRuneExchange, min: 0, max: 2 },
+            { ...ItemAttributes.RandomRuneBonus, min: 0, max: 2 },
+            { ...ItemAttributes.HarvestBurn, min: 0, max: 4 },
+            { ...ItemAttributes.HarvestFee, min: 10, max: 20 },
+            { ...ItemAttributes.HarvestFeeToken, min: RuneId.NEF, max: RuneId.ITH, map: RuneNames },
+          ],
+          perfection: [4, 2, 2, 0, 10, undefined],
+        },
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
+          attributes: [
+            { ...ItemAttributes.IncreaseDamage, min: 0, max: 4, description: '{Value}% Increased Physical Damage' },
+            { ...ItemAttributes.IncreaseStat, min: 1, max: 5, description: '{Value}% Energy Regeneration' },
+            { ...ItemAttributes.IncreaseStat, min: 1, max: 5, description: '{Value}% Attack Speed' },
+            { ...ItemAttributes.IncreaseRankRewardBonus, min: 1, max: 5 },
+            { ...ItemAttributes.IncreaseDamageTaken, min: 0, max: 5, description: '{Value}% Additional Damage Taken (While Idle)' },
+            { ...ItemAttributes.UnlockSkills, min: 0, max: 4, description: 'Unlock Skill: Berserker Soul' },
+          ],
+        },
+        [Games.Guardians.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3046,7 +3619,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 2, Epic: 4, Rare: 10, Magical: 20',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Rewarded to Rune Scholars for their noble service.'],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3055,15 +3628,13 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: `Rewarded to Rune Scholars for their noble service.`,
           attributes: [],
         },
@@ -3097,7 +3668,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 5, Epic: 10, Rare: 20, Magical: 30',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Rewarded to Rune Generals for their valiant service.'],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3106,15 +3677,13 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: `Rewarded to Rune Generals for their valiant service.`,
           attributes: [],
         },
@@ -3149,20 +3718,20 @@ export const itemData = {
         'Max Supply': 'Unknown',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Given as a token of excellence in crafting.'],
           attributes: [{ ...ItemAttributes.CrafterCertificate, min: 1, max: 2, map: CraftingCompetitionWinner }],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3195,7 +3764,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 5, Rare: 20, Magical: 50',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Ancient power.'],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3205,16 +3774,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3247,7 +3816,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 5, Rare: 20, Magical: 50',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['Ancient power.'],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3257,16 +3826,390 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
+        },
+        [Games.Infinite.id]: {
+          attributes: [],
+        },
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 1205,
+      name: "Founder's Cube",
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01205.png',
+      value: '0',
+      type: ItemType.Key,
+      slots: [],
+      isNew: true,
+      isEquipable: false,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: false,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      isRetired: false,
+      createdDate: 0,
+      hotness: 99,
+      attributes: [],
+      details: {
+        Type: 'Cube',
+        Subtype: 'Cube',
+        Distribution: 'Fundraiser',
+        Date: 'September 12, 2021 - TBD',
+        'Max Supply': '1000',
+      },
+      description: [`Founder's Cube will be redeemable for multiple benefits within Rune's ecosystem.`],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 2, max: 2, value: 2, map: ItemRarityNameById },
+            {
+              description: `Rune Sanctuary Collector's Edition`,
+            },
+            {
+              description: `Early Access to Rune Games`,
+            },
+            {
+              description: `Access to Founder's Tavern (End of Time)`,
+            },
+            {
+              description: `Every Rune in Rune Sanctuary (1 EL-ZOD)`,
+            },
+            {
+              description: `Golden Cube Skin`,
+            },
+            {
+              description: `Angel Skin + Wings`,
+            },
+            {
+              description: `Discord Badge + Private Channel`,
+            },
+            {
+              description: `Exclusive T-Shirt`,
+            },
+          ],
+        },
+        2: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 2, max: 2, value: 2, map: ItemRarityNameById },
+            {
+              description: `Rune Sanctuary Collector's Edition`,
+            },
+            {
+              description: `Early Access to Rune Games`,
+            },
+            {
+              description: `Access to Founder's Tavern (End of Time)`,
+            },
+            {
+              description: `Every Rune in Rune Sanctuary (1 EL-ZOD)`,
+            },
+            {
+              description: `Golden Cube Skin`,
+            },
+            {
+              description: `Angel Skin + Wings`,
+            },
+            {
+              description: `Discord Badge + Private Channel`,
+            },
+            {
+              description: `Exclusive T-Shirt`,
+            },
+          ],
         },
         3: {
-          description: ['To be announced.'],
-          attributes: [],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 2, max: 2, value: 2, map: ItemRarityNameById },
+            {
+              description: `Rune Sanctuary Collector's Edition`,
+            },
+            {
+              description: `Early Access to Rune Games`,
+            },
+            {
+              description: `Access to Founder's Tavern (End of Time)`,
+            },
+            {
+              description: `Every Rune in Rune Sanctuary (1 EL-ZOD)`,
+            },
+            {
+              description: `Golden Cube Skin`,
+            },
+            {
+              description: `Angel Skin + Wings`,
+            },
+            {
+              description: `Discord Badge + Private Channel`,
+            },
+            {
+              description: `Exclusive T-Shirt`,
+            },
+          ],
         },
         4: {
-          description: ['To be announced.'],
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 2, max: 2, value: 2, map: ItemRarityNameById },
+            {
+              description: `Rune Sanctuary Collector's Edition`,
+            },
+            {
+              description: `Early Access to Rune Games`,
+            },
+            {
+              description: `Access to Founder's Tavern (End of Time)`,
+            },
+            {
+              description: `Every Rune in Rune Sanctuary (1 EL-ZOD)`,
+            },
+            {
+              description: `Golden Cube Skin`,
+            },
+            {
+              description: `Angel Skin + Wings`,
+            },
+            {
+              description: `Discord Badge + Private Channel`,
+            },
+            {
+              description: `Exclusive T-Shirt`,
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: 1207,
+      name: 'Black Drake Scale',
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01207.png',
+      value: '0',
+      type: ItemType.Trinket,
+      slots: [ItemSlot.Trinket1, ItemSlot.Trinket2, ItemSlot.Trinket3],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 0,
+      hotness: 9,
+      attributes: [],
+      // rarity: ItemRarity.Unique,
+      details: {
+        Type: 'Trinket',
+        Subtype: 'Dragon Scale',
+        Distribution: 'Evolution Battles',
+        Date: 'September 12, 2021 - TBD',
+        'Max Supply': '1000',
+      },
+      description: [
+        `A rigid, fire resistant plate that once protected the body of a mature black drake. The circumstances of the drake's death have left this scale and its defensive properties well preserved- an uncommon occurrence.`,
+      ],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
+            { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 20, max: 50 },
+            { ...ItemAttributes.MagicFind, min: 14, max: 20 },
+            { ...ItemAttributes.FindShard, min: 10, max: 10 },
+          ],
+          perfection: [undefined, 5, 50, 20, undefined],
+        },
+        [Games.Evolution.id]: {
+          attributes: [],
+        },
+        [Games.Infinite.id]: {
+          attributes: [],
+        },
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 1208,
+      name: 'Black Drake Talon',
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01208.png',
+      value: '0',
+      type: ItemType.Trinket,
+      slots: [ItemSlot.Trinket1, ItemSlot.Trinket2, ItemSlot.Trinket3],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 0,
+      hotness: 9,
+      attributes: [],
+      // rarity: ItemRarity.Unique,
+      details: {
+        Type: 'Trinket',
+        Subtype: 'Dragon Talon',
+        Distribution: 'Evolution Battles',
+        Date: 'September 12, 2021 - TBD',
+        'Max Supply': '1000',
+      },
+      description: [
+        `Razor sharp and menacing, these talons can rarely be found scattered across the Mage Isles, acting as an enduring and grim reminder of the brutal violence that once filled the skies around them.`,
+      ],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
+            { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
+            { ...ItemAttributes.RemoveFees, min: 20, max: 50 },
+            { ...ItemAttributes.MagicFind, min: 14, max: 20 },
+            { ...ItemAttributes.FindShard, min: 10, max: 10 },
+          ],
+          perfection: [undefined, 5, 50, 20, undefined],
+        },
+        [Games.Evolution.id]: {
+          attributes: [],
+        },
+        [Games.Infinite.id]: {
+          attributes: [],
+        },
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 1209,
+      name: 'Glow Fly Powder',
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01209.png',
+      value: '0',
+      type: ItemType.Trinket,
+      slots: [ItemSlot.Trinket1, ItemSlot.Trinket2, ItemSlot.Trinket3],
+      isNew: true,
+      isEquipable: true,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: true,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 0,
+      hotness: 9,
+      attributes: [],
+      // rarity: ItemRarity.Unique,
+      details: {
+        Type: 'Trinket',
+        Subtype: 'Glow Fly Essence',
+        Distribution: 'Evolution Battles',
+        Date: 'September 12, 2021 - TBD',
+        'Max Supply': '1000',
+      },
+      description: [
+        `Once fully suffused with arcane energy, the glow flies that fill the skies of the Mage Isles begin to produce this powder. It has become a popular tool among magic users seeking to quickly restore their stores of mana.`,
+      ],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
+            { ...ItemAttributes.SendHarvestHiddenPool, min: 1, max: 5 },
+            { ...ItemAttributes.YieldBonusFromHiddenPool, min: 1, max: 3 },
+            { ...ItemAttributes.UnstakeLockedDurationFromHarvest },
+            { ...ItemAttributes.MagicFind, min: 14, max: 20 },
+          ],
+          perfection: [undefined, 5, 3, undefined, 20],
+        },
+        [Games.Evolution.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
+            { ...ItemAttributes.ReduceSkillCooldown, min: 1, max: 5 },
+            { ...ItemAttributes.EnergyDecayDecrease, min: 1, max: 3 },
+            { ...ItemAttributes.EarlyOrbPickup },
+            { ...ItemAttributes.MagicFind, min: 14, max: 20 },
+          ],
+          perfection: [undefined, 5, 3, undefined, 20],
+        },
+        [Games.Infinite.id]: {
+          attributes: [
+            { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
+            // { ...ItemAttributes.ManaRegen, min: 1, max: 5 }
+          ],
+        },
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
+          attributes: [],
+        },
+      },
+    },
+    {
+      id: 1210,
+      name: 'Santa Christmas 2021 Ticket',
+      category: ItemCategoriesType.ACCESSORY,
+      icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01210.png',
+      value: '0',
+      type: ItemType.Misc,
+      slots: [],
+      isNew: true,
+      isEquipable: false,
+      isUnequipable: false,
+      isTradeable: true,
+      isTransferable: true,
+      isUpgradable: false,
+      isCraftable: false,
+      isDisabled: false,
+      isRuneword: false,
+      createdDate: 0,
+      hotness: 9,
+      attributes: [],
+      // rarity: ItemRarity.Unique,
+      details: {
+        Type: 'Ticket',
+        Subtype: 'Holiday Ticket',
+        Distribution: 'Evolution Battles',
+        Date: 'December 24, 2021 - December 31, 2021',
+        'Max Supply': 'Unknown',
+      },
+      description: [``],
+      branches: {
+        [Games.Raid.id]: {
+          attributes: [],
+          perfection: [],
+        },
+        [Games.Evolution.id]: {
+          attributes: [],
+        },
+        [Games.Infinite.id]: {
+          attributes: [],
+        },
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3299,7 +4242,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.HarvestYield, min: 10, max: 40 },
@@ -3324,16 +4267,16 @@ export const itemData = {
           ],
           perfection: [100, 100, 10, 50, 0, 0, 0, undefined],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3366,7 +4309,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [``],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3390,16 +4333,16 @@ export const itemData = {
           epic: [4, 2, 5, 0, 1, 20, 10],
           mythic: [3, 2, 5, 0, 1, 20, 10],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3432,7 +4375,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [``],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3447,11 +4390,9 @@ export const itemData = {
           perfection: [],
         },
         2: {
-          description: ['To be announced.'],
           attributes: [],
         },
         3: {
-          description: ['To be announced.'],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
             { ...ItemAttributes.EnhancedDefense, min: 70, max: 100 },
@@ -3465,7 +4406,6 @@ export const itemData = {
           perfection: [100, 5, null, null, 8, 8, 20, 5],
         },
         4: {
-          description: ['To be announced.'],
           attributes: [],
         },
       },
@@ -3498,22 +4438,19 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [``],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         2: {
-          description: ['To be announced.'],
           attributes: [],
         },
         3: {
-          description: ['To be announced.'],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         4: {
-          description: ['To be announced.'],
           attributes: [],
         },
       },
@@ -3546,22 +4483,19 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [``],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         2: {
-          description: ['To be announced.'],
           attributes: [],
         },
         3: {
-          description: ['To be announced.'],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         4: {
-          description: ['To be announced.'],
           attributes: [],
         },
       },
@@ -3594,22 +4528,19 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [``],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         2: {
-          description: ['To be announced.'],
           attributes: [],
         },
         3: {
-          description: ['To be announced.'],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         4: {
-          description: ['To be announced.'],
           attributes: [],
         },
       },
@@ -3642,22 +4573,19 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [``],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         2: {
-          description: ['To be announced.'],
           attributes: [],
         },
         3: {
-          description: ['To be announced.'],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         4: {
-          description: ['To be announced.'],
           attributes: [],
         },
       },
@@ -3690,22 +4618,19 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [``],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         2: {
-          description: ['To be announced.'],
           attributes: [],
         },
         3: {
-          description: ['To be announced.'],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
         },
         4: {
-          description: ['To be announced.'],
           attributes: [],
         },
       },
@@ -3739,7 +4664,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3757,16 +4682,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3800,7 +4725,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3818,16 +4743,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3862,7 +4787,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3880,16 +4805,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3924,7 +4849,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -3942,16 +4867,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -3985,7 +4910,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4003,16 +4928,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4046,7 +4971,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4064,16 +4989,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4107,7 +5032,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4125,16 +5050,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4169,7 +5094,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4187,16 +5112,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4230,7 +5155,7 @@ export const itemData = {
         'Max Supply': '1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4248,16 +5173,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4291,7 +5216,7 @@ export const itemData = {
         'Max Supply': 'Unknown',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['It seems to be a Guardian egg'],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
@@ -4339,7 +5264,7 @@ export const itemData = {
         'Max Supply': 'Unknown',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['It seems to be a powerful cube'],
           attributes: [{ ...ItemAttributes.Rarity, min: 2, max: 2, value: 2, map: ItemRarityNameById }],
           perfection: [],
@@ -4387,7 +5312,7 @@ export const itemData = {
         'Max Supply': 'Unknown',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['It seems to be a trinket waiting to reveal itself'],
           attributes: [{ ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById }],
           perfection: [],
@@ -4435,7 +5360,7 @@ export const itemData = {
         'Max Supply': 'Unknown',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ['It seems to be a Rune'],
           attributes: [{ ...ItemAttributes.Rarity, min: 2, max: 2, value: 2, map: ItemRarityNameById }],
           perfection: [],
@@ -4483,7 +5408,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4501,16 +5426,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4544,7 +5469,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4562,16 +5487,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4606,7 +5531,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4624,16 +5549,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4668,7 +5593,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4686,16 +5611,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4729,7 +5654,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4747,16 +5672,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4790,7 +5715,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4808,16 +5733,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4851,7 +5776,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4869,16 +5794,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4913,7 +5838,7 @@ export const itemData = {
         'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4931,16 +5856,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -4974,7 +5899,7 @@ export const itemData = {
         'Max Supply': '1',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: [''],
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
@@ -4992,16 +5917,16 @@ export const itemData = {
           ],
           perfection: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
-          description: ['To be announced.'],
+        [Games.Guardians.id]: {
+          attributes: [],
+        },
+        [Games.Sanctuary.id]: {
           attributes: [],
         },
       },
@@ -5029,19 +5954,17 @@ export const itemData = {
         'Max Supply': 'Burned to 40,000',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #1 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock music player / extras.'],
           attributes: [],
         },
@@ -5069,7 +5992,7 @@ export const itemData = {
         Reward: '57 ELD',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #2 in the Rune Codex."],
           attributes: [],
         },
@@ -5108,19 +6031,17 @@ export const itemData = {
         'Planned Max Supply': 'Burned to 50,000',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #3 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock hideout decoration piece.'],
           attributes: [],
         },
@@ -5147,7 +6068,7 @@ export const itemData = {
         'Planned Max Supply': 'Burned to 50,000',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #4 in the Rune Codex."],
           attributes: [],
         },
@@ -5186,19 +6107,17 @@ export const itemData = {
         'Planned Max Supply': 'TBD',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #5 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock random skin.'],
           attributes: [],
         },
@@ -5225,19 +6144,17 @@ export const itemData = {
         'Planned Max Supply': 'Burned to 50,000',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #6 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Personalize item.'],
           attributes: [],
         },
@@ -5264,19 +6181,17 @@ export const itemData = {
         'Planned Max Supply': 'Burned to 50,000',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #7 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock a new chat sticker pack.'],
           attributes: [],
         },
@@ -5303,19 +6218,17 @@ export const itemData = {
         'Planned Max Supply': 'Burned to 50,000',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #8 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Change character gender.'],
           attributes: [],
         },
@@ -5342,19 +6255,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #9 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlocks random item transmog.'],
           attributes: [],
         },
@@ -5381,19 +6292,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #10 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlocks random character aura.'],
           attributes: [],
         },
@@ -5420,19 +6329,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #11 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Change your name.'],
           attributes: [],
         },
@@ -5459,19 +6366,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #12 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock a new dance move.'],
           attributes: [],
         },
@@ -5498,19 +6403,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #13 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock hardcore mode.'],
           attributes: [],
         },
@@ -5537,19 +6440,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #14 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Rename an NPC (only your games).'],
           attributes: [],
         },
@@ -5576,19 +6477,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #15 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unsocket item.'],
           attributes: [],
         },
@@ -5615,19 +6514,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #16 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Change character name.'],
           attributes: [],
         },
@@ -5654,19 +6551,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #17 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Change guild name.'],
           attributes: [],
         },
@@ -5693,19 +6588,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #18 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Highlight game name (in list).'],
           attributes: [],
         },
@@ -5732,19 +6625,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #19 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Highlight character name (in game).'],
           attributes: [],
         },
@@ -5771,19 +6662,17 @@ export const itemData = {
         // 'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #20 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Upgrade item.'],
           attributes: [],
         },
@@ -5810,19 +6699,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #21 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock additional inventory tab.'],
           attributes: [],
         },
@@ -5849,19 +6736,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #22 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Skip server queue (if we have any).'],
           attributes: [],
         },
@@ -5888,19 +6773,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #23 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Access to Hidden Vortex in End of Time.'],
           attributes: [],
         },
@@ -5927,19 +6810,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #24 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock your own shop.'],
           attributes: [],
         },
@@ -5966,19 +6847,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #25 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock your hideout.'],
           attributes: [],
         },
@@ -6005,19 +6884,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #26 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Highlight your marketplace listings.'],
           attributes: [],
         },
@@ -6044,19 +6921,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #27 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock additional stash tab.'],
           attributes: [],
         },
@@ -6083,19 +6958,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #28 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Access storage trunks across world.'],
           attributes: [],
         },
@@ -6122,19 +6995,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #29 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Enable traveling mule (storage companion).'],
           attributes: [],
         },
@@ -6161,19 +7032,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #30 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock additional gear set.'],
           attributes: [],
         },
@@ -6200,19 +7069,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #31 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Reveal a secret recipe.'],
           attributes: [],
         },
@@ -6239,19 +7106,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #32 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Increase guild member allowance.'],
           attributes: [],
         },
@@ -6278,19 +7143,17 @@ export const itemData = {
         'Planned Max Supply': 'TBA',
       },
       branches: {
-        1: {
+        [Games.Raid.id]: {
           description: ["An ancient rune used in magical craft. It's #33 in the Rune Codex."],
           attributes: [],
         },
-        2: {
-          description: ['To be announced.'],
+        [Games.Evolution.id]: {
           attributes: [],
         },
-        3: {
-          description: ['To be announced.'],
+        [Games.Infinite.id]: {
           attributes: [],
         },
-        4: {
+        [Games.Sanctuary.id]: {
           description: ['Unlock additional characters.'],
           attributes: [],
         },

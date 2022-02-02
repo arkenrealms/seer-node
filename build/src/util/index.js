@@ -35,14 +35,56 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateGit = exports.getAddress = exports.toShort = exports.toLong = exports.removeDupes = exports.round = exports.wait = void 0;
+exports.commarise = exports.ordinalise = exports.average = exports.getHighestId = exports.groupBy = exports.groupBySub = exports.updateGit = exports.toShort = exports.toLong = exports.removeDupes = exports.round = exports.wait = exports.log = exports.logError = exports.isDebug = void 0;
 var child_process_1 = require("child_process");
+var fs_jetpack_1 = __importDefault(require("fs-jetpack"));
 var ethers_1 = __importDefault(require("ethers"));
 var util_1 = __importDefault(require("util"));
+var path = require('path');
+var logData = fs_jetpack_1.default.read(path.resolve('../public/data/log.json'), 'json') || [];
+exports.isDebug = process.env.HOME === '/Users/dev';
+function logError() {
+    var msgs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        msgs[_i] = arguments[_i];
+    }
+    console.log.apply(console, __spreadArray(["[DB]"], msgs, false));
+    var errorLog = fs_jetpack_1.default.read(path.resolve('../public/data/errors.json'), 'json') || [];
+    for (var _a = 0, msgs_1 = msgs; _a < msgs_1.length; _a++) {
+        var msg = msgs_1[_a];
+        errorLog.push(msg + '');
+    }
+    fs_jetpack_1.default.write(path.resolve('../public/data/errors.json'), JSON.stringify(errorLog, null, 2), { atomic: true });
+}
+exports.logError = logError;
+function log() {
+    var msgs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        msgs[_i] = arguments[_i];
+    }
+    for (var _a = 0, msgs_2 = msgs; _a < msgs_2.length; _a++) {
+        var msg = msgs_2[_a];
+        logData.push(msg + '');
+    }
+    if (exports.isDebug) {
+        console.log.apply(console, __spreadArray(['[DB]'], msgs, false));
+    }
+    fs_jetpack_1.default.write(path.resolve('../public/data/log.json'), JSON.stringify(logData, null, 2));
+}
+exports.log = log;
 function wait(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
 }
@@ -70,16 +112,10 @@ var toLong = function (x) { return ethers_1.default.utils.parseEther(x + ''); };
 exports.toLong = toLong;
 var toShort = function (x) { return round(parseFloat(ethers_1.default.utils.formatEther(x)), 4); };
 exports.toShort = toShort;
-var getAddress = function (address) {
-    var mainNetChainId = 56;
-    var chainId = process.env.REACT_APP_CHAIN_ID;
-    return address[chainId] ? address[chainId] : address[mainNetChainId];
-};
-exports.getAddress = getAddress;
 var updatingGit = false;
 function updateGit() {
     return __awaiter(this, void 0, void 0, function () {
-        var execPromise, e2_1, _a, err, stdout, stderr, e_1;
+        var execPromise, e2_1, _a, stdout, stderr, e_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -102,8 +138,8 @@ function updateGit() {
                     return [3 /*break*/, 5];
                 case 5: return [4 /*yield*/, execPromise('cd db && git add -A && git commit -m "build: Binzy doz it" && git push --set-upstream origin master')];
                 case 6:
-                    _a = _b.sent(), err = _a.err, stdout = _a.stdout, stderr = _a.stderr;
-                    console.log(err, stderr, stdout);
+                    _a = _b.sent(), stdout = _a.stdout, stderr = _a.stderr;
+                    console.log(stderr, stdout);
                     return [4 /*yield*/, wait(100)];
                 case 7:
                     _b.sent();
@@ -120,3 +156,38 @@ function updateGit() {
     });
 }
 exports.updateGit = updateGit;
+function groupBySub(xs, key, subkey) {
+    return xs.reduce(function (rv, x) {
+        if (!x[key][subkey])
+            return rv;
+        (rv[x[key][subkey]] = rv[x[key][subkey]] || []).push(x);
+        return rv;
+    }, {}) || null;
+}
+exports.groupBySub = groupBySub;
+function groupBy(xs, key) {
+    return xs.reduce(function (rv, x) {
+        if (!x[key])
+            return rv;
+        (rv[x[key]] = rv[x[key]] || []).push(x);
+        return rv;
+    }, {}) || null;
+}
+exports.groupBy = groupBy;
+function getHighestId(arr) {
+    var highest = 0;
+    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+        var item = arr_1[_i];
+        if (item.id > highest) {
+            highest = item.id;
+        }
+    }
+    return highest;
+}
+exports.getHighestId = getHighestId;
+function average(arr) { return arr.reduce(function (p, c) { return p + c; }, 0) / arr.length; }
+exports.average = average;
+function ordinalise(n) { return n + (n % 10 == 1 && n % 100 != 11 ? 'st' : n % 10 == 2 && n % 100 != 12 ? 'nd' : n % 10 == 3 && n % 100 != 13 ? 'rd' : 'th'); }
+exports.ordinalise = ordinalise;
+function commarise(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+exports.commarise = commarise;

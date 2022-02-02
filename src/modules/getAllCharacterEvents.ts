@@ -1,0 +1,97 @@
+import path from 'path'
+import jetpack from 'fs-jetpack'
+import ethers from 'ethers'
+import { getHighestId, log, logError } from '../util'
+import { iterateBlocks, getAddress } from '../util/web3'
+import { decodeItem } from '../util/decodeItem'
+
+export async function getAllCharacterEvents(app) {
+  if (app.config.characters.updating) return
+
+  log('[Characters] Updating')
+
+  app.config.characters.updating = true
+
+  try {
+    const iface = new ethers.utils.Interface(app.contractMetadata.ArcaneCharacters.abi)
+
+    // @ts-ignore
+    async function processLog(log, updateConfig = true) {
+      const e = iface.parseLog(log)
+      
+      // log(e.name, e)
+
+      if (e.name === 'Transfer') {
+        const { from, to: userAddress, tokenId } = e.args
+
+        const user = app.db.loadUser(userAddress)
+
+        if (!user.characters.length) {
+          log('New user: ' + userAddress)
+        }
+
+        const characterData = {
+          owner: userAddress,
+          from,
+          status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
+          tokenId: tokenId.toString(),
+          transferredAt: new Date().getTime(),
+          blockNumber: log.blockNumber,
+          tx: log.transactionHash,
+          id: await app.contracts.arcaneCharacters.getCharacterId(tokenId.toString())
+        }
+
+        await app.db.saveUserCharacter(user, characterData)
+        // app.db.saveTokenTransfer(app.db.loadToken(characterData.tokenId), characterData)
+
+        if (from !== '0x0000000000000000000000000000000000000000') {
+          await app.db.saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
+        }
+
+        await app.db.saveCharacterOwner(app.db.loadCharacter(characterData.id), characterData)
+      }
+
+      const e2 = app.db.charactersEvents.find(t => t.transactionHash === log.transactionHash)
+
+      if (!e2) {
+        app.db.charactersEvents.push({
+          id: getHighestId(app.db.charactersEvents) + 1,
+          ...log,
+          ...e
+        })
+      }
+    
+
+      // if (updateConfig) {
+      //   config.characters.lastBlock = log.blockNumber
+      //   saveConfig()
+      // }
+    }
+
+    const blockNumber = await app.web3.eth.getBlockNumber()
+
+    const events = [
+      'Transfer'
+    ]
+    
+    for (const event of events) {
+      await iterateBlocks(app.web3Provider.getLogs, `Characters Events: ${event}`, getAddress(app.contracts.characters), app.config.characters.lastBlock[event], blockNumber, app.contractMetadata.arcaneCharacters.filters[event](), processLog, async function (blockNumber2) {
+        app.config.characters.lastBlock[event] = blockNumber2
+        // await saveConfig()
+      })
+    }
+
+    log('Finished')
+  } catch(e) {
+    logError(e)
+  }
+
+  app.config.characters.updating = false
+  app.config.characters.updatedDate = (new Date()).toString()
+  app.config.characters.updatedTimestamp = new Date().getTime()
+
+  // await saveCharactersEvents()
+  // await saveConfig()
+
+  setTimeout(() => getAllCharacterEvents(app), 2 * 60 * 1000)
+}

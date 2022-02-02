@@ -1,0 +1,77 @@
+import * as ethers from 'ethers'
+import Web3 from 'web3'
+import { log } from '../util'
+import { getAddress, getRandomProvider } from '../util/web3'
+import contracts from '../contracts'
+import ArcaneRaidV1 from '../../contracts/ArcaneRaidV1.json'
+import ArcaneTraderV1 from '../../contracts/ArcaneTraderV1.json'
+import ArcaneCharacters from '../../contracts/ArcaneCharacters.json'
+import ArcaneCharacterFactoryV3 from '../../contracts/ArcaneCharacterFactoryV3.json'
+import ArcaneBarracksFacetV1 from '../../contracts/ArcaneBarracksFacetV1.json'
+import ArcaneProfile from '../../contracts/ArcaneProfile.json'
+import ArcaneItems from '../../contracts/ArcaneItems.json'
+import BEP20Contract from '../../contracts/BEP20.json'
+
+function _initProvider(app) {
+  try {
+    log('Setting up provider')
+
+    app.provider = getRandomProvider()
+    app.web3 = new Web3(app.provider)
+
+    app.web3Provider = new ethers.providers.Web3Provider(getRandomProvider(), "any")
+    app.web3Provider.pollingInterval = 15000
+
+    app.signers.read = app.web3Provider.getSigner()
+    app.signers.write = app.web3Provider.getSigner()
+
+    app.contracts.arcaneItems = new ethers.Contract(getAddress(app.contractInfo.items), app.contractMetadata.ArcaneItems.abi, app.signers.read)
+    app.contracts.arcaneCharacters = new ethers.Contract(getAddress(app.contractInfo.characters), app.contractMetadata.ArcaneCharacters.abi, app.signers.read)
+    app.contracts.arcaneBarracks = new ethers.Contract(getAddress(app.contractInfo.barracks), app.contractMetadata.ArcaneBarracksFacetV1.abi, app.signers.read)
+    app.contracts.arcaneTrader = new ethers.Contract(getAddress(app.contractInfo.trader), app.contractMetadata.ArcaneTraderV1.abi, app.signers.read)
+    app.contracts.arcaneCharacterFactory = new ethers.Contract(getAddress(app.contractInfo.characterFactory), app.contractMetadata.ArcaneCharacterFactoryV3.abi, app.signers.read)
+    app.contracts.arcaneProfile = new ethers.Contract(getAddress(app.contractInfo.profile), app.contractMetadata.ArcaneProfile.abi, app.signers.read)
+    app.contracts.busd = new ethers.Contract(getAddress(app.contractInfo.busd), app.contractMetadata.BEP20Contract.abi, app.signers.read)
+    app.contracts.wbnb = new ethers.Contract(getAddress(app.contractInfo.wbnb), app.contractMetadata.BEP20Contract.abi, app.signers.read)
+  } catch(e) {
+    log(`Couldn't setup provider.`)
+  }
+}
+
+export function initProvider(app) {
+  _initProvider(app)
+
+  setInterval(() => {
+    // Something happened, lets restart the provider
+    if (new Date().getTime() > app.config.trades.updatedTimestamp + 10 * 60 * 1000) {
+      _initProvider(app)
+    }
+  }, 15 * 60 * 1000)
+}
+
+// web3Provider.on("network", (newNetwork, oldNetwork) => {
+  // When a Provider makes its initial connection, it emits a "network"
+  // event with a null oldNetwork along with the newNetwork. So, if the
+  // oldNetwork exists, it represents a changing network
+  // process.exit()
+// });
+
+export function initWeb3(app) {
+  app.contractInfo = contracts
+  app.contractMetadata = {}
+  app.contractMetadata.ArcaneRaidV1 = ArcaneRaidV1
+  app.contractMetadata.ArcaneTraderV1 = ArcaneTraderV1
+  app.contractMetadata.ArcaneCharacters = ArcaneCharacters
+  app.contractMetadata.ArcaneCharacterFactoryV3 = ArcaneCharacterFactoryV3
+  app.contractMetadata.ArcaneBarracksFacetV1 = ArcaneBarracksFacetV1
+  app.contractMetadata.ArcaneProfile = ArcaneProfile
+  app.contractMetadata.ArcaneItems = ArcaneItems
+  app.contractMetadata.BEP20Contract = BEP20Contract
+
+  app.signers = {
+    read: undefined,
+    write: undefined
+  }
+
+  initProvider(app)
+}

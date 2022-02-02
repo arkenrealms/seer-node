@@ -10,10 +10,27 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63, _64, _65, _66, _67, _68, _69, _70, _71, _72, _73, _74, _75, _76, _77, _78, _79, _80, _81, _82, _83, _84, _85, _86;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.itemData = exports.RuneNames = exports.RuneId = exports.ItemId = exports.ItemSlotToText = exports.ItemSlot = exports.ItemTypeToText = exports.ItemType = exports.ItemAttributesById = exports.ItemRarityNameById = exports.ItemRarity = exports.CraftingCompetitionWinner = exports.ClassIdByName = exports.ClassNames = exports.SkillIdByName = exports.SkillNames = exports.ItemAttributes = void 0;
-var items_type_mjs_1 = require("./items.type.mjs");
+exports.itemData = exports.RuneNames = exports.RuneId = exports.ItemId = exports.ItemSlotToText = exports.ItemSlot = exports.ItemTypeToText = exports.ItemType = exports.ItemAttributesById = exports.ItemRarityNameById = exports.ItemRarity = exports.CraftingCompetitionWinner = exports.ClassIdByName = exports.ClassNames = exports.SkillIdByName = exports.SkillNames = exports.ItemAttributes = exports.Games = void 0;
+var items_type_1 = require("./items.type");
+exports.Games = {
+    Raid: {
+        id: 1,
+    },
+    Evolution: {
+        id: 2,
+    },
+    Infinite: {
+        id: 3,
+    },
+    Sanctuary: {
+        id: 4,
+    },
+    Guardians: {
+        id: 5,
+    },
+};
 exports.ItemAttributes = {
     HarvestYield: {
         id: 1,
@@ -385,7 +402,7 @@ exports.ItemAttributes = {
         id: 63,
         min: 0,
         max: 5,
-        description: "Add {value}% to harvest, vested over time (Not Implemented)",
+        description: "Add {value}% To Harvest, Vested Over Time (Not Implemented)",
     },
     HarvestVestmentReduction: {
         id: 64,
@@ -427,7 +444,7 @@ exports.ItemAttributes = {
         id: 69,
         min: 0,
         max: 5,
-        description: "{value}% bonus yield given as a random rune (Not Implemented)",
+        description: "{value}% Bonus Yield Given as a Random Rune (Not Implemented)",
     },
     YieldBonusSpecificWeapon: {
         id: 70,
@@ -445,19 +462,19 @@ exports.ItemAttributes = {
         id: 72,
         min: 0,
         max: 5,
-        description: "Specific weapon: {value} (Not Implemented)",
+        description: "Specific Weapon: {value} (Not Implemented)",
     },
     HarvestTheftDefense: {
         id: 73,
         min: 0,
         max: 5,
-        description: "{value}% chance to defend harvest theft, taking the thief's runes instead (Not Implemented)",
+        description: "{value}% Theft Counter Chance (Not Implemented)",
     },
     RandomRuneExchangeSpecific: {
         id: 74,
         min: 0,
         max: 5,
-        description: "{value}% chance that random rune exchange gives a specific rune (Not Implemented)",
+        description: "{value}% Chance That Random Rune Exchange Gives a Specific Rune (Not Implemented)",
     },
     RandomRuneToken: {
         id: 75,
@@ -811,13 +828,133 @@ exports.ItemAttributes = {
         id: 205,
         min: 0,
         max: 100,
-        description: "Damage Reduced By {value}%",
+        description: "Physical Damage Reduced By {value}%",
     },
     MagicDamageReduced: {
         id: 206,
         min: 0,
         max: 100,
         description: "Magic Damage Reduced By {value}%",
+    },
+    EvolutionMovementSpeedIncrease: {
+        id: 1030,
+        min: 0,
+        max: 100,
+        description: "{Value}% Faster Movement",
+    },
+    InfiniteMovementSpeedIncrease: {
+        id: 1030,
+        min: 0,
+        max: 100,
+        description: "{Value}% Faster Movement",
+    },
+    DeathPenaltyAvoid: {
+        id: 1102,
+        min: 0,
+        max: 100,
+        description: "{Value}% To Avoid Losing Points On Death",
+    },
+    DodgeChance: {
+        id: 2159,
+        min: 0,
+        max: 100,
+        description: "{value}% Dodge Chance",
+    },
+    ReduceSkillCooldown: {
+        id: 1329,
+        min: 0,
+        max: 100,
+        description: "{Value}% Skill Cooldown Reduction",
+    },
+    EnergyDecayDecrease: {
+        id: 1104,
+        min: 0,
+        max: 100,
+        description: "{Value}% Decrease To Energy Decay Speed",
+    },
+    EarlyOrbPickup: {
+        id: 1114,
+        min: 0,
+        max: 0,
+        description: "Can Pick Up Orbs Early.",
+    },
+    DamageReduce: {
+        id: 2316,
+        min: 0,
+        max: 100,
+        description: "{Value}% Damage Reduction",
+    },
+    DoublePickupChance: {
+        id: 2914,
+        min: 0,
+        max: 100,
+        description: "{Value}% Chance To Double Item Pickup",
+    },
+    AttackSpeed: {
+        id: 2153,
+        min: 0,
+        max: 100,
+        description: "{Value}% Attack Speed",
+    },
+    CriticalHitChance: {
+        id: 2006,
+        min: 0,
+        max: 100,
+        description: "{Value}% Critical Hit Chance",
+    },
+    IncreaseAbsorb: {
+        id: 2307,
+        min: 0,
+        max: 100,
+        description: "Increase Absorb",
+    },
+    IncreaseRandomStat: {
+        id: 2600,
+        min: 0,
+        max: 100,
+        description: "{param1} {param2}",
+    },
+    IncreaseAilmentChance: {
+        id: 2914,
+        min: 0,
+        max: 100,
+        description: "Increase Ailment Chance",
+    },
+    UnlockSkills: {
+        id: 3801,
+        min: 0,
+        max: 100,
+        description: "{Value} Unlocked",
+    },
+    IncreaseDamage: {
+        id: 3801,
+        min: 0,
+        max: 100,
+        description: "{parameter1} {parameter2} damage",
+    },
+    SelfEffectOnCondition: {
+        id: 3801,
+        min: 0,
+        max: 100,
+        description: "{parameter1} {parameter2} damage",
+    },
+    IncreaseRankRewardBonus: {
+        id: 3801,
+        min: 0,
+        max: 100,
+        description: "{Value}% Increase To Rank Reward Bonuses",
+    },
+    IncreaseDamageTaken: {
+        id: 3801,
+        min: 0,
+        max: 100,
+        description: "{parameter1} Additional Damage Taken ({parameter2})",
+    },
+    IncreaseStat: {
+        id: 3801,
+        min: 0,
+        max: 100,
+        description: "{parameter1} {parameter2} {parameter3}",
     },
 };
 exports.SkillNames = {
@@ -842,10 +979,18 @@ exports.SkillNames = {
     18: 'Flurry Assault',
     19: 'Destructive Impact',
     20: 'Nova Breath',
+    24: 'Shadow Strike',
+    512: 'Evasion',
+    499: 'Arcane Orbs',
 };
+for (var i = 0; i < 1000; i++) {
+    if (!exports.SkillNames[i]) {
+        exports.SkillNames[i] = '';
+    }
+}
 exports.SkillIdByName = {};
-for (var _i = 0, _d = Object.keys(exports.SkillNames); _i < _d.length; _i++) {
-    var key = _d[_i];
+for (var _i = 0, _87 = Object.keys(exports.SkillNames); _i < _87.length; _i++) {
+    var key = _87[_i];
     // @ts-ignore
     exports.SkillIdByName[exports.SkillNames[key]] = parseInt(key);
 }
@@ -861,8 +1006,8 @@ exports.ClassNames = {
     8: 'Bard',
 };
 exports.ClassIdByName = {};
-for (var _e = 0, _f = Object.keys(exports.ClassNames); _e < _f.length; _e++) {
-    var key = _f[_e];
+for (var _88 = 0, _89 = Object.keys(exports.ClassNames); _88 < _89.length; _88++) {
+    var key = _89[_88];
     // @ts-ignore
     exports.ClassIdByName[exports.ClassNames[key]] = parseInt(key);
 }
@@ -884,14 +1029,14 @@ exports.ItemRarity = {
     Trash: { id: 10, name: 'Trash' },
 };
 exports.ItemRarityNameById = {};
-for (var _g = 0, _h = Object.keys(exports.ItemRarity); _g < _h.length; _g++) {
-    var key = _h[_g];
+for (var _90 = 0, _91 = Object.keys(exports.ItemRarity); _90 < _91.length; _90++) {
+    var key = _91[_90];
     // @ts-ignore
     exports.ItemRarityNameById[exports.ItemRarity[key].id] = exports.ItemRarity[key].name;
 }
 exports.ItemAttributesById = {};
-for (var _j = 0, _k = Object.keys(exports.ItemAttributes); _j < _k.length; _j++) {
-    var key = _k[_j];
+for (var _92 = 0, _93 = Object.keys(exports.ItemAttributes); _92 < _93.length; _92++) {
+    var key = _93[_92];
     // @ts-ignore
     exports.ItemAttributesById[exports.ItemAttributes[key].id] = exports.ItemAttributes[key];
 }
@@ -1054,17 +1199,17 @@ exports.RuneId = {
     ZOD: 32,
 };
 exports.RuneNames = {};
-for (var _l = 0, _m = Object.keys(exports.RuneId); _l < _m.length; _l++) {
-    var key = _m[_l];
+for (var _94 = 0, _95 = Object.keys(exports.RuneId); _94 < _95.length; _94++) {
+    var key = _95[_94];
     // @ts-ignore
     exports.RuneNames[parseInt(exports.RuneId[key])] = key;
 }
 exports.itemData = (_c = {},
-    _c[items_type_mjs_1.ItemsMainCategoriesType.OTHER] = [
+    _c[items_type_1.ItemsMainCategoriesType.OTHER] = [
         {
             id: 1,
             name: 'Steel',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00001.png',
             value: '0',
             type: exports.ItemType.OneHandedWeapon,
@@ -1096,8 +1241,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.EL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_d = {},
+                _d[exports.Games.Raid.id] = {
                     description: ['Made by Men, this blade is common but has minimal downsides.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 5, max: 15 }),
@@ -1107,15 +1252,13 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [15, 0],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _d[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _d[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _d[exports.Games.Sanctuary.id] = {
                     description: 'Made by Men, this blade is common but has minimal downsides.',
                     attributes: [
                         { id: 1, min: 16, max: 20, description: "{value}% Increased Attack Speed" },
@@ -1126,12 +1269,12 @@ exports.itemData = (_c = {},
                         { id: 8, value: 3, description: "{value} Increased Light Radius" },
                     ],
                 },
-            },
+                _d),
         },
         {
             id: 2,
             name: 'Fury',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00002.png',
             value: '0',
             type: exports.ItemType.OneHandedWeapon,
@@ -1165,8 +1308,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.EL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_e = {},
+                _e[exports.Games.Raid.id] = {
                     description: ['Not much is known about this sword, other than the creator had gone mad.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 3, max: 7 }),
@@ -1176,15 +1319,13 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [7, 40, 20],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _e[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _e[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _e[exports.Games.Sanctuary.id] = {
                     description: 'Not much is known about this sword, other than the creator had gone mad.',
                     attributes: [
                         { id: 1, min: 16, max: 20, description: "{value}% Increased Lightning Spell Damage" },
@@ -1194,12 +1335,12 @@ exports.itemData = (_c = {},
                         { id: 6, description: "Half Freeze Duration" },
                     ],
                 },
-            },
+                _e),
         },
         {
             id: 3,
             name: 'Lorekeeper',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00003.png',
             value: '0',
             type: exports.ItemType.Helm,
@@ -1231,8 +1372,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.TIR, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_f = {},
+                _f[exports.Games.Raid.id] = {
                     description: [
                         'An ancient helm forged by the Archons to seek out powerful shards in the battle between Heaven and Hell.',
                     ],
@@ -1244,15 +1385,13 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [3, 1],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _f[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _f[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _f[exports.Games.Sanctuary.id] = {
                     description: "An ancient helm forged by the Archons to seek out powerful shards in the battle between Heaven and Hell.",
                     attributes: [
                         { id: 1, value: 5, description: "{value}% Chance to Cast L6 Lion Heart on Taking Damage" },
@@ -1262,12 +1401,12 @@ exports.itemData = (_c = {},
                         { id: 2, description: 'Half Freeze Duration' },
                     ],
                 },
-            },
+                _f),
         },
         {
             id: 4,
             name: 'Worldstone Shard',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00004.png',
             value: '0',
             type: exports.ItemType.Ingredient,
@@ -1288,32 +1427,30 @@ exports.itemData = (_c = {},
                 Date: 'May 3, 2021 - Now',
                 'Max Supply': 'Unknown',
             },
-            branches: {
-                1: {
+            branches: (_g = {},
+                _g[exports.Games.Raid.id] = {
                     description: ['A relic from a broken time.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.TransmuteItem), { description: '100% Chance To Transmute Item', min: 0, max: 0, value: 100 }),
                     ],
                     perfection: [100],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _g[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _g[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _g[exports.Games.Sanctuary.id] = {
                     description: "A relic from a broken time.",
                     attributes: [{ id: 1, value: 0, description: "Used to transmute items." }],
                 },
-            },
+                _g),
         },
         {
             id: 5,
             name: 'Flash',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00005.png',
             value: '0',
             type: exports.ItemType.Boot,
@@ -1347,8 +1484,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.TAL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_h = {},
+                _h[exports.Games.Raid.id] = {
                     description: ['Although common in another world, these Sourcer boots are considered high quality.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 1, max: 10 }),
@@ -1358,24 +1495,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [10, 1, 20],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _h[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _h[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _h[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _h[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _h),
         },
         {
             id: 6,
             name: 'Titan',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00006.png',
             value: '0',
             type: exports.ItemType.BodyArmor,
@@ -1410,8 +1547,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.NEF, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_j = {},
+                _j[exports.Games.Raid.id] = {
                     description: ['Made from light-weight Templar material, it provides quality protection.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 5 }),
@@ -1421,24 +1558,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [5, 20, 2],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _j[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _j[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _j[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _j[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _j),
         },
         {
             id: 7,
             name: 'Smoke',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00007.png',
             value: '0',
             type: exports.ItemType.Glove,
@@ -1473,8 +1610,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.RAL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_k = {},
+                _k[exports.Games.Raid.id] = {
                     description: ['These handwraps have an unknown origin and emit a dark aura.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 1, max: 5 }),
@@ -1484,24 +1621,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [5, 100],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _k[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _k[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _k[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _k[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _k),
         },
         {
             id: 8,
             name: 'Moda',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00008.png',
             value: '0',
             type: exports.ItemType.Helm,
@@ -1526,16 +1663,22 @@ exports.itemData = (_c = {},
                 Date: 'March 28, 2021 - Now',
                 'Max Supply': 'Unknown',
             },
-            branches: {
-                1: {
+            branches: (_l = {},
+                _l[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 3, map: exports.ItemRarityNameById }),
                         {
                             id: 1,
+                            min: 0,
+                            max: 0,
+                            description: "{value}% Chance She Will Be Your Waifu",
+                        },
+                        {
+                            id: 1,
                             min: 100,
                             max: 100,
-                            description: "{value}% Chance she will not be your waifu",
+                            description: "{value}% Chance Of Ban Hammer",
                         },
                         {
                             id: 39,
@@ -1546,24 +1689,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [5, 75],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _l[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _l[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _l[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _l[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _l),
         },
         {
             id: 10,
             name: 'Glory',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00010.png',
             value: '0',
             type: exports.ItemType.TwoHandedWeapon,
@@ -1597,8 +1740,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.ORT, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_m = {},
+                _m[exports.Games.Raid.id] = {
                     description: [
                         'Crafted with the finest Vira materials, this Cloudstrike Sword is imbued with the power of wind.',
                     ],
@@ -1615,24 +1758,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [40, undefined, undefined, 10, 5],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _m[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _m[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _m[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _m[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _m),
         },
         {
             id: 11,
             name: 'Grace',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00011.png',
             value: '0',
             type: exports.ItemType.TwoHandedWeapon,
@@ -1666,8 +1809,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.ORT, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_o = {},
+                _o[exports.Games.Raid.id] = {
                     description: "Crafted with the finest Druid material, this Sage Bow is imbued to seek out what is hidden.",
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 10, max: 40 }),
@@ -1682,24 +1825,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [40, undefined, undefined, 10, 5],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _o[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _o[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _o[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _o[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _o),
         },
         {
             id: 12,
             name: 'Genesis',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00012.png',
             value: '0',
             type: exports.ItemType.OneHandedWeapon,
@@ -1732,8 +1875,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.ORT, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_p = {},
+                _p[exports.Games.Raid.id] = {
                     description: [
                         'Crafted with the finest Archon material, this Dimensional Dagger is imbued with banished sacrificial power.',
                     ],
@@ -1748,24 +1891,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [5, 40, undefined, 2],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _p[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _p[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _p[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _p[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _p),
         },
         {
             id: 13,
             name: 'Destiny',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00013.png',
             value: '0',
             type: exports.ItemType.TwoHandedWeapon,
@@ -1799,8 +1942,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.RAL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_q = {},
+                _q[exports.Games.Raid.id] = {
                     description: ['A mysterious staff that appears to be of Archon origin and imbued with the power of time.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 10, max: 40 }),
@@ -1815,24 +1958,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [40, undefined, undefined, 10, 5],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _q[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _q[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _q[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _q[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _q),
         },
         {
             id: exports.ItemId.Wrath,
             name: 'Wrath',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00014.png',
             value: '0',
             type: exports.ItemType.OneHandedWeapon,
@@ -1866,8 +2009,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.SOL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_r = {},
+                _r[exports.Games.Raid.id] = {
                     description: ['Originally royal Vira bracers, they have been forged to claws of an unknown material.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 7 }),
@@ -1882,24 +2025,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [7, 2, 15, null, 2],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _r[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _r[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _r[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _r[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _r),
         },
         {
             id: exports.ItemId.Fortress,
             name: 'Fortress',
-            category: items_type_mjs_1.ItemCategoriesType.SHIELD,
+            category: items_type_1.ItemCategoriesType.SHIELD,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00015.png',
             value: '0',
             type: exports.ItemType.Shield,
@@ -1933,8 +2076,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.NEF, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_s = {},
+                _s[exports.Games.Raid.id] = {
                     description: ['A shield designed for Vira royalty, it has been blessed with a protective aura.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.RemoveFees), { min: 2, max: 10 }),
@@ -1948,24 +2091,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [10, 4, 10, null, 10],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _s[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _s[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _s[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _s[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _s),
         },
         {
             id: exports.ItemId.Elder,
             name: 'Elder',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00016.png',
             value: '0',
             type: exports.ItemType.OneHandedWeapon,
@@ -1999,8 +2142,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.TAL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_t = {},
+                _t[exports.Games.Raid.id] = {
                     description: ['A mace crafted by Vira using mystical Archon materials during the Battle for the Worldstone.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 5 }),
@@ -2015,24 +2158,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [5, 20, null, null, 2],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _t[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _t[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _t[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _t[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _t),
         },
         {
             id: 19,
             name: 'Pledge',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00019.png',
             value: '0',
             type: exports.ItemType.Helm,
@@ -2065,8 +2208,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.ORT, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_u = {},
+                _u[exports.Games.Raid.id] = {
                     description: ['A once unbreakable helm, its best days have passed.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.FindShard), { min: 1, max: 15 }),
@@ -2077,24 +2220,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [15, 1, 4, 5],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _u[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _u[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _u[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _u[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _u),
         },
         {
             id: 20,
             name: 'Flow',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00020.png',
             value: '0',
             type: exports.ItemType.LegArmor,
@@ -2127,8 +2270,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.LUM, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_v = {},
+                _v[exports.Games.Raid.id] = {
                     description: [
                         'Lightweight Templar materials fashioned into plated chausses. These provide excellent leg protection.',
                     ],
@@ -2142,24 +2285,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [10, 10, null, null, 1, 0],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _v[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _v[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _v[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _v[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _v),
         },
         {
             id: 21,
             name: 'Guiding Light',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00021.png',
             value: '0',
             type: exports.ItemType.TwoHandedWeapon,
@@ -2194,8 +2337,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.ZOD, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_w = {},
+                _w[exports.Games.Raid.id] = {
                     description: [
                         "Taken from a Paladin whose fall from grace was legendary, the soft glow of this weapon's blade promises power and fortune to its wielder.",
                     ],
@@ -2211,8 +2354,7 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [100, 100, 10, 50, 0, 0, 0, undefined],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _w[2] = {
                     attributes: [],
                     // attributes: [
                     //   { ...ItemAttributes.PhysicalDamage, min: 0, max: 100 },
@@ -2231,20 +2373,18 @@ exports.itemData = (_c = {},
                     // ],
                     // perfection: [100, 100, 10, 50, 5, 100, 100, undefined],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _w[3] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _w[4] = {
                     attributes: [],
                 },
-            },
+                _w),
         },
         {
             id: 22,
             name: 'Lionheart',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00022.png',
             value: '0',
             type: exports.ItemType.OneHandedWeapon,
@@ -2278,8 +2418,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.KO, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_x = {},
+                _x[exports.Games.Raid.id] = {
                     description: [
                         "A keen blade crafted in Templar forges, this weapon is imbued with magics which benefit the allies of the wielder.",
                     ],
@@ -2294,24 +2434,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [12, undefined, 4, 5, 0, undefined, undefined],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _x[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _x[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _x[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _x[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _x),
         },
         {
             id: 23,
             name: 'Pressure',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00023.png',
             value: '0',
             type: exports.ItemType.Glove,
@@ -2344,8 +2484,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.KO, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_y = {},
+                _y[exports.Games.Raid.id] = {
                     description: [
                         "Made en masse by another world's crafters, these gauntlets are relatively exceptional compared to the work of humans.",
                     ],
@@ -2358,24 +2498,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [5, 5, 5, 10, 1],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _y[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _y[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _y[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _y[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _y),
         },
         {
             id: 24,
             name: 'Zeal',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00024.png',
             value: '0',
             type: exports.ItemType.WristArmor,
@@ -2409,8 +2549,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.HEL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_z = {},
+                _z[exports.Games.Raid.id] = {
                     description: [
                         "Lightweight Templar materials fashioned into bracers. These provide excellent arm protection.",
                     ],
@@ -2423,24 +2563,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [10, 3, 15, 3],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _z[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _z[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _z[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _z[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _z),
         },
         {
             id: 25,
             name: 'Balance',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00025.png',
             value: '0',
             type: exports.ItemType.Belt,
@@ -2473,8 +2613,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.RAL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_0 = {},
+                _0[exports.Games.Raid.id] = {
                     description: ["Soft yet resilient Wyrmhide skillfully shaped into a belt after Sage fashion."],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.RemoveFees), { min: 1, max: 3 }),
@@ -2485,24 +2625,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [3, 5, 0, 20],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _0[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _0[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _0[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _0[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _0),
         },
         {
             id: 26,
             name: 'Eternity',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00026.png',
             value: '0',
             type: exports.ItemType.Ring,
@@ -2536,8 +2676,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.ZOD, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_1 = {},
+                _1[exports.Games.Raid.id] = {
                     description: [
                         "The method and materials used to create this object of transcendant beauty and power have long been lost to the world.",
                     ],
@@ -2554,24 +2694,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [4, 3, null, 1, 5, null, 0, null],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _1[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _1[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _1[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _1[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _1),
         },
         {
             id: 27,
             name: 'Instinct',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00027.png',
             value: '0',
             type: exports.ItemType.Ring,
@@ -2605,8 +2745,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.LUM, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_2 = {},
+                _2[exports.Games.Raid.id] = {
                     description: [
                         "Wearers of this masterfully-crafted ring display a preternatural ability to find fortune and avoid harm.",
                     ],
@@ -2620,24 +2760,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [3, 3, 3, 4, 5, 0],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _2[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _2[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _2[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _2[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _2),
         },
         {
             id: 28,
             name: 'Beacon',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00028.png',
             value: '0',
             type: exports.ItemType.Amulet,
@@ -2670,8 +2810,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.SHAEL, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_3 = {},
+                _3[exports.Games.Raid.id] = {
                     description: [
                         "The light emitted from this brilliant stone highlights the latent arcane potential of objects in the environment.",
                     ],
@@ -2684,24 +2824,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [3, 3, 3, 4, 0],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _3[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _3[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _3[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _3[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _3),
         },
         {
             id: 29,
             name: 'Dragonlight',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00029.png',
             value: '0',
             type: exports.ItemType.Amulet,
@@ -2726,8 +2866,8 @@ exports.itemData = (_c = {},
                 Date: 'September 12, 2021',
                 'Max Supply': '1000',
             },
-            branches: {
-                1: {
+            branches: (_4 = {},
+                _4[exports.Games.Raid.id] = {
                     description: [
                         "Captured during the last breath of a dragon, this brilliant stone is imbued with energy that protects the owner, and is said to bring great furtune.",
                     ],
@@ -2740,24 +2880,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [undefined, 5, 50, 20, undefined],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _4[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _4[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _4[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _4[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _4),
         },
         {
             id: 30,
             name: 'Haze',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00030.png',
             value: '0',
             type: exports.ItemType.Helm,
@@ -2791,8 +2931,8 @@ exports.itemData = (_c = {},
                     { id: exports.RuneId.LO, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
+            branches: (_5 = {},
+                _5[exports.Games.Raid.id] = {
                     description: [
                         "A hood of unknown origin and fabric. Preternatural darkness clouds the appearance of the wearer.",
                     ],
@@ -2808,28 +2948,256 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [15, 2, 3, 2, undefined, undefined, undefined, undefined],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _5[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _5[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _5[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _5[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _5),
         },
         {
             id: 31,
             name: 'Hellfire',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00031.png',
             value: '0',
             type: exports.ItemType.BodyArmor,
             slots: [exports.ItemSlot.Chest],
+            isNew: true,
+            isEquipable: true,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: true,
+            isCraftable: true,
+            isDisabled: false,
+            isRuneword: true,
+            createdDate: 0,
+            hotness: 9,
+            attributes: [],
+            details: {
+                Type: 'Body Armor',
+                Subtype: 'Dragonforged Cuirass',
+                'Rune Word': 'Fal Mal Pul Um Zod',
+                Distribution: 'Crafted',
+                Date: 'Jan 16, 2022 - Now',
+                'Max Supply': 'Unknown',
+            },
+            recipe: {
+                requirement: [
+                    { id: exports.RuneId.FAL, quantity: 1 },
+                    { id: exports.RuneId.MAL, quantity: 1 },
+                    { id: exports.RuneId.PUL, quantity: 1 },
+                    { id: exports.RuneId.UM, quantity: 1 },
+                    { id: exports.RuneId.ZOD, quantity: 1 },
+                ],
+            },
+            description: [
+                "Produced on one of the rare occasions that dragons lended their energies to crafting, this armor is always hot to the touch.",
+            ],
+            branches: (_6 = {},
+                _6[exports.Games.Raid.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.RemoveFees), { min: 5, max: 10 }),
+                        __assign(__assign({}, exports.ItemAttributes.RandomRuneExchange), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestOverTime), { min: 0, max: 3 }),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 0, max: 4 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestBurn), { min: 0, max: 3 })
+                    ],
+                    perfection: [10, 2, 3, 4, 0],
+                },
+                _6[exports.Games.Evolution.id] = {
+                    attributes: [],
+                },
+                _6[exports.Games.Infinite.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.DamageReduce), { min: 10, max: 14, description: "{Value}% Reduced Fire Damage" }),
+                        __assign(__assign({}, exports.ItemAttributes.IncreaseAbsorb), { min: 4, max: 10, description: '{Value}% Increased Fire Absorb' }),
+                        __assign(__assign({}, exports.ItemAttributes.IncreaseRandomStat), { min: 0, max: 3, description: "Increase Stat: {Value}", map: { 0: "+10% Magic Find", 1: "+5% Movement Speed", 2: "+10% Energy", 3: "+14% Health" } }),
+                        __assign(__assign({}, exports.ItemAttributes.IncreaseAilmentChance), { min: 4, max: 8, description: '{Value}% Increased Burn Ailment Chance' }),
+                        __assign(__assign({}, exports.ItemAttributes.UnlockSkills), { min: 1, max: 1, description: "Unlocks Fire Nova and Infernal Cascade" })
+                    ],
+                },
+                _6[exports.Games.Guardians.id] = {
+                    attributes: [],
+                },
+                _6[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _6),
+        },
+        {
+            id: 32,
+            name: 'Luminous Flywings',
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00032.png',
+            value: '0',
+            type: exports.ItemType.Trinket,
+            slots: [exports.ItemSlot.Trinket1, exports.ItemSlot.Trinket2, exports.ItemSlot.Trinket3],
+            isNew: true,
+            isEquipable: true,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: true,
+            isCraftable: false,
+            isDisabled: false,
+            isRuneword: false,
+            createdDate: 0,
+            hotness: 9,
+            attributes: [],
+            // rarity: ItemRarity.Unique,
+            details: {
+                Type: 'Trinket',
+                Subtype: '',
+                Distribution: 'Airdrop',
+                Date: 'November 11, 2021',
+                'Max Supply': '1000',
+            },
+            description: [
+                "The voracious nature of Mage Isles fauna leave the defenseless glow flies unlikely to reach maturity, a point at which their body parts are coveted for their strange magical effects. These wings are one such example, bestowing the holder with periodic bursts of speed and agility.",
+            ],
+            branches: (_7 = {},
+                _7[exports.Games.Raid.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
+                        __assign(__assign({}, exports.ItemAttributes.AvoidBurn), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestTheftDefense), { min: 1, max: 3 }),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 14, max: 20 }),
+                    ],
+                    perfection: [undefined, 2, 3, 20],
+                    rarity: (_8 = {},
+                        _8[exports.ItemRarity.Magical.id] = [6, 0, 1, 14],
+                        _8[exports.ItemRarity.Rare.id] = [5, 1, 2, 16],
+                        _8[exports.ItemRarity.Epic.id] = [4, 1, 3, 18],
+                        _8[exports.ItemRarity.Mythic.id] = [3, 2, 3, 20],
+                        _8),
+                },
+                _7[exports.Games.Evolution.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
+                        __assign(__assign({}, exports.ItemAttributes.EvolutionMovementSpeedIncrease), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.DeathPenaltyAvoid), { min: 1, max: 3 }),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 14, max: 20 }),
+                    ],
+                    perfection: [undefined, 2, 3, 20],
+                    rarity: (_9 = {},
+                        _9[exports.ItemRarity.Magical.id] = [6, 0, 1, 14],
+                        _9[exports.ItemRarity.Rare.id] = [5, 1, 2, 16],
+                        _9[exports.ItemRarity.Epic.id] = [4, 1, 3, 18],
+                        _9[exports.ItemRarity.Mythic.id] = [3, 2, 3, 20],
+                        _9),
+                },
+                _7[exports.Games.Infinite.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
+                        __assign(__assign({}, exports.ItemAttributes.InfiniteMovementSpeedIncrease), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.DodgeChance), { min: 1, max: 3 }),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 14, max: 20 }),
+                    ],
+                    perfection: [undefined, 2, 3, 20],
+                    rarity: (_10 = {},
+                        _10[exports.ItemRarity.Magical.id] = [6, 0, 1, 14],
+                        _10[exports.ItemRarity.Rare.id] = [5, 1, 2, 16],
+                        _10[exports.ItemRarity.Epic.id] = [4, 1, 3, 18],
+                        _10[exports.ItemRarity.Mythic.id] = [3, 2, 3, 20],
+                        _10),
+                },
+                _7[exports.Games.Guardians.id] = {
+                    attributes: [],
+                },
+                _7[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _7),
+        },
+        {
+            id: 34,
+            name: 'Blur',
+            category: items_type_1.ItemCategoriesType.ARMOR,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00034.png',
+            value: '0',
+            type: exports.ItemType.BodyArmor,
+            slots: [exports.ItemSlot.Chest],
+            isNew: true,
+            isEquipable: true,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: true,
+            isCraftable: true,
+            isDisabled: false,
+            isRuneword: true,
+            createdDate: 0,
+            hotness: 9,
+            attributes: [],
+            details: {
+                Type: 'Body Armor',
+                Subtype: 'Drakehide Vestments',
+                'Rune Word': 'Pul Lo Um Zod',
+                Distribution: 'Crafted',
+                Date: 'Jan 16, 2022 - Now',
+                'Max Supply': 'Unknown',
+            },
+            recipe: {
+                requirement: [
+                    { id: exports.RuneId.PUL, quantity: 1 },
+                    { id: exports.RuneId.LO, quantity: 1 },
+                    { id: exports.RuneId.UM, quantity: 1 },
+                    { id: exports.RuneId.ZOD, quantity: 1 },
+                ],
+            },
+            description: [
+                "Enchanted with evasive magics, even the surest of strikes have trouble finding purchase on this finely-crafted armor.",
+            ],
+            branches: (_11 = {},
+                _11[exports.Games.Raid.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.RemoveFees), { min: 0, max: 10 }),
+                        __assign(__assign({}, exports.ItemAttributes.AvoidBurn), { min: 0, max: 1 }),
+                        __assign(__assign({}, exports.ItemAttributes.SendHarvestHiddenPool), { min: 0, max: 5 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestCritMultiplier), { min: 0, max: 10 }),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 5, max: 5, value: 5 }),
+                        __assign(__assign({}, exports.ItemAttributes.AddSkill), { min: exports.SkillIdByName['Evasion'], max: exports.SkillIdByName['Evasion'], value: exports.SkillIdByName['Evasion'], map: exports.SkillNames })
+                    ],
+                    perfection: [10, 1, 5, 10]
+                },
+                _11[exports.Games.Evolution.id] = {
+                    attributes: [],
+                },
+                _11[exports.Games.Infinite.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.DamageReduce), { min: 5, max: 10, description: "{Value}% Reduced Physical Damage" }),
+                        __assign(__assign({}, exports.ItemAttributes.DoublePickupChance), { min: 0, max: 1 }),
+                        __assign(__assign({}, exports.ItemAttributes.AttackSpeed), { min: 0, max: 5 }),
+                        __assign(__assign({}, exports.ItemAttributes.CriticalHitChance), { min: 4, max: 10 }),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 10, max: 10, value: 10 }),
+                        __assign(__assign({}, exports.ItemAttributes.AddSkill), { min: exports.SkillIdByName['Arcane Orbs'], max: exports.SkillIdByName['Arcane Orbs'], value: exports.SkillIdByName['Arcane Orbs'], map: exports.SkillNames })
+                    ],
+                },
+                _11[exports.Games.Guardians.id] = {
+                    attributes: [],
+                },
+                _11[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _11),
+        },
+        {
+            id: 35,
+            name: 'Mercy',
+            category: items_type_1.ItemCategoriesType.WEAPON,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00035.png',
+            value: '0',
+            type: exports.ItemType.OneHandedWeapon,
+            slots: [exports.ItemSlot.LeftHand, exports.ItemSlot.RightHand],
             isNew: true,
             isEquipable: true,
             isUnequipable: false,
@@ -2843,57 +3211,170 @@ exports.itemData = (_c = {},
             hotness: 9,
             attributes: [],
             details: {
-                Type: 'Armor',
-                Subtype: 'Dragonforged Cuirass',
-                // 'Rune Word': 'Hel Thul Tal Ko Lo',
+                Type: 'Dagger',
+                Subtype: 'Fanged Dagger',
+                // 'Rune Word': 'Hel Thul Tal Ko Lo',Thul Tal Sol Hel Lo     El Tir Thul Hel Sol  Thul El Sol Hel Tir
                 Distribution: 'Crafted',
-                Date: 'October 31, 2021 - Now',
+                Date: 'December 5, 2021 - Now',
                 'Max Supply': 'Unknown',
             },
             recipe: {
                 requirement: [
-                    { id: exports.RuneId.HEL, quantity: 1 },
                     { id: exports.RuneId.THUL, quantity: 1 },
-                    { id: exports.RuneId.PUL, quantity: 1 },
-                    { id: exports.RuneId.KO, quantity: 1 },
-                    { id: exports.RuneId.LO, quantity: 1 },
+                    { id: exports.RuneId.EL, quantity: 1 },
+                    { id: exports.RuneId.SOL, quantity: 1 },
+                    { id: exports.RuneId.HEL, quantity: 1 },
+                    { id: exports.RuneId.TIR, quantity: 1 },
                 ],
             },
-            branches: {
-                1: {
-                    description: [
-                        "Produced on one of the rare occasions that dragons lended their energies to crafting, this armor is always hot to the touch.",
-                    ],
+            description: [
+                "The an aura of menace surrounds this dagger, its prominent serrations promising a quick and bloody end to the foes of its wielder.",
+            ],
+            branches: (_12 = {},
+                _12[exports.Games.Raid.id] = {
                     attributes: [
-                        __assign(__assign({}, exports.ItemAttributes.RemoveFees), { min: 5, max: 15 }),
-                        __assign(__assign({}, exports.ItemAttributes.DebuffToBuffAttributeRange), { min: 0, max: 5 }),
-                        __assign(__assign({}, exports.ItemAttributes.RandomRuneExchange), { min: 0, max: 2 }),
-                        __assign(__assign({}, exports.ItemAttributes.HarvestOverTime), { min: 0, max: 2 }),
-                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 0, max: 4 }),
-                        __assign(__assign({}, exports.ItemAttributes.AttributeDebuffToBuffOnEquipTime), { min: 336, max: 336, map: exports.RuneNames }),
-                        __assign(__assign({}, exports.ItemAttributes.DebuffAttributeToChange), { min: 336, max: 336 }),
-                        __assign(__assign({}, exports.ItemAttributes.TargetAttributeToUnlock), { value: 1, min: 1, max: 1, map: ['1', '2'] }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 7 }),
+                        __assign(__assign({}, exports.ItemAttributes.SendHarvestHiddenPool), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.AvoidBurn), { min: 0, max: 1 }),
+                        __assign(__assign({}, exports.ItemAttributes.CreateRandomRuneword), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFee), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFeeToken), { min: exports.RuneId.NEF, max: exports.RuneId.ITH, map: exports.RuneNames }),
+                        __assign(__assign({}, exports.ItemAttributes.AddSkill), { min: exports.SkillIdByName['Shadow Strike'], max: exports.SkillIdByName['Shadow Strike'], value: exports.SkillIdByName['Shadow Strike'], map: exports.SkillNames }),
+                        __assign(__assign({}, exports.ItemAttributes.SpecificClass), { min: exports.ClassIdByName.Assassin, max: exports.ClassIdByName.Assassin, value: exports.ClassIdByName.Assassin, map: exports.ClassNames }),
                     ],
-                    perfection: [15, 2, 3, 2, undefined, undefined, undefined, undefined],
+                    perfection: [7, 15, 1, 2, 10, undefined, undefined, undefined],
                 },
-                2: {
-                    description: ['To be announced.'],
-                    attributes: [],
+                _12[exports.Games.Evolution.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 7 }),
+                        __assign(__assign({}, exports.ItemAttributes.SendHarvestHiddenPool), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.AvoidBurn), { min: 0, max: 1 }),
+                        __assign(__assign({}, exports.ItemAttributes.CreateRandomRuneword), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFee), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFeeToken), { min: exports.RuneId.NEF, max: exports.RuneId.ITH, value: exports.RuneId.ITH, map: exports.RuneNames }),
+                        __assign(__assign({}, exports.ItemAttributes.AddSkill), { min: exports.SkillIdByName['Shadow Strike'], max: exports.SkillIdByName['Shadow Strike'], value: exports.SkillIdByName['Shadow Strike'], map: exports.SkillNames }),
+                        __assign(__assign({}, exports.ItemAttributes.SpecificClass), { min: exports.ClassIdByName.Assassin, max: exports.ClassIdByName.Assassin, value: exports.ClassIdByName.Assassin, map: exports.ClassNames }),
+                    ],
+                    perfection: [7, 15, 1, 2, 10, undefined, undefined, undefined],
                 },
-                3: {
-                    description: ['To be announced.'],
-                    attributes: [],
+                _12[exports.Games.Infinite.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 7 }),
+                        __assign(__assign({}, exports.ItemAttributes.SendHarvestHiddenPool), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.AvoidBurn), { min: 0, max: 1 }),
+                        __assign(__assign({}, exports.ItemAttributes.CreateRandomRuneword), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFee), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFeeToken), { min: exports.RuneId.NEF, max: exports.RuneId.ITH, value: exports.RuneId.ITH, map: exports.RuneNames }),
+                        __assign(__assign({}, exports.ItemAttributes.AddSkill), { min: exports.SkillIdByName['Shadow Strike'], max: exports.SkillIdByName['Shadow Strike'], value: exports.SkillIdByName['Shadow Strike'], map: exports.SkillNames }),
+                        __assign(__assign({}, exports.ItemAttributes.SpecificClass), { min: exports.ClassIdByName.Assassin, max: exports.ClassIdByName.Assassin, value: exports.ClassIdByName.Assassin, map: exports.ClassNames }),
+                    ],
+                    perfection: [7, 15, 1, 2, 10, undefined, undefined, undefined],
                 },
-                4: {
-                    description: ['To be announced.'],
-                    attributes: [],
+                _12[exports.Games.Guardians.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 7 }),
+                        __assign(__assign({}, exports.ItemAttributes.SendHarvestHiddenPool), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.AvoidBurn), { min: 0, max: 1 }),
+                        __assign(__assign({}, exports.ItemAttributes.CreateRandomRuneword), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFee), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFeeToken), { min: exports.RuneId.NEF, max: exports.RuneId.ITH, value: exports.RuneId.ITH, map: exports.RuneNames }),
+                        __assign(__assign({}, exports.ItemAttributes.AddSkill), { min: exports.SkillIdByName['Shadow Strike'], max: exports.SkillIdByName['Shadow Strike'], value: exports.SkillIdByName['Shadow Strike'], map: exports.SkillNames }),
+                        __assign(__assign({}, exports.ItemAttributes.SpecificClass), { min: exports.ClassIdByName.Assassin, max: exports.ClassIdByName.Assassin, value: exports.ClassIdByName.Assassin, map: exports.ClassNames }),
+                    ],
+                    perfection: [7, 15, 1, 2, 10, undefined, undefined, undefined],
                 },
+                _12[exports.Games.Sanctuary.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 7 }),
+                        __assign(__assign({}, exports.ItemAttributes.SendHarvestHiddenPool), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.AvoidBurn), { min: 0, max: 1 }),
+                        __assign(__assign({}, exports.ItemAttributes.CreateRandomRuneword), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFee), { min: 10, max: 15 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFeeToken), { min: exports.RuneId.NEF, max: exports.RuneId.ITH, value: exports.RuneId.ITH, map: exports.RuneNames }),
+                        __assign(__assign({}, exports.ItemAttributes.AddSkill), { min: exports.SkillIdByName['Shadow Strike'], max: exports.SkillIdByName['Shadow Strike'], value: exports.SkillIdByName['Shadow Strike'], map: exports.SkillNames }),
+                        __assign(__assign({}, exports.ItemAttributes.SpecificClass), { min: exports.ClassIdByName.Assassin, max: exports.ClassIdByName.Assassin, value: exports.ClassIdByName.Assassin, map: exports.ClassNames }),
+                    ],
+                    perfection: [7, 15, 1, 2, 10, undefined, undefined],
+                },
+                _12),
+        },
+        {
+            id: 112,
+            name: 'Animus',
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/00112.png',
+            value: '0',
+            type: exports.ItemType.Ring,
+            slots: [exports.ItemSlot.Finger1, exports.ItemSlot.Finger2],
+            isNew: true,
+            isEquipable: true,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: true,
+            isCraftable: true,
+            isDisabled: true,
+            isRuneword: true,
+            createdDate: 0,
+            hotness: 9,
+            attributes: [],
+            details: {
+                Type: 'Ring',
+                Subtype: 'Overwrought Iron Ring',
+                // 'Rune Word': 'Pul Ith Mal Um Zod',
+                Distribution: 'Crafted',
+                Date: 'Jan 16, 2022 - Now',
+                'Max Supply': 'Unknown',
             },
+            recipe: {
+                requirement: [
+                    { id: exports.RuneId.PUL, quantity: 1 },
+                    { id: exports.RuneId.ITH, quantity: 1 },
+                    { id: exports.RuneId.MAL, quantity: 1 },
+                    { id: exports.RuneId.UM, quantity: 1 },
+                    { id: exports.RuneId.ZOD, quantity: 1 },
+                ],
+            },
+            description: [
+                "A blackened, abrasive circle of metal said to be the product of an ancient barbarian blacksmith. In addition to being brutal to look upon, its wearer becomes imbued with boundless aggression in battle, becoming heedless of danger or pain.",
+            ],
+            branches: (_13 = {},
+                _13[exports.Games.Raid.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 0, max: 4 }),
+                        __assign(__assign({}, exports.ItemAttributes.RandomRuneExchange), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.RandomRuneBonus), { min: 0, max: 2 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestBurn), { min: 0, max: 4 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFee), { min: 10, max: 20 }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestFeeToken), { min: exports.RuneId.NEF, max: exports.RuneId.ITH, map: exports.RuneNames }),
+                    ],
+                    perfection: [4, 2, 2, 0, 10, undefined],
+                },
+                _13[exports.Games.Evolution.id] = {
+                    attributes: [],
+                },
+                _13[exports.Games.Infinite.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.IncreaseDamage), { min: 0, max: 4, description: '{Value}% Increased Physical Damage' }),
+                        __assign(__assign({}, exports.ItemAttributes.IncreaseStat), { min: 1, max: 5, description: '{Value}% Energy Regeneration' }),
+                        __assign(__assign({}, exports.ItemAttributes.IncreaseStat), { min: 1, max: 5, description: '{Value}% Attack Speed' }),
+                        __assign(__assign({}, exports.ItemAttributes.IncreaseRankRewardBonus), { min: 1, max: 5 }),
+                        __assign(__assign({}, exports.ItemAttributes.IncreaseDamageTaken), { min: 0, max: 5, description: '{Value}% Additional Damage Taken (While Idle)' }),
+                        __assign(__assign({}, exports.ItemAttributes.UnlockSkills), { min: 0, max: 4, description: 'Unlock Skill: Berserker Soul' }),
+                    ],
+                },
+                _13[exports.Games.Guardians.id] = {
+                    attributes: [],
+                },
+                _13[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _13),
         },
         {
             id: 1200,
             name: "Scholar's Codex",
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01200.png',
             value: '0',
             type: exports.ItemType.Trinket,
@@ -2917,8 +3398,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 2, Epic: 4, Rare: 10, Magical: 20',
             },
-            branches: {
-                1: {
+            branches: (_14 = {},
+                _14[exports.Games.Raid.id] = {
                     description: ['Rewarded to Rune Scholars for their noble service.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -2927,24 +3408,22 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _14[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _14[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _14[exports.Games.Sanctuary.id] = {
                     description: "Rewarded to Rune Scholars for their noble service.",
                     attributes: [],
                 },
-            },
+                _14),
         },
         {
             id: 1201,
             name: "General's Medallion",
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01201.png',
             value: '0',
             type: exports.ItemType.Trinket,
@@ -2968,8 +3447,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 5, Epic: 10, Rare: 20, Magical: 30',
             },
-            branches: {
-                1: {
+            branches: (_15 = {},
+                _15[exports.Games.Raid.id] = {
                     description: ['Rewarded to Rune Generals for their valiant service.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -2978,24 +3457,22 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _15[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _15[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _15[exports.Games.Sanctuary.id] = {
                     description: "Rewarded to Rune Generals for their valiant service.",
                     attributes: [],
                 },
-            },
+                _15),
         },
         {
             id: 1202,
             name: 'Crafting Competition Certificate',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01202.png',
             value: '0',
             rarity: exports.ItemRarity.Normal,
@@ -3020,29 +3497,29 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - Now',
                 'Max Supply': 'Unknown',
             },
-            branches: {
-                1: {
+            branches: (_16 = {},
+                _16[exports.Games.Raid.id] = {
                     description: ['Given as a token of excellence in crafting.'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.CrafterCertificate), { min: 1, max: 2, map: exports.CraftingCompetitionWinner })],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _16[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _16[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _16[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _16[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _16),
         },
         {
             id: 1203,
             name: 'Seed of Rebirth',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: 'https://i.imgur.com/lTxW6Bk.png',
             value: '0',
             type: exports.ItemType.Trinket,
@@ -3066,8 +3543,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 5, Rare: 20, Magical: 50',
             },
-            branches: {
-                1: {
+            branches: (_17 = {},
+                _17[exports.Games.Raid.id] = {
                     description: ['Ancient power.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3077,24 +3554,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _17[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _17[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _17[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _17[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _17),
         },
         {
             id: 1204,
             name: 'Spire Seed',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: 'https://i.imgur.com/xJjqWZE.png',
             value: '0',
             type: exports.ItemType.Trinket,
@@ -3118,8 +3595,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 5, Rare: 20, Magical: 50',
             },
-            branches: {
-                1: {
+            branches: (_18 = {},
+                _18[exports.Games.Raid.id] = {
                     description: ['Ancient power.'],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3129,24 +3606,398 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _18[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _18[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _18[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
+                _18[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _18),
+        },
+        {
+            id: 1205,
+            name: "Founder's Cube",
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01205.png',
+            value: '0',
+            type: exports.ItemType.Key,
+            slots: [],
+            isNew: true,
+            isEquipable: false,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: false,
+            isCraftable: false,
+            isDisabled: false,
+            isRuneword: false,
+            isRetired: false,
+            createdDate: 0,
+            hotness: 99,
+            attributes: [],
+            details: {
+                Type: 'Cube',
+                Subtype: 'Cube',
+                Distribution: 'Fundraiser',
+                Date: 'September 12, 2021 - TBD',
+                'Max Supply': '1000',
             },
+            description: ["Founder's Cube will be redeemable for multiple benefits within Rune's ecosystem."],
+            branches: (_19 = {},
+                _19[exports.Games.Raid.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById }),
+                        {
+                            description: "Rune Sanctuary Collector's Edition",
+                        },
+                        {
+                            description: "Early Access to Rune Games",
+                        },
+                        {
+                            description: "Access to Founder's Tavern (End of Time)",
+                        },
+                        {
+                            description: "Every Rune in Rune Sanctuary (1 EL-ZOD)",
+                        },
+                        {
+                            description: "Golden Cube Skin",
+                        },
+                        {
+                            description: "Angel Skin + Wings",
+                        },
+                        {
+                            description: "Discord Badge + Private Channel",
+                        },
+                        {
+                            description: "Exclusive T-Shirt",
+                        },
+                    ],
+                },
+                _19[2] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById }),
+                        {
+                            description: "Rune Sanctuary Collector's Edition",
+                        },
+                        {
+                            description: "Early Access to Rune Games",
+                        },
+                        {
+                            description: "Access to Founder's Tavern (End of Time)",
+                        },
+                        {
+                            description: "Every Rune in Rune Sanctuary (1 EL-ZOD)",
+                        },
+                        {
+                            description: "Golden Cube Skin",
+                        },
+                        {
+                            description: "Angel Skin + Wings",
+                        },
+                        {
+                            description: "Discord Badge + Private Channel",
+                        },
+                        {
+                            description: "Exclusive T-Shirt",
+                        },
+                    ],
+                },
+                _19[3] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById }),
+                        {
+                            description: "Rune Sanctuary Collector's Edition",
+                        },
+                        {
+                            description: "Early Access to Rune Games",
+                        },
+                        {
+                            description: "Access to Founder's Tavern (End of Time)",
+                        },
+                        {
+                            description: "Every Rune in Rune Sanctuary (1 EL-ZOD)",
+                        },
+                        {
+                            description: "Golden Cube Skin",
+                        },
+                        {
+                            description: "Angel Skin + Wings",
+                        },
+                        {
+                            description: "Discord Badge + Private Channel",
+                        },
+                        {
+                            description: "Exclusive T-Shirt",
+                        },
+                    ],
+                },
+                _19[4] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById }),
+                        {
+                            description: "Rune Sanctuary Collector's Edition",
+                        },
+                        {
+                            description: "Early Access to Rune Games",
+                        },
+                        {
+                            description: "Access to Founder's Tavern (End of Time)",
+                        },
+                        {
+                            description: "Every Rune in Rune Sanctuary (1 EL-ZOD)",
+                        },
+                        {
+                            description: "Golden Cube Skin",
+                        },
+                        {
+                            description: "Angel Skin + Wings",
+                        },
+                        {
+                            description: "Discord Badge + Private Channel",
+                        },
+                        {
+                            description: "Exclusive T-Shirt",
+                        },
+                    ],
+                },
+                _19),
+        },
+        {
+            id: 1207,
+            name: 'Black Drake Scale',
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01207.png',
+            value: '0',
+            type: exports.ItemType.Trinket,
+            slots: [exports.ItemSlot.Trinket1, exports.ItemSlot.Trinket2, exports.ItemSlot.Trinket3],
+            isNew: true,
+            isEquipable: true,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: true,
+            isCraftable: false,
+            isDisabled: false,
+            isRuneword: false,
+            createdDate: 0,
+            hotness: 9,
+            attributes: [],
+            // rarity: ItemRarity.Unique,
+            details: {
+                Type: 'Trinket',
+                Subtype: 'Dragon Scale',
+                Distribution: 'Evolution Battles',
+                Date: 'September 12, 2021 - TBD',
+                'Max Supply': '1000',
+            },
+            description: [
+                "A rigid, fire resistant plate that once protected the body of a mature black drake. The circumstances of the drake's death have left this scale and its defensive properties well preserved- an uncommon occurrence.",
+            ],
+            branches: (_20 = {},
+                _20[exports.Games.Raid.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 5 }),
+                        __assign(__assign({}, exports.ItemAttributes.RemoveFees), { min: 20, max: 50 }),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 14, max: 20 }),
+                        __assign(__assign({}, exports.ItemAttributes.FindShard), { min: 10, max: 10 }),
+                    ],
+                    perfection: [undefined, 5, 50, 20, undefined],
+                },
+                _20[exports.Games.Evolution.id] = {
+                    attributes: [],
+                },
+                _20[exports.Games.Infinite.id] = {
+                    attributes: [],
+                },
+                _20[exports.Games.Guardians.id] = {
+                    attributes: [],
+                },
+                _20[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _20),
+        },
+        {
+            id: 1208,
+            name: 'Black Drake Talon',
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01208.png',
+            value: '0',
+            type: exports.ItemType.Trinket,
+            slots: [exports.ItemSlot.Trinket1, exports.ItemSlot.Trinket2, exports.ItemSlot.Trinket3],
+            isNew: true,
+            isEquipable: true,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: true,
+            isCraftable: false,
+            isDisabled: false,
+            isRuneword: false,
+            createdDate: 0,
+            hotness: 9,
+            attributes: [],
+            // rarity: ItemRarity.Unique,
+            details: {
+                Type: 'Trinket',
+                Subtype: 'Dragon Talon',
+                Distribution: 'Evolution Battles',
+                Date: 'September 12, 2021 - TBD',
+                'Max Supply': '1000',
+            },
+            description: [
+                "Razor sharp and menacing, these talons can rarely be found scattered across the Mage Isles, acting as an enduring and grim reminder of the brutal violence that once filled the skies around them.",
+            ],
+            branches: (_21 = {},
+                _21[exports.Games.Raid.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
+                        __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 2, max: 5 }),
+                        __assign(__assign({}, exports.ItemAttributes.RemoveFees), { min: 20, max: 50 }),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 14, max: 20 }),
+                        __assign(__assign({}, exports.ItemAttributes.FindShard), { min: 10, max: 10 }),
+                    ],
+                    perfection: [undefined, 5, 50, 20, undefined],
+                },
+                _21[exports.Games.Evolution.id] = {
+                    attributes: [],
+                },
+                _21[exports.Games.Infinite.id] = {
+                    attributes: [],
+                },
+                _21[exports.Games.Guardians.id] = {
+                    attributes: [],
+                },
+                _21[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _21),
+        },
+        {
+            id: 1209,
+            name: 'Glow Fly Powder',
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01209.png',
+            value: '0',
+            type: exports.ItemType.Trinket,
+            slots: [exports.ItemSlot.Trinket1, exports.ItemSlot.Trinket2, exports.ItemSlot.Trinket3],
+            isNew: true,
+            isEquipable: true,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: true,
+            isCraftable: false,
+            isDisabled: false,
+            isRuneword: false,
+            createdDate: 0,
+            hotness: 9,
+            attributes: [],
+            // rarity: ItemRarity.Unique,
+            details: {
+                Type: 'Trinket',
+                Subtype: 'Glow Fly Essence',
+                Distribution: 'Evolution Battles',
+                Date: 'September 12, 2021 - TBD',
+                'Max Supply': '1000',
+            },
+            description: [
+                "Once fully suffused with arcane energy, the glow flies that fill the skies of the Mage Isles begin to produce this powder. It has become a popular tool among magic users seeking to quickly restore their stores of mana.",
+            ],
+            branches: (_22 = {},
+                _22[exports.Games.Raid.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
+                        __assign(__assign({}, exports.ItemAttributes.SendHarvestHiddenPool), { min: 1, max: 5 }),
+                        __assign(__assign({}, exports.ItemAttributes.YieldBonusFromHiddenPool), { min: 1, max: 3 }),
+                        __assign({}, exports.ItemAttributes.UnstakeLockedDurationFromHarvest),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 14, max: 20 }),
+                    ],
+                    perfection: [undefined, 5, 3, undefined, 20],
+                },
+                _22[exports.Games.Evolution.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
+                        __assign(__assign({}, exports.ItemAttributes.ReduceSkillCooldown), { min: 1, max: 5 }),
+                        __assign(__assign({}, exports.ItemAttributes.EnergyDecayDecrease), { min: 1, max: 3 }),
+                        __assign({}, exports.ItemAttributes.EarlyOrbPickup),
+                        __assign(__assign({}, exports.ItemAttributes.MagicFind), { min: 14, max: 20 }),
+                    ],
+                    perfection: [undefined, 5, 3, undefined, 20],
+                },
+                _22[exports.Games.Infinite.id] = {
+                    attributes: [
+                        __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
+                        // { ...ItemAttributes.ManaRegen, min: 1, max: 5 }
+                    ],
+                },
+                _22[exports.Games.Guardians.id] = {
+                    attributes: [],
+                },
+                _22[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _22),
+        },
+        {
+            id: 1210,
+            name: 'Santa Christmas 2021 Ticket',
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
+            icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/01210.png',
+            value: '0',
+            type: exports.ItemType.Misc,
+            slots: [],
+            isNew: true,
+            isEquipable: false,
+            isUnequipable: false,
+            isTradeable: true,
+            isTransferable: true,
+            isUpgradable: false,
+            isCraftable: false,
+            isDisabled: false,
+            isRuneword: false,
+            createdDate: 0,
+            hotness: 9,
+            attributes: [],
+            // rarity: ItemRarity.Unique,
+            details: {
+                Type: 'Ticket',
+                Subtype: 'Holiday Ticket',
+                Distribution: 'Evolution Battles',
+                Date: 'December 24, 2021 - December 31, 2021',
+                'Max Supply': 'Unknown',
+            },
+            description: [""],
+            branches: (_23 = {},
+                _23[exports.Games.Raid.id] = {
+                    attributes: [],
+                    perfection: [],
+                },
+                _23[exports.Games.Evolution.id] = {
+                    attributes: [],
+                },
+                _23[exports.Games.Infinite.id] = {
+                    attributes: [],
+                },
+                _23[exports.Games.Guardians.id] = {
+                    attributes: [],
+                },
+                _23[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _23),
         },
         {
             id: 2000,
             name: 'Windforce',
-            category: items_type_mjs_1.ItemCategoriesType.WEAPON,
+            category: items_type_1.ItemCategoriesType.WEAPON,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/02000.png',
             value: '0',
             type: exports.ItemType.TwoHandedWeapon,
@@ -3170,8 +4021,8 @@ exports.itemData = (_c = {},
                 Date: 'TBD',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_24 = {},
+                _24[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.HarvestYield), { min: 10, max: 40 }),
@@ -3186,24 +4037,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [100, 100, 10, 50, 0, 0, 0, undefined],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _24[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _24[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _24[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _24[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _24),
         },
         {
             id: 2001,
             name: 'Stone of Jordan',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/02001.png',
             value: '0',
             type: exports.ItemType.Ring,
@@ -3227,8 +4078,8 @@ exports.itemData = (_c = {},
                 Date: 'TBD',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_25 = {},
+                _25[exports.Games.Raid.id] = {
                     description: [""],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3247,24 +4098,24 @@ exports.itemData = (_c = {},
                     epic: [4, 2, 5, 0, 1, 20, 10],
                     mythic: [3, 2, 5, 0, 1, 20, 10],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _25[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _25[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _25[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _25[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _25),
         },
         {
             id: 2002,
             name: 'Vampire Gaze',
-            category: items_type_mjs_1.ItemCategoriesType.HELM,
+            category: items_type_1.ItemCategoriesType.HELM,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/02002.png',
             value: '0',
             type: exports.ItemType.Helm,
@@ -3288,8 +4139,8 @@ exports.itemData = (_c = {},
                 Date: 'TBD',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_26 = {},
+                _26[exports.Games.Raid.id] = {
                     description: [""],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3303,12 +4154,10 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _26[2] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _26[3] = {
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
                         __assign(__assign({}, exports.ItemAttributes.EnhancedDefense), { min: 70, max: 100 }),
@@ -3321,16 +4170,15 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [100, 5, null, null, 8, 8, 20, 5],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _26[4] = {
                     attributes: [],
                 },
-            },
+                _26),
         },
         {
             id: 2003,
             name: 'Harlequin Crest',
-            category: items_type_mjs_1.ItemCategoriesType.HELM,
+            category: items_type_1.ItemCategoriesType.HELM,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/02003.png',
             value: '0',
             type: exports.ItemType.Helm,
@@ -3354,31 +4202,28 @@ exports.itemData = (_c = {},
                 Date: 'TBD',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_27 = {},
+                _27[exports.Games.Raid.id] = {
                     description: [""],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _27[2] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _27[3] = {
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _27[4] = {
                     attributes: [],
                 },
-            },
+                _27),
         },
         {
             id: 2004,
             name: 'The Oculus',
-            category: items_type_mjs_1.ItemCategoriesType.HELM,
+            category: items_type_1.ItemCategoriesType.HELM,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/02004.png',
             value: '0',
             type: exports.ItemType.Helm,
@@ -3402,31 +4247,28 @@ exports.itemData = (_c = {},
                 Date: 'TBD',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_28 = {},
+                _28[exports.Games.Raid.id] = {
                     description: [""],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _28[2] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _28[3] = {
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _28[4] = {
                     attributes: [],
                 },
-            },
+                _28),
         },
         {
             id: 2005,
             name: 'War Traveler',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/02005.png',
             value: '0',
             type: exports.ItemType.Boot,
@@ -3450,31 +4292,28 @@ exports.itemData = (_c = {},
                 Date: 'TBD',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_29 = {},
+                _29[exports.Games.Raid.id] = {
                     description: [""],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _29[2] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _29[3] = {
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _29[4] = {
                     attributes: [],
                 },
-            },
+                _29),
         },
         {
             id: 2047,
             name: 'Lightsabre',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/02047.png',
             value: '0',
             type: exports.ItemType.OneHandedWeapon,
@@ -3498,31 +4337,28 @@ exports.itemData = (_c = {},
                 Date: 'TBD',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_30 = {},
+                _30[exports.Games.Raid.id] = {
                     description: [""],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _30[2] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _30[3] = {
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _30[4] = {
                     attributes: [],
                 },
-            },
+                _30),
         },
         {
             id: 2052,
             name: 'Crown of Ages',
-            category: items_type_mjs_1.ItemCategoriesType.ARMOR,
+            category: items_type_1.ItemCategoriesType.ARMOR,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/02052.png',
             value: '0',
             type: exports.ItemType.Helm,
@@ -3546,31 +4382,28 @@ exports.itemData = (_c = {},
                 Date: 'TBD',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_31 = {},
+                _31[exports.Games.Raid.id] = {
                     description: [""],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _31[2] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _31[3] = {
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _31[4] = {
                     attributes: [],
                 },
-            },
+                _31),
         },
         {
             id: 3000,
             name: 'Golden Lion Cub',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03000.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -3595,8 +4428,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_32 = {},
+                _32[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3609,24 +4442,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _32[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _32[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _32[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _32[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _32),
         },
         {
             id: 3001,
             name: 'Blue-Eyes White Drake',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03001.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -3651,8 +4484,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_33 = {},
+                _33[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3665,24 +4498,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _33[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _33[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _33[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _33[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _33),
         },
         {
             id: 3002,
             name: 'Red-Eyes Black Drake',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03002.png',
             video: process.env.REACT_APP_PUBLIC_URL + 'videos/items/03002.mp4',
             value: '0',
@@ -3708,8 +4541,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_34 = {},
+                _34[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3722,24 +4555,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _34[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _34[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _34[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _34[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _34),
         },
         {
             id: 3003,
             name: 'Fairy Drake',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03003.png',
             video: process.env.REACT_APP_PUBLIC_URL + 'videos/items/03003.mp4',
             value: '0',
@@ -3765,8 +4598,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_35 = {},
+                _35[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3779,24 +4612,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _35[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _35[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _35[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _35[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _35),
         },
         {
             id: 3004,
             name: 'Goblin Drake',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03004.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -3821,8 +4654,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_36 = {},
+                _36[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3835,24 +4668,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _36[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _36[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _36[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _36[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _36),
         },
         {
             id: 3005,
             name: 'Hippogryph',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03005.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -3877,8 +4710,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_37 = {},
+                _37[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3891,24 +4724,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _37[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _37[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _37[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _37[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _37),
         },
         {
             id: 3006,
             name: 'Wyvern',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03006.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -3933,8 +4766,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_38 = {},
+                _38[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -3947,24 +4780,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _38[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _38[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _38[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _38[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _38),
         },
         {
             id: 3007,
             name: 'Forest Turtle',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03007.png',
             video: process.env.REACT_APP_PUBLIC_URL + 'videos/items/03007.mp4',
             value: '0',
@@ -3990,8 +4823,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_39 = {},
+                _39[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4004,24 +4837,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _39[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _39[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _39[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _39[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _39),
         },
         {
             id: 3008,
             name: 'Skeleton Drake',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03008.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -4046,8 +4879,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': '1',
             },
-            branches: {
-                1: {
+            branches: (_40 = {},
+                _40[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4060,24 +4893,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _40[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _40[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _40[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _40[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _40),
         },
         {
             id: 3010,
             name: 'Mysterious Egg',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03010.png',
             value: '0',
             type: exports.ItemType.Ingredient,
@@ -4102,30 +4935,30 @@ exports.itemData = (_c = {},
                 Date: 'October 1, 2021 - ?',
                 'Max Supply': 'Unknown',
             },
-            branches: {
-                1: {
+            branches: (_41 = {},
+                _41[exports.Games.Raid.id] = {
                     description: ['It seems to be a Guardian egg'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
+                _41[2] = {
                     description: ['It seems to be a Guardian egg'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                 },
-                3: {
+                _41[3] = {
                     description: ['It seems to be a Guardian egg'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                 },
-                4: {
+                _41[4] = {
                     description: ['It seems to be a Guardian egg'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                 },
-            },
+                _41),
         },
         {
             id: 3011,
             name: 'Mysterious Cube',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03011.png',
             value: '0',
             type: exports.ItemType.Ingredient,
@@ -4150,30 +4983,30 @@ exports.itemData = (_c = {},
                 Date: 'October 1, 2021 - ?',
                 'Max Supply': 'Unknown',
             },
-            branches: {
-                1: {
+            branches: (_42 = {},
+                _42[exports.Games.Raid.id] = {
                     description: ['It seems to be a powerful cube'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
+                _42[2] = {
                     description: ['It seems to be a powerful cube'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById })],
                 },
-                3: {
+                _42[3] = {
                     description: ['It seems to be a powerful cube'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById })],
                 },
-                4: {
+                _42[4] = {
                     description: ['It seems to be a powerful cube'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById })],
                 },
-            },
+                _42),
         },
         {
             id: 3012,
             name: 'Mysterious Trinket',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03012.png',
             value: '0',
             type: exports.ItemType.Ingredient,
@@ -4198,30 +5031,30 @@ exports.itemData = (_c = {},
                 Date: 'October 1, 2021 - ?',
                 'Max Supply': 'Unknown',
             },
-            branches: {
-                1: {
+            branches: (_43 = {},
+                _43[exports.Games.Raid.id] = {
                     description: ['It seems to be a trinket waiting to reveal itself'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
+                _43[2] = {
                     description: ['It seems to be a trinket waiting to reveal itself'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                 },
-                3: {
+                _43[3] = {
                     description: ['It seems to be a trinket waiting to reveal itself'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                 },
-                4: {
+                _43[4] = {
                     description: ['It seems to be a trinket waiting to reveal itself'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById })],
                 },
-            },
+                _43),
         },
         {
             id: 3013,
             name: 'Mysterious Rune',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03013.png',
             value: '0',
             type: exports.ItemType.Ingredient,
@@ -4246,30 +5079,30 @@ exports.itemData = (_c = {},
                 Date: 'October 1, 2021 - ?',
                 'Max Supply': 'Unknown',
             },
-            branches: {
-                1: {
+            branches: (_44 = {},
+                _44[exports.Games.Raid.id] = {
                     description: ['It seems to be a Rune'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById })],
                     perfection: [],
                 },
-                2: {
+                _44[2] = {
                     description: ['It seems to be a Rune'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById })],
                 },
-                3: {
+                _44[3] = {
                     description: ['It seems to be a Rune'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById })],
                 },
-                4: {
+                _44[4] = {
                     description: ['It seems to be a Rune'],
                     attributes: [__assign(__assign({}, exports.ItemAttributes.Rarity), { min: 2, max: 2, value: 2, map: exports.ItemRarityNameById })],
                 },
-            },
+                _44),
         },
         {
             id: 4000,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03000.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -4294,8 +5127,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_45 = {},
+                _45[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4308,24 +5141,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _45[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _45[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _45[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _45[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _45),
         },
         {
             id: 4001,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03001.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -4350,8 +5183,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_46 = {},
+                _46[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4364,24 +5197,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _46[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _46[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _46[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _46[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _46),
         },
         {
             id: 4002,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03002.png',
             video: process.env.REACT_APP_PUBLIC_URL + 'videos/items/03002.mp4',
             value: '0',
@@ -4407,8 +5240,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_47 = {},
+                _47[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4421,24 +5254,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _47[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _47[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _47[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _47[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _47),
         },
         {
             id: 4003,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03003.png',
             video: process.env.REACT_APP_PUBLIC_URL + 'videos/items/03003.mp4',
             value: '0',
@@ -4464,8 +5297,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_48 = {},
+                _48[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4478,24 +5311,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _48[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _48[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _48[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _48[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _48),
         },
         {
             id: 4004,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03004.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -4520,8 +5353,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_49 = {},
+                _49[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4534,24 +5367,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _49[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _49[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _49[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _49[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _49),
         },
         {
             id: 4005,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03005.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -4576,8 +5409,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_50 = {},
+                _50[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4590,24 +5423,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _50[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _50[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _50[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _50[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _50),
         },
         {
             id: 4006,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03006.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -4632,8 +5465,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_51 = {},
+                _51[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4646,24 +5479,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _51[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _51[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _51[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _51[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _51),
         },
         {
             id: 4007,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03007.png',
             video: process.env.REACT_APP_PUBLIC_URL + 'videos/items/03007.mp4',
             value: '0',
@@ -4689,8 +5522,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': 'Mythic: 1, Epic: 1, Rare: 1, Magical: 1',
             },
-            branches: {
-                1: {
+            branches: (_52 = {},
+                _52[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4703,24 +5536,24 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _52[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _52[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _52[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _52[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _52),
         },
         {
             id: 4008,
             name: 'Bad Item',
-            category: items_type_mjs_1.ItemCategoriesType.ACCESSORY,
+            category: items_type_1.ItemCategoriesType.ACCESSORY,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/items/03008.png',
             value: '0',
             type: exports.ItemType.Pet,
@@ -4745,8 +5578,8 @@ exports.itemData = (_c = {},
                 Date: 'June 12, 2021 - June 12, 2021',
                 'Max Supply': '1',
             },
-            branches: {
-                1: {
+            branches: (_53 = {},
+                _53[exports.Games.Raid.id] = {
                     description: [''],
                     attributes: [
                         __assign(__assign({}, exports.ItemAttributes.Rarity), { min: 3, max: 6, map: exports.ItemRarityNameById }),
@@ -4759,26 +5592,26 @@ exports.itemData = (_c = {},
                     ],
                     perfection: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _53[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _53[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
-                    description: ['To be announced.'],
+                _53[exports.Games.Guardians.id] = {
                     attributes: [],
                 },
-            },
+                _53[exports.Games.Sanctuary.id] = {
+                    attributes: [],
+                },
+                _53),
         },
     ],
-    _c[items_type_mjs_1.ItemsMainCategoriesType.RUNES] = [
+    _c[items_type_1.ItemsMainCategoriesType.RUNES] = [
         {
             id: 1,
             name: 'El Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/EL.png',
             value: '0',
             isNew: false,
@@ -4795,29 +5628,27 @@ exports.itemData = (_c = {},
                 Date: 'April 2, 2021 - April 9, 2021',
                 'Max Supply': 'Burned to 40,000',
             },
-            branches: {
-                1: {
+            branches: (_54 = {},
+                _54[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #1 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _54[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _54[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _54[exports.Games.Sanctuary.id] = {
                     description: ['Unlock music player / extras.'],
                     attributes: [],
                 },
-            },
+                _54),
         },
         {
             id: 2,
             name: 'Eld Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/ELD.png',
             value: '0',
             isNew: false,
@@ -4835,29 +5666,29 @@ exports.itemData = (_c = {},
                 'Max Supply': '40,000',
                 Reward: '57 ELD',
             },
-            branches: {
-                1: {
+            branches: (_55 = {},
+                _55[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #2 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
+                _55[2] = {
                     description: ['Unlock dark mode.'],
                     attributes: [],
                 },
-                3: {
+                _55[3] = {
                     description: ['Unlock dark mode.'],
                     attributes: [],
                 },
-                4: {
+                _55[4] = {
                     description: ['Unlock UI themes.'],
                     attributes: [],
                 },
-            },
+                _55),
         },
         {
             id: 3,
             name: 'Tir Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/TIR.png',
             value: '0',
             isNew: false,
@@ -4874,29 +5705,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'April 11, 2021 - April 16, 2021',
                 'Planned Max Supply': 'Burned to 50,000',
             },
-            branches: {
-                1: {
+            branches: (_56 = {},
+                _56[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #3 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _56[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _56[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _56[exports.Games.Sanctuary.id] = {
                     description: ['Unlock hideout decoration piece.'],
                     attributes: [],
                 },
-            },
+                _56),
         },
         {
             id: 4,
             name: 'Nef Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/NEF.png',
             value: '0',
             isNew: false,
@@ -4913,29 +5742,29 @@ exports.itemData = (_c = {},
                 'Planned Date': 'April 20, 2021 - April 26, 2021',
                 'Planned Max Supply': 'Burned to 50,000',
             },
-            branches: {
-                1: {
+            branches: (_57 = {},
+                _57[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #4 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
+                _57[2] = {
                     description: ['Disable extras (stay hydrated reminder).'],
                     attributes: [],
                 },
-                3: {
+                _57[3] = {
                     description: ['Disable extras.'],
                     attributes: [],
                 },
-                4: {
+                _57[4] = {
                     description: ['Disable extras.'],
                     attributes: [],
                 },
-            },
+                _57),
         },
         {
             id: 5,
             name: 'Eth Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/ETH.png',
             value: '0',
             isNew: false,
@@ -4952,29 +5781,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBD',
             },
-            branches: {
-                1: {
+            branches: (_58 = {},
+                _58[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #5 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _58[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _58[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _58[exports.Games.Sanctuary.id] = {
                     description: ['Unlock random skin.'],
                     attributes: [],
                 },
-            },
+                _58),
         },
         {
             id: 6,
             name: 'Ith Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/ITH.png',
             value: '0',
             isNew: false,
@@ -4991,29 +5818,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'April 26, 2021 - May 3, 2021',
                 'Planned Max Supply': 'Burned to 50,000',
             },
-            branches: {
-                1: {
+            branches: (_59 = {},
+                _59[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #6 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _59[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _59[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _59[exports.Games.Sanctuary.id] = {
                     description: ['Personalize item.'],
                     attributes: [],
                 },
-            },
+                _59),
         },
         {
             id: 7,
             name: 'Tal Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/TAL.png',
             value: '0',
             isNew: false,
@@ -5030,29 +5855,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'May 3, 2021 - May 10, 2021',
                 'Planned Max Supply': 'Burned to 50,000',
             },
-            branches: {
-                1: {
+            branches: (_60 = {},
+                _60[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #7 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _60[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _60[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _60[exports.Games.Sanctuary.id] = {
                     description: ['Unlock a new chat sticker pack.'],
                     attributes: [],
                 },
-            },
+                _60),
         },
         {
             id: 8,
             name: 'Ral Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/RAL.png',
             value: '0',
             isNew: false,
@@ -5069,29 +5892,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'May 10, 2021 - May 17, 2021',
                 'Planned Max Supply': 'Burned to 50,000',
             },
-            branches: {
-                1: {
+            branches: (_61 = {},
+                _61[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #8 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _61[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _61[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _61[exports.Games.Sanctuary.id] = {
                     description: ['Change character gender.'],
                     attributes: [],
                 },
-            },
+                _61),
         },
         {
             id: 9,
             name: 'Ort Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/ORT.png',
             value: '0',
             isNew: false,
@@ -5108,29 +5929,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_62 = {},
+                _62[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #9 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _62[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _62[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _62[exports.Games.Sanctuary.id] = {
                     description: ['Unlocks random item transmog.'],
                     attributes: [],
                 },
-            },
+                _62),
         },
         {
             id: 10,
             name: 'Thul Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/THUL.png',
             value: '0',
             isNew: false,
@@ -5147,29 +5966,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_63 = {},
+                _63[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #10 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _63[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _63[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _63[exports.Games.Sanctuary.id] = {
                     description: ['Unlocks random character aura.'],
                     attributes: [],
                 },
-            },
+                _63),
         },
         {
             id: 11,
             name: 'Amn Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/AMN.png',
             value: '0',
             isNew: false,
@@ -5186,29 +6003,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_64 = {},
+                _64[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #11 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _64[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _64[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _64[exports.Games.Sanctuary.id] = {
                     description: ['Change your name.'],
                     attributes: [],
                 },
-            },
+                _64),
         },
         {
             id: 12,
             name: 'Sol Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/SOL.png',
             value: '0',
             isNew: false,
@@ -5225,29 +6040,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_65 = {},
+                _65[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #12 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _65[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _65[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _65[exports.Games.Sanctuary.id] = {
                     description: ['Unlock a new dance move.'],
                     attributes: [],
                 },
-            },
+                _65),
         },
         {
             id: 13,
             name: 'Shael Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/SHAEL.png',
             value: '0',
             isNew: false,
@@ -5264,29 +6077,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_66 = {},
+                _66[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #13 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _66[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _66[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _66[exports.Games.Sanctuary.id] = {
                     description: ['Unlock hardcore mode.'],
                     attributes: [],
                 },
-            },
+                _66),
         },
         {
             id: 14,
             name: 'Dol Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/DOL.png',
             value: '0',
             isNew: false,
@@ -5303,29 +6114,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_67 = {},
+                _67[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #14 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _67[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _67[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _67[exports.Games.Sanctuary.id] = {
                     description: ['Rename an NPC (only your games).'],
                     attributes: [],
                 },
-            },
+                _67),
         },
         {
             id: 15,
             name: 'Hel Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/HEL.png',
             value: '0',
             isNew: false,
@@ -5342,29 +6151,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_68 = {},
+                _68[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #15 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _68[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _68[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _68[exports.Games.Sanctuary.id] = {
                     description: ['Unsocket item.'],
                     attributes: [],
                 },
-            },
+                _68),
         },
         {
             id: 16,
             name: 'Io Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/IO.png',
             value: '0',
             isNew: false,
@@ -5381,29 +6188,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_69 = {},
+                _69[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #16 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _69[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _69[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _69[exports.Games.Sanctuary.id] = {
                     description: ['Change character name.'],
                     attributes: [],
                 },
-            },
+                _69),
         },
         {
             id: 17,
             name: 'Lum Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/LUM.png',
             value: '0',
             isNew: false,
@@ -5420,29 +6225,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_70 = {},
+                _70[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #17 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _70[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _70[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _70[exports.Games.Sanctuary.id] = {
                     description: ['Change guild name.'],
                     attributes: [],
                 },
-            },
+                _70),
         },
         {
             id: 18,
             name: 'Ko Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/KO.png',
             value: '0',
             isNew: false,
@@ -5459,29 +6262,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_71 = {},
+                _71[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #18 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _71[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _71[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _71[exports.Games.Sanctuary.id] = {
                     description: ['Highlight game name (in list).'],
                     attributes: [],
                 },
-            },
+                _71),
         },
         {
             id: 19,
             name: 'Fal Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/FAL.png',
             value: '0',
             isNew: false,
@@ -5498,29 +6299,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_72 = {},
+                _72[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #19 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _72[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _72[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _72[exports.Games.Sanctuary.id] = {
                     description: ['Highlight character name (in game).'],
                     attributes: [],
                 },
-            },
+                _72),
         },
         {
             id: 20,
             name: 'Lem Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/LEM.png',
             value: '0',
             isNew: false,
@@ -5537,29 +6336,27 @@ exports.itemData = (_c = {},
                 // 'Planned Date': 'TBA',
                 // 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_73 = {},
+                _73[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #20 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _73[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _73[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _73[exports.Games.Sanctuary.id] = {
                     description: ['Upgrade item.'],
                     attributes: [],
                 },
-            },
+                _73),
         },
         {
             id: 21,
             name: 'Pul Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/PUL.png',
             value: '0',
             isNew: false,
@@ -5576,29 +6373,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_74 = {},
+                _74[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #21 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _74[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _74[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _74[exports.Games.Sanctuary.id] = {
                     description: ['Unlock additional inventory tab.'],
                     attributes: [],
                 },
-            },
+                _74),
         },
         {
             id: 22,
             name: 'Um Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/UM.png',
             value: '0',
             isNew: false,
@@ -5615,29 +6410,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_75 = {},
+                _75[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #22 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _75[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _75[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _75[exports.Games.Sanctuary.id] = {
                     description: ['Skip server queue (if we have any).'],
                     attributes: [],
                 },
-            },
+                _75),
         },
         {
             id: 23,
             name: 'Mal Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/MAL.png',
             value: '0',
             isNew: false,
@@ -5654,29 +6447,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_76 = {},
+                _76[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #23 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _76[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _76[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _76[exports.Games.Sanctuary.id] = {
                     description: ['Access to Hidden Vortex in End of Time.'],
                     attributes: [],
                 },
-            },
+                _76),
         },
         {
             id: 24,
             name: 'Ist Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/IST.png',
             value: '0',
             isNew: false,
@@ -5693,29 +6484,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_77 = {},
+                _77[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #24 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _77[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _77[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _77[exports.Games.Sanctuary.id] = {
                     description: ['Unlock your own shop.'],
                     attributes: [],
                 },
-            },
+                _77),
         },
         {
             id: 25,
             name: 'Gul Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/GUL.png',
             value: '0',
             isNew: false,
@@ -5732,29 +6521,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_78 = {},
+                _78[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #25 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _78[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _78[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _78[exports.Games.Sanctuary.id] = {
                     description: ['Unlock your hideout.'],
                     attributes: [],
                 },
-            },
+                _78),
         },
         {
             id: 26,
             name: 'Vex Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/VEX.png',
             value: '0',
             isNew: false,
@@ -5771,29 +6558,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_79 = {},
+                _79[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #26 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _79[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _79[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _79[exports.Games.Sanctuary.id] = {
                     description: ['Highlight your marketplace listings.'],
                     attributes: [],
                 },
-            },
+                _79),
         },
         {
             id: 27,
             name: 'Ohm Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/OHM.png',
             value: '0',
             isNew: false,
@@ -5810,29 +6595,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_80 = {},
+                _80[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #27 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _80[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _80[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _80[exports.Games.Sanctuary.id] = {
                     description: ['Unlock additional stash tab.'],
                     attributes: [],
                 },
-            },
+                _80),
         },
         {
             id: 28,
             name: 'Lo Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/LO.png',
             value: '0',
             isNew: false,
@@ -5849,29 +6632,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'August 25, 2021',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_81 = {},
+                _81[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #28 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _81[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _81[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _81[exports.Games.Sanctuary.id] = {
                     description: ['Access storage trunks across world.'],
                     attributes: [],
                 },
-            },
+                _81),
         },
         {
             id: 29,
             name: 'Sur Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/SUR.png',
             value: '0',
             isNew: false,
@@ -5888,29 +6669,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_82 = {},
+                _82[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #29 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _82[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _82[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _82[exports.Games.Sanctuary.id] = {
                     description: ['Enable traveling mule (storage companion).'],
                     attributes: [],
                 },
-            },
+                _82),
         },
         {
             id: 30,
             name: 'Ber Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/BER.png',
             value: '0',
             isNew: false,
@@ -5927,29 +6706,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_83 = {},
+                _83[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #30 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _83[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _83[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _83[exports.Games.Sanctuary.id] = {
                     description: ['Unlock additional gear set.'],
                     attributes: [],
                 },
-            },
+                _83),
         },
         {
             id: 31,
             name: 'Jah Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/JAH.png',
             value: '0',
             isNew: false,
@@ -5966,29 +6743,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_84 = {},
+                _84[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #31 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _84[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _84[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _84[exports.Games.Sanctuary.id] = {
                     description: ['Reveal a secret recipe.'],
                     attributes: [],
                 },
-            },
+                _84),
         },
         {
             id: 32,
             name: 'Cham Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/CHAM.png',
             value: '0',
             isNew: false,
@@ -6005,29 +6780,27 @@ exports.itemData = (_c = {},
                 'Planned Date': 'TBA',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_85 = {},
+                _85[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #32 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _85[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _85[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _85[exports.Games.Sanctuary.id] = {
                     description: ['Increase guild member allowance.'],
                     attributes: [],
                 },
-            },
+                _85),
         },
         {
             id: 33,
             name: 'Zod Rune',
-            category: items_type_mjs_1.ItemCategoriesType.RUNE,
+            category: items_type_1.ItemCategoriesType.RUNE,
             icon: process.env.REACT_APP_PUBLIC_URL + 'images/new-runes/ZOD.png',
             value: '0',
             isNew: false,
@@ -6044,27 +6817,25 @@ exports.itemData = (_c = {},
                 'Planned Date': 'July 4, 2021',
                 'Planned Max Supply': 'TBA',
             },
-            branches: {
-                1: {
+            branches: (_86 = {},
+                _86[exports.Games.Raid.id] = {
                     description: ["An ancient rune used in magical craft. It's #33 in the Rune Codex."],
                     attributes: [],
                 },
-                2: {
-                    description: ['To be announced.'],
+                _86[exports.Games.Evolution.id] = {
                     attributes: [],
                 },
-                3: {
-                    description: ['To be announced.'],
+                _86[exports.Games.Infinite.id] = {
                     attributes: [],
                 },
-                4: {
+                _86[exports.Games.Sanctuary.id] = {
                     description: ['Unlock additional characters.'],
                     attributes: [],
                 },
-            },
+                _86),
         },
     ],
-    _c[items_type_mjs_1.ItemsMainCategoriesType.WEAPONS] = [
+    _c[items_type_1.ItemsMainCategoriesType.WEAPONS] = [
     // {
     //   name: "Swiftoak's Relic",
     //   category: ItemCategoriesType.WEAPON,
@@ -6133,7 +6904,7 @@ exports.itemData = (_c = {},
     //     'The legendary sword that seals the darkness. Its blade gleams with a sacred luster that can oppose the Calamity. Only a hero chosen by the sword itself may wield it.',
     // },
     ],
-    _c[items_type_mjs_1.ItemsMainCategoriesType.SHIELDS] = [
+    _c[items_type_1.ItemsMainCategoriesType.SHIELDS] = [
     // {
     //   name: 'Wooden Shield',
     //   category: ItemCategoriesType.SHIELD,
@@ -6168,7 +6939,7 @@ exports.itemData = (_c = {},
     //     'This shield was made using ancient Sheikah technology. Its surface glows blue when raised in defense. Enhanced functionality allows it to deflect Guardian beams.',
     // },
     ],
-    _c[items_type_mjs_1.ItemsMainCategoriesType.ARMORS] = [
+    _c[items_type_1.ItemsMainCategoriesType.ARMORS] = [
     // {
     //   name: 'Zora Helm',
     //   category: ItemCategoriesType.HELM,

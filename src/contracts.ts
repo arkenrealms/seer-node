@@ -1,7 +1,11 @@
 export const MAINNET = 56
 export const TESTNET = 97
-
+// 0x7ec3abB2fB42a6Afeb029C5922eF67381708ed6A
 export default {
+  dol: {
+    [MAINNET]: '0x94F2E23c7422fa8c5A348a0E6D7C05b0a6C8a5b8',
+    [TESTNET]: '',
+  },
   shael: {
     [MAINNET]: '0x56DeFe2310109624c20c2E985c3AEa63b9718319',
     [TESTNET]: '',
@@ -9,14 +13,12 @@ export default {
   sol: {
     [MAINNET]: '0x4ffd3b8ba90f5430cda7f4cc4c0a80df3cd0e495',
     [TESTNET]: '',
+    name: 'Sol',
   },
   amn: {
     [MAINNET]: '0x346C03fe8BE489baAAc5CE67e817Ff11fb580F98',
     [TESTNET]: '',
-  },
-  dol: {
-    [MAINNET]: '0x94F2E23c7422fa8c5A348a0E6D7C05b0a6C8a5b8',
-    [TESTNET]: '',
+    name: 'Amn',
   },
   raid: {
     [MAINNET]: '0xcfA857d6EC2F59b050D7296FbcA8a91D061451f3',
@@ -75,7 +77,7 @@ export default {
     [TESTNET]: '',
   },
   blacksmith: {
-    [MAINNET]: '0xB615023dfa06944B06c4caDB308E6009907E8f4d',
+    [MAINNET]: '0x734a1e8848EF2490CC5F3D177b497be78BB3Dec0',
     [TESTNET]: '0x6bEf093fab1BeE45EA6b8dd60c4C3c3247Dd4E30',
   },
 
@@ -95,8 +97,7 @@ export default {
   },
   ort: {
     [MAINNET]: '0x33bc7539D83C1ADB95119A255134e7B584cd5c59',
-    [TESTNET]: '0xeF8503491F1eC0f2Fea52914A74cc0CAa3AD0b38',
-    name: 'Ort',
+    [TESTNET]: '',
   },
   trader: {
     [MAINNET]: '0xdAE69A43bC73e662095b488dbDDD1D3aBA59c1FF',
@@ -123,14 +124,6 @@ export default {
     [MAINNET]: '0x85C07b6a475Ee19218D0ef9C278C7e58715Af842',
     [TESTNET]: '0xE53397Dfa3364877381bCa9Ba84A8d4ee47466Cf',
   },
-  barracks: {
-    [MAINNET]: '0x5fE24631136D570D12920C9Fa0FEcaDA84E47673',
-    [TESTNET]: '0x403ecFeDaF05486466BC5f8CcD3A93c0cC4043ac',
-  },
-  blacksmith: {
-    [MAINNET]: '0xA9E123F1741351ebD42025F3fe18241A4026Fd6F',
-    [TESTNET]: '0x6bEf093fab1BeE45EA6b8dd60c4C3c3247Dd4E30',
-  },
   worldstoneMinter: {
     [MAINNET]: '0x1d892d0b6a95e097149c3986ea148debc31ca588',
     [TESTNET]: '0xBC3dE343771e2Bff1FDDb7b95Fca97c033745676',
@@ -145,9 +138,17 @@ export default {
     [MAINNET]: '0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F',
     [TESTNET]: '0xD99D1c33F9fC3444f8101754aBC46c52416550D1',
   },
+  pancakeRouterV2: {
+    [MAINNET]: '0x10ED43C718714eb63d5aA57B78B54704E256024E',
+    [TESTNET]: '',
+  },
   pancakeFactory: {
     [MAINNET]: '0xbcfccbde45ce874adcb698cc183debcf17952812',
     [TESTNET]: '0x6725F303b657a9451d8BA641348b6761A6CC7a17',
+  },
+  pancakeFactoryV2: {
+    [MAINNET]: '0xca143ce32fe78f1f7019d7d551a6402fc5350c73',
+    [TESTNET]: '',
   },
   runeMasterChef: {
     [MAINNET]: '0xa49bc3441ccdd4abeaea8c42500709a5b8c94dcc',
@@ -221,20 +222,24 @@ export default {
     [MAINNET]: '0x4596e527eba13a27cd02576d023695eab0a6b210',
     [TESTNET]: '0x86ec1fDadcb050d669Bb07A6802619836c7e2d64',
   },
-  characterFactoryV2: {
-    [MAINNET]: '0x8405f64b6a383729ac175b20ccc42ee38503b423',
-    [TESTNET]: '0x4e6b83c6e287c31e778045a4b5f506666411beb8',
-  },
   characterMintingStation: {
     [MAINNET]: '0x9c8c29cb9d23a9a61b8ed4022150039f088b750e',
     [TESTNET]: '0x8eb020c7b3a1391803d170a8048c5f80a4f83776',
+  },
+  characterFactoryV2: {
+    [MAINNET]: '0x8405f64b6a383729ac175b20ccc42ee38503b423',
+    [TESTNET]: '0x4e6b83c6e287c31e778045a4b5f506666411beb8',
   },
   characterFactoryV3: {
     [MAINNET]: '0xd4f0f1ca98455e7958595a630f28abc0690d7a1f',
     [TESTNET]: '0x80bc523c452ac6f8a99a4a597e54d3cacbd3fbe1',
   },
-  characterFactory: {
+  characterFactoryV4: {
     [MAINNET]: '0x6122f8500e7d602629fea714fea33bc2b2e0e2ac',
+    [TESTNET]: '',
+  },
+  characterFactory: {
+    [MAINNET]: '0xbf06E3c7A621120d9c6B8735A6896cf97FB5eDFb',
     [TESTNET]: '',
   },
   characterSpecial: {
@@ -248,6 +253,18 @@ export default {
   devAddress: {
     [MAINNET]: '0xEc9e6FBb58b3633B132dA9afB94A43446845edC8',
     [TESTNET]: '0xEc9e6FBb58b3633B132dA9afB94A43446845edC8',
+  },
+  dev2Address: {
+    [MAINNET]: '0x6B16c7BD6da2Aa1b8fA05C2A35613c5B240772f9',
+    [TESTNET]: '0x6B16c7BD6da2Aa1b8fA05C2A35613c5B240772f9',
+  },
+  dev3Address: {
+    [MAINNET]: '0x0Db3266bD741bCf95908CBdAF1142E072867c73d',
+    [TESTNET]: '0x0Db3266bD741bCf95908CBdAF1142E072867c73d',
+  },
+  dev4Address: {
+    [MAINNET]: '0x01e69C87472c8Ed08fE151beF5D4EF568E3D244c',
+    [TESTNET]: '0x01e69C87472c8Ed08fE151beF5D4EF568E3D244c',
   },
   vaultAddress: {
     [MAINNET]: '0x602a27bBf954b6945534a84C8c88FB8cA9E92B7F',
@@ -419,10 +436,6 @@ export default {
   },
   btcb: {
     [MAINNET]: '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c',
-    [TESTNET]: '',
-  },
-  slme: {
-    [MAINNET]: '0x4fcfa6cc8914ab455b5b33df916d90bfe70b6ab1',
     [TESTNET]: '',
   },
   usdt: {

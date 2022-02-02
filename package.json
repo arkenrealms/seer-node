@@ -1,10 +1,10 @@
 {
   "name": "rune-databaser",
   "version": "2.0.0",
-  "main": "build/index.js",
+  "main": "build/src/index.js",
   "scripts": {
     "build": "NODE_ENV=production tsc",
-    "start": "NODE_ENV=production node --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/index.js",
+    "start": "NODE_ENV=production node --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js",
     "forever": "forever start forever-config.json",
     "clean": "rm forever-script-err.log && rm forever-script-log.log && rm forever-script-out.log && rm nohup.out"
   },
@@ -63,7 +63,9 @@
   },
   "dependencies": {
     "ipfs-http-client": "^50.1.2",
+    "js-md5": "^0.7.3",
     "json-beautify": "^1.1.1",
-    "scrypt": "^6.0.3"
+    "scrypt": "^6.0.3",
+    "shortid": "^2.2.16"
   }
 }

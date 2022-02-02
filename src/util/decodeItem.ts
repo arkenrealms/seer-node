@@ -1,5 +1,5 @@
-import { itemData, ItemAttributes, ItemAttributesById, ItemType, ItemRarity, ItemRarityNameById } from '../data/items.mjs'
-import { ItemsMainCategoriesType } from '../data/items.type.mjs'
+import { itemData, ItemAttributes, ItemAttributesById, ItemType, ItemRarity, ItemRarityNameById } from '../data/items'
+import { ItemsMainCategoriesType } from '../data/items.type'
 
 const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
 
@@ -77,7 +77,7 @@ export function decodeItem(tokenId) {
     const item = {
       ...defaultItem,
       id,
-      ...itemData[ItemsMainCategoriesType.OTHER].find((i) => i.id === id),
+      ...(itemData[ItemsMainCategoriesType.OTHER] as any).find((i) => i.id === id), // TODO: fix
       type,
       version,
       mods,
