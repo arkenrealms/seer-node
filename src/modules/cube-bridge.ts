@@ -133,7 +133,7 @@ export async function initCubeBridge(app) {
       log(`:: Backend ready and listening on *:${sslPort}`)
     })
   } else {
-    const port = process.env.CUBE_BRIDGE_PORT || 80
+    const port = process.env.CUBE_BRIDGE_PORT || 7777
     app.cubeBridge.http.listen(port, function() {
       log(`:: Backend ready and listening on *:${port}`)
     })
