@@ -100,7 +100,7 @@ export async function initCubeBridge(app) {
 
   app.cubeBridge.server = express()
 
-  const isHttps = process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
+  const isHttps = false // process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
 
   if (isHttps) {
     app.cubeBridge.https = require('https').createServer({
