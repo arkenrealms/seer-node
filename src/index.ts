@@ -23,6 +23,7 @@ import { monitorCraftingStats } from './modules/monitorCraftingStats'
 import { monitorEvolutionStats } from './modules/monitorEvolutionStats'
 import { monitorMeta } from './modules/monitorMeta'
 import { monitorCoordinator } from './modules/monitorCoordinator'
+import { initCubeBridge } from './modules/cube-bridge'
 import * as tests from './tests'
 
 dotenv.config()
@@ -72,6 +73,12 @@ async function init() {
       //   async: true,
       //   timeout: 0
       // },
+      {
+        name: 'initCubeBridge',
+        instance: initCubeBridge,
+        async: false,
+        timeout: 0
+      },
       {
         name: 'monitorRealmServers',
         instance: monitorRealmServers,
