@@ -14,7 +14,10 @@ function initEventHandler(app) {
       socket.on('RC_AuthRequest', function(req) {
         if (req.data !== 'myverysexykey') {
           log('Invalid databaser creds:', req)
-          socket.disconnect()
+          emitDirect(socket, 'RC_AuthResponse', {
+            id: req.id,
+            data: { success: 0 }
+          })
           return
         }
 
