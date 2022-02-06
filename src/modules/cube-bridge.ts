@@ -94,6 +94,8 @@ function initEventHandler(app) {
 }
 
 export async function initCubeBridge(app) {
+  app.cubeBridge = {}
+  
   app.cubeBridge.ioCallbacks = {}
 
   app.cubeBridge.server = express()
