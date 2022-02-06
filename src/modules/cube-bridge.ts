@@ -61,6 +61,7 @@ function initEventHandler(app) {
         }
 
         try {
+          console.log(req)
           const user = app.db.loadUser(req.data.address)
 
           if (!user.rewardHistory) user.rewardHistory = []
