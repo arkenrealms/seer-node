@@ -79,12 +79,12 @@ async function init() {
         async: false,
         timeout: 0
       },
-      {
-        name: 'monitorRealmServers',
-        instance: monitorRealmServers,
-        async: false,
-        timeout: 0
-      },
+      // {
+      //   name: 'monitorRealmServers',
+      //   instance: monitorRealmServers,
+      //   async: false,
+      //   timeout: 0
+      // },
       // {
       //   name: 'getAllItemEvents',
       //   instance: getAllItemEvents,
