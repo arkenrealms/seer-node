@@ -128,12 +128,12 @@ export async function initCubeBridge(app) {
 
   // Finalize
   if (isHttps) {
-    const sslPort = process.env.CUBE_BRIDGE_PORT || 80
+    const sslPort = process.env.CUBE_BRIDGE_PORT || 443
     app.cubeBridge.https.listen(sslPort, function() {
       log(`:: Backend ready and listening on *:${sslPort}`)
     })
   } else {
-    const port = process.env.CUBE_BRIDGE_PORT || 443
+    const port = process.env.CUBE_BRIDGE_PORT || 80
     app.cubeBridge.http.listen(port, function() {
       log(`:: Backend ready and listening on *:${port}`)
     })
