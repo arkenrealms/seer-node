@@ -95,19 +95,22 @@ function initEventHandler(app) {
 
 export async function initCubeBridge(app) {
   app.cubeBridge = {}
-  
+
   app.cubeBridge.ioCallbacks = {}
 
   app.cubeBridge.server = express()
 
-  app.cubeBridge.http = require('http').Server(app.cubeBridge.server)
-
-  app.cubeBridge.https = require('https').createServer({
-    key: fs.readFileSync(path.resolve('./privkey.pem')),
-    cert: fs.readFileSync(path.resolve('./fullchain.pem'))
-  }, app.cubeBridge.server)
-
   const isHttps = process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
+
+  if (isHttps) {
+    app.cubeBridge.https = require('https').createServer({
+      key: fs.readFileSync(path.resolve('./privkey.pem')),
+      cert: fs.readFileSync(path.resolve('./fullchain.pem'))
+    }, app.cubeBridge.server)
+  
+  } else {
+    app.cubeBridge.http = require('http').Server(app.cubeBridge.server)
+  }
 
   app.cubeBridge.io = require('socket.io')(isHttps ? app.cubeBridge.https : app.cubeBridge.http, {
     secure: isHttps ? true : false,
