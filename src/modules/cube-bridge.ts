@@ -27,13 +27,35 @@ function initEventHandler(app) {
       })
   
       socket.on('RC_GetUserRequest', function(req) {
-        if (!socket.authed) return
+        if (!socket.authed) {
+          emitDirect('RC_GetUserResponse', {
+            id: req.id,
+            data: {
+              status: 0
+            }
+          })
+          return
+        }
         
-        emitDirect('RC_GetUserResponse', app.db.loadUser(req.data.address))
+        emitDirect('RC_GetUserResponse', {
+          id: req.id,
+          data: {
+            status: 1,
+            user: app.db.loadUser(req.data.address)
+          }
+        })
       })
 
       socket.on('RC_ReduceRewardsRequest', async function(req) {
-        if (!socket.authed) return
+        if (!socket.authed) {
+          emitDirect('RC_ReduceRewardsResponse', {
+            id: req.id,
+            data: {
+              status: 0
+            }
+          })
+          return
+        }
 
         try {
           const user = app.db.loadUser(req.data.address)
@@ -59,18 +81,42 @@ function initEventHandler(app) {
 
           await app.db.saveUser(user)
 
-          emitDirect('RC_ReduceRewardsResponse', { status: 1 })
+          emitDirect('RC_ReduceRewardsResponse', {
+            id: req.id,
+            data: {
+              status: 1
+            }
+          })
         } catch (e) {
           logError(e)
 
-          emitDirect('RC_ReduceRewardsResponse', { status: 0 })
+          emitDirect('RC_ReduceRewardsResponse', {
+            id: req.id,
+            data: {
+              status: 0
+            }
+          })
         }
       })
       
-      socket.on('RC_EvolutionRealmListRequest', function() {
-        if (!socket.authed) return
-        
-        emitDirect('RC_EvolutionRealmListResponse', app.db.evolutionServers)
+      socket.on('RC_EvolutionRealmListRequest', function(req) {
+        if (!socket.authed) {
+          emitDirect('RC_EvolutionRealmListResponse', {
+            id: req.id,
+            data: {
+              status: 0
+            }
+          })
+          return
+        }
+
+        emitDirect('RC_EvolutionRealmListResponse', {
+          id: req.id,
+          data: {
+            status: 1,
+            list: app.db.evolutionServers
+          }
+        })
       })
 
       socket.onAny(function(eventName, res) {
