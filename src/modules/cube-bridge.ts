@@ -6,9 +6,9 @@ import * as websocketUtil from '../util/websocket'
 const path = require('path')
 
 function initEventHandler(app) {
-  const { emitDirect, emitAll } = app.cubeBridge
+  const { emitDirect, emitAll, io } = app.cubeBridge
 
-  app.io.on('connection', function(socket) {
+  io.on('connection', function(socket) {
     try {
       // Use by GS to tell DB it's connected
       socket.on('RC_AuthRequest', function(req) {
