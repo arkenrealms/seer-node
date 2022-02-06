@@ -16,7 +16,7 @@ function initEventHandler(app) {
           log('Invalid databaser creds:', req)
           emitDirect(socket, 'RC_AuthResponse', {
             id: req.id,
-            data: { success: 0 }
+            data: { status: 0 }
           })
           return
         }
@@ -25,7 +25,7 @@ function initEventHandler(app) {
   
         emitDirect(socket, 'RC_AuthResponse', {
           id: req.id,
-          data: { success: 1 }
+          data: { status: 1 }
         })
       })
   
