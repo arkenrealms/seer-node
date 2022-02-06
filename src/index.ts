@@ -66,12 +66,12 @@ async function init() {
         async: false,
         timeout: 0
       },
-      {
-        name: 'convertRewards',
-        instance: convertRewards,
-        async: true,
-        timeout: 0
-      },
+      // {
+      //   name: 'convertRewards',
+      //   instance: convertRewards,
+      //   async: true,
+      //   timeout: 0
+      // },
       {
         name: 'monitorRealmServers',
         instance: monitorRealmServers,
