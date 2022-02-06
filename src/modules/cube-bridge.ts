@@ -31,7 +31,7 @@ function initEventHandler(app) {
   
       socket.on('RC_GetUserRequest', function(req) {
         if (!socket.authed) {
-          emitDirect('RC_GetUserResponse', {
+          emitDirect(socket, 'RC_GetUserResponse', {
             id: req.id,
             data: {
               status: 0
@@ -40,7 +40,7 @@ function initEventHandler(app) {
           return
         }
         
-        emitDirect('RC_GetUserResponse', {
+        emitDirect(socket, 'RC_GetUserResponse', {
           id: req.id,
           data: {
             status: 1,
@@ -51,7 +51,7 @@ function initEventHandler(app) {
 
       socket.on('RC_ReduceRewardsRequest', async function(req) {
         if (!socket.authed) {
-          emitDirect('RC_ReduceRewardsResponse', {
+          emitDirect(socket, 'RC_ReduceRewardsResponse', {
             id: req.id,
             data: {
               status: 0
@@ -84,7 +84,7 @@ function initEventHandler(app) {
 
           await app.db.saveUser(user)
 
-          emitDirect('RC_ReduceRewardsResponse', {
+          emitDirect(socket, 'RC_ReduceRewardsResponse', {
             id: req.id,
             data: {
               status: 1
@@ -93,7 +93,7 @@ function initEventHandler(app) {
         } catch (e) {
           logError(e)
 
-          emitDirect('RC_ReduceRewardsResponse', {
+          emitDirect(socket, 'RC_ReduceRewardsResponse', {
             id: req.id,
             data: {
               status: 0
@@ -104,7 +104,7 @@ function initEventHandler(app) {
       
       socket.on('RC_EvolutionRealmListRequest', function(req) {
         if (!socket.authed) {
-          emitDirect('RC_EvolutionRealmListResponse', {
+          emitDirect(socket, 'RC_EvolutionRealmListResponse', {
             id: req.id,
             data: {
               status: 0
@@ -113,7 +113,7 @@ function initEventHandler(app) {
           return
         }
 
-        emitDirect('RC_EvolutionRealmListResponse', {
+        emitDirect(socket, 'RC_EvolutionRealmListResponse', {
           id: req.id,
           data: {
             status: 1,
