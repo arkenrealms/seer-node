@@ -75,7 +75,7 @@ export async function getAllCharacterEvents(app) {
     ]
     
     for (const event of events) {
-      await iterateBlocks(app.web3Provider.getLogs, `Characters Events: ${event}`, getAddress(app.contracts.characters), app.config.characters.lastBlock[event], blockNumber, app.contractMetadata.arcaneCharacters.filters[event](), processLog, async function (blockNumber2) {
+      await iterateBlocks(app.ethersProvider.getLogs, `Characters Events: ${event}`, getAddress(app.contracts.characters), app.config.characters.lastBlock[event], blockNumber, app.contractMetadata.arcaneCharacters.filters[event](), processLog, async function (blockNumber2) {
         app.config.characters.lastBlock[event] = blockNumber2
         // await saveConfig()
       })

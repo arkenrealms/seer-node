@@ -393,6 +393,11 @@ export function initDb(app) {
       joinedGuildAt: undefined,
       isGuildMembershipActive: false,
       guildMembershipTokenId: null,
+      rewardHistory: [],
+      rewards: {
+        runes: {},
+        items: {}
+      },
       ...(jetpack.read(path.resolve(`./db/users/${address}/overview.json`), 'json') || {}),
       achievements: (jetpack.read(path.resolve(`./db/users/${address}/achievements.json`), 'json') || []),
       characters: (jetpack.read(path.resolve(`./db/users/${address}/characters.json`), 'json') || []),
@@ -628,7 +633,7 @@ export function initDb(app) {
   app.db.saveUser = async (user) => {
     // console.log('Save user', user.address)
 
-    await app.db.updateGuildByUser(user)
+    // await app.db.updateGuildByUser(user)
     await app.db.updatePointsByUser(user)
 
     jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), beautify({

@@ -1,10 +1,38 @@
+import fetch from 'node-fetch'
 import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
 import { average, groupBySub } from '../util'
 import { log } from '../util'
+import { median } from '../util/math'
 
 export async function monitorEvolutionStats(app) {
+
+  // Update evolution player rewards
+  try {
+    log('Update evolution player rewards')
+    for (const server of app.db.evolutionServers) {
+      if (server.status !== 'online') continue
+
+      log('Server', server.key)
+
+      try {
+        const rand = Math.floor(Math.random() * Math.floor(999999))
+        const response = await fetch(`http://${server.endpoint}/data/playerRewards.json?${rand}`)
+      
+        const data = await response.json()
+
+        jetpack.write(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), beautify(data, null, 2), { atomic: true })
+      } catch(e) {
+        log(e)
+      }
+    }
+  } catch(e) {
+    log(e)
+  }
+
+  
+  return
   const playerRoundWinners = {}
   const playerRewardWinners = {}
 
@@ -670,30 +698,6 @@ export async function monitorEvolutionStats(app) {
 
   
 
-  // Update evolution player rewards
-  try {
-    log('Update evolution player rewards')
-    for (const server of app.db.evolutionServers) {
-      if (server.status !== 'online') continue
-
-      log('Server', server.key)
-
-      try {
-        const rand = Math.floor(Math.random() * Math.floor(999999))
-        const response = await fetch(`https://${server.endpoint}/data/playerRewards.json?${rand}`)
-      
-        const data = await response.json()
-
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), beautify(data, null, 2), { atomic: true })
-      } catch(e) {
-        log(e)
-      }
-    }
-  } catch(e) {
-    log(e)
-  }
-
-  
 
   // Update evolution player rewards
   try {

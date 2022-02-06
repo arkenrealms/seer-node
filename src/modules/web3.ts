@@ -16,15 +16,17 @@ function _initProvider(app) {
   try {
     log('Setting up provider')
 
-    app.provider = getRandomProvider()
-    app.web3 = new Web3(app.provider)
+    app.web3Provider = getRandomProvider()
+    app.web3 = new Web3(app.web3Provider)
 
-    app.web3Provider = new ethers.providers.Web3Provider(getRandomProvider(), "any")
-    app.web3Provider.pollingInterval = 15000
+    app.ethersProvider = new ethers.providers.Web3Provider(app.web3Provider, 'any')
+    app.ethersProvider.pollingInterval = 15000
 
-    app.signers.read = app.web3Provider.getSigner()
-    app.signers.write = app.web3Provider.getSigner()
+    app.signers = {}
+    app.signers.read = app.ethersProvider.getSigner()
+    app.signers.write = app.ethersProvider.getSigner()
 
+    app.contracts = {}
     app.contracts.arcaneItems = new ethers.Contract(getAddress(app.contractInfo.items), app.contractMetadata.ArcaneItems.abi, app.signers.read)
     app.contracts.arcaneCharacters = new ethers.Contract(getAddress(app.contractInfo.characters), app.contractMetadata.ArcaneCharacters.abi, app.signers.read)
     app.contracts.arcaneBarracks = new ethers.Contract(getAddress(app.contractInfo.barracks), app.contractMetadata.ArcaneBarracksFacetV1.abi, app.signers.read)
@@ -49,7 +51,7 @@ export function initProvider(app) {
   }, 15 * 60 * 1000)
 }
 
-// web3Provider.on("network", (newNetwork, oldNetwork) => {
+// ethersProvider.on("network", (newNetwork, oldNetwork) => {
   // When a Provider makes its initial connection, it emits a "network"
   // event with a null oldNetwork along with the newNetwork. So, if the
   // oldNetwork exists, it represents a changing network

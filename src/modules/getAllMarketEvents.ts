@@ -148,7 +148,7 @@ export async function getAllMarketEvents(app) {
     ]
     
     for (const event of events) {
-      await iterateBlocks(app.web3Provider.getLogs, `Market Events: ${event}`, getAddress(app.contracts.trader), app.config.trades.lastBlock[event], blockNumber, app.contracts.arcaneTrader.filters[event](), processLog, async function (blockNumber2) {
+      await iterateBlocks(app.ethersProvider.getLogs, `Market Events: ${event}`, getAddress(app.contracts.trader), app.config.trades.lastBlock[event], blockNumber, app.contracts.arcaneTrader.filters[event](), processLog, async function (blockNumber2) {
         app.config.trades.lastBlock[event] = blockNumber2
         // await saveConfig()
       })

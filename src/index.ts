@@ -4,7 +4,8 @@ import { subProcesses, catchExceptions } from './util/process'
 import { initConfig } from './modules/config'
 import { initDb } from './modules/db'
 import { initWeb3 } from './modules/web3'
-import { monitorRealmServers } from './modules/monitorRealmServers'
+import { convertRewards } from './modules/convert-rewards'
+import { monitorRealmServers } from './modules/realm-servers'
 import { migrateTrades } from './modules/migrateTrades'
 import { getAllItemEvents } from './modules/getAllItemEvents'
 import { getAllBarracksEvents } from './modules/getAllBarracksEvents'
@@ -43,10 +44,6 @@ async function init() {
     const app: any = {}
 
     app.subProcesses = subProcesses
-    app.provider = undefined
-    app.web3 = undefined
-    app.web3Provider  = undefined
-    app.signer = undefined
 
     app.flags = {}
 
@@ -69,6 +66,12 @@ async function init() {
         async: false,
         timeout: 0
       },
+      // {
+      //   name: 'convertRewards',
+      //   instance: convertRewards,
+      //   async: true,
+      //   timeout: 0
+      // },
       {
         name: 'monitorRealmServers',
         instance: monitorRealmServers,
@@ -105,6 +108,12 @@ async function init() {
       //   async: false,
       //   timeout: 5 * 60 * 1000
       // },
+      {
+        name: 'monitorEvolutionStats',
+        instance: monitorEvolutionStats,
+        async: true,
+        timeout: 0
+      },
       // {
       //   name: 'monitorEvolutionStats2',
       //   instance: monitorEvolutionStats2,
@@ -150,12 +159,6 @@ async function init() {
       // {
       //   name: 'monitorCraftingStats',
       //   instance: monitorCraftingStats,
-      //   async: true,
-      //   timeout: 0
-      // },
-      // {
-      //   name: 'monitorEvolutionStats',
-      //   instance: monitorEvolutionStats,
       //   async: true,
       //   timeout: 0
       // },

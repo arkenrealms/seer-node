@@ -5,32 +5,32 @@ import util from 'util'
 
 const path = require('path')
 
-const logData = jetpack.read(path.resolve('../public/data/log.json'), 'json') || []
-
 export const isDebug = process.env.HOME === '/Users/dev'
 
 export function logError(...msgs) {
   console.log("[DB]", ...msgs)
 
-  const errorLog = jetpack.read(path.resolve('../public/data/errors.json'), 'json') || []
+  const errorLog = jetpack.read(path.resolve('./public/data/errors.json'), 'json') || []
 
   for (const msg of msgs) {
-    errorLog.push(msg + '')
+    errorLog.push(JSON.stringify(msg))
   }
   
-  jetpack.write(path.resolve('../public/data/errors.json'), JSON.stringify(errorLog, null, 2), { atomic: true })
+  jetpack.write(path.resolve('./public/data/errors.json'), JSON.stringify(errorLog, null, 2), { atomic: true })
 }
 
 export function log(...msgs) {
+  const logData = jetpack.read(path.resolve('../public/data/log.json'), 'json') || []
+  
   for (const msg of msgs) {
-    logData.push(msg + '')
+    logData.push(JSON.stringify(msg))
   }
 
   if (isDebug) {
     console.log('[DB]', ...msgs)
   }
 
-  jetpack.write(path.resolve('../public/data/log.json'), JSON.stringify(logData, null, 2))
+  jetpack.write(path.resolve('./public/data/log.json'), JSON.stringify(logData, null, 2))
 }
 
 export function wait(ms) {

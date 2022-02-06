@@ -101,7 +101,7 @@ export async function getAllBarracksEvents(app) {
     ]
     
     for (const event of events) {
-      await iterateBlocks(app.web3Provider.getLogs, `Barracks Events: ${event}`, getAddress(app.contracts.barracks), app.config.barracks.lastBlock[event], blockNumber, app.contractMetadata.arcaneBarracks.filters[event](), processLog, async function (blockNumber2) {
+      await iterateBlocks(app.ethersProvider.getLogs, `Barracks Events: ${event}`, getAddress(app.contracts.barracks), app.config.barracks.lastBlock[event], blockNumber, app.contractMetadata.arcaneBarracks.filters[event](), processLog, async function (blockNumber2) {
         app.config.barracks.lastBlock[event] = blockNumber2
         // await app.db.saveConfig()
       })

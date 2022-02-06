@@ -84,7 +84,7 @@ export async function getAllItemEvents(app) {
     ]
     
     for (const event of events) {
-      await iterateBlocks(app.web3Provider.getLogs, `Items Events: ${event}`, getAddress(app.contracts.items), app.config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber2) {
+      await iterateBlocks(app.ethersProvider.getLogs, `Items Events: ${event}`, getAddress(app.contracts.items), app.config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber2) {
         app.config.items.lastBlock[event] = blockNumber2
         // await saveConfig()
       })

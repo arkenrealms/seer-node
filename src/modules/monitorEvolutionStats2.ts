@@ -1,7 +1,9 @@
+import fetch from 'node-fetch'
 import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
 import { log } from '../util'
+import { fancyTimeFormat } from '../util/time'
 
 export async function monitorEvolutionStats2(app) {
 
@@ -62,7 +64,7 @@ export async function monitorEvolutionStats2(app) {
 
       jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
 
-      app.db.updateGames()
+      // app.db.updateGames()
 
       const oldTime = (new Date(app.db.evolutionHistorical.playerCount[app.db.evolutionHistorical.playerCount.length-1]?.[0] || 0)).getTime()
       const newTime = (new Date()).getTime()

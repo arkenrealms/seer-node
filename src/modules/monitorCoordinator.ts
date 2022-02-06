@@ -1,3 +1,4 @@
+import fetch from 'node-fetch'
 import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
