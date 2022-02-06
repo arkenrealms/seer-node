@@ -5,7 +5,7 @@ import util from 'util'
 
 const path = require('path')
 
-export const isDebug = process.env.HOME === '/Users/dev' || process.env.HOME === '/home/dev'
+export const isDebug = process.env.HOME === '/Users/dev' || process.env.HOME === '/home/dev' || process.env.HOME === '/home/dev'
 
 export function logError(...msgs) {
   console.log("[DB]", ...msgs)
