@@ -67,24 +67,24 @@ async function init() {
         async: false,
         timeout: 0
       },
+      {
+        name: 'convertRewards',
+        instance: convertRewards,
+        async: true,
+        timeout: 0
+      },
       // {
-      //   name: 'convertRewards',
-      //   instance: convertRewards,
-      //   async: true,
+      //   name: 'initCubeBridge',
+      //   instance: initCubeBridge,
+      //   async: false,
       //   timeout: 0
       // },
-      {
-        name: 'initCubeBridge',
-        instance: initCubeBridge,
-        async: false,
-        timeout: 0
-      },
-      {
-        name: 'monitorRealmServers',
-        instance: monitorRealmServers,
-        async: false,
-        timeout: 0
-      },
+      // {
+      //   name: 'monitorRealmServers',
+      //   instance: monitorRealmServers,
+      //   async: false,
+      //   timeout: 0
+      // },
       // {
       //   name: 'getAllItemEvents',
       //   instance: getAllItemEvents,
