@@ -43,12 +43,12 @@ function _initProvider(app) {
 export function initProvider(app) {
   _initProvider(app)
 
-  setInterval(() => {
-    // Something happened, lets restart the provider
-    if (new Date().getTime() > app.config.trades.updatedTimestamp + 10 * 60 * 1000) {
-      _initProvider(app)
-    }
-  }, 15 * 60 * 1000)
+  // setInterval(() => {
+  //   // Something happened, lets restart the provider
+  //   if (new Date().getTime() > app.config.trades.updatedTimestamp + 10 * 60 * 1000) {
+  //     _initProvider(app)
+  //   }
+  // }, 15 * 60 * 1000)
 }
 
 // ethersProvider.on("network", (newNetwork, oldNetwork) => {
