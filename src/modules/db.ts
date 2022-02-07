@@ -397,6 +397,10 @@ export function initDb(app) {
         runes: {},
         items: {}
       },
+      lifetimeRewards: {
+        runes: {},
+        items: {}
+      },
       ...(jetpack.read(path.resolve(`./db/users/${address}/overview.json`), 'json') || {}),
       achievements: (jetpack.read(path.resolve(`./db/users/${address}/achievements.json`), 'json') || []),
       characters: (jetpack.read(path.resolve(`./db/users/${address}/characters.json`), 'json') || []),

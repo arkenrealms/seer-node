@@ -291,7 +291,7 @@ export async function convertRewards(app) {
         const rewards = playerRewards[address]
 
         if (!userCache[address.toLowerCase()]) {
-          user.rewards = {
+          user.lifetimeRewards = {
             runes: {},
             items: {}
           }
@@ -300,14 +300,14 @@ export async function convertRewards(app) {
         }
 
         for (const key of Object.keys(rewards.pending)) {
-          if (!user.rewards.runes[key]) user.rewards.runes[key] = 0
+          if (!user.lifetimeRewards.runes[key]) user.lifetimeRewards.runes[key] = 0
 
-          user.rewards.runes[key] += rewards.pending[key]
+          user.lifetimeRewards.runes[key] += rewards.pending[key]
         }
 
         for (const index in rewards.pendingItems) {
           const item = rewards.pendingItems[index]
-          user.rewards.items[item.id] = {
+          user.lifetimeRewards.items[item.id] = {
             name: item.name,
             rarity: item.rarity,
             quantity: item.quantity
@@ -317,7 +317,7 @@ export async function convertRewards(app) {
         if (address === '0x865f4a1eDEdBf68f05E0DD27242d397Bb8b1255b') {
           console.log(222, address, rewards, user)
         }
-        if (Object.keys(user.rewards.items).length > 0) {
+        if (Object.keys(user.lifetimeRewards.items).length > 0) {
           console.log(address)
         }
 
