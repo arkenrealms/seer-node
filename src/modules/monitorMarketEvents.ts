@@ -8,7 +8,7 @@ export async function monitorMarketEvents(app) {
   // event Recover(address indexed user, address indexed seller, uint256 tokenId);
 
   try {
-    app.contracts.arcaneTrader.on('List', async () => {
+    app.contracts.trader.on('List', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
@@ -16,7 +16,7 @@ export async function monitorMarketEvents(app) {
       }
     })
 
-    app.contracts.arcaneTrader.on('Update', async () => {
+    app.contracts.trader.on('Update', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
@@ -24,7 +24,7 @@ export async function monitorMarketEvents(app) {
       }
     })
 
-    app.contracts.arcaneTrader.on('Delist', async () => {
+    app.contracts.trader.on('Delist', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
@@ -32,7 +32,7 @@ export async function monitorMarketEvents(app) {
       }
     })
 
-    app.contracts.arcaneTrader.on('Buy', async () => {
+    app.contracts.trader.on('Buy', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {

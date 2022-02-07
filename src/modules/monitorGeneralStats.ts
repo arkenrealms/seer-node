@@ -1,4 +1,4 @@
-import ethers from 'ethers'
+import * as ethers from 'ethers'
 import BigNumber from 'bignumber.js'
 import { average, toShort } from '../util'
 import { log } from '../util'
@@ -10,29 +10,29 @@ export async function monitorGeneralStats(app) {
     log('[Stats] Updating')
 
     try {
-      app.db.stats.totalCharacters = (await app.contracts.arcaneCharacters.totalSupply()).toNumber()
+      app.db.stats.totalCharacters = (await app.contracts.characters.totalSupply()).toNumber()
 
       if (!app.db.stats.characters) app.db.stats.characters = {}
     
       for (let i = 1; i <= 7; i++) {
         if (!app.db.stats.characters[i]) app.db.stats.characters[i] = {}
 
-        app.db.stats.characters[i].total = (await app.contracts.arcaneCharacters.characterCount(i)).toNumber()
+        app.db.stats.characters[i].total = (await app.contracts.characters.characterCount(i)).toNumber()
       }
     } catch (e) {
       console.error(e)
     }
 
     try {
-      app.db.stats.totalItems = (await app.contracts.arcaneItems.totalSupply()).toNumber()
+      app.db.stats.totalItems = (await app.contracts.items.totalSupply()).toNumber()
 
       if (!app.db.stats.items) app.db.stats.items = {}
     
       for (let i = 1; i <= 30; i++) {
         if (!app.db.stats.items[i]) app.db.stats.items[i] = {}
 
-        app.db.stats.items[i].total = (await app.contracts.arcaneItems.itemCount(i)).toNumber()
-        app.db.stats.items[i].burned = (await app.contracts.arcaneItems.itemBurnCount(i)).toNumber()
+        app.db.stats.items[i].total = (await app.contracts.items.itemCount(i)).toNumber()
+        app.db.stats.items[i].burned = (await app.contracts.items.itemBurnCount(i)).toNumber()
       }
     } catch (e) {
       console.error(e)
@@ -322,8 +322,8 @@ export async function monitorGeneralStats(app) {
       {
         log('Updating Profile config')
 
-        app.config.characterMintCost = toShort((await app.contracts.arcaneCharacterFactory.tokenPrice()).toString())
-        app.config.profileRegisterCost = toShort((await app.contracts.arcaneProfile.numberRuneToRegister()).toString())
+        app.config.characterMintCost = toShort((await app.contracts.characterFactory.tokenPrice()).toString())
+        app.config.profileRegisterCost = toShort((await app.contracts.profile.numberRuneToRegister()).toString())
       }
 
     }
@@ -347,7 +347,7 @@ export async function monitorGeneralStats(app) {
           if (farm.isTokenOnly) {
             const symbol = tokenSymbol.toLowerCase()
 
-            const tokenContract = new ethers.Contract(getAddress(app.db.contracts[symbol]), app.contractMetadata.BEP20.abi, app.signers.read)
+            const tokenContract = new ethers.Contract(getAddress(app.contractInfo[symbol]), app.contractMetadata.BEP20.abi, app.signers.read)
 
             const raidHoldings = toShort((await tokenContract.balanceOf(getAddress(app.contractInfo.raid))).toString())
             const botHoldings = toShort((await tokenContract.balanceOf(getAddress(app.contractInfo.botAddress))).toString())

@@ -1,4 +1,4 @@
-import ethers from 'ethers'
+import * as ethers from 'ethers'
 import { log, logError } from '../util'
 import { iterateBlocks, getAddress } from '../util/web3'
 import { decodeItem } from '../util/decodeItem'
@@ -11,7 +11,7 @@ export async function getAllItemEvents(app) {
   app.config.items.updating = true
 
   try {
-    const contract = new ethers.Contract(getAddress(app.contracts.items), app.contractMetadata.ArcaneItems.abi, app.signers.read)
+    const contract = new ethers.Contract(getAddress(app.contractInfo.items), app.contractMetadata.ArcaneItems.abi, app.signers.read)
     const iface = new ethers.utils.Interface(app.contractMetadata.ArcaneItems.abi)
 
     // @ts-ignore
@@ -84,7 +84,7 @@ export async function getAllItemEvents(app) {
     ]
     
     for (const event of events) {
-      await iterateBlocks(app.ethersProvider.getLogs, `Items Events: ${event}`, getAddress(app.contracts.items), app.config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber2) {
+      await iterateBlocks(app, `Items Events: ${event}`, getAddress(app.contractInfo.items), app.config.items.lastBlock[event], blockNumber, contract.filters[event](), processLog, async function (blockNumber2) {
         app.config.items.lastBlock[event] = blockNumber2
         // await saveConfig()
       })

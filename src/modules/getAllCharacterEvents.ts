@@ -1,6 +1,6 @@
 import path from 'path'
 import jetpack from 'fs-jetpack'
-import ethers from 'ethers'
+import * as ethers from 'ethers'
 import { getHighestId, log, logError } from '../util'
 import { iterateBlocks, getAddress } from '../util/web3'
 import { decodeItem } from '../util/decodeItem'
@@ -38,7 +38,7 @@ export async function getAllCharacterEvents(app) {
           transferredAt: new Date().getTime(),
           blockNumber: log.blockNumber,
           tx: log.transactionHash,
-          id: await app.contracts.arcaneCharacters.getCharacterId(tokenId.toString())
+          id: await app.contracts.characters.getCharacterId(tokenId.toString())
         }
 
         await app.db.saveUserCharacter(user, characterData)
@@ -75,7 +75,7 @@ export async function getAllCharacterEvents(app) {
     ]
     
     for (const event of events) {
-      await iterateBlocks(app.ethersProvider.getLogs, `Characters Events: ${event}`, getAddress(app.contracts.characters), app.config.characters.lastBlock[event], blockNumber, app.contractMetadata.arcaneCharacters.filters[event](), processLog, async function (blockNumber2) {
+      await iterateBlocks(app, `Characters Events: ${event}`, getAddress(app.contractInfo.characters), app.config.characters.lastBlock[event], blockNumber, app.contracts.characters.filters[event](), processLog, async function (blockNumber2) {
         app.config.characters.lastBlock[event] = blockNumber2
         // await saveConfig()
       })

@@ -27,12 +27,12 @@ function _initProvider(app) {
     app.signers.write = app.ethersProvider.getSigner()
 
     app.contracts = {}
-    app.contracts.arcaneItems = new ethers.Contract(getAddress(app.contractInfo.items), app.contractMetadata.ArcaneItems.abi, app.signers.read)
-    app.contracts.arcaneCharacters = new ethers.Contract(getAddress(app.contractInfo.characters), app.contractMetadata.ArcaneCharacters.abi, app.signers.read)
-    app.contracts.arcaneBarracks = new ethers.Contract(getAddress(app.contractInfo.barracks), app.contractMetadata.ArcaneBarracksFacetV1.abi, app.signers.read)
-    app.contracts.arcaneTrader = new ethers.Contract(getAddress(app.contractInfo.trader), app.contractMetadata.ArcaneTraderV1.abi, app.signers.read)
-    app.contracts.arcaneCharacterFactory = new ethers.Contract(getAddress(app.contractInfo.characterFactory), app.contractMetadata.ArcaneCharacterFactoryV3.abi, app.signers.read)
-    app.contracts.arcaneProfile = new ethers.Contract(getAddress(app.contractInfo.profile), app.contractMetadata.ArcaneProfile.abi, app.signers.read)
+    app.contracts.items = new ethers.Contract(getAddress(app.contractInfo.items), app.contractMetadata.ArcaneItems.abi, app.signers.read)
+    app.contracts.characters = new ethers.Contract(getAddress(app.contractInfo.characters), app.contractMetadata.ArcaneCharacters.abi, app.signers.read)
+    app.contracts.barracks = new ethers.Contract(getAddress(app.contractInfo.barracks), app.contractMetadata.ArcaneBarracksFacetV1.abi, app.signers.read)
+    app.contracts.trader = new ethers.Contract(getAddress(app.contractInfo.trader), app.contractMetadata.ArcaneTraderV1.abi, app.signers.read)
+    app.contracts.characterFactory = new ethers.Contract(getAddress(app.contractInfo.characterFactory), app.contractMetadata.ArcaneCharacterFactoryV3.abi, app.signers.read)
+    app.contracts.profile = new ethers.Contract(getAddress(app.contractInfo.profile), app.contractMetadata.ArcaneProfile.abi, app.signers.read)
     app.contracts.busd = new ethers.Contract(getAddress(app.contractInfo.busd), app.contractMetadata.BEP20Contract.abi, app.signers.read)
     app.contracts.wbnb = new ethers.Contract(getAddress(app.contractInfo.wbnb), app.contractMetadata.BEP20Contract.abi, app.signers.read)
   } catch(e) {

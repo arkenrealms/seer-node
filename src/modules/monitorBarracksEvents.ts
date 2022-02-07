@@ -1,29 +1,29 @@
 export async function monitorBarracksEvents(app) {
-  app.contracts.arcaneBarracks.on('Equip', async () => {
+  app.contracts.barracks.on('Equip', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
 
-  app.contracts.arcaneBarracks.on('Unequip', async () => {
+  app.contracts.barracks.on('Unequip', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
 
-  app.contracts.arcaneBarracks.on('ActionBurn', async () => {
+  app.contracts.barracks.on('ActionBurn', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
 
-  app.contracts.arcaneBarracks.on('ActionBonus', async () => {
+  app.contracts.barracks.on('ActionBonus', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
 
-  app.contracts.arcaneBarracks.on('ActionHiddenPool', async () => {
+  app.contracts.barracks.on('ActionHiddenPool', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
 
-  app.contracts.arcaneBarracks.on('ActionFee', async () => {
+  app.contracts.barracks.on('ActionFee', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
 
-  app.contracts.arcaneBarracks.on('ActionSwap', async () => {
+  app.contracts.barracks.on('ActionSwap', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
 }

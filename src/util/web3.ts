@@ -1,8 +1,7 @@
-import ethers from 'ethers'
 import Web3 from 'web3'
 import HDWalletProvider from "@truffle/hdwallet-provider"
 import secrets from '../../secrets.json'
-import { log } from '.'
+import { log, logError } from '.'
 
 // const fetchPrice = async (id, vs = 'usd') => {
 //   const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=${vs}`)
@@ -24,7 +23,7 @@ export const getRandomProvider = () => {
 // const blocknativeApiKey = '58a45321-bf96-485c-ab9b-e0610e181d26'
 
 
-export async function iterateBlocks(getLogs, name, address, fromBlock, toBlock, event, processLog, updateConfig) {
+export async function iterateBlocks(app, name, address, fromBlock, toBlock, event, processLog, updateConfig) {
   if (!toBlock) return
   if (fromBlock === toBlock) return
 
@@ -44,9 +43,9 @@ export async function iterateBlocks(getLogs, name, address, fromBlock, toBlock, 
       topics: event.topics
     }
 
-    console.log(name, 'Iterating block', fromBlock, 'to', toBlock2, 'eventually', toBlock, 'for', event.topics)
+    log(name, 'Iterating block', fromBlock, 'to', toBlock2, 'eventually', toBlock, 'for', event.topics)
 
-    const logs = await getLogs(filter)
+    const logs = await app.ethersProvider.getLogs(filter)
 
     for(let i = 0; i < logs.length; i++) {
       await processLog(logs[i], false)
@@ -58,10 +57,10 @@ export async function iterateBlocks(getLogs, name, address, fromBlock, toBlock, 
       await updateConfig(toBlock2)
     }
 
-    await iterateBlocks(getLogs, name, address, toBlock2, toBlock, event, processLog, updateConfig)
+    await iterateBlocks(app, name, address, toBlock2, toBlock, event, processLog, updateConfig)
   } catch(e) {
-    console.log('error', e)
-    console.log(name, address, fromBlock, toBlock, event)
+    logError('Iterate Blocks Error', e)
+    logError(name, address, fromBlock, toBlock, event)
     // process.exit(1)
   }
 }
@@ -82,7 +81,7 @@ export function verifySignature(signature) {
   try {
     return web3.eth.accounts.recover(signature.data, signature.hash).toLowerCase() === signature.address.toLowerCase()
   } catch(e) {
-    log(e)
+    logError(e)
     return false
   }
 }

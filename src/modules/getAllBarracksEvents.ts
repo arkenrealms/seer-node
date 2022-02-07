@@ -1,4 +1,4 @@
-import ethers from 'ethers'
+import * as ethers from 'ethers'
 import { log, logError } from '../util'
 import { iterateBlocks, getAddress } from '../util/web3'
 import { decodeItem } from '../util/decodeItem'
@@ -101,7 +101,7 @@ export async function getAllBarracksEvents(app) {
     ]
     
     for (const event of events) {
-      await iterateBlocks(app.ethersProvider.getLogs, `Barracks Events: ${event}`, getAddress(app.contracts.barracks), app.config.barracks.lastBlock[event], blockNumber, app.contractMetadata.arcaneBarracks.filters[event](), processLog, async function (blockNumber2) {
+      await iterateBlocks(app, `Barracks Events: ${event}`, getAddress(app.contractInfo.barracks), app.config.barracks.lastBlock[event], blockNumber, app.contracts.barracks.filters[event](), processLog, async function (blockNumber2) {
         app.config.barracks.lastBlock[event] = blockNumber2
         // await app.db.saveConfig()
       })

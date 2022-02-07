@@ -75,66 +75,68 @@ export async function connectRealm(app, server) {
   }
 
   client.socket.on('connect', async () => {
-    log('Connected: ' + server.key)
+    try {
+      log('Connected: ' + server.key)
 
-    const res = await rsCall(client, 'AuthRequest', 'myverysexykey') as any
+      const res = await rsCall(client, 'AuthRequest', 'myverysexykey') as any
 
-    if (res.status === 1) {
-      client.authed = true
+      if (res.status === 1) {
+        client.authed = true
 
+        if (!app.db.evolutionHistorical.playerCount) app.db.evolutionHistorical.playerCount = []
 
-      if (!app.db.evolutionHistorical.playerCount) app.db.evolutionHistorical.playerCount = []
+        let playerCount = 0
 
-      let playerCount = 0
+        for (const server of app.db.evolutionServers) {
+          try {
+            const rand = Math.floor(Math.random() * Math.floor(999999))
+            const response = await rsCall(client, 'InfoRequest') as any
 
-      for (const server of app.db.evolutionServers) {
-        try {
-          const rand = Math.floor(Math.random() * Math.floor(999999))
-          const response = await rsCall(client, 'InfoRequest') as any
+            const { data } = response
 
-          const { data } = response
-          
-          server.playerCount = data.playerTotal
-          server.speculatorCount = data.speculatorTotal
-          server.version = data.version
-          server.rewardItemAmount = data.rewardItemAmount
-          server.rewardWinnerAmount = data.rewardWinnerAmount
-          server.gameMode = data.gameMode
-          server.roundId = data.round.id
-          server.roundStartedAt = data.round.startedAt
-          server.timeLeft = ~~(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
-          server.timeLeftText = fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
-          // server.totalLegitPlayers = data.totalLegitPlayers
+            server.playerCount = data.playerTotal
+            server.speculatorCount = data.speculatorTotal
+            server.version = data.version
+            server.rewardItemAmount = data.rewardItemAmount
+            server.rewardWinnerAmount = data.rewardWinnerAmount
+            server.gameMode = data.gameMode
+            server.roundId = data.round.id
+            server.roundStartedAt = data.round.startedAt
+            server.timeLeft = ~~(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
+            server.timeLeftText = fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
+            // server.totalLegitPlayers = data.totalLegitPlayers
 
-          server.status = "online"
-        } catch(e) {
-          if ((e + '').toString().indexOf('invalid json response body') === -1) log(e)
+            server.status = "online"
+          } catch(e) {
+            if ((e + '').toString().indexOf('invalid json response body') === -1) log(e)
 
-          server.status = "offline"
-          server.playerCount = 0
-          server.speculatorCount = 0
-          server.rewardItemAmount = 0
-          server.rewardWinnerAmount = 0
+            server.status = "offline"
+            server.playerCount = 0
+            server.speculatorCount = 0
+            server.rewardItemAmount = 0
+            server.rewardWinnerAmount = 0
+          }
+
+          const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
+
+          if (!hist.playerCount) hist.playerCount = []
+
+          const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
+          const newTime = (new Date()).getTime()
+          const diff = newTime - oldTime
+          if (diff / (1000 * 60 * 60 * 1) > 1) {
+            hist.playerCount.push([newTime, server.playerCount])
+          }
+
+          jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
+
+          playerCount += server.playerCount
         }
 
-        const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
-
-        if (!hist.playerCount) hist.playerCount = []
-
-        const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
-        const newTime = (new Date()).getTime()
-        const diff = newTime - oldTime
-        if (diff / (1000 * 60 * 60 * 1) > 1) {
-          hist.playerCount.push([newTime, server.playerCount])
-        }
-
-        jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
-
-        playerCount += server.playerCount
+        jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
       }
-
-      jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
-
+    } catch(e) {
+      logError(e)
     }
   })
 

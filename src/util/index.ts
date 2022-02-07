@@ -1,6 +1,6 @@
 import { exec } from 'child_process'
 import jetpack from 'fs-jetpack'
-import ethers from 'ethers'
+import * as ethers from 'ethers'
 import util from 'util'
 
 const path = require('path')

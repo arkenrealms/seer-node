@@ -1,9 +1,8 @@
-
-import ethers from 'ethers'
+import * as ethers from 'ethers'
 import beautify from 'json-beautify'
 import jetpack from 'fs-jetpack'
 import path from 'path'
-import { removeDupes } from '../util'
+import { log, removeDupes } from '../util'
 import { decodeItem } from '../util/decodeItem'
 import { achievementData } from '../data/achievements'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '../data/items'
@@ -248,8 +247,8 @@ export function initDb(app) {
 
     if (!app.db.stats.items[item.id]) app.db.stats.items[item.id] = {}
 
-    app.db.stats.items[item.id].total = (await app.db.contracts.arcaneItems.itemCount(item.id)).toNumber()
-    app.db.stats.items[item.id].burned = 0 //(await arcaneItems.itemBurnCount(item.id)).toNumber()
+    app.db.stats.items[item.id].total = (await app.contracts.items.itemCount(item.id)).toNumber()
+    app.db.stats.items[item.id].burned = 0 //(await items.itemBurnCount(item.id)).toNumber()
     
     await app.db.saveItem(item)
   }
@@ -467,7 +466,7 @@ export function initDb(app) {
   }
 
   app.db.loadGuild = (id) => {
-    console.log('Loading guild', id)
+    log('Loading guild', id)
     return {
       id,
       memberCount: 0,
@@ -487,7 +486,7 @@ export function initDb(app) {
   }
 
   app.db.saveGuild = async (guild) => {
-    console.log('Saving guild', guild.name)
+    log('Saving guild', guild.name)
     app.db.updateAchievementsByGuild(guild)
 
     jetpack.write(path.resolve(`./db/guilds/${guild.id}/overview.json`), beautify({
@@ -631,7 +630,7 @@ export function initDb(app) {
   }
 
   app.db.saveUser = async (user) => {
-    // console.log('Save user', user.address)
+    // log('Save user', user.address)
 
     // await app.db.updateGuildByUser(user)
     await app.db.updatePointsByUser(user)

@@ -1,5 +1,5 @@
 import path from 'path'
-import ethers from 'ethers'
+import * as ethers from 'ethers'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
 import { achievementData } from '../data/achievements'

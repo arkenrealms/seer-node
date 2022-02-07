@@ -33,11 +33,11 @@ export async function monitorGuildMemberDetails(app) {
         }
       }
 
-      const hasRegistered = (await app.contracts.arcaneProfile.hasRegistered(user.address))
+      const hasRegistered = (await app.contracts.profile.hasRegistered(user.address))
 
       if (!hasRegistered) continue
 
-      const profileResponse = await app.contracts.arcaneProfile.getUserProfile(user.address)
+      const profileResponse = await app.contracts.profile.getUserProfile(user.address)
       const { userId, teamId, tokenId, nftAddress, isActive } = transformProfileResponse(profileResponse)
 
       if (teamId !== guild.id) continue
@@ -51,7 +51,7 @@ export async function monitorGuildMemberDetails(app) {
         points: user.points,
         achievementCount: user.achievements.length,
         isActive: user.isGuildMembershipActive,
-        characterId: await app.contracts.arcaneCharacters.getCharacterId(tokenId)
+        characterId: await app.contracts.characters.getCharacterId(tokenId)
       })
 
       log(`Sync guild ${guild.id} member ${guild.memberDetails.length} / ${guild.memberCount}`)
