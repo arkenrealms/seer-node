@@ -4,11 +4,14 @@ import ethers from 'ethers'
 import util from 'util'
 
 const path = require('path')
-console.log(process.env.HOME)
+const writeLogs = false
+
 export const isDebug = process.env.HOME === '/Users/dev' || process.env.HOME === '/home/dev' || process.env.HOME === '/root'
 
 export function logError(...msgs) {
   console.log("[DB]", ...msgs)
+
+  if (!writeLogs) return
 
   const errorLog = jetpack.read(path.resolve('./public/data/errors.json'), 'json') || []
 
@@ -20,14 +23,16 @@ export function logError(...msgs) {
 }
 
 export function log(...msgs) {
+  if (isDebug) {
+    console.log('[DB]', ...msgs)
+  }
+
+  if (!writeLogs) return
+
   const logData = jetpack.read(path.resolve('../public/data/log.json'), 'json') || []
   
   for (const msg of msgs) {
     logData.push(JSON.stringify(msg))
-  }
-
-  if (isDebug) {
-    console.log('[DB]', ...msgs)
   }
 
   jetpack.write(path.resolve('./public/data/log.json'), JSON.stringify(logData, null, 2))
