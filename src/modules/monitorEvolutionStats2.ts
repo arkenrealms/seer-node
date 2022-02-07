@@ -39,7 +39,7 @@ export async function monitorEvolutionStats2(app) {
         } catch(e) {
           if ((e + '').toString().indexOf('invalid json response body') === -1) log(e)
 
-          server.status = "offline"
+          // server.status = "offline"
           server.playerCount = 0
           server.speculatorCount = 0
           server.rewardItemAmount = 0
