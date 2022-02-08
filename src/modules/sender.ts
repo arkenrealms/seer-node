@@ -18,7 +18,7 @@ export async function getAllSenderEvents(app) {
     }
   
     const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`https://coordinator.rune.game/data/claimRequests.json`) // ?${rand}
+    const response = await fetch(`http://35.245.242.215/data/claimRequests.json`) // ?${rand}
     const claimRequests = await response.json()
   
     const iface = new ethers.utils.Interface(app.contractMetadata.RuneSenderV1.abi)
@@ -79,7 +79,7 @@ export async function getAllSenderEvents(app) {
           }),
         }
     
-        const finalizeRes = await (await fetch(`https://coordinator.rune.game/claim/${e.args.requestId}/finalize`, requestOptions)).json() // ?${rand}
+        const finalizeRes = await (await fetch(`http://35.245.242.215/claim/${e.args.requestId}/finalize`, requestOptions)).json() // ?${rand}
 
         if (finalizeRes.status !== 1) {
           await app.db.saveUser(user)
