@@ -67,6 +67,10 @@ export async function getAllSenderEvents(app) {
               })
 
               user.rewards.runes[rune.key] -= rune.value
+
+              if (user.rewards.runes[rune.key] < 0) {
+                user.rewards.runes[rune.key] = 0
+              }
             }
           }
         }
