@@ -9,11 +9,5 @@ export function initConfig(app) {
   app.config.items.updating = false
   app.config.characters.updating = false
   app.config.test.updating = false
-
-  if (!app.config.sender) {
-    app.config.sender = {
-      updating: false,
-      lastBlock: {}
-    }
-  }
+  app.config.sender.updating = false
 }
