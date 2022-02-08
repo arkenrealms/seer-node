@@ -117,7 +117,7 @@ export async function getAllSenderEvents(app) {
   // await saveItemsEvents()
   // await saveConfig()
 
-  setTimeout(() => getAllSenderEvents(app), 5 * 60 * 1000)
+  setTimeout(() => getAllSenderEvents(app), 1 * 60 * 1000)
 }
 
 export async function monitorSenderEvents(app) {
