@@ -450,4 +450,12 @@ export default {
     [MAINNET]: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
     [TESTNET]: '',
   },
+  sender: {
+    [MAINNET]: '0xEC8e4F50A5EDc7aD5e567E747F2c8056F1A0723b',
+    [TESTNET]: '0xD3108E16aA0316DA66970a844f3eD804f75f1353',
+  },
+  cube: {
+    [MAINNET]: '0x623703ABa694eC31Fc53CbC83A840e6cB4F97488',
+    [TESTNET]: '',
+  },
 }

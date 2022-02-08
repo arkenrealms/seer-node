@@ -323,6 +323,8 @@ export async function convertRewards(app) {
 
         app.db.saveUser(user)
       }
+
+      console.log('Done')
     } catch(e) {
       log(e)
     }

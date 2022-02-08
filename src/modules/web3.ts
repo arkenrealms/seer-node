@@ -10,6 +10,7 @@ import ArcaneCharacterFactoryV3 from '../../contracts/ArcaneCharacterFactoryV3.j
 import ArcaneBarracksFacetV1 from '../../contracts/ArcaneBarracksFacetV1.json'
 import ArcaneProfile from '../../contracts/ArcaneProfile.json'
 import ArcaneItems from '../../contracts/ArcaneItems.json'
+import RuneSenderV1 from '../../contracts/RuneSenderV1.json'
 import BEP20Contract from '../../contracts/BEP20.json'
 
 function _initProvider(app) {
@@ -33,6 +34,7 @@ function _initProvider(app) {
     app.contracts.trader = new ethers.Contract(getAddress(app.contractInfo.trader), app.contractMetadata.ArcaneTraderV1.abi, app.signers.read)
     app.contracts.characterFactory = new ethers.Contract(getAddress(app.contractInfo.characterFactory), app.contractMetadata.ArcaneCharacterFactoryV3.abi, app.signers.read)
     app.contracts.profile = new ethers.Contract(getAddress(app.contractInfo.profile), app.contractMetadata.ArcaneProfile.abi, app.signers.read)
+    app.contracts.sender = new ethers.Contract(getAddress(app.contractInfo.sender), app.contractMetadata.RuneSenderV1.abi, app.signers.read)
     app.contracts.busd = new ethers.Contract(getAddress(app.contractInfo.busd), app.contractMetadata.BEP20Contract.abi, app.signers.read)
     app.contracts.wbnb = new ethers.Contract(getAddress(app.contractInfo.wbnb), app.contractMetadata.BEP20Contract.abi, app.signers.read)
   } catch(e) {
@@ -68,6 +70,7 @@ export function initWeb3(app) {
   app.contractMetadata.ArcaneBarracksFacetV1 = ArcaneBarracksFacetV1
   app.contractMetadata.ArcaneProfile = ArcaneProfile
   app.contractMetadata.ArcaneItems = ArcaneItems
+  app.contractMetadata.RuneSenderV1 = RuneSenderV1
   app.contractMetadata.BEP20Contract = BEP20Contract
 
   app.signers = {

@@ -49,9 +49,9 @@ function initEventHandler(app) {
         })
       })
 
-      socket.on('RC_ReduceRewardsRequest', async function(req) {
+      socket.on('RC_SaveUserClaimRequest', async function(req) {
         if (!socket.authed) {
-          emitDirect(socket, 'RC_ReduceRewardsResponse', {
+          emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
             data: {
               status: 0
@@ -61,15 +61,16 @@ function initEventHandler(app) {
         }
 
         try {
-          console.log(req)
           const user = app.db.loadUser(req.data.address)
 
           if (!user.rewardHistory) user.rewardHistory = []
 
           for (const rune of req.data.runes) {
             user.rewardHistory.push({
+              id: req.data.id,
               rune: rune.key,
-              value: rune.value
+              value: rune.value,
+              timestamp: new Date().getTime()
             })
 
             user.rewards.runes[rune.key] -= rune.value
@@ -77,15 +78,34 @@ function initEventHandler(app) {
 
           for (const item of req.data.items) {
             user.rewardHistory.push({
-              item: JSON.parse(JSON.stringify(user.rewards.items[item.key]))
+              id: req.data.id,
+              item: JSON.parse(JSON.stringify(user.rewards.items[item.key])),
+              quantity: item.quantity,
+              timestamp: new Date().getTime()
             })
 
             delete user.rewards.items[item.key]
           }
 
+          if (!user.claimRequests) user.claimRequests = []
+  
+          let claimRequest = user.claimRequests.find(c => c.requestId === req.data.requestId)
+  
+          if (!claimRequest) {
+            claimRequest = {
+              id: req.data.id,
+              requestId: req.data.requestId,
+              timestamp: new Date().getTime()
+            }
+  
+            user.claimRequests.push(claimRequest)
+  
+            claimRequest.status = 'processing'
+          }
+
           await app.db.saveUser(user)
 
-          emitDirect(socket, 'RC_ReduceRewardsResponse', {
+          emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
             data: {
               status: 1
@@ -94,7 +114,7 @@ function initEventHandler(app) {
         } catch (e) {
           logError(e)
 
-          emitDirect(socket, 'RC_ReduceRewardsResponse', {
+          emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
             data: {
               status: 0
