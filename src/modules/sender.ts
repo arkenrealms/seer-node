@@ -8,19 +8,19 @@ export async function getAllSenderEvents(app) {
 
   log('[Sender] Updating')
 
-  const contractAddressToKey = {}
-
-  for (const contractKey of Object.keys(app.contractInfo)) {
-    contractAddressToKey[app.contractInfo[contractKey][56]] = contractKey
-  }
-
-  const rand = Math.floor(Math.random() * Math.floor(999999))
-  const response = await fetch(`https://coordinator.rune.game/data/claimRequests.json`) // ?${rand}
-  const claimRequests = await response.json()
-
   app.config.sender.updating = true
 
   try {
+    const contractAddressToKey = {}
+  
+    for (const contractKey of Object.keys(app.contractInfo)) {
+      contractAddressToKey[app.contractInfo[contractKey][56]] = contractKey
+    }
+  
+    const rand = Math.floor(Math.random() * Math.floor(999999))
+    const response = await fetch(`https://coordinator.rune.game/data/claimRequests.json`) // ?${rand}
+    const claimRequests = await response.json()
+  
     const iface = new ethers.utils.Interface(app.contractMetadata.RuneSenderV1.abi)
 
     // @ts-ignore

@@ -122,18 +122,6 @@ async function init() {
         async: false,
         timeout: 5 * 60 * 1000
       },
-      // {
-      //   name: 'monitorEvolutionStats',
-      //   instance: monitorEvolutionStats,
-      //   async: true,
-      //   timeout: 0
-      // },
-      // {
-      //   name: 'monitorEvolutionStats2',
-      //   instance: monitorEvolutionStats2,
-      //   async: false,
-      //   timeout: 1 * 10 * 1000
-      // },
       {
         name: 'getAllMarketEvents',
         instance: getAllMarketEvents,
