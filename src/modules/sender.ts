@@ -18,7 +18,7 @@ export async function getAllSenderEvents(app) {
     }
   
     const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`http://35.245.242.215/data/claimRequests.json`) // ?${rand}
+    const response = await fetch(`http://35.245.242.215/data/claimRequests.json?${rand}`) // ?${rand}
     const claimRequests = await response.json()
   
     const iface = new ethers.utils.Interface(app.contractMetadata.RuneSenderV1.abi)
@@ -28,7 +28,7 @@ export async function getAllSenderEvents(app) {
       try {
         const e = iface.parseLog(log2)
         
-        // console.log(e.name, e)
+        console.log(e.name, e)
         const user = await app.db.loadUser(e.args.to)
 
         if (!user.claimRequests) user.claimRequests = []
