@@ -8,6 +8,8 @@ const path = require('path')
 function initEventHandler(app) {
   const { emitDirect, emitAll, io } = app.cubeBridge
 
+  log('Cube event handler')
+  
   io.on('connection', function(socket) {
     try {
       // Use by GS to tell DB it's connected

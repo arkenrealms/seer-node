@@ -14,8 +14,8 @@ export async function getAllBarracksEvents(app) {
     const iface = new ethers.utils.Interface(app.contractMetadata.ArcaneBarracksFacetV1.abi)
 
     // @ts-ignore
-    async function processLog(log, updateConfig = true) {
-      const e = iface.parseLog(log)
+    async function processLog(logInfo, updateConfig = true) {
+      const e = iface.parseLog(logInfo)
       
       // log(e.name, e)
 
@@ -71,19 +71,19 @@ export async function getAllBarracksEvents(app) {
         
       }
 
-      const e2 = app.db.barracksEvents.find(t => t.transactionHash === log.transactionHash)
+      const e2 = app.db.barracksEvents.find(t => t.transactionHash === logInfo.transactionHash)
 
       if (!e2) {
         app.db.barracksEvents.push({
           // id: ++config.barracks.counter,
-          ...log,
+          ...logInfo,
           ...e
         })
       }
     
 
-      // if (updateConfig && log.blockNumber > config.barracks.lastBlock) {
-      //   config.barracks.lastBlock = log.blockNumber
+      // if (updateConfig && logInfo.blockNumber > config.barracks.lastBlock) {
+      //   config.barracks.lastBlock = logInfo.blockNumber
       //   app.db.saveConfig()
       // }
     }

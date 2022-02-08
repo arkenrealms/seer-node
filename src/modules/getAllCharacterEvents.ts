@@ -16,8 +16,8 @@ export async function getAllCharacterEvents(app) {
     const iface = new ethers.utils.Interface(app.contractMetadata.ArcaneCharacters.abi)
 
     // @ts-ignore
-    async function processLog(log, updateConfig = true) {
-      const e = iface.parseLog(log)
+    async function processLog(logInfo, updateConfig = true) {
+      const e = iface.parseLog(logInfo)
       
       // log(e.name, e)
 
@@ -36,8 +36,8 @@ export async function getAllCharacterEvents(app) {
           status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
           tokenId: tokenId.toString(),
           transferredAt: new Date().getTime(),
-          blockNumber: log.blockNumber,
-          tx: log.transactionHash,
+          blockNumber: logInfo.blockNumber,
+          tx: logInfo.transactionHash,
           id: await app.contracts.characters.getCharacterId(tokenId.toString())
         }
 
@@ -51,19 +51,19 @@ export async function getAllCharacterEvents(app) {
         await app.db.saveCharacterOwner(app.db.loadCharacter(characterData.id), characterData)
       }
 
-      const e2 = app.db.charactersEvents.find(t => t.transactionHash === log.transactionHash)
+      const e2 = app.db.charactersEvents.find(t => t.transactionHash === logInfo.transactionHash)
 
       if (!e2) {
         app.db.charactersEvents.push({
           id: getHighestId(app.db.charactersEvents) + 1,
-          ...log,
+          ...logInfo,
           ...e
         })
       }
     
 
       // if (updateConfig) {
-      //   config.characters.lastBlock = log.blockNumber
+      //   config.characters.lastBlock = logInfo.blockNumber
       //   saveConfig()
       // }
     }

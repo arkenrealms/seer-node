@@ -15,9 +15,9 @@ export async function getAllItemEvents(app) {
     const iface = new ethers.utils.Interface(app.contractMetadata.ArcaneItems.abi)
 
     // @ts-ignore
-    async function processLog(log2, updateConfig = true) {
+    async function processLog(logInfo, updateConfig = true) {
       try {
-        const e = iface.parseLog(log2)
+        const e = iface.parseLog(logInfo)
         
         // console.log(e.name, e)
 
@@ -55,12 +55,12 @@ export async function getAllItemEvents(app) {
           await app.db.saveItemOwner(app.db.loadItem(itemData.id), itemData)
         }
 
-        const e2 = app.db.itemsEvents.find(t => t.transactionHash === log2.transactionHash)
+        const e2 = app.db.itemsEvents.find(t => t.transactionHash === logInfo.transactionHash)
 
         if (!e2) {
           app.db.itemsEvents.push({
             // id: ++config.items.counter,
-            ...log2,
+            ...logInfo,
             ...e
           })
         }
@@ -68,12 +68,12 @@ export async function getAllItemEvents(app) {
         // await saveConfig()
 
         // if (updateConfig) {
-        //   config.items.lastBlock = log2.blockNumber
+        //   config.items.lastBlock = logInfo.blockNumber
         //   saveConfig()
         // }
       } catch (ex) {
         logError(ex)
-        logError("Error parsing log: ", log2)
+        logError("Error parsing log: ", logInfo)
       }
     }
 
