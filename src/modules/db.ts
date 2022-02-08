@@ -52,52 +52,64 @@ export function initDb(app) {
   }
 
   app.db.saveConfig = async () => {
+    log('Saving: config')
     app.config.updatedDate = (new Date()).toString()
     app.config.updatedTimestamp = new Date().getTime()
     jetpack.write(path.resolve('./db/config.json'), beautify(app.config, null, 2, 100), { atomic: true })
   }
 
   app.db.saveTrades = async () => {
+    log('Saving: trades')
     jetpack.write(path.resolve('./db/trades.json'), beautify(removeDupes(app.db.trades), null, 2, 100), { atomic: true })
   }
 
   app.db.saveTradesEvents = async () => {
+    log('Saving: tradesEvents')
     jetpack.write(path.resolve('./db/trades/events.json'), beautify(app.db.tradesEvents, null, 2, 100), { atomic: true })
   }
 
   app.db.saveBarracksEvents = async () => {
+    log('Saving: barracksEvents')
     jetpack.write(path.resolve('./db/barracks/events.json'), beautify(app.db.barracksEvents, null, 2, 100), { atomic: true })
   }
 
   app.db.saveCharactersEvents = async () => {
+    log('Saving: charactersEvent')
     jetpack.write(path.resolve('./db/characters/events.json'), beautify(app.db.charactersEvents, null, 2, 100), { atomic: true })
   }
 
   app.db.saveItemsEvents = async () => {
+    log('Saving: itemsEvents')
     jetpack.write(path.resolve('./db/items/events.json'), beautify(app.db.itemsEvents, null, 2, 100), { atomic: true })
   }
 
   app.db.saveFarms = async () => {
+    log('Saving: farms')
     jetpack.write(path.resolve('./db/farms.json'), beautify(app.db.farms, null, 2, 100), { atomic: true })
   }
 
   app.db.saveGuilds = async () => {
+    log('Saving: guilds')
     jetpack.write(path.resolve('./db/guilds.json'), beautify(app.db.guilds, null, 2, 100), { atomic: true })
   }
 
   app.db.saveRunes = async () => {
+    log('Saving: runes')
     jetpack.write(path.resolve('./db/runes.json'), beautify(app.db.runes, null, 2, 100), { atomic: true })
   }
 
   app.db.saveStats = async () => {
+    log('Saving: stats')
     jetpack.write(path.resolve('./db/stats.json'), beautify(app.db.stats, null, 2, 100), { atomic: true })
   }
 
   app.db.saveHistorical = async () => {
+    log('Saving: historical')
     jetpack.write(path.resolve('./db/historical.json'), beautify(app.db.historical, null, 2, 100), { atomic: true })
   }
 
   app.db.saveApp = async () => {
+    log('Saving: app')
     jetpack.write(path.resolve('./db/app.json'), beautify(app, null, 2, 100), { atomic: true })
   }
 

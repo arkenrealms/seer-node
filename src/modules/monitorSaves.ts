@@ -15,7 +15,7 @@ export async function monitorSaves(app) {
     await app.db.saveConfig()
     // await app.db.updateGit()
   } catch(e) {
-    console.log('Git error', e)
+    console.log('Save error', e)
   }
 
   setTimeout(() => monitorSaves(app), 5 * 60 * 1000)
