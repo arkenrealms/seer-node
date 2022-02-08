@@ -15,6 +15,8 @@ export async function getAllSenderEvents(app) {
     contractAddressToKey[app.contractInfo[contractKey][56]] = contractKey
   }
 
+  const newCoordinatorRequests = []
+
   
   // const rand = Math.floor(Math.random() * Math.floor(999999))
   // const response = await fetch(`https://coordinator.rune.game/data/claimRequests.json`) // ?${rand}
@@ -27039,6 +27041,11 @@ export async function getAllSenderEvents(app) {
             user.rewards.runes[rune.key] -= rune.value
             if (e.args.to === '0x4F9f8027C22819a359270391128414AB48D72092') console.log('vvv2', rune.key, rune.value, user.rewards.runes[rune.key])
           }
+
+          newCoordinatorRequests.push({
+            ...coordinatorRequest,
+            status: 'completed'
+          })
         }
 
         const requestOptions = {
@@ -27126,6 +27133,8 @@ export async function getAllSenderEvents(app) {
         // await saveConfig()
       })
     }
+
+    console.log(JSON.stringify(newCoordinatorRequests, null, 2))
 
     log('Finished')
   } catch(e) {
