@@ -289,8 +289,11 @@ export async function convertRewards(app) {
 
         userCache[address.toLowerCase()] = user
 
+        user.rewardHistory = user.rewardHistory.filter(r => !!r.timestamp)
+
         for (const runeKey of Object.keys(user.lifetimeRewards.runes)) {
           const runeAmount = user.lifetimeRewards.runes[runeKey]
+
 
           if (user.address == '0xe2948dA8c5638B75C56ab4198f49C385E5aB34D5') {
             console.log(user)
@@ -299,7 +302,7 @@ export async function convertRewards(app) {
 
           user.rewards.runes[runeKey] = runeAmount - user.rewardHistory.filter(r => r.rune === runeKey).reduce((sum, r) => sum + r.value, 0)
 
-          if (user.rewards.runes[runeKey] < 0) {
+          if (user.rewards.runes[runeKey] < 0.000000001) {
             user.rewards.runes[runeKey] = 0
           }
 
