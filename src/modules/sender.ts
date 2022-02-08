@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import * as ethers from 'ethers'
 import { log, logError } from '../util'
-import { iterateBlocks, getAddress } from '../util/web3'
+import { iterateBlocks, getAddress, getSignedRequest } from '../util/web3'
 import { decodeItem } from '../util/decodeItem'
 
 export async function getAllSenderEvents(app) {
@@ -84,10 +84,24 @@ export async function getAllSenderEvents(app) {
           }
         }
 
-        await app.db.saveUser(user)
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            signature: await getSignedRequest('rune-databaser/sender')
+          }),
+        }
+    
+        const finalizeRes = await (await fetch(`https://coordinator.rune.game/claim/${e.args.requestId}/finalize`, requestOptions)).json() // ?${rand}
+
+        console.log(finalizeRes)
+        // if (finalizeRes.status !== 1) {
+          await app.db.saveUser(user)
+        // }
+
 
         // if (e.name === 'Transfer') {
-          const { from, to: userAddress, tokenIds } = e.args
+          // const { from, to: userAddress, tokenIds } = e.args
 
 
         //   const user = app.db.loadUser(userAddress)

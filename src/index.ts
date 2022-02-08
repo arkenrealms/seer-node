@@ -68,18 +68,18 @@ async function init() {
         async: false,
         timeout: 0
       },
-      {
-        name: 'monitorSenderEvents',
-        instance: monitorSenderEvents,
-        async: false,
-        timeout: 5 * 1000
-      },
       // {
-      //   name: 'convertRewards',
-      //   instance: convertRewards,
-      //   async: true,
-      //   timeout: 0
+      //   name: 'monitorSenderEvents',
+      //   instance: monitorSenderEvents,
+      //   async: false,
+      //   timeout: 5 * 1000
       // },
+      {
+        name: 'convertRewards',
+        instance: convertRewards,
+        async: true,
+        timeout: 0
+      },
       // {
       //   name: 'initCubeBridge',
       //   instance: initCubeBridge,
