@@ -33,7 +33,7 @@ export async function getAllSenderEvents(app) {
 
         if (!user.claimRequests) user.claimRequests = []
 
-        const coordinatorRequest = claimRequests.find(c => c.data?.requestId === e.args.requestId)
+        const coordinatorRequest = claimRequests.find(c => c.data?.requestId === e.args.requestId && c.status == 'completed')
 
         let claimRequest = user.claimRequests.find(c => c.requestId === e.args.requestId)
 
