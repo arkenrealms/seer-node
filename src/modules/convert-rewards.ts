@@ -285,7 +285,7 @@ export async function convertRewards(app) {
 
       for (const address of Object.keys(playerRewards)) {
         const user = userCache[address.toLowerCase()] || app.db.loadUser(address)
-        if (address === '0x865f4a1eDEdBf68f05E0DD27242d397Bb8b1255b') {
+        if (address === '0x124e75Ae14A4311BB434Dec465953e84BbF3aB35') {
           console.log(111, address, user)
         }
         const rewards = playerRewards[address]
@@ -314,7 +314,7 @@ export async function convertRewards(app) {
           }
         }
 
-        if (address === '0x865f4a1eDEdBf68f05E0DD27242d397Bb8b1255b') {
+        if (address === '0x124e75Ae14A4311BB434Dec465953e84BbF3aB35') {
           console.log(222, address, rewards, user)
         }
         if (Object.keys(user.lifetimeRewards.items).length > 0) {
