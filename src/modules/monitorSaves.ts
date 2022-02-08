@@ -11,7 +11,7 @@ export async function monitorSaves(app) {
     await app.db.saveStats()
     await app.db.saveRunes()
     await app.db.saveHistorical()
-    await app.db.saveApp()
+    // await app.db.saveApp()
     await app.db.saveConfig()
     // await app.db.updateGit()
   } catch(e) {
