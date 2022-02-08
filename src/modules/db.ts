@@ -649,7 +649,7 @@ export function initDb(app) {
     // log('Save user', user.address)
 
     // await app.db.updateGuildByUser(user)
-    await app.db.updatePointsByUser(user)
+    // await app.db.updatePointsByUser(user)
 
     jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
       ...user,
