@@ -79,7 +79,7 @@ export async function getAllSenderEvents(app) {
           }),
         }
     
-        const finalizeRes = await (await fetch(`http://35.245.242.215/claim/${e.args.requestId}/finalize`, requestOptions)).json() // ?${rand}
+        const finalizeRes = await (await fetch(`http://35.245.242.215/claim/finalize/${e.args.requestId}`, requestOptions)).json() // ?${rand}
 
         if (finalizeRes.status !== 1) {
           await app.db.saveUser(user)
