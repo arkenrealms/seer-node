@@ -1,7 +1,7 @@
 import * as ethers from 'ethers'
 import { log, logError } from '../util'
 import { iterateBlocks, getAddress } from '../util/web3'
-import { decodeItem } from '../util/decodeItem'
+import { decodeItem } from '../util/item-decoder'
 
 export async function getAllItemEvents(app) {
   if (app.config.items.updating) return
@@ -103,4 +103,10 @@ export async function getAllItemEvents(app) {
   // await saveConfig()
 
   setTimeout(() => getAllItemEvents(app), 2 * 60 * 1000)
+}
+
+export async function monitorItemEvents(app) {
+  app.contracts.items.on('Transfer', async () => {
+    await app.modules.getAllItemEvents(app)
+  })
 }

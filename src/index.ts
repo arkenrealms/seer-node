@@ -4,27 +4,21 @@ import { subProcesses, catchExceptions } from './util/process'
 import { initConfig } from './modules/config'
 import { initDb } from './modules/db'
 import { initWeb3 } from './modules/web3'
-import { convertRewards } from './modules/convert-rewards'
-import { monitorRealmServers } from './modules/realm-servers'
-import { migrateTrades } from './modules/migrateTrades'
-import { getAllItemEvents } from './modules/getAllItemEvents'
-import { getAllBarracksEvents } from './modules/getAllBarracksEvents'
-import { getAllMarketEvents } from './modules/getAllMarketEvents'
-import { getAllCharacterEvents } from './modules/getAllCharacterEvents'
-import { monitorGuildMemberDetails } from './modules/monitorGuildMemberDetails'
-import { monitorSaves } from './modules/monitorSaves'
-import { monitorEvolutionStats2 } from './modules/monitorEvolutionStats2'
-import { monitorItemEvents } from './modules/monitorItemEvents'
-import { monitorBarracksEvents } from './modules/monitorBarracksEvents'
-import { monitorMarketEvents } from './modules/monitorMarketEvents'
-import { monitorCharacterEvents } from './modules/monitorCharacterEvents'
-import { monitorGeneralStats } from './modules/monitorGeneralStats'
-import { monitorCraftingStats } from './modules/monitorCraftingStats'
-import { monitorEvolutionStats } from './modules/monitorEvolutionStats'
-import { monitorMeta } from './modules/monitorMeta'
-import { monitorCoordinator } from './modules/monitorCoordinator'
+import { convertRewards } from './modules/reward-converter'
+import { monitorEvolutionRealms } from './modules/evolution'
+import { migrateTrades } from './modules/trades'
+import { monitorGuildMemberDetails } from './modules/guild'
+import { monitorSaves } from './modules/save'
+import { monitorItemEvents, getAllItemEvents } from './modules/items'
+import { monitorBarracksEvents, getAllBarracksEvents } from './modules/barracks'
+import { monitorMarketEvents, getAllMarketEvents } from './modules/market'
+import { monitorCharacterEvents, getAllCharacterEvents } from './modules/characters'
+import { monitorGeneralStats } from './modules/stats'
+import { monitorCraftingStats } from './modules/crafting'
+import { monitorMeta } from './modules/meta'
+import { monitorCoordinator } from './modules/coordinator'
 import { monitorSenderEvents } from './modules/sender'
-import { initCubeBridge } from './modules/cube-bridge'
+import { initCubeBridge } from './modules/cube'
 import * as tests from './tests'
 
 dotenv.config()
@@ -68,12 +62,6 @@ async function init() {
         async: false,
         timeout: 0
       },
-      {
-        name: 'monitorSenderEvents',
-        instance: monitorSenderEvents,
-        async: false,
-        timeout: 5 * 1000
-      },
       // {
       //   name: 'convertRewards',
       //   instance: convertRewards,
@@ -81,17 +69,23 @@ async function init() {
       //   timeout: 0
       // },
       {
+        name: 'monitorSenderEvents',
+        instance: monitorSenderEvents,
+        async: false,
+        timeout: 5 * 1000
+      },
+      {
         name: 'initCubeBridge',
         instance: initCubeBridge,
         async: false,
         timeout: 0
       },
-      // {
-      //   name: 'monitorRealmServers',
-      //   instance: monitorRealmServers,
-      //   async: false,
-      //   timeout: 0
-      // },
+      {
+        name: 'monitorEvolutionRealms',
+        instance: monitorEvolutionRealms,
+        async: false,
+        timeout: 0
+      },
       {
         name: 'getAllItemEvents',
         instance: getAllItemEvents,
@@ -219,6 +213,6 @@ async function init() {
 init()
 
 // Force restart after an hour
-setTimeout(() => {
-  process.exit(1)
-}, 1 * 60 * 60 * 1000)
+// setTimeout(() => {
+//   process.exit(1)
+// }, 1 * 60 * 60 * 1000)

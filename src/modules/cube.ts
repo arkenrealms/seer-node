@@ -9,7 +9,7 @@ function initEventHandler(app) {
   const { emitDirect, emitAll, io } = app.cubeBridge
 
   log('Cube event handler')
-  
+
   io.on('connection', function(socket) {
     try {
       // Use by GS to tell DB it's connected
@@ -166,53 +166,57 @@ function initEventHandler(app) {
 }
 
 export async function initCubeBridge(app) {
-  app.cubeBridge = {}
+  try {
+    app.cubeBridge = {}
 
-  app.cubeBridge.ioCallbacks = {}
+    app.cubeBridge.ioCallbacks = {}
 
-  app.cubeBridge.server = express()
+    app.cubeBridge.server = express()
 
-  const isHttps = false // process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
+    const isHttps = false // process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
 
-  if (isHttps) {
-    app.cubeBridge.https = require('https').createServer({
-      key: fs.readFileSync(path.resolve('./privkey.pem')),
-      cert: fs.readFileSync(path.resolve('./fullchain.pem'))
-    }, app.cubeBridge.server)
-  
-  } else {
-    app.cubeBridge.http = require('http').Server(app.cubeBridge.server)
-  }
-
-  app.cubeBridge.io = require('socket.io')(isHttps ? app.cubeBridge.https : app.cubeBridge.http, {
-    secure: isHttps ? true : false,
-    pingInterval: 30005,
-    pingTimeout: 5000,
-    upgradeTimeout: 3000,
-    allowUpgrades: true,
-    cookie: false,
-    serveClient: true,
-    allowEIO3: false,
-    cors: {
-      origin: "*"
+    if (isHttps) {
+      app.cubeBridge.https = require('https').createServer({
+        key: fs.readFileSync(path.resolve('./privkey.pem')),
+        cert: fs.readFileSync(path.resolve('./fullchain.pem'))
+      }, app.cubeBridge.server)
+    
+    } else {
+      app.cubeBridge.http = require('http').Server(app.cubeBridge.server)
     }
-  })
 
-  // Finalize
-  if (isHttps) {
-    const sslPort = process.env.CUBE_BRIDGE_PORT || 443
-    app.cubeBridge.https.listen(sslPort, function() {
-      log(`:: Backend ready and listening on *:${sslPort}`)
+    app.cubeBridge.io = require('socket.io')(isHttps ? app.cubeBridge.https : app.cubeBridge.http, {
+      secure: isHttps ? true : false,
+      pingInterval: 30005,
+      pingTimeout: 5000,
+      upgradeTimeout: 3000,
+      allowUpgrades: true,
+      cookie: false,
+      serveClient: true,
+      allowEIO3: false,
+      cors: {
+        origin: "*"
+      }
     })
-  } else {
-    const port = process.env.CUBE_BRIDGE_PORT || 7777
-    app.cubeBridge.http.listen(port, function() {
-      log(`:: Backend ready and listening on *:${port}`)
-    })
+
+    // Finalize
+    if (isHttps) {
+      const sslPort = process.env.CUBE_BRIDGE_PORT || 443
+      app.cubeBridge.https.listen(sslPort, function() {
+        log(`:: Backend ready and listening on *:${sslPort}`)
+      })
+    } else {
+      const port = process.env.CUBE_BRIDGE_PORT || 7777
+      app.cubeBridge.http.listen(port, function() {
+        log(`:: Backend ready and listening on *:${port}`)
+      })
+    }
+
+    app.cubeBridge.emitDirect = websocketUtil.emitDirect.bind(null, app.cubeBridge.io)
+    app.cubeBridge.emitAll = websocketUtil.emitAll.bind(null, app.cubeBridge.io)
+
+    initEventHandler(app)
+  } catch(e) {
+    
   }
-
-  app.cubeBridge.emitDirect = websocketUtil.emitDirect.bind(null, app.cubeBridge.io)
-  app.cubeBridge.emitAll = websocketUtil.emitAll.bind(null, app.cubeBridge.io)
-
-  initEventHandler(app)
 }

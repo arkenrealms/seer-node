@@ -1,9 +1,6 @@
-import path from 'path'
-import jetpack from 'fs-jetpack'
 import * as ethers from 'ethers'
 import { getHighestId, log, logError } from '../util'
 import { iterateBlocks, getAddress } from '../util/web3'
-import { decodeItem } from '../util/decodeItem'
 
 export async function getAllCharacterEvents(app) {
   if (app.config.characters.updating) return
@@ -94,4 +91,10 @@ export async function getAllCharacterEvents(app) {
   // await saveConfig()
 
   setTimeout(() => getAllCharacterEvents(app), 2 * 60 * 1000)
+}
+
+export async function monitorCharacterEvents(app) {
+  app.contracts.characters.on('Transfer', async (from, to, tokenId, log) => {
+    await app.modules.getAllCharacterEvents()
+  })
 }

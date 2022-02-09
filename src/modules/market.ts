@@ -1,7 +1,7 @@
 import * as ethers from 'ethers'
 import { getHighestId, toShort, log, logError } from '../util'
 import { iterateBlocks, getAddress } from '../util/web3'
-import { decodeItem } from '../util/decodeItem'
+import { decodeItem } from '../util/item-decoder'
 
 export async function getAllMarketEvents(app) {
   if (app.config.trades.updating) return
@@ -167,4 +167,48 @@ export async function getAllMarketEvents(app) {
   // await saveConfig()
 
   setTimeout(() => getAllMarketEvents(app), 2 * 60 * 1000)
+}
+
+export async function monitorMarketEvents(app) {
+  // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Delist(address indexed seller, uint256 tokenId);
+  // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+  // event Recover(address indexed user, address indexed seller, uint256 tokenId);
+
+  try {
+    app.contracts.trader.on('List', async () => {
+      try {
+        await app.modules.getAllMarketEvents(app)
+      } catch(e) {
+        log(e)
+      }
+    })
+
+    app.contracts.trader.on('Update', async () => {
+      try {
+        await app.modules.getAllMarketEvents(app)
+      } catch(e) {
+        log(e)
+      }
+    })
+
+    app.contracts.trader.on('Delist', async () => {
+      try {
+        await app.modules.getAllMarketEvents(app)
+      } catch(e) {
+        log(e)
+      }
+    })
+
+    app.contracts.trader.on('Buy', async () => {
+      try {
+        await app.modules.getAllMarketEvents(app)
+      } catch(e) {
+        log(e)
+      }
+    })
+  } catch(e) {
+    log(e)
+  }
 }

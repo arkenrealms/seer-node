@@ -1,7 +1,7 @@
 import * as ethers from 'ethers'
 import { log, logError } from '../util'
 import { iterateBlocks, getAddress } from '../util/web3'
-import { decodeItem } from '../util/decodeItem'
+import { decodeItem } from '../util/item-decoder'
 
 export async function getAllBarracksEvents(app) {
   if (app.config.barracks.updating) return
@@ -120,4 +120,34 @@ export async function getAllBarracksEvents(app) {
   // await app.db.saveConfig()
 
   setTimeout(() => getAllBarracksEvents(app), 15 * 60 * 1000)
+}
+
+export async function monitorBarracksEvents(app) {
+  app.contracts.barracks.on('Equip', async () => {
+    await app.modules.getAllBarracksEvents(app)
+  })
+
+  app.contracts.barracks.on('Unequip', async () => {
+    await app.modules.getAllBarracksEvents(app)
+  })
+
+  app.contracts.barracks.on('ActionBurn', async () => {
+    await app.modules.getAllBarracksEvents(app)
+  })
+
+  app.contracts.barracks.on('ActionBonus', async () => {
+    await app.modules.getAllBarracksEvents(app)
+  })
+
+  app.contracts.barracks.on('ActionHiddenPool', async () => {
+    await app.modules.getAllBarracksEvents(app)
+  })
+
+  app.contracts.barracks.on('ActionFee', async () => {
+    await app.modules.getAllBarracksEvents(app)
+  })
+
+  app.contracts.barracks.on('ActionSwap', async () => {
+    await app.modules.getAllBarracksEvents(app)
+  })
 }

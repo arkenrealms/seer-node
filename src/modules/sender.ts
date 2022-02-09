@@ -18,7 +18,7 @@ export async function getAllSenderEvents(app) {
     }
   
     const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`http://35.245.242.215/data/claimRequests.json?${rand}`) // ?${rand}
+    const response = await fetch(`${app.sender.coordinatorEndpoint}/data/claimRequests.json?${rand}`) // ?${rand}
     const claimRequests = await response.json()
   
     const iface = new ethers.utils.Interface(app.contractMetadata.RuneSenderV1.abi)
@@ -83,7 +83,7 @@ export async function getAllSenderEvents(app) {
           }),
         }
     
-        const finalizeRes = await (await fetch(`http://35.245.242.215/claim/finalize/${e.args.requestId}`, requestOptions)).json() // ?${rand}
+        const finalizeRes = await (await fetch(`${app.sender.coordinatorEndpoint}/claim/finalize/${e.args.requestId}`, requestOptions)).json() // ?${rand}
 
         if (finalizeRes.status !== 1) {
           await app.db.saveUser(user)
@@ -125,6 +125,14 @@ export async function getAllSenderEvents(app) {
 }
 
 export async function monitorSenderEvents(app) {
+  app.sender = {}
+
+  app.sender.coordinatorEndpoint = 'http://35.245.242.215'
+
+  if (process.env.RUNE_ENV === 'local') {
+    app.sender.coordinatorEndpoint = 'http://localhost:5001'
+  }
+
   await getAllSenderEvents(app)
 
   app.contracts.sender.on('RewardsSent', async () => {

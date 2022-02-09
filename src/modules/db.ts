@@ -3,7 +3,7 @@ import beautify from 'json-beautify'
 import jetpack from 'fs-jetpack'
 import path from 'path'
 import { log, removeDupes } from '../util'
-import { decodeItem } from '../util/decodeItem'
+import { decodeItem } from '../util/item-decoder'
 import { achievementData } from '../data/achievements'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '../data/items'
 
@@ -49,6 +49,29 @@ export function initDb(app) {
       banList: [],
       modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
     }
+  }
+
+  if (process.env.RUNE_ENV === 'local') {
+    app.db.evolutionServers = [
+      {
+        "key": "local1",
+        "name": "Local",
+        "regionId": 1,
+        "endpoint": "localhost:3006",
+        "status": "online",
+        "version": "1.6.3",
+        "rewardItemAmount": 0,
+        "rewardWinnerAmount": 0,
+        "playerCount": 0,
+        "gameMode": "Sprite Leader",
+        "roundId": 39824,
+        "roundStartedAt": 1644146527,
+        "roundStartedDate": "Mon Aug 30 2021 20:19:08 GMT+0000 (Coordinated Universal Time)",
+        "timeLeft": 275,
+        "timeLeftText": "4:35",
+        "speculatorCount": 0
+      }
+    ]
   }
 
   app.db.saveConfig = async () => {
@@ -649,7 +672,7 @@ export function initDb(app) {
     // log('Save user', user.address)
 
     // await app.db.updateGuildByUser(user)
-    // await app.db.updatePointsByUser(user)
+    await app.db.updatePointsByUser(user)
 
     jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
       ...user,
