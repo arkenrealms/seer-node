@@ -25,11 +25,21 @@ export function initDb(app) {
     charactersEvents: jetpack.read(path.resolve('./db/characters/events.json'), 'json'),
     usersEvents: jetpack.read(path.resolve('./db/users/events.json'), 'json'),
     tradesEvents: jetpack.read(path.resolve('./db/trades/events.json'), 'json'),
-    evolutionLeaderboardHistory: jetpack.read(path.resolve('./db/evolution/leaderboardHistory.json'), 'json'),
-    evolutionRewardHistory: jetpack.read(path.resolve('./db/evolution/rewardHistory.json'), 'json'),
+    // evolutionLeaderboardHistory: jetpack.read(path.resolve('./db/evolution/leaderboardHistory.json'), 'json'),
+    // evolutionRewardHistory: jetpack.read(path.resolve('./db/evolution/rewardHistory.json'), 'json'),
     evolutionHistorical: jetpack.read(path.resolve('./db/evolution/historical.json'), 'json'),
+    evolutionRealms: jetpack.read(path.resolve('./db/evolution/realms.json'), 'json') || [],
     evolutionServers: jetpack.read(path.resolve('./db/evolution/servers.json'), 'json'),
+    evolutionConfig: jetpack.read(path.resolve('./db/evolution/config.json'), 'json') || {
+      "rewardItemAmountPerLegitPlayer": 0.001,
+      "rewardItemAmountMax": 0.02,
+      "rewardWinnerAmountPerLegitPlayer": 0.003,
+      "rewardWinnerAmountMax": 0.04,
+      "rewardItemAmount": 0.02,
+      "rewardWinnerAmount": 0.04
+    },
     evolution: {
+      playerCount: 0,
       banList: [],
       modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
     },
@@ -52,24 +62,19 @@ export function initDb(app) {
   }
 
   if (process.env.RUNE_ENV === 'local') {
-    app.db.evolutionServers = [
+    app.db.evolutionRealms = [
       {
         "key": "local1",
         "name": "Local",
         "regionId": 1,
-        "endpoint": "localhost:3006",
-        "status": "online",
-        "version": "1.6.3",
-        "rewardItemAmount": 0,
-        "rewardWinnerAmount": 0,
         "playerCount": 0,
-        "gameMode": "Sprite Leader",
-        "roundId": 39824,
-        "roundStartedAt": 1644146527,
-        "roundStartedDate": "Mon Aug 30 2021 20:19:08 GMT+0000 (Coordinated Universal Time)",
-        "timeLeft": 275,
-        "timeLeftText": "4:35",
-        "speculatorCount": 0
+        "speculatorCount": 0,
+        "version": "1.0.0",
+        "endpoint": "http://localhost:3006",
+        "games": [],
+        "status": "online",
+        "rewardItemAmount": 0,
+        "rewardWinnerAmount": 0
       }
     ]
   }
@@ -593,7 +598,7 @@ export function initDb(app) {
     }
   }
 
-  app.db.updatePointsByUser = async (user) => {
+  app.db.updatePointsByUser = (user) => {
     const achievements = user.achievements.map(a => achievementData.find(b => b.id === a))
 
     user.points = 0
@@ -669,10 +674,10 @@ export function initDb(app) {
   }
 
   app.db.saveUser = async (user) => {
-    // log('Save user', user.address)
+    // log('Save user', user.address, user)
 
     // await app.db.updateGuildByUser(user)
-    await app.db.updatePointsByUser(user)
+    app.db.updatePointsByUser(user)
 
     jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
       ...user,

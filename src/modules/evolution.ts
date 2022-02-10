@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import path from 'path'
-import jetpack from 'fs-jetpack'
+import jetpack, { find } from 'fs-jetpack'
 import beautify from 'json-beautify'
 import { fancyTimeFormat } from '../util/time'
 import md5 from 'js-md5'
@@ -64,55 +64,79 @@ const games = {
   }
 }
 
-async function updateRealm(app, server) {
-  try {
-    const response = await rsCall(games.evolution.realms[server.key].client, 'InfoRequest') as any
+function setRealmOffline(realm) {
+  realm.status = 'offline'
+  realm.playerCount = 0
+  realm.speculatorCount = 0
+  realm.rewardItemAmount = 0
+  realm.rewardWinnerAmount = 0
+}
 
-    if (!response || response.status !== 1) {
+async function setRealmConfig(app, realm) {
+  const configRes = await rsCall(games.evolution.realms[realm.key].client, 'SetConfigRequest', app.db.evolutionConfig) as any
+
+  if (configRes.status !== 1) {
+    setRealmOffline(realm)
+    return
+  }
+}
+
+async function updateRealm(app, realm) {
+  try {
+    const infoRes = await rsCall(games.evolution.realms[realm.key].client, 'InfoRequest') as any
+
+    if (!infoRes || infoRes.status !== 1) {
+      setRealmOffline(realm)
       return
     }
+    
+    const { data } = infoRes
 
-    const { data } = response
+    realm.playerCount = data.playerCount
+    realm.speculatorCount = data.speculatorCount
+    realm.version = data.version
 
-    server.playerCount = data.playerTotal
-    server.speculatorCount = data.speculatorTotal
-    server.version = data.version
-    server.rewardItemAmount = data.rewardItemAmount
-    server.rewardWinnerAmount = data.rewardWinnerAmount
-    server.gameMode = data.gameMode
-    server.roundId = data.round.id
-    server.roundStartedAt = data.round.startedAt
-    server.timeLeft = ~~(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
-    server.timeLeftText = fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - data.round.startedAt)))
-    // server.totalLegitPlayers = data.totalLegitPlayers
+    realm.games = data.games.map(game => ({
+      id: game.id,
+      playerCount: game.playerTotal,
+      speculatorCount: game.speculatorTotal,
+      version: game.version,
+      rewardItemAmount: game.rewardItemAmount,
+      rewardWinnerAmount: game.rewardWinnerAmount,
+      gameMode: game.gameMode,
+      roundId: game.round.id,
+      roundStartedAt: game.round.startedAt,
+      timeLeft: ~~(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
+      timeLeftText: fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
+      endpoint: (function() { const url = new URL(realm.endpoint); url.port = game.port; return url.toString(); })().replace('http://', '').replace('/', '')
+    }))
+    // realm.totalLegitPlayers = data.totalLegitPlayers
 
-    delete server.timeLeftFancy
+    delete realm.timeLeftFancy
 
-    server.status = 'online'
+    realm.status = 'online'
   } catch(e) {
-    if ((e + '').indexOf('invalid json response body') === -1) log(e)
+    logError(e)
 
-    server.status = 'offline'
-    server.playerCount = 0
-    server.speculatorCount = 0
-    server.rewardItemAmount = 0
-    server.rewardWinnerAmount = 0
+    realm.status = 'offline'
+    realm.playerCount = 0
+    realm.speculatorCount = 0
+    realm.rewardItemAmount = 0
+    realm.rewardWinnerAmount = 0
   }
 
   // log('Updated server', server)
 
-  return server
+  return realm
 }
 
 async function updateRealms(app) {
-  if (!app.db.evolutionHistorical.playerCount) app.db.evolutionHistorical.playerCount = []
-
   let playerCount = 0
 
-  for (const server of app.db.evolutionServers) {
-    await updateRealm(app, server)
+  for (const realm of app.db.evolutionRealms) {
+    await updateRealm(app, realm)
 
-    const hist = jetpack.read(path.resolve(`./db/evolution/${server.key}/historical.json`), 'json') || {}
+    const hist = jetpack.read(path.resolve(`./db/evolution/${realm.key}/historical.json`), 'json') || {}
 
     if (!hist.playerCount) hist.playerCount = []
 
@@ -120,46 +144,101 @@ async function updateRealms(app) {
     const newTime = (new Date()).getTime()
     const diff = newTime - oldTime
     if (diff / (1000 * 60 * 60 * 1) > 1) {
-      hist.playerCount.push([newTime, server.playerCount])
+      hist.playerCount.push([newTime, realm.playerCount])
     }
 
-    jetpack.write(path.resolve(`./db/evolution/${server.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
+    jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
 
-    playerCount += server.playerCount
+    playerCount += realm.playerCount
   }
 
+  app.db.evolution.playerCount = playerCount
+
+  for (const server of app.db.evolutionServers) {
+    server.status = 'offline'
+  }
+
+  const evolutionServers = app.db.evolutionRealms.map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
+
+  for (const evolutionServer of evolutionServers) {
+    const server = app.db.evolutionServers.find(s => s.key === evolutionServer.key)
+
+    if (!server) {
+      if (evolutionServer.key) {
+        app.db.evolutionServers.push(evolutionServer)
+      }
+      continue
+    }
+
+    server.status = evolutionServer.status
+    server.version = evolutionServer.version
+    server.rewardItemAmount = evolutionServer.rewardItemAmount
+    server.rewardWinnerAmount = evolutionServer.rewardWinnerAmount
+    server.gameMode = evolutionServer.gameMode
+    server.roundId = evolutionServer.roundId
+    server.roundStartedAt = evolutionServer.roundStartedAt
+    server.roundStartedDate = evolutionServer.roundStartedDate
+    server.timeLeft = evolutionServer.timeLeft
+    server.timeLeftText = evolutionServer.timeLeftText
+    server.playerCount = evolutionServer.playerCount
+    server.speculatorCount = evolutionServer.speculatorCount
+    server.endpoint = evolutionServer.endpoint
+  }
+
+
+  jetpack.write(path.resolve('./db/evolution/realms.json'), beautify(app.db.evolutionRealms, null, 2), { atomic: true })
+
+  // Update old servers file
   jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
+
+
+  // Update overall historics
+  const hist = jetpack.read(path.resolve(`./db/evolution/historical.json`), 'json') || {}
+
+  if (!hist.playerCount) hist.playerCount = []
+
+  const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
+  const newTime = (new Date()).getTime()
+  const diff = newTime - oldTime
+  if (diff / (1000 * 60 * 60 * 1) > 1) {
+    hist.playerCount.push([newTime, playerCount])
+  }
+
+  jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(hist, null, 2), { atomic: true })
 }
 
-export async function connectRealm(app, server) {
-  log('Connecting to realm', server)
-  if (games.evolution.realms[server.key].client?.socket.connected) {
-    games.evolution.realms[server.key].client.socket.close()
+export async function connectRealm(app, realm) {
+  log('Connecting to realm', realm)
+  if (games.evolution.realms[realm.key].client.socket?.connected) {
+    games.evolution.realms[realm.key].client.socket.close()
   }
 
-  const client = {
-    authed: false,
-    socket: getClientSocket('http://' + server.endpoint.replace('3007', '3006')) // TODO: RS should be running things
-  }
+  games.evolution.realms[realm.key].client.isConnecting = true
+  games.evolution.realms[realm.key].client.socket = getClientSocket(realm.endpoint) // TODO: RS should be running things
+
+  const { client } = games.evolution.realms[realm.key]
 
   client.socket.on('connect', async () => {
     try {
-      log('Connected: ' + server.key)
+      log('Connected: ' + realm.key)
 
       const res = await rsCall(client, 'AuthRequest', 'myverysexykey') as any
 
       if (res.status === 1) {
-        client.authed = true
+        client.isAuthed = true
 
-        await updateRealm(app, server)
+        await setRealmConfig(app, realm)
+        await updateRealm(app, realm)
       }
+
+      client.isConnecting = false
     } catch(e) {
       logError(e)
     }
   })
 
   client.socket.on('disconnect', () => {
-    log('Disconnected: ' + server.key)
+    log('Disconnected: ' + realm.key)
   })
 
   client.socket.on('PingRequest', function (msg) {
@@ -318,36 +397,98 @@ export async function connectRealm(app, server) {
     try {
       log('SaveRoundRequest', req)
 
-      if (await verifySignature(req.signature) && app.db.evolution.modList.includes(req.signature.address)) {
-        console.log(req)
-        // Iterate the winners, determine the winning amounts, validate, save to user rewards
-        // Iterate all players and save their log / stats 
-        for (const player of req.players) {
-          const user = app.db.loadUser(player.address)
-
-          for (const pickup of player.pickups) {
-            if (pickup.type === 'rune') {
-              user.rewards.runes[pickup.rewardItemName.toLowerCase()] += pickup.quantity
-            } else {
-              user.rewards.items[pickup.id] = {
-                name: pickup.name,
-                rarity: pickup.rarity,
-                quantity: pickup.quantity
-              }
-            }
-          }
-        }
-        
-        client.socket.emit('SaveRoundResponse', {
-          id: req.id,
-          data: { status: 1 }
-        })
-      } else {
+      if (!await verifySignature(req.signature) && app.db.evolution.modList.includes(req.signature.address)) {
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
           data: { status: 0, message: 'Invalid signature' }
         })
+        return
       }
+      // log(req)
+      // Iterate the winners, determine the winning amounts, validate, save to user rewards
+      // Iterate all players and save their log / stats 
+      for (const player of req.data.round.players) {
+        const user = app.db.loadUser(player.address)
+
+        for (const pickup of player.pickups) {
+          if (pickup.type === 'rune') {
+            // TODO: change to authoritative
+            if (pickup.quantity <= app.db.evolutionConfig.rewardItemAmountMax) {
+              client.socket.emit('SaveRoundResponse', {
+                id: req.id,
+                data: { status: 0, message: 'Invalid reward' }
+              })
+              return
+            }
+
+            if (!user.rewards.runes[pickup.rewardItemName.toLowerCase()]) {
+              user.rewards.runes[pickup.rewardItemName.toLowerCase()] = 0
+            }
+
+            user.rewards.runes[pickup.rewardItemName.toLowerCase()] += pickup.quantity
+
+            if (!user.lifetimeRewards.runes[pickup.rewardItemName.toLowerCase()]) {
+              user.lifetimeRewards.runes[pickup.rewardItemName.toLowerCase()] = 0
+            }
+
+            user.lifetimeRewards.runes[pickup.rewardItemName.toLowerCase()] += pickup.quantity
+          } else {
+            user.rewards.items[pickup.id] = {
+              name: pickup.name,
+              rarity: pickup.rarity,
+              quantity: pickup.quantity
+            }
+
+            user.lifetimeRewards.items[pickup.id] = {
+              name: pickup.name,
+              rarity: pickup.rarity,
+              quantity: pickup.quantity
+            }
+          }
+
+          // user.rewardTracking.push(req.tracking)
+        }
+
+        app.db.saveUser(user)
+      }
+
+      const rewardWinnerMap = {
+        0: Math.round((req.data.rewardWinnerAmount * 1) * 1000) / 1000,
+        1: Math.round((req.data.rewardWinnerAmount * 0.25) * 1000) / 1000,
+        2: Math.round((req.data.rewardWinnerAmount * 0.15) * 1000) / 1000,
+        3: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        4: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        5: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        6: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        7: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        8: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        9: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+      }
+
+      // Calculate winnings
+      for (const index in req.data.round.winners.slice(0, 10)) {
+        const player = req.data.round.winners[index]
+        const user = app.db.loadUser(player.address)
+
+        if (!user.rewards.runes['zod']) {
+          user.rewards.runes['zod'] = 0
+        }
+
+        user.rewards.runes['zod'] += rewardWinnerMap[index]
+
+        if (!user.lifetimeRewards.runes['zod']) {
+          user.lifetimeRewards.runes['zod'] = 0
+        }
+
+        user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
+
+        app.db.saveUser(user)
+      }
+      
+      client.socket.emit('SaveRoundResponse', {
+        id: req.id,
+        data: { status: 1 }
+      })
     } catch (e) {
       logError(e)
       
@@ -496,31 +637,41 @@ export async function connectRealm(app, server) {
   })
 
   client.socket.connect()
-
-  games.evolution.realms[server.key].client = client
 }
 
 export async function connectRealms(app) {
-  for (const server of app.db.evolutionServers) {
-    if (!games.evolution.realms[server.key]) {
-      games.evolution.realms[server.key] = {}
-      for (const key in Object.keys(server)) {
-        games.evolution.realms[server.key][key] = server[key]
+  try {
+    for (const realm of app.db.evolutionRealms) {
+      if (!games.evolution.realms[realm.key]) {
+        games.evolution.realms[realm.key] = {}
+        for (const key in Object.keys(realm)) {
+          games.evolution.realms[realm.key][key] = realm[key]
+        }
+      }
+
+      if (!games.evolution.realms[realm.key].client) {
+        games.evolution.realms[realm.key].client = {
+          isAuthed: false,
+          isConnecting: false,
+          socket: null
+        }
+      }
+
+      if (!games.evolution.realms[realm.key].client.isConnecting && !games.evolution.realms[realm.key].client.isAuthed) {
+        await connectRealm(app, realm)
       }
     }
 
-    if (!games.evolution.realms[server.key].client?.authed) {
-      await connectRealm(app, server)
-    }
+    await updateRealms(app)
+  } catch(e) {
+    logError(e)
   }
-
-  await updateRealms(app)
 }
 
 export async function emitAll(app, ...args) {
-  for (const server of app.db.evolutionServers) {
-    if (games.evolution.realms[server.key]?.client?.authed) {
-      games.evolution.realms[server.key]?.client?.socket.emit(...args)
+  for (const realm of app.db.evolutionRealms) {
+    if (games.evolution.realms[realm.key]?.client?.authed) {
+      games.evolution.realms[realm.key]?.client?.socket.emit(...args)
     }
   }
 }
