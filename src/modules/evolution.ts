@@ -229,6 +229,8 @@ export async function connectRealm(app, realm) {
       if (res.status === 1) {
         client.isAuthed = true
 
+        clearTimeout(client.timeout)
+
         await setRealmConfig(app, realm)
         await updateRealm(app, realm)
       }
@@ -639,11 +641,17 @@ export async function connectRealm(app, realm) {
   })
 
   client.socket.connect()
+
+  client.timeout = setTimeout(function() {
+    if (!client.isAuthed) {
+      client.socket.disconnect()
+    }
+  }, 20 * 1000)
 }
 
 export async function connectRealms(app) {
   log('Connecting to Evolution realms')
-  
+
   try {
     for (const realm of app.db.evolutionRealms) {
       if (!games.evolution.realms[realm.key]) {
@@ -657,7 +665,8 @@ export async function connectRealms(app) {
         games.evolution.realms[realm.key].client = {
           isAuthed: false,
           isConnecting: false,
-          socket: null
+          socket: null,
+          timeout: null
         }
       }
 
@@ -688,7 +697,7 @@ export async function monitorEvolutionRealms(app) {
     app.realm.emitAll = emitAll.bind(null, app)
   }
 
-  connectRealms(app) 
+  connectRealms(app)
 
   setTimeout(() => monitorEvolutionRealms(app), 10 * 1000)
 }
