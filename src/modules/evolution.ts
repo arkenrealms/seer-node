@@ -644,7 +644,7 @@ export async function connectRealm(app, realm) {
 
   client.timeout = setTimeout(function() {
     if (!client.isAuthed) {
-      log(`Couldnt connect/authorize ${realm.key}`)
+      log(`Couldnt connect/authorize ${realm.key} on ${realm.endpoint}`)
       client.socket.disconnect()
     }
   }, 20 * 1000)
