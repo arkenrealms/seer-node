@@ -497,6 +497,8 @@ export async function connectRealm(app, realm) {
 
         app.db.saveUser(user)
       }
+
+      log('Round saved')
       
       client.socket.emit('SaveRoundResponse', {
         id: req.id,
