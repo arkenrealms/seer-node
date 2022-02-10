@@ -114,7 +114,7 @@ async function updateRealm(app, realm) {
       roundStartedAt: game.round.startedAt,
       timeLeft: ~~(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
       timeLeftText: fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
-      endpoint: (function() { const url = new URL(realm.endpoint); url.port = game.port; return url.toString(); })().replace('http://', '').replace('/', '')
+      endpoint: (function() { const url = new URL((process.env.RUNE_ENV === 'local' ? 'http://' : 'https://') + realm.endpoint); url.port = game.port; return url.toString(); })().replace('http://', '').replace('https://', '').replace('/', '')
     }))
     // realm.totalLegitPlayers = data.totalLegitPlayers
 
