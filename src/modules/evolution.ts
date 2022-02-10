@@ -152,6 +152,8 @@ async function updateRealms(app) {
     jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
 
     playerCount += realm.playerCount
+
+    log(`Realm server updated: ${realm.key}`)
   }
 
   app.db.evolution.playerCount = playerCount
@@ -193,6 +195,7 @@ async function updateRealms(app) {
   // Update old servers file
   jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
 
+  log('Realm and server info generated')
 
   // Update overall historics
   const hist = jetpack.read(path.resolve(`./db/evolution/historical.json`), 'json') || {}
@@ -216,7 +219,7 @@ export async function connectRealm(app, realm) {
   }
 
   games.evolution.realms[realm.key].client.isConnecting = true
-  games.evolution.realms[realm.key].client.socket = getClientSocket('https://' + realm.endpoint) // TODO: RS should be running things
+  games.evolution.realms[realm.key].client.socket = getClientSocket('ws://' + realm.endpoint) // TODO: RS should be running things
 
   const { client } = games.evolution.realms[realm.key]
 
