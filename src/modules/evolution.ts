@@ -426,7 +426,7 @@ export async function connectRealm(app, realm) {
         for (const pickup of player.pickups) {
           if (pickup.type === 'rune') {
             // TODO: change to authoritative
-            if (pickup.quantity <= app.db.evolutionConfig.rewardItemAmountMax) {
+            if (pickup.quantity > app.db.evolutionConfig.rewardItemAmountMax) {
               client.socket.emit('SaveRoundResponse', {
                 id: req.id,
                 data: { status: 0, message: 'Invalid reward' }
