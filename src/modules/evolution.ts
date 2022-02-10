@@ -131,6 +131,8 @@ async function updateRealm(app, realm) {
 }
 
 async function updateRealms(app) {
+  log('Updating Evolution realms')
+
   let playerCount = 0
 
   for (const realm of app.db.evolutionRealms) {
@@ -640,6 +642,8 @@ export async function connectRealm(app, realm) {
 }
 
 export async function connectRealms(app) {
+  log('Connecting to Evolution realms')
+  
   try {
     for (const realm of app.db.evolutionRealms) {
       if (!games.evolution.realms[realm.key]) {
