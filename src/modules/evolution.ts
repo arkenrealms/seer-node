@@ -216,7 +216,7 @@ export async function connectRealm(app, realm) {
   }
 
   games.evolution.realms[realm.key].client.isConnecting = true
-  games.evolution.realms[realm.key].client.socket = getClientSocket(realm.endpoint) // TODO: RS should be running things
+  games.evolution.realms[realm.key].client.socket = getClientSocket('https://' + realm.endpoint) // TODO: RS should be running things
 
   const { client } = games.evolution.realms[realm.key]
 
