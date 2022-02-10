@@ -56,7 +56,7 @@ export async function monitorGuildMemberDetails(app) {
           characterId: await app.contracts.characters.getCharacterId(tokenId)
         })
 
-        log(`Sync guild ${guild.id} member ${guild.memberDetails.length} / ${guild.memberCount}`)
+        // log(`Sync guild ${guild.id} member ${guild.memberDetails.length} / ${guild.memberCount}`)
 
         await app.db.saveUser(user)
       }
