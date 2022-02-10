@@ -713,7 +713,7 @@ export async function monitorEvolutionRealms(app) {
 
   connectRealms(app)
 
-  setTimeout(() => monitorEvolutionRealms(app), 10 * 1000)
+  setTimeout(() => monitorEvolutionRealms(app), 30 * 1000)
 }
 
 
