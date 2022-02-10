@@ -35,6 +35,12 @@ async function rsCall(client, name, data = undefined) {
     
     ioCallbacks[id] = resolve
 
+    client.reqTimeout = setTimeout(function() {
+      resolve({ status: 0, message: 'Request timeout' })
+
+      delete ioCallbacks[id]
+    }, 5 * 1000)
+
     if (!client.socket?.connected) {
       logError('Not connected to realm server.')
       return
@@ -637,6 +643,9 @@ export async function connectRealm(app, realm) {
     // console.log(eventName, res)
     if (ioCallbacks[res.id]) {
       log('Callback', eventName)
+
+      clearTimeout(client.reqTimeout)
+
       ioCallbacks[res.id](res.data)
 
       delete ioCallbacks[res.id]
@@ -645,7 +654,7 @@ export async function connectRealm(app, realm) {
 
   client.socket.connect()
 
-  client.timeout = setTimeout(function() {
+  client.connectTimeout = setTimeout(function() {
     if (!client.isAuthed) {
       log(`Couldnt connect/authorize ${realm.key} on ${realm.endpoint}`)
       client.socket.disconnect()
@@ -670,7 +679,8 @@ export async function connectRealms(app) {
           isAuthed: false,
           isConnecting: false,
           socket: null,
-          timeout: null
+          connectTimeout: null,
+          reqTimeout: null
         }
       }
 
