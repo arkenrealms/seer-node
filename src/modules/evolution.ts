@@ -423,6 +423,7 @@ export async function connectRealm(app, realm) {
       for (const player of req.data.round.players) {
         const user = app.db.loadUser(player.address)
 
+        log(player.address, player.pickups)
         for (const pickup of player.pickups) {
           if (pickup.type === 'rune') {
             // TODO: change to authoritative
