@@ -693,7 +693,7 @@ export function initDb(app) {
       transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
     }, null, 2), { atomic: true })
 
-    await app.db.updateLeaderboardByUser(user)
+    // await app.db.updateLeaderboardByUser(user)
     await app.db.updateAchievementsByUser(user)
 
     jetpack.write(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2), { atomic: true })
