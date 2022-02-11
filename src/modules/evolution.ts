@@ -218,16 +218,26 @@ async function updateRealms(app) {
   jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(hist, null, 2), { atomic: true })
 }
 
+function cleanupClient(client) {
+  client.socket?.close()
+  client.isConnecting = false
+  client.isAuthed = false
+
+  clearTimeout(client.timeout)
+  clearTimeout(client.pingReplyTimeout)
+  clearTimeout(client.pingerTimeout)
+}
+
 export async function connectRealm(app, realm) {
   log('Connecting to realm', realm)
-  if (games.evolution.realms[realm.key].client.socket?.connected) {
-    games.evolution.realms[realm.key].client.socket.close()
+  const { client } = games.evolution.realms[realm.key]
+
+  if (client.socket?.connected) {
+    cleanupClient(client)
   }
 
-  games.evolution.realms[realm.key].client.isConnecting = true
-  games.evolution.realms[realm.key].client.socket = getClientSocket('https://' + realm.endpoint) // TODO: RS should be running things
-
-  const { client } = games.evolution.realms[realm.key]
+  client.isConnecting = true
+  client.socket = getClientSocket('https://' + realm.endpoint) // TODO: RS should be running things
 
   client.socket.on('connect', async () => {
     try {
@@ -245,6 +255,19 @@ export async function connectRealm(app, realm) {
       }
 
       client.isConnecting = false
+
+      const pinger = async () => {
+        client.pingReplyTimeout = setTimeout(function() {
+          log('Realm didnt respond in time, disconnecting')
+          cleanupClient(client)
+        }, 10 * 1000)
+
+        await rsCall(client, 'PingRequest')
+
+        client.pingerTimeout = setTimeout(pinger, 5 * 1000)
+      }
+
+      client.pingerTimeout = setTimeout(pinger, 5 * 1000)
     } catch(e) {
       logError(e)
     }
@@ -258,6 +281,14 @@ export async function connectRealm(app, realm) {
     log(msg)
 
     client.socket.emit('PingResponse')
+  })
+
+  client.socket.on('PongRequest', function (msg) {
+    log(msg)
+
+    clearTimeout(client.pingReplyTimeout)
+
+    client.socket.emit('PongResponse')
   })
 
   client.socket.on('BanPlayerRequest', async function (req) {
@@ -417,6 +448,8 @@ export async function connectRealm(app, realm) {
         })
         return
       }
+
+      const users = []
       // log(req)
       // Iterate the winners, determine the winning amounts, validate, save to user rewards
       // Iterate all players and save their log / stats 
@@ -463,7 +496,7 @@ export async function connectRealm(app, realm) {
           // user.rewardTracking.push(req.tracking)
         }
 
-        app.db.saveUser(user)
+        users.push(user)
       }
 
       const rewardWinnerMap = {
@@ -482,7 +515,7 @@ export async function connectRealm(app, realm) {
       // Calculate winnings
       for (const index in req.data.round.winners.slice(0, 10)) {
         const player = req.data.round.winners[index]
-        const user = app.db.loadUser(player.address)
+        const user = users.find(u => u.address === player.address)
 
         if (!user.rewards.runes['zod']) {
           user.rewards.runes['zod'] = 0
@@ -495,7 +528,9 @@ export async function connectRealm(app, realm) {
         }
 
         user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
+      }
 
+      for (const user of users) {
         app.db.saveUser(user)
       }
 

@@ -679,7 +679,7 @@ export function initDb(app) {
     // await app.db.updateGuildByUser(user)
     app.db.updatePointsByUser(user)
 
-    jetpack.write(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
+    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
       ...user,
       inventory: undefined,
       market: undefined,
@@ -691,16 +691,16 @@ export function initDb(app) {
       equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
       transferredOutCount: user.inventory.items.filter(i => i.status === 'transferred_out').length,
       transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
-    }, null, 2), { atomic: true })
+    }, null, 2))
 
     // await app.db.updateLeaderboardByUser(user)
     await app.db.updateAchievementsByUser(user)
 
-    jetpack.write(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2), { atomic: true })
-    jetpack.write(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2), { atomic: true })
-    jetpack.write(path.resolve(`./db/users/${user.address}/characters.json`), beautify(user.characters, null, 2), { atomic: true })
-    jetpack.write(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2), { atomic: true })
-    jetpack.write(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2), { atomic: true })
+    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2))
+    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2))
+    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/characters.json`), beautify(user.characters, null, 2))
+    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2))
+    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2))
   }
 
   app.db.saveUserItem = async (user, item) => {
