@@ -228,6 +228,11 @@ function cleanupClient(client) {
   clearTimeout(client.pingerTimeout)
 }
 
+function disconnectClient(client) {
+  client.socket.close()
+  cleanupClient(client)
+}
+
 export async function connectRealm(app, realm) {
   log('Connecting to realm', realm)
   const { client } = games.evolution.realms[realm.key]
@@ -547,6 +552,8 @@ export async function connectRealm(app, realm) {
         id: req.id,
         data: { status: 0, message: e }
       })
+
+      disconnectClient(client)
     }
 
     // Iterate the items found, add to user.evolution.rewards
