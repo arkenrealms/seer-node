@@ -1,0 +1,18 @@
+import Leaderboard from '../src/models/leaderboard'
+
+export const data = [
+    {
+        status: 'active',
+        meta: {}
+    }
+]
+
+export const seed = async function (knex): Promise<any> {
+    console.log('[DB] Seeding leaderboards')
+
+    await knex('leaderboards').del()
+
+    await Leaderboard
+        .query(knex)
+        .upsertGraph(data)
+}

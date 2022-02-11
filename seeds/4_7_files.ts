@@ -1,0 +1,18 @@
+import File from '../src/models/file'
+
+export const data = [
+    {
+        status: 'active',
+        meta: {}
+    }
+]
+
+export const seed = async function (knex): Promise<any> {
+    console.log('[DB] Seeding files')
+
+    await knex('files').del()
+
+    await File
+        .query(knex)
+        .upsertGraph(data)
+}

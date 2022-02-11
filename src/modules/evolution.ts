@@ -282,6 +282,7 @@ export async function connectRealm(app, realm) {
 
   client.socket.on('disconnect', () => {
     log('Disconnected: ' + realm.key)
+    cleanupClient(client)
   })
 
   client.socket.on('PingRequest', function (msg) {

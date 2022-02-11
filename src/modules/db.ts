@@ -2,7 +2,7 @@ import * as ethers from 'ethers'
 import beautify from 'json-beautify'
 import jetpack from 'fs-jetpack'
 import path from 'path'
-import { log, removeDupes } from '../util'
+import { log, logError, removeDupes } from '../util'
 import { decodeItem } from '../util/item-decoder'
 import { achievementData } from '../data/achievements'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '../data/items'
@@ -674,33 +674,37 @@ export function initDb(app) {
   }
 
   app.db.saveUser = async (user) => {
-    // log('Save user', user.address, user)
+    try {
+      // log('Save user', user.address, user)
 
-    // await app.db.updateGuildByUser(user)
-    app.db.updatePointsByUser(user)
+      // await app.db.updateGuildByUser(user)
+      app.db.updatePointsByUser(user)
 
-    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
-      ...user,
-      inventory: undefined,
-      market: undefined,
-      characters: undefined,
-      achievements: undefined,
-      evolution: undefined,
-      craftedItemCount: user.inventory.items.filter(i => i.status === 'created').length,
-      inventoryItemCount: user.inventory.items.filter(i => i.status === 'unequipped').length,
-      equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
-      transferredOutCount: user.inventory.items.filter(i => i.status === 'transferred_out').length,
-      transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
-    }, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
+        ...user,
+        inventory: undefined,
+        market: undefined,
+        characters: undefined,
+        achievements: undefined,
+        evolution: undefined,
+        craftedItemCount: user.inventory.items.filter(i => i.status === 'created').length,
+        inventoryItemCount: user.inventory.items.filter(i => i.status === 'unequipped').length,
+        equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
+        transferredOutCount: user.inventory.items.filter(i => i.status === 'transferred_out').length,
+        transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
+      }, null, 2))
 
-    // await app.db.updateLeaderboardByUser(user)
-    await app.db.updateAchievementsByUser(user)
+      // await app.db.updateLeaderboardByUser(user)
+      await app.db.updateAchievementsByUser(user)
 
-    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2))
-    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2))
-    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/characters.json`), beautify(user.characters, null, 2))
-    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2))
-    await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/characters.json`), beautify(user.characters, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2))
+    } catch(e) {
+      logError('Couldnt save user', user.address, e)
+    }
   }
 
   app.db.saveUserItem = async (user, item) => {
