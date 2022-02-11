@@ -265,7 +265,7 @@ export async function connectRealm(app, realm) {
         client.pingReplyTimeout = setTimeout(function() {
           log('Realm didnt respond in time, disconnecting')
           cleanupClient(client)
-        }, 10 * 1000)
+        }, 20 * 1000)
 
         await rsCall(client, 'PingRequest')
 
@@ -702,7 +702,7 @@ export async function connectRealm(app, realm) {
   client.connectTimeout = setTimeout(function() {
     if (!client.isAuthed) {
       log(`Couldnt connect/authorize ${realm.key} on ${realm.endpoint}`)
-      client.socket.disconnect()
+      disconnectClient(client)
     }
   }, 20 * 1000)
 }
