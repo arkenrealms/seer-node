@@ -269,6 +269,8 @@ export async function connectRealm(app, realm) {
 
         await rsCall(client, 'PingRequest')
 
+        clearTimeout(client.pingReplyTimeout)
+
         client.pingerTimeout = setTimeout(pinger, 5 * 1000)
       }
 
@@ -290,8 +292,6 @@ export async function connectRealm(app, realm) {
 
   client.socket.on('PongRequest', function (msg) {
     log(msg)
-
-    clearTimeout(client.pingReplyTimeout)
 
     client.socket.emit('PongResponse')
   })
