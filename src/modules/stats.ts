@@ -152,8 +152,8 @@ export async function monitorGeneralStats(app) {
           farm.lpTotalSupply = toShort(lpTotalSupply.toString())
           farm.tokenDecimals = tokenDecimals
           farm.quoteTokenDecimals = quoteTokenDecimals
-          farm.tokenTotalSupply = toShort((await app.contracts.token.totalSupply()).toString())
-          farm.tokenTotalBurned = toShort((await app.contracts.token.balanceOf('0x000000000000000000000000000000000000dEaD')).toString())
+          farm.tokenTotalSupply = toShort((await tokenContract.totalSupply()).toString())
+          farm.tokenTotalBurned = toShort((await tokenContract.balanceOf('0x000000000000000000000000000000000000dEaD')).toString())
 
           // log(farm)
 
