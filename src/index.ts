@@ -119,56 +119,56 @@ async function init() {
       {
         name: 'getAllMarketEvents',
         instance: getAllMarketEvents,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
       {
         name: 'monitorItemEvents',
         instance: monitorItemEvents,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
       {
         name: 'monitorBarracksEvents',
         instance: monitorBarracksEvents,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
       {
         name: 'monitorMarketEvents',
         instance: monitorMarketEvents,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
       {
         name: 'monitorCharacterEvents',
         instance: monitorCharacterEvents,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
       {
         name: 'monitorGeneralStats',
         instance: monitorGeneralStats,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
       {
         name: 'monitorCraftingStats',
         instance: monitorCraftingStats,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
       {
         name: 'monitorMeta',
         instance: monitorMeta,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
       {
         name: 'monitorCoordinator',
         instance: monitorCoordinator,
-        async: true,
-        timeout: 0
+        async: false,
+        timeout: 1 * 1000
       },
     ]
 
