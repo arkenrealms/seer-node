@@ -35,8 +35,8 @@ function _initProvider(app) {
     app.contracts.characterFactory = new ethers.Contract(getAddress(app.contractInfo.characterFactory), app.contractMetadata.ArcaneCharacterFactoryV3.abi, app.signers.read)
     app.contracts.profile = new ethers.Contract(getAddress(app.contractInfo.profile), app.contractMetadata.ArcaneProfile.abi, app.signers.read)
     app.contracts.sender = new ethers.Contract(getAddress(app.contractInfo.sender), app.contractMetadata.RuneSenderV1.abi, app.signers.read)
-    app.contracts.busd = new ethers.Contract(getAddress(app.contractInfo.busd), app.contractMetadata.BEP20Contract.abi, app.signers.read)
-    app.contracts.wbnb = new ethers.Contract(getAddress(app.contractInfo.wbnb), app.contractMetadata.BEP20Contract.abi, app.signers.read)
+    app.contracts.busd = new ethers.Contract(getAddress(app.contractInfo.busd), app.contractMetadata.BEP20.abi, app.signers.read)
+    app.contracts.wbnb = new ethers.Contract(getAddress(app.contractInfo.wbnb), app.contractMetadata.BEP20.abi, app.signers.read)
   } catch(e) {
     log(`Couldn't setup provider.`)
   }
@@ -71,7 +71,7 @@ export function initWeb3(app) {
   app.contractMetadata.ArcaneProfile = ArcaneProfile
   app.contractMetadata.ArcaneItems = ArcaneItems
   app.contractMetadata.RuneSenderV1 = RuneSenderV1
-  app.contractMetadata.BEP20Contract = BEP20Contract
+  app.contractMetadata.BEP20 = BEP20Contract
 
   app.signers = {
     read: undefined,
