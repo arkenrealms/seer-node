@@ -66,11 +66,12 @@ export function initDb(app) {
       {
         "key": "local1",
         "name": "Local",
+        "roundId": app.db.evolutionRealms?.[0]?.roundId || 1,
         "regionId": 1,
         "playerCount": 0,
         "speculatorCount": 0,
         "version": "1.0.0",
-        "endpoint": "http://localhost:3006",
+        "endpoint": "localhost:3006",
         "games": [],
         "status": "online",
         "rewardItemAmount": 0,
@@ -417,6 +418,14 @@ export function initDb(app) {
     await app.db.saveToken(token)
   }
 
+  function read(filePath, defaultValue) {
+    try {
+      return jetpack.read(path.resolve(filePath), 'json') || defaultValue
+    } catch (e) {
+      return defaultValue
+    }
+  }
+
   app.db.loadUser = (address) => {
     return {
       address,
@@ -441,17 +450,17 @@ export function initDb(app) {
         runes: {},
         items: {}
       },
-      ...(jetpack.read(path.resolve(`./db/users/${address}/overview.json`), 'json') || {}),
-      achievements: (jetpack.read(path.resolve(`./db/users/${address}/achievements.json`), 'json') || []),
-      characters: (jetpack.read(path.resolve(`./db/users/${address}/characters.json`), 'json') || []),
-      evolution: (jetpack.read(path.resolve(`./db/users/${address}/evolution.json`), 'json') || {}),
+      ...read(`./db/users/${address}/overview.json`, {}),
+      achievements: read(`./db/users/${address}/achievements.json`, []),
+      characters: read(`./db/users/${address}/characters.json`, []),
+      evolution: read(`./db/users/${address}/evolution.json`, {}),
       inventory: {
         items: [],
-        ...(jetpack.read(path.resolve(`./db/users/${address}/inventory.json`), 'json') || {})
+        ...read(`./db/users/${address}/inventory.json`, {})
       },
       market: {
         trades: [],
-        ...(jetpack.read(path.resolve(`./db/users/${address}/market.json`), 'json') || {})
+        ...read(`./db/users/${address}/market.json`, {})
       }
     }
   }

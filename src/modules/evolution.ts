@@ -6,7 +6,7 @@ import { fancyTimeFormat } from '../util/time'
 import md5 from 'js-md5'
 import { log, logError } from '../util'
 import { getClientSocket } from '../util/socket'
-import { verifySignature, getSignedRequest } from '../util/web3'
+import { isValidRequest, getSignedRequest } from '../util/web3'
 
 const shortId = require('shortid')
 
@@ -30,9 +30,10 @@ async function isConnected() {
 const ioCallbacks = {}
 
 async function rsCall(client, name, data = undefined) {
-  return new Promise(resolve => {
-    const id = shortId()
-    
+  const id = shortId()
+  const signature = await getSignedRequest(data)
+  
+  return new Promise(async (resolve) => {
     ioCallbacks[id] = resolve
 
     client.reqTimeout = setTimeout(function() {
@@ -48,7 +49,7 @@ async function rsCall(client, name, data = undefined) {
 
     log('Emit Realm', name, { id, data })
 
-    client.socket.emit(name, { id, data })
+    client.socket.emit(name, { id, signature, data })
   })
 }
 
@@ -89,7 +90,7 @@ async function setRealmConfig(app, realm) {
 
 async function updateRealm(app, realm) {
   try {
-    const infoRes = await rsCall(games.evolution.realms[realm.key].client, 'InfoRequest') as any
+    const infoRes = await rsCall(games.evolution.realms[realm.key].client, 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
 
     if (!infoRes || infoRes.status !== 1) {
       setRealmOffline(realm)
@@ -110,7 +111,7 @@ async function updateRealm(app, realm) {
       rewardItemAmount: game.rewardItemAmount,
       rewardWinnerAmount: game.rewardWinnerAmount,
       gameMode: game.gameMode,
-      roundId: game.round.id,
+      roundId: game.roundId,
       roundStartedAt: game.round.startedAt,
       timeLeft: ~~(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
       timeLeftText: fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
@@ -242,7 +243,7 @@ export async function connectRealm(app, realm) {
   }
 
   client.isConnecting = true
-  client.socket = getClientSocket('https://' + realm.endpoint) // TODO: RS should be running things
+  client.socket = getClientSocket((process.env.RUNE_ENV === 'local' ? 'http://' : 'https://') + realm.endpoint) // TODO: RS should be running things
 
   client.socket.on('connect', async () => {
     try {
@@ -302,7 +303,7 @@ export async function connectRealm(app, realm) {
     try {
       log('Ban', req)
 
-      if (await verifySignature(req.signature) && app.db.evolution.modList.includes(req.signature.address)) {
+      if (await isValidRequest(req) && app.db.evolution.modList.includes(req.signature.address)) {
         app.db.addBanList('evolution', req.data.target)
   
         app.db.saveBanList()
@@ -447,13 +448,21 @@ export async function connectRealm(app, realm) {
     try {
       log('SaveRoundRequest', req)
 
-      if (!await verifySignature(req.signature) && app.db.evolution.modList.includes(req.signature.address)) {
+      if (!await isValidRequest(req) && app.db.evolution.modList.includes(req.signature.address)) {
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
           data: { status: 0, message: 'Invalid signature' }
         })
         return
       }
+
+      // if (req.data.roundId > realm.roundId) {
+      //   client.socket.emit('SaveRoundResponse', {
+      //     id: req.id,
+      //     data: { status: 0, message: 'Invalid round id' }
+      //   })
+      //   return
+      // }
 
       const users = []
       // log(req)
@@ -537,7 +546,19 @@ export async function connectRealm(app, realm) {
       }
 
       for (const user of users) {
-        app.db.saveUser(user)
+        await app.db.saveUser(user)
+      }
+
+      if (req.data.roundId > realm.roundId) {
+        realm.roundId = req.data.roundId
+      } else if (req.data.roundId < realm.roundId) {
+        client.socket.emit('SaveRoundResponse', {
+          id: req.id,
+          data: { status: 0, message: 'Round id too low' }
+        })
+        return
+      } else {
+        realm.roundId += 1
       }
 
       log('Round saved')
@@ -728,6 +749,10 @@ export async function connectRealms(app) {
           connectTimeout: null,
           reqTimeout: null
         }
+      }
+
+      if (!realm.roundId) {
+        realm.roundId = 1
       }
 
       if (!games.evolution.realms[realm.key].client.isConnecting && !games.evolution.realms[realm.key].client.isAuthed) {

@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import * as ethers from 'ethers'
-import { log, logError } from '../util'
+import { log, logError, wait } from '../util'
 import { iterateBlocks, getAddress, getSignedRequest } from '../util/web3'
 
 export async function getAllSenderEvents(app) {
@@ -91,6 +91,7 @@ export async function getAllSenderEvents(app) {
       } catch (ex) {
         logError(ex)
         logError("Error parsing log: ", log2)
+        await wait(1000)
       }
     }
 
@@ -112,6 +113,7 @@ export async function getAllSenderEvents(app) {
     log('Finished')
   } catch(e) {
     logError(e)
+    await wait(1000)
   }
 
   app.config.sender.updating = false
