@@ -7,31 +7,31 @@ import { ItemsMainCategoriesType } from '../data/items.type'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '../data/items'
 
 export async function monitorMeta(app) {
-  console.log('Saving achievement data')
-  jetpack.write(path.resolve('./db/achievements.json'), beautify(achievementData, null, 2), { atomic: true })
-
-  console.log('Saving item data')
-  jetpack.write(path.resolve('./db/items.json'), beautify(itemData, null, 2), { atomic: true })
-
-  console.log('Saving item attribute data')
-  jetpack.write(path.resolve('./db/itemAttributes.json'), beautify(ItemAttributes, null, 2), { atomic: true })
-
-  console.log('Saving skill data')
-  jetpack.write(path.resolve('./db/skills.json'), beautify(SkillNames, null, 2), { atomic: true })
-
-  console.log('Saving class data')
-  jetpack.write(path.resolve('./db/classes.json'), beautify(ClassNames, null, 2), { atomic: true })
-
-  console.log('Saving item rarity data')
-  jetpack.write(path.resolve('./db/itemRarity.json'), beautify(ItemRarity, null, 2), { atomic: true })
-
-  console.log('Saving item type data')
-  jetpack.write(path.resolve('./db/itemTypes.json'), beautify(ItemTypeToText, null, 2), { atomic: true })
-
-  console.log('Saving item slot data')
-  jetpack.write(path.resolve('./db/itemSlots.json'), beautify(ItemSlotToText, null, 2), { atomic: true })
-
   try {
+    console.log('Saving achievement data')
+    jetpack.write(path.resolve('./db/achievements.json'), beautify(achievementData, null, 2), { atomic: true })
+  
+    console.log('Saving item data')
+    jetpack.write(path.resolve('./db/items.json'), beautify(itemData, null, 2), { atomic: true })
+  
+    console.log('Saving item attribute data')
+    jetpack.write(path.resolve('./db/itemAttributes.json'), beautify(ItemAttributes, null, 2), { atomic: true })
+  
+    console.log('Saving skill data')
+    jetpack.write(path.resolve('./db/skills.json'), beautify(SkillNames, null, 2), { atomic: true })
+  
+    console.log('Saving class data')
+    jetpack.write(path.resolve('./db/classes.json'), beautify(ClassNames, null, 2), { atomic: true })
+  
+    console.log('Saving item rarity data')
+    jetpack.write(path.resolve('./db/itemRarity.json'), beautify(ItemRarity, null, 2), { atomic: true })
+  
+    console.log('Saving item type data')
+    jetpack.write(path.resolve('./db/itemTypes.json'), beautify(ItemTypeToText, null, 2), { atomic: true })
+  
+    console.log('Saving item slot data')
+    jetpack.write(path.resolve('./db/itemSlots.json'), beautify(ItemSlotToText, null, 2), { atomic: true })
+  
     for (const _item of itemData[ItemsMainCategoriesType.OTHER]) {
       const item = _item as any
       item.icon = item.icon.replace('undefined', 'https://rune.game/')
@@ -39,6 +39,8 @@ export async function monitorMeta(app) {
       if (item.recipe) {
         item.recipe.requirement = item.recipe.requirement.map(r => ({...r, id: RuneNames[r.id]}))
       }
+
+      if (!item.branches?.[1]) continue
 
       item.branches[1].attributes.map(a => ({...a, description: ItemAttributesById[a.id].description }))
 
