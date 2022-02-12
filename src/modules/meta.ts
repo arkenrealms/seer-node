@@ -42,7 +42,7 @@ export async function monitorMeta(app) {
 
       if (!item.branches?.[1]) continue
 
-      item.branches[1].attributes.map(a => ({...a, description: ItemAttributesById[a.id].description }))
+      item.branches[1].attributes.map(a => ({...a, description: ItemAttributesById[a.id]?.description }))
 
       const itemJson = {
         "description": Array.isArray(item.branches[1].description) ? item.branches[1].description[0] : item.branches[1].description,
