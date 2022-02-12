@@ -80,7 +80,7 @@ function setRealmOffline(realm) {
 }
 
 async function setRealmConfig(app, realm) {
-  const configRes = await rsCall(games.evolution.realms[realm.key].client, 'SetConfigRequest', app.db.evolutionConfig) as any
+  const configRes = await rsCall(games.evolution.realms[realm.key].client, 'SetConfigRequest', { config: app.db.evolutionConfig }) as any
 
   if (configRes.status !== 1) {
     setRealmOffline(realm)
@@ -233,6 +233,8 @@ function disconnectClient(client) {
   client.socket.close()
   cleanupClient(client)
 }
+
+const runes = ['el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'amn', 'sol', 'shael', 'dol', 'hel', 'io', 'lum', 'ko', 'fal', 'lem',  'pul', 'um', 'mal', 'ist', 'gul', 'vex', 'ohm', 'lo', 'sur', 'ber', 'jah', 'cham', 'zod']
 
 export async function connectRealm(app, realm) {
   log('Connecting to realm', realm)
@@ -483,17 +485,23 @@ export async function connectRealm(app, realm) {
               return
             }
 
-            if (!user.rewards.runes[pickup.rewardItemName.toLowerCase()]) {
-              user.rewards.runes[pickup.rewardItemName.toLowerCase()] = 0
+            const runeSymbol = pickup.rewardItemName.toLowerCase()
+
+            if (!runes.includes(runeSymbol)) {
+              continue
             }
 
-            user.rewards.runes[pickup.rewardItemName.toLowerCase()] += pickup.quantity
-
-            if (!user.lifetimeRewards.runes[pickup.rewardItemName.toLowerCase()]) {
-              user.lifetimeRewards.runes[pickup.rewardItemName.toLowerCase()] = 0
+            if (!user.rewards.runes[runeSymbol]) {
+              user.rewards.runes[runeSymbol] = 0
             }
 
-            user.lifetimeRewards.runes[pickup.rewardItemName.toLowerCase()] += pickup.quantity
+            user.rewards.runes[runeSymbol] += pickup.quantity
+
+            if (!user.lifetimeRewards.runes[runeSymbol]) {
+              user.lifetimeRewards.runes[runeSymbol] = 0
+            }
+
+            user.lifetimeRewards.runes[runeSymbol] += pickup.quantity
           } else {
             user.rewards.items[pickup.id] = {
               name: pickup.name,
