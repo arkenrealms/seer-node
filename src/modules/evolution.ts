@@ -166,6 +166,7 @@ async function updateRealms(app) {
   app.db.evolution.playerCount = playerCount
 
   for (const server of app.db.evolutionServers) {
+    if (server.key === 'tournament1') continue
     server.status = 'offline'
   }
 
