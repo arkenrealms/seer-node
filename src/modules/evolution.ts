@@ -491,13 +491,13 @@ export async function connectRealm(app, realm) {
               continue
             }
 
-            if (!user.rewards.runes[runeSymbol]) {
+            if (!user.rewards.runes[runeSymbol] || user.rewards.runes[runeSymbol] < 0.000000001) {
               user.rewards.runes[runeSymbol] = 0
             }
 
             user.rewards.runes[runeSymbol] += pickup.quantity
 
-            if (!user.lifetimeRewards.runes[runeSymbol]) {
+            if (!user.lifetimeRewards.runes[runeSymbol] || user.lifetimeRewards.runes[runeSymbol] < 0.000000001) {
               user.lifetimeRewards.runes[runeSymbol] = 0
             }
 
@@ -541,6 +541,10 @@ export async function connectRealm(app, realm) {
         const user = users.find(u => u.address === player.address)
 
         if (!user.rewards.runes['zod']) {
+          user.rewards.runes['zod'] = 0
+        }
+
+        if (user.rewards.runes['zod'] < 0) {
           user.rewards.runes['zod'] = 0
         }
 

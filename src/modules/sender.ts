@@ -66,11 +66,15 @@ export async function getAllSenderEvents(app) {
                 timestamp: new Date().getTime(),
               })
 
-              user.rewards.runes[rune.key] -= rune.value
+              // if (!user.rewards.runes[rune.key]) {
+              //   user.rewards.runes[rune.key] = 0
+              // }
 
-              if (user.rewards.runes[rune.key] < 0) {
-                user.rewards.runes[rune.key] = 0
-              }
+              // user.rewards.runes[rune.key] -= rune.value
+
+              // if (user.rewards.runes[rune.key] < 0.000000001) {
+              //   user.rewards.runes[rune.key] = 0
+              // }
             }
           }
         }

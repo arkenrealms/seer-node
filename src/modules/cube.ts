@@ -76,6 +76,10 @@ function initEventHandler(app) {
             })
 
             user.rewards.runes[rune.key] -= rune.value
+
+            if (user.rewards.runes[rune.key] < 0.000000001) {
+              user.rewards.runes[rune.key] = 0
+            }
           }
 
           for (const item of req.data.items) {
