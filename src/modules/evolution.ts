@@ -40,7 +40,7 @@ async function rsCall(client, name, data = undefined) {
       resolve({ status: 0, message: 'Request timeout' })
 
       delete ioCallbacks[id]
-    }, 5 * 1000)
+    }, 30 * 1000)
 
     if (!client.socket?.connected) {
       logError('Not connected to realm server.')
@@ -739,7 +739,7 @@ export async function connectRealm(app, realm) {
       log(`Couldnt connect/authorize ${realm.key} on ${realm.endpoint}`)
       disconnectClient(client)
     }
-  }, 20 * 1000)
+  }, 60 * 1000)
 }
 
 export async function connectRealms(app) {
@@ -795,7 +795,7 @@ export async function monitorEvolutionRealms(app) {
     app.realm.emitAll = emitAll.bind(null, app)
   }
 
-  connectRealms(app)
+  await connectRealms(app)
 
   setTimeout(() => monitorEvolutionRealms(app), 30 * 1000)
 }

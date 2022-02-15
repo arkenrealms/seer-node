@@ -942,7 +942,6 @@ export const ItemAttributes = {
     max: 100,
     description: `{parameter1} {parameter2} {parameter3}`,
   },
-  
 }
 
 export const SkillNames = {
@@ -3157,7 +3156,7 @@ export const itemData = {
             { ...ItemAttributes.RandomRuneExchange, min: 0, max: 2 },
             { ...ItemAttributes.HarvestOverTime, min: 0, max: 3 },
             { ...ItemAttributes.MagicFind, min: 0, max: 4 },
-            { ...ItemAttributes.HarvestBurn, min: 0, max: 3 }
+            { ...ItemAttributes.HarvestBurn, min: 0, max: 3 },
           ],
           perfection: [10, 2, 3, 4, 0],
         },
@@ -3166,11 +3165,22 @@ export const itemData = {
         },
         [Games.Infinite.id]: {
           attributes: [
-            { ...ItemAttributes.DamageReduce, min: 10, max: 14, description: "{Value}% Reduced Fire Damage" },
+            { ...ItemAttributes.DamageReduce, min: 10, max: 14, description: '{Value}% Reduced Fire Damage' },
             { ...ItemAttributes.IncreaseAbsorb, min: 4, max: 10, description: '{Value}% Increased Fire Absorb' },
-            { ...ItemAttributes.IncreaseRandomStat, min: 0, max: 3, description: "Increase Stat: {Value}", map: {0: "+10% Magic Find", 1: "+5% Movement Speed", 2: "+10% Energy", 3: "+14% Health"} },
-            { ...ItemAttributes.IncreaseAilmentChance, min: 4, max: 8, description: '{Value}% Increased Burn Ailment Chance' },
-            { ...ItemAttributes.UnlockSkills, min: 1, max: 1, description: "Unlocks Fire Nova and Infernal Cascade" }
+            {
+              ...ItemAttributes.IncreaseRandomStat,
+              min: 0,
+              max: 3,
+              description: 'Increase Stat: {Value}',
+              map: { 0: '+10% Magic Find', 1: '+5% Movement Speed', 2: '+10% Energy', 3: '+14% Health' },
+            },
+            {
+              ...ItemAttributes.IncreaseAilmentChance,
+              min: 4,
+              max: 8,
+              description: '{Value}% Increased Burn Ailment Chance',
+            },
+            { ...ItemAttributes.UnlockSkills, min: 1, max: 1, description: 'Unlocks Fire Nova and Infernal Cascade' },
           ],
         },
         [Games.Guardians.id]: {
@@ -3319,16 +3329,16 @@ export const itemData = {
               max: SkillIdByName['Evasion'],
               value: SkillIdByName['Evasion'],
               map: SkillNames,
-            }
+            },
           ],
-          perfection: [10, 1, 5, 10]
+          perfection: [10, 1, 5, 10, undefined, undefined],
         },
         [Games.Evolution.id]: {
           attributes: [],
         },
         [Games.Infinite.id]: {
           attributes: [
-            { ...ItemAttributes.DamageReduce, min: 5, max: 10, description: "{Value}% Reduced Physical Damage" },
+            { ...ItemAttributes.DamageReduce, min: 5, max: 10, description: '{Value}% Reduced Physical Damage' },
             { ...ItemAttributes.DoublePickupChance, min: 0, max: 1 },
             { ...ItemAttributes.AttackSpeed, min: 0, max: 5 },
             { ...ItemAttributes.CriticalHitChance, min: 4, max: 10 },
@@ -3339,7 +3349,7 @@ export const itemData = {
               max: SkillIdByName['Arcane Orbs'],
               value: SkillIdByName['Arcane Orbs'],
               map: SkillNames,
-            }
+            },
           ],
         },
         [Games.Guardians.id]: {
@@ -3579,7 +3589,12 @@ export const itemData = {
             { ...ItemAttributes.IncreaseStat, min: 1, max: 5, description: '{Value}% Energy Regeneration' },
             { ...ItemAttributes.IncreaseStat, min: 1, max: 5, description: '{Value}% Attack Speed' },
             { ...ItemAttributes.IncreaseRankRewardBonus, min: 1, max: 5 },
-            { ...ItemAttributes.IncreaseDamageTaken, min: 0, max: 5, description: '{Value}% Additional Damage Taken (While Idle)' },
+            {
+              ...ItemAttributes.IncreaseDamageTaken,
+              min: 0,
+              max: 5,
+              description: '{Value}% Additional Damage Taken (While Idle)',
+            },
             { ...ItemAttributes.UnlockSkills, min: 0, max: 4, description: 'Unlock Skill: Berserker Soul' },
           ],
         },
@@ -4024,11 +4039,18 @@ export const itemData = {
           attributes: [
             { ...ItemAttributes.Rarity, min: 3, max: 6, map: ItemRarityNameById },
             { ...ItemAttributes.HarvestYield, min: 2, max: 5 },
-            { ...ItemAttributes.RemoveFees, min: 20, max: 50 },
+            { ...ItemAttributes.RemoveFees, min: 4, max: 10 },
             { ...ItemAttributes.MagicFind, min: 14, max: 20 },
             { ...ItemAttributes.FindShard, min: 10, max: 10 },
           ],
           perfection: [undefined, 5, 50, 20, undefined],
+          presets: {
+            [ItemRarity.Magical.id]: [6, 2, 4, 14, 10],
+            [ItemRarity.Rare.id]: [5, 3, 6, 16, 10],
+            [ItemRarity.Epic.id]: [4, 4, 8, 18, 10],
+            [ItemRarity.Mythic.id]: [3, 5, 10, 20, 10],
+            [ItemRarity.Unique.id]: [3, 5, 10, 20, 10],
+          },
         },
         [Games.Evolution.id]: {
           attributes: [],
@@ -4328,10 +4350,13 @@ export const itemData = {
             // { ...ItemAttributes.Sockets, value: 5, min: 5, max: 5 },
           ],
           perfection: [],
-          magical: [6, 2, 5, 0, 1, 20, 10],
-          rare: [5, 2, 5, 0, 1, 20, 10],
-          epic: [4, 2, 5, 0, 1, 20, 10],
-          mythic: [3, 2, 5, 0, 1, 20, 10],
+          presets: {
+            [ItemRarity.Magical.id]: [6, 2, 5, 0, 1, 20, 10, 9],
+            [ItemRarity.Rare.id]: [5, 2, 5, 0, 2, 20, 7, 9],
+            [ItemRarity.Epic.id]: [4, 3, 5, 1, 4, 20, 3, 9],
+            [ItemRarity.Mythic.id]: [3, 4, 5, 1, 5, 20, 0, 9],
+            [ItemRarity.Unique.id]: [3, 4, 5, 1, 5, 20, 0, 9],
+          },
         },
         [Games.Evolution.id]: {
           attributes: [],
@@ -7161,219 +7186,10 @@ export const itemData = {
     },
   ],
   [ItemsMainCategoriesType.WEAPONS]: [
-    // {
-    //   name: "Swiftoak's Relic",
-    //   category: ItemCategoriesType.WEAPON,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/weapons/BotW_Tree_Branch_Icon.png',
-    //   value: '2',
-    //   isNew: true,
-    //   description:
-    //     "These branches look common, but it's surprisingly rare relics of the once powerful Swiftoak ent. It doesn't do much damage but could be useful in powerful arcane recipes.",
-    // },
-    // {
-    //   name: 'Etherwarp Blade',
-    //   category: ItemCategoriesType.WEAPON,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/weapons/BotW_Ancient_Short_Sword_Icon.png',
-    //   value: '40',
-    //   description:
-    //     'The blade of this sword was made using an ancient power lost to this modern age. Its blade appears only when drawn, and its cutting power surpasses known modern age swords.',
-    // },
-    // {
-    //   name: 'Dragonhollow',
-    //   category: ItemCategoriesType.WEAPON,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/weapons/BotW_Dragonbone_Boko_Club_Icon.png',
-    //   value: '24',
-    //   isNew: true,
-    //   description:
-    //     'The Dragonhollow club has been reinforced with fossilized bones to maximize clobbering potential. Only the brawniest of Cordema druids can manage its immense weight.',
-    // },
-    // {
-    //   name: 'Feathered Edge',
-    //   category: ItemCategoriesType.WEAPON,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/weapons/BotW_Feathered_Edge_Icon.png',
-    //   value: '15',
-    //   description:
-    //     'Rito craftsmen forged this lightweight, double-edge sword so Rito warriors could soar into battle unhindered by its weight.',
-    // },
-    // {
-    //   name: 'Flameblade',
-    //   category: ItemCategoriesType.WEAPON,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/weapons/BotW_Flameblade_Icon.png',
-    //   value: '24',
-    //   description:
-    //     'This magical sword was forged in the lava of Death Mountain. It leaves white-hot flames in its wake when the blade glows red.',
-    // },
-    // {
-    //   name: 'Broadsword',
-    //   category: ItemCategoriesType.WEAPON,
-    //   isNew: true,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + "items/weapons/BotW_Soldier's_Broadsword_Icon.png",
-    //   value: '14',
-    //   description:
-    //     'A sword brandished by the soldiers who once protected Hyrule Castle. Its durable blade is well tuned for slaying monsters.',
-    // },
-    // {
-    //   name: 'Claymore',
-    //   category: ItemCategoriesType.WEAPON,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/weapons/BotW_Royal_Claymore_Icon.png',
-    //   value: '52',
-    //   description:
-    //     "A two-handed sword issued to the Hyrulean royal family's immediate guard detail. Its powerful strikes are said to crush an opponent's body and resolve alike.",
-    // },
-    // {
-    //   name: 'Cloudstrike',
-    //   category: ItemCategoriesType.WEAPON,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/weapons/BotW_Master_Sword_Icon.png',
-    //   value: '30',
-    //   description:
-    //     'The legendary sword that seals the darkness. Its blade gleams with a sacred luster that can oppose the Calamity. Only a hero chosen by the sword itself may wield it.',
-    // },
   ],
   [ItemsMainCategoriesType.SHIELDS]: [
-    // {
-    //   name: 'Wooden Shield',
-    //   category: ItemCategoriesType.SHIELD,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/shields/BotW_Wooden_Shield_Icon.png',
-    //   value: '2',
-    //   description:
-    //     'This lightweight, simple shield is ideal for less-experienced fighters. It can withstand light attacks, but blocking stronger blows is not recommended.',
-    // },
-    // {
-    //   name: 'Buckler',
-    //   category: ItemCategoriesType.SHIELD,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + "items/shields/BotW_Traveler's_Shield_Icon.png",
-    //   value: '4',
-    //   description:
-    //     'A sturdy shield loved by many an adventurer. It is made of animal hide and sturdy wood and is best suited to defending against weak monsters or animals.',
-    // },
-    // {
-    //   name: 'Scutum',
-    //   category: ItemCategoriesType.SHIELD,
-    //   isNew: true,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/shields/BotW_Gerudo_Shield_Icon.png',
-    //   value: '20',
-    //   description:
-    //     "The design of this metal shield has changed over time to match the Gerudo's sword-and-shield fighting style. It's favored by soldiers and travelers alike.",
-    // },
-    // {
-    //   name: 'Ancient Shield',
-    //   category: ItemCategoriesType.SHIELD,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/shields/BotW_Ancient_Shield_Icon.png',
-    //   value: '70',
-    //   description:
-    //     'This shield was made using ancient Sheikah technology. Its surface glows blue when raised in defense. Enhanced functionality allows it to deflect Guardian beams.',
-    // },
   ],
   [ItemsMainCategoriesType.ARMORS]: [
-    // {
-    //   name: 'Zora Helm',
-    //   category: ItemCategoriesType.HELM,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Zora_Helm_Icon.png',
-    //   value: '3',
-    //   bonus: 'swimming',
-    //   description: 'Zora headgear made from dragon scales. Increases swimming speed and allows you to use Spin Attack.',
-    // },
-    // {
-    //   name: 'Zora Armor',
-    //   category: ItemCategoriesType.ARMOR,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Zora_Armor_Icon.png',
-    //   value: '3',
-    //   bonus: 'swimming',
-    //   description:
-    //     "Custom armor painstakingly crafted by each generation's Zora princess for her future husband. Wearing it will give you the ability to swim up waterfalls.",
-    // },
-    // {
-    //   name: 'Zora Greaves',
-    //   category: ItemCategoriesType.GREAVE,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Zora_Greaves_Icon.png',
-    //   value: '3',
-    //   bonus: 'swimming',
-    //   description:
-    //     "These greave have been passed down among the Zora for generations. It's been said they're crafted using dragon scales. Equip them to swim faster.",
-    // },
-    // {
-    //   name: "Climber's Bandanna",
-    //   category: ItemCategoriesType.HELM,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + "items/armors/BotW_Climber's_Bandanna_Icon.png",
-    //   value: '3',
-    //   bonus: 'climbing',
-    //   description:
-    //     "It may look like a regular bandanna, but it's actually infused with ancient technology that enhances core strength to improve your climbing ability.",
-    // },
-    // {
-    //   name: 'Climbing Gear',
-    //   category: ItemCategoriesType.ARMOR,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Climbing_Gear_Icon.png',
-    //   value: '3',
-    //   bonus: 'climbing',
-    //   description:
-    //     'The ancient technology in this gear will make you a better climber. The special no-slip gloves help you use your energy more efficiently to facilitate nimble climbing.',
-    // },
-    // {
-    //   name: 'Climbing Boots',
-    //   category: ItemCategoriesType.GREAVE,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Climbing_Boots_Icon.png',
-    //   value: '3',
-    //   bonus: 'climbing',
-    //   description:
-    //     'These rock-climbing boots have special no-slip toes that help you cling to walls. This ancient technology facilitates more nimble climbing.',
-    // },
-    // {
-    //   name: 'Flamebreaker Helm',
-    //   category: ItemCategoriesType.HELM,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Flamebreaker_Helm_Icon.png',
-    //   value: '3',
-    //   bonus: 'fire',
-    //   description:
-    //     "Stone headgear made by Goron craftsmen to protect tourists visiting Goron City. As if its flame resistance isn't enough of a selling point, it also covers your entire head!",
-    // },
-    // {
-    //   name: 'Flamebreaker Armor',
-    //   category: ItemCategoriesType.ARMOR,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Flamebreaker_Armor_Icon.png',
-    //   value: '3',
-    //   bonus: 'fire',
-    //   description:
-    //     "Armor crafted by Gorons for Hylians curious enough to visit Goron City. It's made from fire-resistant rocks to protect the wearer.",
-    // },
-    // {
-    //   name: 'Flamebreaker Boots',
-    //   category: ItemCategoriesType.GREAVE,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Flamebreaker_Boots_Icon.png',
-    //   value: '3',
-    //   bonus: 'fire',
-    //   description:
-    //     'Goron artisans used flame-resistant rocks to craft these fireproof boots for curious Hylians visiting Goron City.',
-    // },
-    // {
-    //   name: 'Cap of the Hero',
-    //   category: ItemCategoriesType.HELM,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Cap_of_the_Hero_Icon.png',
-    //   value: '3',
-    //   bonus: 'normal',
-    //   description:
-    //     "According to legend, this cap was once treasured by an ancient hero. It's quite the simple cap, yet there's something about it that's just so appealing...",
-    // },
-    // {
-    //   name: "Champion's Tunic",
-    //   category: ItemCategoriesType.ARMOR,
-    //   isNew: true,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + "items/armors/BotW_Champion's_Tunic_Icon.png",
-    //   value: '5',
-    //   bonus: 'normal',
-    //   description:
-    //     "In ancient Hyrule, this garment could only be worn by one who had earned the respect of the royal family. Equipping it will reveal an enemy's life gauge.",
-    // },
-    // {
-    //   name: 'Hylian Trousers',
-    //   category: ItemCategoriesType.GREAVE,
-    //   isNew: true,
-    //   icon: process.env.REACT_APP_PUBLIC_URL + 'items/armors/BotW_Hylian_Trousers_Icon.png',
-    //   value: '3',
-    //   bonus: 'normal',
-    //   description:
-    //     'Traditional dress trousers of Hyrule. The plush fabric makes these trousers quite comfortable, and their high durability makes them ideal for travelers.',
-    // },
   ],
 }
 
