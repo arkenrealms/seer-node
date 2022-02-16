@@ -90,6 +90,8 @@ async function setRealmConfig(app, realm) {
 
 async function updateRealm(app, realm) {
   try {
+    if (!realm.isAuthed) return
+  
     const infoRes = await rsCall(games.evolution.realms[realm.key].client, 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
 
     if (!infoRes || infoRes.status !== 1) {
@@ -125,11 +127,7 @@ async function updateRealm(app, realm) {
   } catch(e) {
     logError(e)
 
-    realm.status = 'offline'
-    realm.playerCount = 0
-    realm.speculatorCount = 0
-    realm.rewardItemAmount = 0
-    realm.rewardWinnerAmount = 0
+    setRealmOffline(realm)
   }
 
   // log('Updated server', server)
@@ -224,6 +222,7 @@ async function updateRealms(app) {
 
 function cleanupClient(client) {
   client.socket?.close()
+  client.isConnected = false
   client.isConnecting = false
   client.isAuthed = false
 
@@ -233,7 +232,8 @@ function cleanupClient(client) {
 }
 
 function disconnectClient(client) {
-  client.socket.close()
+  log('Disconnecting client', client.key)
+
   cleanupClient(client)
 }
 
@@ -243,7 +243,7 @@ export async function connectRealm(app, realm) {
   log('Connecting to realm', realm)
   const { client } = games.evolution.realms[realm.key]
 
-  if (client.socket?.connected) {
+  if (client.isConnected || client.socket?.connected) {
     cleanupClient(client)
   }
 
@@ -252,6 +252,8 @@ export async function connectRealm(app, realm) {
 
   client.socket.on('connect', async () => {
     try {
+      client.isConnected = true
+
       log('Connected: ' + realm.key)
 
       const res = await rsCall(client, 'AuthRequest', 'myverysexykey') as any
@@ -259,7 +261,7 @@ export async function connectRealm(app, realm) {
       if (res.status === 1) {
         client.isAuthed = true
 
-        clearTimeout(client.timeout)
+        clearTimeout(client.connectTimeout)
 
         await setRealmConfig(app, realm)
         await updateRealm(app, realm)
@@ -760,6 +762,7 @@ export async function connectRealms(app) {
         games.evolution.realms[realm.key].client = {
           isAuthed: false,
           isConnecting: false,
+          isConnected: false,
           socket: null,
           connectTimeout: null,
           reqTimeout: null
@@ -772,7 +775,7 @@ export async function connectRealms(app) {
 
       if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
 
-      if (!games.evolution.realms[realm.key].client.isConnecting && !games.evolution.realms[realm.key].client.isAuthed) {
+      if (!games.evolution.realms[realm.key].client.isConnected && !games.evolution.realms[realm.key].client.isConnecting && !games.evolution.realms[realm.key].client.isAuthed) {
         await connectRealm(app, realm)
       }
     }
