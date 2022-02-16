@@ -273,7 +273,7 @@ export async function connectRealm(app, realm) {
 
       const pinger = async () => {
         client.pingReplyTimeout = setTimeout(function() {
-          log('Realm didnt respond in time, disconnecting')
+          log(`Realm ${realm.key} didnt respond in time, disconnecting`)
           cleanupClient(client)
         }, 70 * 1000)
 

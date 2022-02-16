@@ -9,7 +9,7 @@ const writeLogs = false
 export const isDebug = process.env.HOME === '/Users/dev' || process.env.HOME === '/home/dev' || process.env.HOME === '/root'
 
 export function logError(...msgs) {
-  console.log("[DB]", ...msgs)
+  console.log('[DB]', nowReadable(), ...msgs)
 
   if (!writeLogs) return
 
@@ -24,7 +24,7 @@ export function logError(...msgs) {
 
 export function log(...msgs) {
   if (isDebug) {
-    console.log('[DB]', ...msgs)
+    console.log('[DB]', nowReadable(), ...msgs)
   }
 
   if (!writeLogs) return
@@ -36,6 +36,10 @@ export function log(...msgs) {
   }
 
   jetpack.write(path.resolve('./public/data/log.json'), JSON.stringify(logData, null, 2))
+}
+
+export function nowReadable() {
+  return new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
 }
 
 export function wait(ms) {
