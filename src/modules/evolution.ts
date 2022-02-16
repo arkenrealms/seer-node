@@ -82,7 +82,7 @@ function setRealmOffline(realm) {
 }
 
 async function setRealmConfig(app, realm) {
-  const configRes = await rsCall(games.evolution.realms[realm.key].client, 'SetConfigRequest', { config: app.db.evolutionConfig }) as any
+  const configRes = await rsCall(games.evolution.realms[realm.key].client, 'SetConfigRequest', { config: { ...app.db.evolutionConfig, roundId: realm.roundId } }) as any
 
   if (configRes.status !== 1) {
     setRealmOffline(realm)
@@ -576,7 +576,7 @@ export async function connectRealm(app, realm) {
       } else if (req.data.roundId < realm.roundId) {
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
-          data: { status: 0, message: 'Round id too low' }
+          data: { status: 0, message: `Round id too low (realm.roundId = ${realm.roundId})` }
         })
         return
       } else {
