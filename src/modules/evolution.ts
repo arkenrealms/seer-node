@@ -269,7 +269,7 @@ export async function connectRealm(app, realm) {
         client.pingReplyTimeout = setTimeout(function() {
           log('Realm didnt respond in time, disconnecting')
           cleanupClient(client)
-        }, 20 * 1000)
+        }, 60 * 1000)
 
         await rsCall(client, 'PingRequest')
 
