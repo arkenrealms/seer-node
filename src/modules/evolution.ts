@@ -272,6 +272,8 @@ export async function connectRealm(app, realm) {
       client.isConnecting = false
 
       const pinger = async () => {
+        clearTimeout(client.pingReplyTimeout)
+
         client.pingReplyTimeout = setTimeout(function() {
           log(`Realm ${realm.key} didnt respond in time, disconnecting`)
           cleanupClient(client)
@@ -281,12 +283,13 @@ export async function connectRealm(app, realm) {
 
         clearTimeout(client.pingReplyTimeout)
 
-        client.pingerTimeout = setTimeout(pinger, 5 * 1000)
+        client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
       }
 
-      client.pingerTimeout = setTimeout(pinger, 5 * 1000)
+      client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
     } catch(e) {
       logError(e)
+      cleanupClient(client)
     }
   })
 

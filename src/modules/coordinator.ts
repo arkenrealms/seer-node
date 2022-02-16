@@ -8,7 +8,7 @@ export async function monitorCoordinator(app) {
   try {
     console.log('Update coordinator refers')
     const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`http://104.21.77.16/data/refers.json?${rand}`)
+    const response = await fetch(`http://35.245.242.215/data/refers.json?${rand}`)
 
     const data = await response.json()
 
