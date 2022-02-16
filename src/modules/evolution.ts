@@ -34,13 +34,15 @@ async function rsCall(client, name, data = undefined) {
   const signature = await getSignedRequest(data)
   
   return new Promise(async (resolve) => {
-    ioCallbacks[id] = resolve
+    ioCallbacks[id] = {}
 
-    client.reqTimeout = setTimeout(function() {
+    ioCallbacks[id].resolve = resolve
+
+    ioCallbacks[id].reqTimeout = setTimeout(function() {
       resolve({ status: 0, message: 'Request timeout' })
 
       delete ioCallbacks[id]
-    }, 30 * 1000)
+    }, 60 * 1000)
 
     if (!client.socket?.connected) {
       logError('Not connected to realm server.')
@@ -728,9 +730,9 @@ export async function connectRealm(app, realm) {
     if (ioCallbacks[res.id]) {
       log('Callback', eventName)
 
-      clearTimeout(client.reqTimeout)
+      clearTimeout(ioCallbacks[res.id].reqTimeout)
 
-      ioCallbacks[res.id](res.data)
+      ioCallbacks[res.id].resolve(res.data)
 
       delete ioCallbacks[res.id]
     }
