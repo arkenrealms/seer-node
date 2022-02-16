@@ -143,6 +143,8 @@ async function updateRealms(app) {
   let playerCount = 0
 
   for (const realm of app.db.evolutionRealms) {
+    if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
+
     await updateRealm(app, realm)
 
     const hist = jetpack.read(path.resolve(`./db/evolution/${realm.key}/historical.json`), 'json') || {}
@@ -754,8 +756,6 @@ export async function connectRealms(app) {
         }
       }
 
-      if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
-
       if (!games.evolution.realms[realm.key].client) {
         games.evolution.realms[realm.key].client = {
           isAuthed: false,
@@ -769,6 +769,8 @@ export async function connectRealms(app) {
       if (!realm.roundId) {
         realm.roundId = 1
       }
+
+      if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
 
       if (!games.evolution.realms[realm.key].client.isConnecting && !games.evolution.realms[realm.key].client.isAuthed) {
         await connectRealm(app, realm)
