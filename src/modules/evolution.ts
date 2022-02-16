@@ -747,14 +747,14 @@ export async function connectRealms(app) {
 
   try {
     for (const realm of app.db.evolutionRealms) {
-      if (realm.key === 'ptr1' || realm.key === 'tournament1') continue
-      
       if (!games.evolution.realms[realm.key]) {
         games.evolution.realms[realm.key] = {}
         for (const key in Object.keys(realm)) {
           games.evolution.realms[realm.key][key] = realm[key]
         }
       }
+
+      if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
 
       if (!games.evolution.realms[realm.key].client) {
         games.evolution.realms[realm.key].client = {
