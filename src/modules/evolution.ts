@@ -92,8 +92,6 @@ async function setRealmConfig(app, realm) {
 
 async function updateRealm(app, realm) {
   try {
-    if (!realm.isAuthed) return
-  
     const infoRes = await rsCall(games.evolution.realms[realm.key].client, 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
 
     if (!infoRes || infoRes.status !== 1) {
@@ -162,7 +160,7 @@ async function updateRealms(app) {
 
     playerCount += realm.playerCount
 
-    log(`Realm server updated: ${realm.key}`)
+    log(`Realm ${realm.key} updated`, realm)
   }
 
   app.db.evolution.playerCount = playerCount
@@ -784,8 +782,6 @@ export async function connectRealms(app) {
         await connectRealm(app, realm)
       }
     }
-
-    await updateRealms(app)
   } catch(e) {
     logError(e)
   }
@@ -808,6 +804,7 @@ export async function monitorEvolutionRealms(app) {
   }
 
   await connectRealms(app)
+  await updateRealms(app)
 
   setTimeout(() => monitorEvolutionRealms(app), 30 * 1000)
 }
