@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import * as ethers from 'ethers'
-import { log, logError, wait } from '../util'
-import { iterateBlocks, getAddress, getSignedRequest } from '../util/web3'
+import { log, logError, wait } from '@rune-backend-sdk/util'
+import { iterateBlocks, getAddress, getSignedRequest } from '@rune-backend-sdk/util/web3'
 
 export async function getAllSenderEvents(app) {
   if (app.config.sender.updating) return
@@ -83,7 +83,7 @@ export async function getAllSenderEvents(app) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            signature: await getSignedRequest('rune-databaser/sender')
+            signature: await getSignedRequest(app.web3, app.secrets, 'rune-databaser/sender')
           }),
         }
     

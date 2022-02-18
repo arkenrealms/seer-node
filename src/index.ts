@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
-import { log, logError, isDebug } from './util'
-import { subProcesses, catchExceptions } from './util/process'
+import { log, logError, isDebug } from '@rune-backend-sdk/util'
+import { subProcesses, catchExceptions } from '@rune-backend-sdk/util/process'
 import { initConfig } from './modules/config'
 import { initDb } from './modules/db'
 import { initWeb3 } from './modules/web3'

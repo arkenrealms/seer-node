@@ -1,6 +1,6 @@
 import * as ethers from 'ethers'
-import { getHighestId, log, logError } from '../util'
-import { iterateBlocks, getAddress } from '../util/web3'
+import { getHighestId, log, logError } from '@rune-backend-sdk/util'
+import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 
 export async function getAllCharacterEvents(app) {
   if (app.config.characters.updating) return

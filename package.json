@@ -3,16 +3,11 @@
   "version": "2.0.0",
   "main": "build/src/index.js",
   "scripts": {
-    "dev": "RUNE_ENV=local CUBE_BRIDGE_PORT=7777 ts-node-dev --quiet --respawn ./src/index.ts",
+    "dev": "RUNE_ENV=local CUBE_BRIDGE_PORT=7777 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "build": "NODE_ENV=production tsc",
     "start": "NODE_ENV=production node --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js",
     "forever": "forever start forever-config.json",
-    "clean": "rm forever-script-err.log && rm forever-script-log.log && rm forever-script-out.log && rm nohup.out",
-    "migrate-all": "ts-node -P ./tsconfig.json ./node_modules/.bin/knex migrate:latest --knexfile knexfile.js",
-    "seed-all": "ts-node -P ./tsconfig.json ~/.nvm/versions/node/v14.16.0/bin/knex seed:run --knexfile knexfile.js",
-    "seed": "ts-node -P ./tsconfig.json ~/.nvm/versions/node/v14.16.0/bin/knex seed:run --knexfile knexfile.js --specific=",
-    "knex": "ts-node -P ./tsconfig.json ./node_modules/.bin/knex",
-    "refresh-db": "yarn migrate-all && yarn seed-all"
+    "clean": "rm forever-script-err.log && rm forever-script-log.log && rm forever-script-out.log && rm nohup.out"
   },
   "devDependencies": {
     "@nomiclabs/buidler": "^1.4.7",

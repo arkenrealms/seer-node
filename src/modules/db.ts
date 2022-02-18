@@ -2,10 +2,10 @@ import * as ethers from 'ethers'
 import beautify from 'json-beautify'
 import jetpack from 'fs-jetpack'
 import path from 'path'
-import { log, logError, removeDupes } from '../util'
-import { decodeItem } from '../util/item-decoder'
-import { achievementData } from '../data/achievements'
-import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '../data/items'
+import { log, logError, removeDupes } from '@rune-backend-sdk/util'
+import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
+import { achievementData } from '@rune-backend-sdk/data/achievements'
+import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 
 export function initDb(app) {
   app.db = {
@@ -31,10 +31,10 @@ export function initDb(app) {
     evolutionRealms: jetpack.read(path.resolve('./db/evolution/realms.json'), 'json') || [],
     evolutionServers: jetpack.read(path.resolve('./db/evolution/servers.json'), 'json'),
     evolutionConfig: jetpack.read(path.resolve('./db/evolution/config.json'), 'json') || {
-      "rewardItemAmountPerLegitPlayer": 0.001,
-      "rewardItemAmountMax": 0.02,
-      "rewardWinnerAmountPerLegitPlayer": 0.003,
-      "rewardWinnerAmountMax": 0.04,
+      "rewardItemAmountPerLegitPlayer": 0.0015,
+      "rewardItemAmountMax": 0.03,
+      "rewardWinnerAmountPerLegitPlayer": 0.0053,
+      "rewardWinnerAmountMax": 0.08,
       "rewardItemAmount": 0.02,
       "rewardWinnerAmount": 0.04
     },
@@ -82,7 +82,7 @@ export function initDb(app) {
 
   app.db.saveConfig = async () => {
     log('Saving: config')
-    app.config.updatedDate = (new Date()).toString()
+    app.config.updatedDate = (new Date().getTime()).toString()
     app.config.updatedTimestamp = new Date().getTime()
     jetpack.write(path.resolve('./db/config.json'), beautify(app.config, null, 2, 100), { atomic: true })
   }

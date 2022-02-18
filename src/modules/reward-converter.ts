@@ -1,6 +1,6 @@
 import path from 'path'
 import jetpack from 'fs-jetpack'
-import { log } from '../util'
+import { log } from '@rune-backend-sdk/util'
 
 
 export async function convertRewards(app) {

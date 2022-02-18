@@ -2,9 +2,9 @@ import path from 'path'
 import * as ethers from 'ethers'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { achievementData } from '../data/achievements'
-import { ItemsMainCategoriesType } from '../data/items.type'
-import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '../data/items'
+import { achievementData } from '@rune-backend-sdk/data/achievements'
+import { ItemsMainCategoriesType } from '@rune-backend-sdk/data/items.type'
+import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 
 export async function monitorMeta(app) {
   try {

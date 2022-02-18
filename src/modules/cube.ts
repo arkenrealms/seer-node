@@ -1,7 +1,7 @@
 import fs from 'fs'
 import express from 'express'
-import { log, logError } from '../util'
-import * as websocketUtil from '../util/websocket'
+import { log, logError } from '@rune-backend-sdk/util'
+import * as websocketUtil from '@rune-backend-sdk/util/websocket'
 
 const path = require('path')
 

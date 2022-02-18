@@ -1,9 +1,9 @@
 import * as ethers from 'ethers'
 import BigNumber from 'bignumber.js'
-import { average, toShort } from '../util'
-import { log } from '../util'
-import { getAddress } from '../util/web3'
-import farmsData, { MAINNET, TESTNET, QuoteToken } from '../farms'
+import { average, toShort } from '@rune-backend-sdk/util'
+import { log } from '@rune-backend-sdk/util'
+import { getAddress } from '@rune-backend-sdk/util/web3'
+import farmsData, { QuoteToken } from '@rune-backend-sdk/farmInfo'
 
 export async function monitorGeneralStats(app) {
   try {

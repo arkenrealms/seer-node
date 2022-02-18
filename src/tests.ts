@@ -1,5 +1,3 @@
-
-
 export function updateUserAchievements(app) {
   const user = app.db.loadUser('0x37470038C615Def104e1bee33c710bD16a09FdEf')
   app.db.updateAchievementsByUser(user)
