@@ -262,6 +262,8 @@ export async function connectRealm(app, realm) {
 
         clearTimeout(client.pingReplyTimeout)
 
+        if (!client.isConnected) return
+        
         client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
       }
 
