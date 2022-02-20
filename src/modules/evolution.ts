@@ -206,6 +206,8 @@ async function updateRealms(app) {
 }
 
 function cleanupClient(client) {
+  log('Cleaning up', client.key)
+
   client.socket?.close()
   client.isConnected = false
   client.isConnecting = false
@@ -229,6 +231,7 @@ export async function connectRealm(app, realm) {
   const { client } = games.evolution.realms[realm.key]
 
   if (client.isConnected || client.socket?.connected) {
+    log(`Realm ${realm.key} already connected, disconnecting`)
     cleanupClient(client)
   }
 
@@ -274,6 +277,7 @@ export async function connectRealm(app, realm) {
       client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
     } catch(e) {
       logError(e)
+      log(`Disconnecting ${realm.key} due to error`)
       cleanupClient(client)
     }
   })
@@ -284,13 +288,13 @@ export async function connectRealm(app, realm) {
   })
 
   client.socket.on('PingRequest', function (msg) {
-    log(msg)
+    log('PingRequest', realm.key, msg)
 
     client.socket.emit('PingResponse')
   })
 
   client.socket.on('PongRequest', function (msg) {
-    log(msg)
+    log('PongRequest', realm.key, msg)
 
     client.socket.emit('PongResponse')
   })
@@ -298,7 +302,7 @@ export async function connectRealm(app, realm) {
   client.socket.on('BanPlayerRequest', async function (req) {
     console.log(req)
     try {
-      log('Ban', req)
+      log('Ban', realm.key, req)
 
       if (await isValidRequest(app.web3, req) && app.db.evolution.modList.includes(req.signature.address)) {
         app.db.addBanList('evolution', req.data.target)
@@ -333,7 +337,7 @@ export async function connectRealm(app, realm) {
   })
 
   client.socket.on('ReportPlayerRequest', function (msg) {
-    log(msg)
+    log('ReportPlayerRequest', realm.key, msg)
 
     const { currentGamePlayers, currentPlayer, reportedPlayer } = msg
 
@@ -445,7 +449,7 @@ export async function connectRealm(app, realm) {
     // Iterate the winners, add to the user.evolution.runes
     // Add winning stats to user.evolution
     try {
-      log('SaveRoundRequest', req)
+      log('SaveRoundRequest', realm.key, req)
 
       if (!await isValidRequest(app.web3, req) && app.db.evolution.modList.includes(req.signature.address)) {
         client.socket.emit('SaveRoundResponse', {
