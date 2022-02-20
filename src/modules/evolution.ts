@@ -82,6 +82,8 @@ async function updateRealm(app, realm) {
       return
     }
     
+    log('infoRes', infoRes.data.games)
+
     const { data } = infoRes
 
     realm.playerCount = data.playerCount
