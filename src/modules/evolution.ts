@@ -239,7 +239,7 @@ export async function connectRealm(app, realm) {
 
       log('Connected: ' + realm.key)
 
-      const res = await rsCall(app, realm, 'AuthRequest', 'myverysexykey') as any
+      const res = await rsCall(app, games.evolution.realms[realm.key], 'AuthRequest', 'myverysexykey') as any
 
       if (res.status === 1) {
         client.isAuthed = true
@@ -260,7 +260,7 @@ export async function connectRealm(app, realm) {
           cleanupClient(client)
         }, 70 * 1000)
 
-        await rsCall(app, realm, 'PingRequest')
+        await rsCall(app, games.evolution.realms[realm.key], 'PingRequest')
 
         clearTimeout(client.pingReplyTimeout)
 
