@@ -216,7 +216,7 @@ export async function initCubeBridge(app) {
       })
     }
 
-    app.cubeBridge.emitDirect = websocketUtil.emitDirect.bind(null, app.cubeBridge.io)
+    app.cubeBridge.emitDirect = websocketUtil.emitDirect
     app.cubeBridge.emitAll = websocketUtil.emitAll.bind(null, app.cubeBridge.io)
 
     initEventHandler(app)
