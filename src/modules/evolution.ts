@@ -589,7 +589,7 @@ export async function connectRealm(app, realm) {
     if (!res || !res.id) return
     // console.log(eventName, res)
     if (ioCallbacks[res.id]) {
-      log('Callback', eventName)
+      log('Callback', eventName, res)
 
       clearTimeout(ioCallbacks[res.id].reqTimeout)
 
