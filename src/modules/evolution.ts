@@ -100,7 +100,7 @@ async function updateRealm(app, realm) {
       rewardItemAmount: game.rewardItemAmount,
       rewardWinnerAmount: game.rewardWinnerAmount,
       gameMode: game.gameMode,
-      roundId: game.roundId,
+      roundId: game.round.id,
       roundStartedAt: game.round.startedAt,
       timeLeft: ~~(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
       timeLeftText: fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
