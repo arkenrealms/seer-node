@@ -75,6 +75,8 @@ async function setRealmConfig(app, realm) {
 
 async function updateRealm(app, realm) {
   try {
+    realm.games = []
+
     const infoRes = await rsCall(app, games.evolution.realms[realm.key], 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
 
     if (!infoRes || infoRes.status !== 1) {
