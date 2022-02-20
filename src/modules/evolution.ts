@@ -12,7 +12,7 @@ const shortId = require('shortid')
 
 const ioCallbacks = {}
 
-async function rsCall(app, client, name, data = undefined) {
+async function rsCall(app, realm, name, data = undefined) {
   const id = shortId()
   const signature = await getSignedRequest(app.web3, app.secrets, data)
   
@@ -27,14 +27,14 @@ async function rsCall(app, client, name, data = undefined) {
       delete ioCallbacks[id]
     }, 60 * 1000)
 
-    if (!client.socket?.connected) {
+    if (!realm.client.socket?.connected) {
       logError('Not connected to realm server.')
       return
     }
 
-    log('Emit Realm', name, { id, data })
+    log('Emit Realm', realm.key, name, { id, data })
 
-    client.socket.emit(name, { id, signature, data })
+    realm.client.socket.emit(name, { id, signature, data })
   })
 }
 
@@ -65,7 +65,7 @@ function setRealmOffline(realm) {
 }
 
 async function setRealmConfig(app, realm) {
-  const configRes = await rsCall(app, games.evolution.realms[realm.key].client, 'SetConfigRequest', { config: { ...app.db.evolutionConfig, roundId: realm.roundId } }) as any
+  const configRes = await rsCall(app, games.evolution.realms[realm.key], 'SetConfigRequest', { config: { ...app.db.evolutionConfig, roundId: realm.roundId } }) as any
 
   if (configRes.status !== 1) {
     setRealmOffline(realm)
@@ -75,7 +75,7 @@ async function setRealmConfig(app, realm) {
 
 async function updateRealm(app, realm) {
   try {
-    const infoRes = await rsCall(app, games.evolution.realms[realm.key].client, 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
+    const infoRes = await rsCall(app, games.evolution.realms[realm.key], 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
 
     if (!infoRes || infoRes.status !== 1) {
       setRealmOffline(realm)
@@ -239,7 +239,7 @@ export async function connectRealm(app, realm) {
 
       log('Connected: ' + realm.key)
 
-      const res = await rsCall(app, client, 'AuthRequest', 'myverysexykey') as any
+      const res = await rsCall(app, realm, 'AuthRequest', 'myverysexykey') as any
 
       if (res.status === 1) {
         client.isAuthed = true
@@ -260,7 +260,7 @@ export async function connectRealm(app, realm) {
           cleanupClient(client)
         }, 70 * 1000)
 
-        await rsCall(app, client, 'PingRequest')
+        await rsCall(app, realm, 'PingRequest')
 
         clearTimeout(client.pingReplyTimeout)
 
