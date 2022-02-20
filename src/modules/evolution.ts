@@ -5,7 +5,7 @@ import beautify from 'json-beautify'
 import { fancyTimeFormat } from '@rune-backend-sdk/util/time'
 import md5 from 'js-md5'
 import { log, logError } from '@rune-backend-sdk/util'
-import { getClientSocket } from '@rune-backend-sdk/util/socket'
+import { getClientSocket } from '@rune-backend-sdk/util/websocket'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
 
 const shortId = require('shortid')
@@ -22,6 +22,7 @@ async function rsCall(app, realm, name, data = undefined) {
     ioCallbacks[id].resolve = resolve
 
     ioCallbacks[id].reqTimeout = setTimeout(function() {
+      logError('Request timeout')
       resolve({ status: 0, message: 'Request timeout' })
 
       delete ioCallbacks[id]
@@ -273,6 +274,9 @@ export async function connectRealm(app, realm) {
         
         client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
       }
+
+      clearTimeout(client.pingerTimeout)
+      clearTimeout(client.pingReplyTimeout)
 
       client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
     } catch(e) {
@@ -565,6 +569,7 @@ export async function connectRealm(app, realm) {
       if (req.data.roundId > realm.roundId) {
         realm.roundId = req.data.roundId
       } else if (req.data.roundId < realm.roundId) {
+        log('Round ID too low')
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
           data: { status: 0, message: `Round id too low (realm.roundId = ${realm.roundId})` }
