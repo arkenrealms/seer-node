@@ -624,6 +624,8 @@ export async function connectRealms(app) {
       }
 
       if (!games.evolution.realms[realm.key].client) {
+        games.evolution.realms[realm.key].key = realm.key
+
         games.evolution.realms[realm.key].client = {
           isAuthed: false,
           isConnecting: false,
