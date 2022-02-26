@@ -23,7 +23,7 @@ export async function monitorGuildMemberDetails(app) {
       guild.memberDetails = []
 
       for (const member of guild.members) {
-        const user = app.db.loadUser(member)
+        const user = await app.db.loadUser(member)
 
         if (!user.username) {
           const usernameSearch = await ((await fetch(`https://rune-api.binzy.workers.dev/users/${user.address}`)).json())
@@ -67,5 +67,5 @@ export async function monitorGuildMemberDetails(app) {
     logError(e)
   }
 
-  setTimeout(() => monitorGuildMemberDetails(app), 10 * 60 * 1000)
+  setTimeout(() => monitorGuildMemberDetails(app), 5 * 60 * 60 * 1000)
 }

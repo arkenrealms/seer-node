@@ -419,14 +419,14 @@ export function initDb(app) {
   }
 
   function read(filePath, defaultValue) {
-    try {
-      return jetpack.read(path.resolve(filePath), 'json') || defaultValue
-    } catch (e) {
-      return defaultValue
-    }
+    // try {
+      return jetpack.readAsync(path.resolve(filePath), 'json') || defaultValue
+    // } catch (e) {
+    //   return defaultValue
+    // }
   }
 
-  app.db.loadUser = (address) => {
+  app.db.loadUser = async (address) => {
     return {
       address,
       inventoryItemCount: 0,
@@ -450,17 +450,17 @@ export function initDb(app) {
         runes: {},
         items: {}
       },
-      ...read(`./db/users/${address}/overview.json`, {}),
-      achievements: read(`./db/users/${address}/achievements.json`, []),
-      characters: read(`./db/users/${address}/characters.json`, []),
-      evolution: read(`./db/users/${address}/evolution.json`, {}),
+      ...(await read(`./db/users/${address}/overview.json`, {})),
+      achievements: (await read(`./db/users/${address}/achievements.json`, [])),
+      characters: (await read(`./db/users/${address}/characters.json`, [])),
+      evolution: (await read(`./db/users/${address}/evolution.json`, {})),
       inventory: {
         items: [],
-        ...read(`./db/users/${address}/inventory.json`, {})
+        ...(await read(`./db/users/${address}/inventory.json`, {}))
       },
       market: {
         trades: [],
-        ...read(`./db/users/${address}/market.json`, {})
+        ...(await read(`./db/users/${address}/market.json`, {}))
       }
     }
   }
@@ -540,7 +540,7 @@ export function initDb(app) {
 
   app.db.saveGuild = async (guild) => {
     log('Saving guild', guild.name)
-    app.db.updateAchievementsByGuild(guild)
+    await app.db.updateAchievementsByGuild(guild)
 
     jetpack.write(path.resolve(`./db/guilds/${guild.id}/overview.json`), beautify({
       ...guild,
@@ -566,11 +566,11 @@ export function initDb(app) {
 
   }
 
-  app.db.updateAchievementsByGuild = (guild) => {
+  app.db.updateAchievementsByGuild = async (guild) => {
     let points = 0
 
     for (const member of guild.members) {
-      const user = app.db.loadUser(member)
+      const user = await app.db.loadUser(member)
 
       if (!user?.points || user.points === null) continue
 

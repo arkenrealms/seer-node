@@ -24,7 +24,7 @@ export async function getAllItemEvents(app) {
         if (e.name === 'Transfer') {
           const { from, to: userAddress, tokenId } = e.args
 
-          const user = app.db.loadUser(userAddress)
+          const user = await app.db.loadUser(userAddress)
           const decodedItem = decodeItem(tokenId.toString())
 
           const itemData = {
@@ -102,7 +102,7 @@ export async function getAllItemEvents(app) {
   // await saveItemsEvents()
   // await saveConfig()
 
-  setTimeout(() => getAllItemEvents(app), 2 * 60 * 1000)
+  setTimeout(() => getAllItemEvents(app), 30 * 60 * 1000)
 }
 
 export async function monitorItemEvents(app) {

@@ -31,7 +31,7 @@ function initEventHandler(app) {
         })
       })
   
-      socket.on('RC_GetUserRequest', function(req) {
+      socket.on('RC_GetUserRequest', async function(req) {
         if (!socket.authed) {
           emitDirect(socket, 'RC_GetUserResponse', {
             id: req.id,
@@ -46,7 +46,7 @@ function initEventHandler(app) {
           id: req.id,
           data: {
             status: 1,
-            user: app.db.loadUser(req.data.address)
+            user: await app.db.loadUser(req.data.address)
           }
         })
       })
@@ -63,7 +63,7 @@ function initEventHandler(app) {
         }
 
         try {
-          const user = app.db.loadUser(req.data.address)
+          const user = await app.db.loadUser(req.data.address)
 
           if (!user.rewardHistory) user.rewardHistory = []
 

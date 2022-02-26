@@ -22,7 +22,7 @@ export async function getAllBarracksEvents(app) {
       if (e.name === 'Equip') {
         const { user: userAddress, tokenId, itemId } = e.args
 
-        const user = app.db.loadUser(userAddress)
+        const user = await app.db.loadUser(userAddress)
 
         const item = {
           status: "equipped",
@@ -37,7 +37,7 @@ export async function getAllBarracksEvents(app) {
       if (e.name === 'Unequip') {
         const { user: userAddress, tokenId, itemId } = e.args
 
-        const user = app.db.loadUser(userAddress)
+        const user = await app.db.loadUser(userAddress)
 
         const item = {
           status: "unequipped",
@@ -119,7 +119,7 @@ export async function getAllBarracksEvents(app) {
   // await app.db.saveBarracksEvents()
   // await app.db.saveConfig()
 
-  setTimeout(() => getAllBarracksEvents(app), 15 * 60 * 1000)
+  setTimeout(() => getAllBarracksEvents(app), 20 * 60 * 1000)
 }
 
 export async function monitorBarracksEvents(app) {

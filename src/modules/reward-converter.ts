@@ -285,7 +285,7 @@ export async function convertRewards(app) {
       for (const address of Object.keys(playerRewards)) {
         if (userCache[address.toLowerCase()]) continue
 
-        const user = app.db.loadUser(address)
+        const user = await app.db.loadUser(address)
 
         userCache[address.toLowerCase()] = user
 

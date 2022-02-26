@@ -43,7 +43,7 @@ export async function getAllMarketEvents(app) {
 
           log('Adding trade', trade)
 
-          await app.db.saveUserTrade(app.db.loadUser(seller), trade)
+          await app.db.saveUserTrade(await app.db.loadUser(seller), trade)
           await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
           await app.db.saveItemTrade(app.db.loadItem(trade.item.id), trade)
           await app.db.saveItemToken(app.db.loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
@@ -66,7 +66,7 @@ export async function getAllMarketEvents(app) {
           specificTrade.item = { id: decodeItem(tokenId.toString()).id }
           // specificTrade.item = decodeItem(specificTrade.tokenId)
 
-          await app.db.saveUserTrade(app.db.loadUser(seller), specificTrade)
+          await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
           await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
           await app.db.saveItemTrade(app.db.loadItem(specificTrade.item.id), specificTrade)
           await app.db.saveItemToken(app.db.loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
@@ -89,7 +89,7 @@ export async function getAllMarketEvents(app) {
 
           log('Delisting trade', specificTrade)
 
-          await app.db.saveUserTrade(app.db.loadUser(seller), specificTrade)
+          await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
           await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
           await app.db.saveItemTrade(app.db.loadItem(specificTrade.item.id), specificTrade)
           await app.db.saveItemToken(app.db.loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
@@ -111,8 +111,8 @@ export async function getAllMarketEvents(app) {
           specificTrade.item = { id: decodeItem(tokenId.toString()).id }
           // specificTrade.item = decodeItem(specificTrade.tokenId)
     
-          await app.db.saveUserTrade(app.db.loadUser(seller), specificTrade)
-          await app.db.saveUserTrade(app.db.loadUser(buyer), specificTrade)
+          await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
+          await app.db.saveUserTrade(await app.db.loadUser(buyer), specificTrade)
           await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
           await app.db.saveItemTrade(app.db.loadItem(specificTrade.item.id), specificTrade)
           await app.db.saveItemToken(app.db.loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
@@ -166,7 +166,7 @@ export async function getAllMarketEvents(app) {
   // await saveTrades()
   // await saveConfig()
 
-  setTimeout(() => getAllMarketEvents(app), 2 * 60 * 1000)
+  setTimeout(() => getAllMarketEvents(app), 30 * 60 * 1000)
 }
 
 export async function monitorMarketEvents(app) {

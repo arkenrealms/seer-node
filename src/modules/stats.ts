@@ -565,7 +565,7 @@ export async function monitorGeneralStats(app) {
     
     // await saveConfig()
 
-    setTimeout(() => monitorGeneralStats(app), 2 * 60 * 1000)
+    setTimeout(() => monitorGeneralStats(app), 30 * 60 * 1000)
   } catch (e) {
     log(e)
   }

@@ -123,16 +123,78 @@ async function updateRealm(app, realm) {
 }
 
 async function updateRealms(app) {
-  log('Updating Evolution realms')
+  try {
+    log('Updating Evolution realms')
 
-  let playerCount = 0
+    let playerCount = 0
 
-  for (const realm of app.db.evolutionRealms) {
-    if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
+    for (const realm of app.db.evolutionRealms) {
+      if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
 
-    await updateRealm(app, realm)
+      await updateRealm(app, realm)
 
-    const hist = jetpack.read(path.resolve(`./db/evolution/${realm.key}/historical.json`), 'json') || {}
+      const hist = jetpack.read(path.resolve(`./db/evolution/${realm.key}/historical.json`), 'json') || {}
+
+      if (!hist.playerCount) hist.playerCount = []
+
+      const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
+      const newTime = (new Date()).getTime()
+      const diff = newTime - oldTime
+      if (diff / (1000 * 60 * 60 * 1) > 1) {
+        hist.playerCount.push([newTime, realm.playerCount])
+      }
+
+      jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
+
+      playerCount += realm.playerCount
+
+      log(`Realm ${realm.key} updated`, realm)
+    }
+
+    app.db.evolution.playerCount = playerCount
+
+    for (const server of app.db.evolutionServers) {
+      if (server.key === 'tournament1') continue
+      server.status = 'offline'
+      server.playerCount = 0
+    }
+
+    const evolutionServers = app.db.evolutionRealms.map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
+
+    for (const evolutionServer of evolutionServers) {
+      const server = app.db.evolutionServers.find(s => s.key === evolutionServer.key)
+
+      if (!server) {
+        if (evolutionServer.key) {
+          app.db.evolutionServers.push(evolutionServer)
+        }
+        continue
+      }
+
+      server.status = evolutionServer.status
+      server.version = evolutionServer.version
+      server.rewardItemAmount = evolutionServer.rewardItemAmount
+      server.rewardWinnerAmount = evolutionServer.rewardWinnerAmount
+      server.gameMode = evolutionServer.gameMode
+      server.roundId = evolutionServer.roundId
+      server.roundStartedAt = evolutionServer.roundStartedAt
+      server.roundStartedDate = evolutionServer.roundStartedDate
+      server.timeLeft = evolutionServer.timeLeft
+      server.timeLeftText = evolutionServer.timeLeftText
+      server.playerCount = evolutionServer.playerCount
+      server.speculatorCount = evolutionServer.speculatorCount
+      server.endpoint = evolutionServer.endpoint
+    }
+
+    jetpack.write(path.resolve('./db/evolution/realms.json'), beautify(app.db.evolutionRealms, null, 2), { atomic: true })
+
+    // Update old servers file
+    jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
+
+    log('Realm and server info generated')
+
+    // Update overall historics
+    const hist = jetpack.read(path.resolve(`./db/evolution/historical.json`), 'json') || {}
 
     if (!hist.playerCount) hist.playerCount = []
 
@@ -140,70 +202,13 @@ async function updateRealms(app) {
     const newTime = (new Date()).getTime()
     const diff = newTime - oldTime
     if (diff / (1000 * 60 * 60 * 1) > 1) {
-      hist.playerCount.push([newTime, realm.playerCount])
+      hist.playerCount.push([newTime, playerCount])
     }
 
-    jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
-
-    playerCount += realm.playerCount
-
-    log(`Realm ${realm.key} updated`, realm)
+    jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(hist, null, 2), { atomic: true })
+  } catch(e) {
+    logError(e)
   }
-
-  app.db.evolution.playerCount = playerCount
-
-  for (const server of app.db.evolutionServers) {
-    if (server.key === 'tournament1') continue
-    server.status = 'offline'
-  }
-
-  const evolutionServers = app.db.evolutionRealms.map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
-
-  for (const evolutionServer of evolutionServers) {
-    const server = app.db.evolutionServers.find(s => s.key === evolutionServer.key)
-
-    if (!server) {
-      if (evolutionServer.key) {
-        app.db.evolutionServers.push(evolutionServer)
-      }
-      continue
-    }
-
-    server.status = evolutionServer.status
-    server.version = evolutionServer.version
-    server.rewardItemAmount = evolutionServer.rewardItemAmount
-    server.rewardWinnerAmount = evolutionServer.rewardWinnerAmount
-    server.gameMode = evolutionServer.gameMode
-    server.roundId = evolutionServer.roundId
-    server.roundStartedAt = evolutionServer.roundStartedAt
-    server.roundStartedDate = evolutionServer.roundStartedDate
-    server.timeLeft = evolutionServer.timeLeft
-    server.timeLeftText = evolutionServer.timeLeftText
-    server.playerCount = evolutionServer.playerCount
-    server.speculatorCount = evolutionServer.speculatorCount
-    server.endpoint = evolutionServer.endpoint
-  }
-
-  jetpack.write(path.resolve('./db/evolution/realms.json'), beautify(app.db.evolutionRealms, null, 2), { atomic: true })
-
-  // Update old servers file
-  jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
-
-  log('Realm and server info generated')
-
-  // Update overall historics
-  const hist = jetpack.read(path.resolve(`./db/evolution/historical.json`), 'json') || {}
-
-  if (!hist.playerCount) hist.playerCount = []
-
-  const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
-  const newTime = (new Date()).getTime()
-  const diff = newTime - oldTime
-  if (diff / (1000 * 60 * 60 * 1) > 1) {
-    hist.playerCount.push([newTime, playerCount])
-  }
-
-  jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(hist, null, 2), { atomic: true })
 }
 
 function cleanupClient(client) {
@@ -476,7 +481,7 @@ export async function connectRealm(app, realm) {
       // Iterate the winners, determine the winning amounts, validate, save to user rewards
       // Iterate all players and save their log / stats 
       for (const player of req.data.round.players) {
-        const user = app.db.loadUser(player.address)
+        const user = await app.db.loadUser(player.address)
 
         log(player.address, player.pickups)
         for (const pickup of player.pickups) {
@@ -570,10 +575,14 @@ export async function connectRealm(app, realm) {
         realm.roundId = req.data.roundId
       } else if (req.data.roundId < realm.roundId) {
         log('Round ID too low')
+        
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
           data: { status: 0, message: `Round id too low (realm.roundId = ${realm.roundId})` }
         })
+
+        await setRealmConfig(app, realm)
+
         return
       } else {
         realm.roundId += 1

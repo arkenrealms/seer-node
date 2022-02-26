@@ -21,7 +21,7 @@ export async function getAllCharacterEvents(app) {
       if (e.name === 'Transfer') {
         const { from, to: userAddress, tokenId } = e.args
 
-        const user = app.db.loadUser(userAddress)
+        const user = await app.db.loadUser(userAddress)
 
         if (!user.characters.length) {
           log('New user: ' + userAddress)
@@ -90,7 +90,7 @@ export async function getAllCharacterEvents(app) {
   // await saveCharactersEvents()
   // await saveConfig()
 
-  setTimeout(() => getAllCharacterEvents(app), 2 * 60 * 1000)
+  setTimeout(() => getAllCharacterEvents(app), 30 * 60 * 1000)
 }
 
 export async function monitorCharacterEvents(app) {
