@@ -43,6 +43,15 @@ async function init() {
 
     app.flags = {}
 
+    // const defunctmodules = [
+    //   {
+    //     name: 'convertRewards',
+    //     instance: convertRewards,
+    //     async: true,
+    //     timeout: 0
+    //   },
+    // ]
+
     app.moduleConfig = [
       {
         name: 'initConfig',
@@ -60,12 +69,6 @@ async function init() {
         name: 'initWeb3',
         instance: initWeb3,
         async: false,
-        timeout: 0
-      },
-      {
-        name: 'convertRewards',
-        instance: convertRewards,
-        async: true,
         timeout: 0
       },
       {
