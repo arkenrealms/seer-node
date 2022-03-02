@@ -19,6 +19,7 @@ import { monitorMeta } from './modules/meta'
 import { monitorCoordinator } from './modules/coordinator'
 import { monitorSenderEvents } from './modules/sender'
 import { initCubeBridge } from './modules/cube'
+import { runTest } from './modules/tests/test-a'
 import * as tests from './tests'
 
 dotenv.config()
@@ -49,6 +50,33 @@ async function init() {
     //     instance: convertRewards,
     //     async: true,
     //     timeout: 0
+    //   },
+    // ]
+
+    // app.moduleConfig = [
+    //   {
+    //     name: 'initConfig',
+    //     instance: initConfig,
+    //     async: false,
+    //     timeout: 0
+    //   },
+    //   {
+    //     name: 'initDb',
+    //     instance: initDb,
+    //     async: false,
+    //     timeout: 0
+    //   },
+    //   {
+    //     name: 'initWeb3',
+    //     instance: initWeb3,
+    //     async: false,
+    //     timeout: 0
+    //   },
+    //   {
+    //     name: 'runTest',
+    //     instance: runTest,
+    //     async: false,
+    //     timeout: 1 * 1000
     //   },
     // ]
 

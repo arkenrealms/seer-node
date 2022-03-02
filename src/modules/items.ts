@@ -3,7 +3,7 @@ import { log, logError } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 
-export async function getAllItemEvents(app) {
+export async function getAllItemEvents(app, retry = false) {
   if (app.config.items.updating) return
 
   log('[Items] Updating')
@@ -102,7 +102,9 @@ export async function getAllItemEvents(app) {
   // await saveItemsEvents()
   // await saveConfig()
 
-  setTimeout(() => getAllItemEvents(app), 30 * 60 * 1000)
+  if (retry) {
+    setTimeout(() => getAllItemEvents(app), 30 * 60 * 1000)
+  }
 }
 
 export async function monitorItemEvents(app) {

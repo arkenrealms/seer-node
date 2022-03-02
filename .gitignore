@@ -3,6 +3,7 @@ secrets.json
 db
 public/data/log.json
 public/data/errors.json
+src/modules/tests/*
 
 # Logs
 logs

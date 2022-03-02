@@ -3,7 +3,7 @@ import { log, logError } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 
-export async function getAllBarracksEvents(app) {
+export async function getAllBarracksEvents(app, retry = false) {
   if (app.config.barracks.updating) return
 
   log('[Barracks] Updating')
@@ -119,7 +119,9 @@ export async function getAllBarracksEvents(app) {
   // await app.db.saveBarracksEvents()
   // await app.db.saveConfig()
 
-  setTimeout(() => getAllBarracksEvents(app), 20 * 60 * 1000)
+  if (retry) {
+    setTimeout(() => getAllBarracksEvents(app), 20 * 60 * 1000)
+  }
 }
 
 export async function monitorBarracksEvents(app) {

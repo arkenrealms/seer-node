@@ -221,6 +221,6 @@ export async function initCubeBridge(app) {
 
     initEventHandler(app)
   } catch(e) {
-    
+    logError(e)
   }
 }

@@ -63,7 +63,7 @@ export async function monitorCraftingStats(app) {
       jetpack.write(path.resolve('../db/crafting/leaderboard.json'), beautify(data, null, 2), { atomic: true })
     }
   } catch(e) {
-    // logError(e)
+    logError(e)
   }
 
   setTimeout(() => monitorCraftingStats(app), 2 * 60 * 1000)

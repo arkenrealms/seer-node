@@ -3,7 +3,7 @@ import * as ethers from 'ethers'
 import { log, logError, wait } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress, getSignedRequest } from '@rune-backend-sdk/util/web3'
 
-export async function getAllSenderEvents(app) {
+export async function getAllSenderEvents(app, retry = false) {
   if (app.config.sender.updating) return
 
   log('[Sender] Updating')
@@ -127,7 +127,9 @@ export async function getAllSenderEvents(app) {
   // await saveItemsEvents()
   // await saveConfig()
 
-  setTimeout(() => getAllSenderEvents(app), 5 * 60 * 1000)
+  if (retry) {
+    setTimeout(() => getAllSenderEvents(app), 5 * 60 * 1000)
+  }
 }
 
 export async function monitorSenderEvents(app) {
@@ -139,7 +141,7 @@ export async function monitorSenderEvents(app) {
     app.sender.coordinatorEndpoint = 'http://localhost:5001'
   }
 
-  await getAllSenderEvents(app)
+  await getAllSenderEvents(app, true)
 
   app.contracts.sender.on('RewardsSent', async () => {
     await getAllSenderEvents(app)

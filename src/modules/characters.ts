@@ -2,7 +2,7 @@ import * as ethers from 'ethers'
 import { getHighestId, log, logError } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 
-export async function getAllCharacterEvents(app) {
+export async function getAllCharacterEvents(app, retry = false) {
   if (app.config.characters.updating) return
 
   log('[Characters] Updating')
@@ -90,7 +90,9 @@ export async function getAllCharacterEvents(app) {
   // await saveCharactersEvents()
   // await saveConfig()
 
-  setTimeout(() => getAllCharacterEvents(app), 30 * 60 * 1000)
+  if (retry) {
+    setTimeout(() => getAllCharacterEvents(app), 30 * 60 * 1000)
+  }
 }
 
 export async function monitorCharacterEvents(app) {

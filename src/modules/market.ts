@@ -3,7 +3,7 @@ import { getHighestId, toShort, log, logError } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 
-export async function getAllMarketEvents(app) {
+export async function getAllMarketEvents(app, retry = false) {
   if (app.config.trades.updating) return
 
   log('[Market] Updating')
@@ -166,7 +166,9 @@ export async function getAllMarketEvents(app) {
   // await saveTrades()
   // await saveConfig()
 
-  setTimeout(() => getAllMarketEvents(app), 30 * 60 * 1000)
+  if (retry) {
+    setTimeout(() => getAllMarketEvents(app), 30 * 60 * 1000)
+  }
 }
 
 export async function monitorMarketEvents(app) {
