@@ -19,7 +19,7 @@ import { monitorMeta } from './modules/meta'
 import { monitorCoordinator } from './modules/coordinator'
 import { monitorSenderEvents } from './modules/sender'
 import { initCubeBridge } from './modules/cube'
-import { runTest } from './modules/tests/test-a'
+// import { runTest } from './modules/tests/test-a'
 import * as tests from './tests'
 
 dotenv.config()
