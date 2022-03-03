@@ -418,9 +418,9 @@ export function initDb(app) {
     await app.db.saveToken(token)
   }
 
-  function read(filePath, defaultValue) {
+  function read(filePath) {
     // try {
-      return jetpack.readAsync(path.resolve(filePath), 'json') || defaultValue
+      return jetpack.readAsync(path.resolve(filePath), 'json')
     // } catch (e) {
     //   return defaultValue
     // }
@@ -450,17 +450,17 @@ export function initDb(app) {
         runes: {},
         items: {}
       },
-      ...(await read(`./db/users/${address}/overview.json`, {})),
-      achievements: (await read(`./db/users/${address}/achievements.json`, [])),
-      characters: (await read(`./db/users/${address}/characters.json`, [])),
-      evolution: (await read(`./db/users/${address}/evolution.json`, {})),
+      ...((await read(`./db/users/${address}/overview.json`)) || {}),
+      achievements: (await read(`./db/users/${address}/achievements.json`)) || [],
+      characters: (await read(`./db/users/${address}/characters.json`)) || [],
+      evolution: (await read(`./db/users/${address}/evolution.json`)) || {},
       inventory: {
         items: [],
-        ...(await read(`./db/users/${address}/inventory.json`, {}))
+        ...((await read(`./db/users/${address}/inventory.json`)) || {})
       },
       market: {
         trades: [],
-        ...(await read(`./db/users/${address}/market.json`, {}))
+        ...((await read(`./db/users/${address}/market.json`)) || {})
       }
     }
   }
