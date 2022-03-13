@@ -250,7 +250,7 @@ export async function monitorGeneralStats(app) {
       {
         log('Update runes')
 
-        app.db.stats.totalRunes = Object.keys(app.db.runes).length - 1
+        app.db.stats.totalRunes = 33 // Object.keys(app.db.runes).length - 2
       }
 
       // Update community

@@ -129,7 +129,7 @@ async function updateRealms(app) {
     let playerCount = 0
 
     for (const realm of app.db.evolutionRealms) {
-      if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
+      if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
 
       await updateRealm(app, realm)
 
@@ -154,7 +154,7 @@ async function updateRealms(app) {
     app.db.evolution.playerCount = playerCount
 
     for (const server of app.db.evolutionServers) {
-      if (server.key === 'tournament1') continue
+      if (server.key.indexOf('tournament') !== -1) continue
       server.status = 'offline'
       server.playerCount = 0
     }
@@ -660,7 +660,7 @@ export async function connectRealms(app) {
         realm.roundId = 1
       }
 
-      if (realm.key === 'ptr1' || realm.key === 'tournament1') continue 
+      if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
 
       if (!games.evolution.realms[realm.key].client.isConnected && !games.evolution.realms[realm.key].client.isConnecting && !games.evolution.realms[realm.key].client.isAuthed) {
         await connectRealm(app, realm)
