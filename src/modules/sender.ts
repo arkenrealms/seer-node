@@ -141,7 +141,7 @@ export async function monitorSenderEvents(app) {
     app.sender.coordinatorEndpoint = 'http://localhost:5001'
   }
 
-  await getAllSenderEvents(app, true)
+  await getAllSenderEvents(app)
 
   app.contracts.sender.on('RewardsSent', async () => {
     await getAllSenderEvents(app)
