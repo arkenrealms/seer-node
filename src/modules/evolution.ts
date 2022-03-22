@@ -308,33 +308,61 @@ export async function connectRealm(app, realm) {
     client.socket.emit('PongResponse')
   })
 
+  // client.socket.on('BanPlayerRequest', async function (req) {
+  //   console.log(req)
+  //   try {
+  //     log('Ban', realm.key, req)
+
+  //     if (await isValidRequest(app.web3, req) && app.db.evolution.modList.includes(req.signature.address)) {
+  //       app.db.addBanList('evolution', req.data.target)
+  
+  //       app.db.saveBanList()
+
+  //       app.realm.emitAll('BanUserRequest', {
+  //         signature: await getSignedRequest(app.web3, app.secrets, md5(JSON.stringify({ target: req.data.target }))),
+  //         data: {
+  //           target: req.data.target
+  //         }
+  //       })
+        
+  //       client.socket.emit('BanUserResponse', {
+  //         id: req.id,
+  //         data: { status: 1 }
+  //       })
+  //     } else {
+  //       client.socket.emit('BanUserResponse', {
+  //         id: req.id,
+  //         data: { status: 0, message: 'Invalid signature' }
+  //       })
+  //     }
+  //   } catch (e) {
+  //     logError(e)
+      
+  //     client.socket.emit('BanUserResponse', {
+  //       id: req.id,
+  //       data: { status: 0, message: e }
+  //     })
+  //   }
+  // })
+
   client.socket.on('BanPlayerRequest', async function (req) {
     console.log(req)
     try {
       log('Ban', realm.key, req)
 
-      if (await isValidRequest(app.web3, req) && app.db.evolution.modList.includes(req.signature.address)) {
-        app.db.addBanList('evolution', req.data.target)
-  
-        app.db.saveBanList()
+      app.db.addBanList('evolution', req.data.target)
+      app.db.saveBanList()
 
-        app.realm.emitAll('BanUserRequest', {
-          signature: await getSignedRequest(app.web3, app.secrets, md5(JSON.stringify({ target: req.data.target }))),
-          data: {
-            target: req.data.target
-          }
-        })
-        
-        client.socket.emit('BanUserResponse', {
-          id: req.id,
-          data: { status: 1 }
-        })
-      } else {
-        client.socket.emit('BanUserResponse', {
-          id: req.id,
-          data: { status: 0, message: 'Invalid signature' }
-        })
-      }
+      app.realm.emitAll('BanUserRequest', {
+        data: {
+          target: req.data.target
+        }
+      })
+      
+      client.socket.emit('BanUserResponse', {
+        id: req.id,
+        data: { status: 1 }
+      })
     } catch (e) {
       logError(e)
       
