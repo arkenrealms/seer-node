@@ -359,14 +359,14 @@ export async function connectRealm(app, realm) {
         }
       })
       
-      client.socket.emit('BanUserResponse', {
+      client.socket.emit('BanPlayerResponse', {
         id: req.id,
         data: { status: 1 }
       })
     } catch (e) {
       logError(e)
       
-      client.socket.emit('BanUserResponse', {
+      client.socket.emit('BanPlayerResponse', {
         id: req.id,
         data: { status: 0, message: e }
       })
@@ -701,7 +701,8 @@ export async function connectRealms(app) {
 
 export async function emitAll(app, ...args) {
   for (const realm of app.db.evolutionRealms) {
-    if (games.evolution.realms[realm.key]?.client?.authed) {
+    if (games.evolution.realms[realm.key]?.client?.isAuthed) {
+      console.log('emitAll', realm.key, ...args)
       games.evolution.realms[realm.key]?.client?.socket.emit(...args)
     }
   }
