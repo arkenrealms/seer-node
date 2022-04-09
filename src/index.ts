@@ -80,6 +80,24 @@ async function init() {
     //   },
     // ]
 
+    app.games = {
+      raid: {
+        realms: {}
+      },
+      evolution: {
+        realms: {}
+      },
+      infinite: {
+        realms: {}
+      },
+      guardians: {
+        realms: {}
+      },
+      sanctuary: {
+        realms: {}
+      }
+    }
+
     app.moduleConfig = [
       {
         name: 'initConfig',

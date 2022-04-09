@@ -429,6 +429,7 @@ export function initDb(app) {
   app.db.loadUser = async (address) => {
     return {
       address,
+      lastGamePlayed: 0,
       inventoryItemCount: 0,
       equippedItemCount: 0,
       marketTradeListedCount: 0,
@@ -462,6 +463,56 @@ export function initDb(app) {
         trades: [],
         ...((await read(`./db/users/${address}/market.json`)) || {})
       }
+    }
+  }
+
+  app.db.saveEvolutionLeaderboards = async () => {
+    try {
+      for (const realm of app.games.evolution.realms) {
+        // Calculate totals
+
+        //                 user.evolution.servers[server.key].winRatio = rounds > 5 ? wins / rounds : 0
+        //                 user.evolution.servers[server.key].killDeathRatio = rounds >= 5 && deaths > 0 ? kills / deaths : kills
+        //                 user.evolution.servers[server.key].roundPointRatio = rounds >= 5 && rounds > 0 ? points / rounds : 0
+        //                 user.evolution.servers[server.key].averageLatency = rounds >= 5 ? average(latency) : 0
+        //                 user.evolution.servers[server.key].timeSpent = parseFloat((rounds * 5 / 60).toFixed(1))
+
+        for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'pickups', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
+          let results = []
+
+          for (const address of realm.leaderboard.raw[statKey]) {
+            results.push({
+              name: realm.leaderboard.raw.names[address],
+              address: address,
+              count: realm.leaderboard.raw[statKey][address]
+            })
+          }
+
+          results = results.filter(a => !!a.count).sort((a, b) => b.count - a.count).slice(0, 10)
+
+          realm.leaderboard[statKey][0].data = []
+
+          for (const result of results) {
+            realm.leaderboard[statKey][0].data.push({
+              name: result.name,
+              address: result.address,
+              count: result.count
+            })
+          }
+        }
+        // realm.leaderboard.raw.rounds[user.address] = 0
+        // realm.leaderboard.raw.kills[user.address] = 0
+        // realm.leaderboard.raw.points[user.address] = 0
+        // realm.leaderboard.raw.deaths[user.address] = 0
+        // realm.leaderboard.raw.powerups[user.address] = 0
+        // realm.leaderboard.raw.evolves[user.address] = 0
+        // realm.leaderboard.raw.rewards[user.address] = 0
+        // realm.leaderboard.raw.pickups[user.address] = 0
+
+        jetpack.write(path.resolve(`./db/evolution/${realm.key}/leaderboard.json`), beautify(realm.leaderboard, null, 2), { atomic: true })
+      }
+    } catch(e) {
+      logError(e)
     }
   }
 

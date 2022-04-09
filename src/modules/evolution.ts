@@ -39,24 +39,6 @@ async function rsCall(app, realm, name, data = undefined) {
   })
 }
 
-const games = {
-  raid: {
-    realms: {}
-  },
-  evolution: {
-    realms: {}
-  },
-  infinite: {
-    realms: {}
-  },
-  guardians: {
-    realms: {}
-  },
-  sanctuary: {
-    realms: {}
-  }
-}
-
 function setRealmOffline(realm) {
   realm.status = 'offline'
   realm.playerCount = 0
@@ -66,7 +48,7 @@ function setRealmOffline(realm) {
 }
 
 async function setRealmConfig(app, realm) {
-  const configRes = await rsCall(app, games.evolution.realms[realm.key], 'SetConfigRequest', { config: { ...app.db.evolutionConfig, roundId: realm.roundId } }) as any
+  const configRes = await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', { config: { ...app.db.evolutionConfig, roundId: realm.roundId } }) as any
 
   if (configRes.status !== 1) {
     setRealmOffline(realm)
@@ -78,7 +60,7 @@ async function updateRealm(app, realm) {
   try {
     realm.games = []
 
-    const infoRes = await rsCall(app, games.evolution.realms[realm.key], 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
+    const infoRes = await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
 
     if (!infoRes || infoRes.status !== 1) {
       setRealmOffline(realm)
@@ -93,7 +75,7 @@ async function updateRealm(app, realm) {
     realm.speculatorCount = data.speculatorCount
     realm.version = data.version
 
-    realm.games = data.games.map(game => ({
+    realm.games = data.app.games.map(game => ({
       id: game.id,
       playerCount: game.playerCount,
       speculatorCount: game.speculatorCount,
@@ -159,7 +141,7 @@ async function updateRealms(app) {
       server.playerCount = 0
     }
 
-    const evolutionServers = app.db.evolutionRealms.map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
+    const evolutionServers = app.db.evolutionRealms.map(r => r.app.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
 
     for (const evolutionServer of evolutionServers) {
       const server = app.db.evolutionServers.find(s => s.key === evolutionServer.key)
@@ -234,7 +216,7 @@ const runes = ['el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'a
 
 export async function connectRealm(app, realm) {
   log('Connecting to realm', realm)
-  const { client } = games.evolution.realms[realm.key]
+  const { client } = app.games.evolution.realms[realm.key]
 
   if (client.isConnected || client.socket?.connected) {
     log(`Realm ${realm.key} already connected, disconnecting`)
@@ -250,7 +232,7 @@ export async function connectRealm(app, realm) {
 
       log('Connected: ' + realm.key)
 
-      const res = await rsCall(app, games.evolution.realms[realm.key], 'AuthRequest', 'myverysexykey') as any
+      const res = await rsCall(app, app.games.evolution.realms[realm.key], 'AuthRequest', 'myverysexykey') as any
 
       if (res.status === 1) {
         client.isAuthed = true
@@ -271,7 +253,7 @@ export async function connectRealm(app, realm) {
           cleanupClient(client)
         }, 70 * 1000)
 
-        await rsCall(app, games.evolution.realms[realm.key], 'PingRequest')
+        await rsCall(app, app.games.evolution.realms[realm.key], 'PingRequest')
 
         clearTimeout(client.pingReplyTimeout)
 
@@ -349,6 +331,12 @@ export async function connectRealm(app, realm) {
     console.log(req)
     try {
       log('Ban', realm.key, req)
+
+      const user = await app.db.loadUser(req.data.target)
+
+      user.isBanned = true
+
+      await app.db.saveUser(user)
 
       app.db.addBanList('evolution', req.data.target)
       app.db.saveBanList()
@@ -510,6 +498,9 @@ export async function connectRealm(app, realm) {
       // Iterate all players and save their log / stats 
       for (const player of req.data.round.players) {
         const user = await app.db.loadUser(player.address)
+        const now = new Date().getTime() / 1000
+
+        if (user.lastGamePlayed > now - (4 * 60)) continue // Make sure this player isn't in 2 games or somehow getting double rewards
 
         log(player.address, player.pickups)
         for (const pickup of player.pickups) {
@@ -557,6 +548,33 @@ export async function connectRealm(app, realm) {
           // user.rewardTracking.push(req.tracking)
         }
 
+        user.lastGamePlayed = now
+
+        app.games.evolution.realms[realm.key].leaderboard.names[user.address] = user.username
+
+        if (!app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address]) {
+          // 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency'
+          app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] = 0
+          app.games.evolution.realms[realm.key].leaderboard.raw.rounds[user.address] = 0
+          app.games.evolution.realms[realm.key].leaderboard.raw.kills[user.address] = 0
+          app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address] = 0
+          app.games.evolution.realms[realm.key].leaderboard.raw.deaths[user.address] = 0
+          app.games.evolution.realms[realm.key].leaderboard.raw.powerups[user.address] = 0
+          app.games.evolution.realms[realm.key].leaderboard.raw.evolves[user.address] = 0
+          app.games.evolution.realms[realm.key].leaderboard.raw.rewards[user.address] = 0
+          app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] = 0
+        }
+
+        // Update leaderboard stats
+        app.games.evolution.realms[realm.key].leaderboard.raw.rounds[user.address] += 1
+        app.games.evolution.realms[realm.key].leaderboard.raw.kills[user.address] += player.kills
+        app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address] += player.points
+        app.games.evolution.realms[realm.key].leaderboard.raw.deaths[user.address] += player.deaths
+        app.games.evolution.realms[realm.key].leaderboard.raw.powerups[user.address] += player.powerups
+        app.games.evolution.realms[realm.key].leaderboard.raw.evolves[user.address] += player.evolves
+        app.games.evolution.realms[realm.key].leaderboard.raw.rewards[user.address] += player.rewards
+        app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] += player.pickups.length
+
         users.push(user)
       }
 
@@ -593,6 +611,10 @@ export async function connectRealm(app, realm) {
         }
 
         user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
+
+        if (req.data.round.winners.indexOf(index) === 0) {
+          app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] += 1
+        }
       }
 
       for (const user of users) {
@@ -602,11 +624,13 @@ export async function connectRealm(app, realm) {
       if (req.data.roundId > realm.roundId) {
         realm.roundId = req.data.roundId
       } else if (req.data.roundId < realm.roundId) {
-        log('Round ID too low')
+        const err = `Round id too low (realm.roundId = ${realm.roundId})`
+
+        log(err)
         
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
-          data: { status: 0, message: `Round id too low (realm.roundId = ${realm.roundId})` }
+          data: { status: 0, message: err }
         })
 
         await setRealmConfig(app, realm)
@@ -664,17 +688,105 @@ export async function connectRealms(app) {
 
   try {
     for (const realm of app.db.evolutionRealms) {
-      if (!games.evolution.realms[realm.key]) {
-        games.evolution.realms[realm.key] = {}
+      if (!app.games.evolution.realms[realm.key]) {
+        app.games.evolution.realms[realm.key] = {}
         for (const key in Object.keys(realm)) {
-          games.evolution.realms[realm.key][key] = realm[key]
+          app.games.evolution.realms[realm.key][key] = realm[key]
         }
       }
 
-      if (!games.evolution.realms[realm.key].client) {
-        games.evolution.realms[realm.key].key = realm.key
+      if (!app.games.evolution.realms[realm.key].leaderboard) {
+        app.games.evolution.realms[realm.key].leaderboard = jetpack.read(path.resolve(`./db/evolution/${realm.key}/leaderboard.json`), 'json') || {
+          raw: {
+            wins: {},
+            rounds: {},
+            rewards: {},
+            points: {},
+            kills: {},
+            deaths: {},
+            powerups: {},
+            evolves: {}
+          },
+          names: {},
+          [app.games.evolution.currentSeason]: {
+            all: [
+              {
+                name: 'Overall',
+                count: 10,
+                data: []
+              }
+            ],
+            monetary: [
+              {
+                name: 'Earnings',
+                count: 10,
+                data: []
+              }
+            ],
+            wins: [
+              {
+                name: 'Wins',
+                count: 10,
+                data: []
+              }
+            ],
+            rounds: [
+              {
+                name: 'Rounds',
+                count: 10,
+                data: []
+              }
+            ],
+            rewards: [
+              {
+                name: 'Rewards',
+                count: 10,
+                data: []
+              }
+            ],
+            points: [
+              {
+                name: 'Points',
+                count: 10,
+                data: []
+              }
+            ],
+            kills: [
+              {
+                name: 'Kills',
+                count: 10,
+                data: []
+              }
+            ],
+            deaths: [
+              {
+                name: 'Deaths',
+                count: 10,
+                data: []
+              }
+            ],
+            powerups: [
+              {
+                name: 'Powerups',
+                count: 10,
+                data: []
+              }
+            ],
+            evolves: [
+              {
+                name: 'Evolves',
+                count: 10,
+                data: []
+              }
+            ],
+          }
+        }
+      }
 
-        games.evolution.realms[realm.key].client = {
+      if (!app.games.evolution.realms[realm.key].client) {
+        app.games.evolution.realms[realm.key].key = realm.key
+
+        app.games.evolution.realms[realm.key].client = {
           isAuthed: false,
           isConnecting: false,
           isConnected: false,
@@ -690,7 +802,7 @@ export async function connectRealms(app) {
 
       if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
 
-      if (!games.evolution.realms[realm.key].client.isConnected && !games.evolution.realms[realm.key].client.isConnecting && !games.evolution.realms[realm.key].client.isAuthed) {
+      if (!app.games.evolution.realms[realm.key].client.isConnected && !app.games.evolution.realms[realm.key].client.isConnecting && !app.games.evolution.realms[realm.key].client.isAuthed) {
         await connectRealm(app, realm)
       }
     }
@@ -701,9 +813,9 @@ export async function connectRealms(app) {
 
 export async function emitAll(app, ...args) {
   for (const realm of app.db.evolutionRealms) {
-    if (games.evolution.realms[realm.key]?.client?.isAuthed) {
+    if (app.games.evolution.realms[realm.key]?.client?.isAuthed) {
       console.log('emitAll', realm.key, ...args)
-      games.evolution.realms[realm.key]?.client?.socket.emit(...args)
+      app.games.evolution.realms[realm.key]?.client?.socket.emit(...args)
     }
   }
 }
@@ -715,6 +827,8 @@ export async function monitorEvolutionRealms(app) {
     app.realm.apiSignature = await getSignedRequest(app.web3, app.secrets, 'evolution')
     app.realm.emitAll = emitAll.bind(null, app)
   }
+
+  app.games.evolution.currentSeason = 1
 
   await connectRealms(app)
   await updateRealms(app)

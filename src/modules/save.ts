@@ -11,6 +11,7 @@ export async function monitorSaves(app) {
     setTimeout(async () => await app.db.saveStats(), 35 * 1000)
     setTimeout(async () => await app.db.saveRunes(), 40 * 1000)
     setTimeout(async () => await app.db.saveHistorical(), 45 * 1000)
+    setTimeout(async () => await app.db.saveLeaderboard(), 2 * 60 * 1000)
     // setTimeout(async () => await app.db.saveApp(), 1 * 1000)
     setTimeout(async () => await app.db.saveConfig(), 50 * 1000)
     // setTimeout(async () => await app.db.updateGit(), 1 * 1000)
