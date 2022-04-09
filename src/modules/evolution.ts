@@ -695,6 +695,8 @@ export async function connectRealms(app) {
         }
       }
 
+      if (!app.games.evolution.realms[realm.key].leaderboard) app.games.evolution.realms[realm.key].leaderboard = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
       if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = {}
       if (!app.games.evolution.realms[realm.key].leaderboard.raw.rounds) app.games.evolution.realms[realm.key].leaderboard.raw.rounds = {}
       if (!app.games.evolution.realms[realm.key].leaderboard.raw.kills) app.games.evolution.realms[realm.key].leaderboard.raw.kills = {}
