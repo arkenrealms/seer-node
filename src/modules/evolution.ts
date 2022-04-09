@@ -695,6 +695,16 @@ export async function connectRealms(app) {
         }
       }
 
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.rounds) app.games.evolution.realms[realm.key].leaderboard.raw.rounds = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.kills) app.games.evolution.realms[realm.key].leaderboard.raw.kills = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.points) app.games.evolution.realms[realm.key].leaderboard.raw.points = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.deaths) app.games.evolution.realms[realm.key].leaderboard.raw.deaths = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.powerups) app.games.evolution.realms[realm.key].leaderboard.raw.powerups = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.evolves) app.games.evolution.realms[realm.key].leaderboard.raw.evolves = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.rewards) app.games.evolution.realms[realm.key].leaderboard.raw.rewards = {}
+      if (!app.games.evolution.realms[realm.key].leaderboard.raw.pickups) app.games.evolution.realms[realm.key].leaderboard.raw.pickups = {}
+
       if (!app.games.evolution.realms[realm.key].leaderboard) {
         app.games.evolution.realms[realm.key].leaderboard = jetpack.read(path.resolve(`./db/evolution/${realm.key}/leaderboard.json`), 'json') || {
           raw: {
