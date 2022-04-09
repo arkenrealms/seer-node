@@ -328,7 +328,6 @@ export async function connectRealm(app, realm) {
   // })
 
   client.socket.on('BanPlayerRequest', async function (req) {
-    console.log(req)
     try {
       log('Ban', realm.key, req)
 
@@ -613,6 +612,9 @@ export async function connectRealm(app, realm) {
         user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
 
         if (req.data.round.winners.indexOf(index) === 0) {
+          if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
+          if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0
+
           app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] += 1
         }
       }
