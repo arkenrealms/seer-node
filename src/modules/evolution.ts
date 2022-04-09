@@ -549,6 +549,8 @@ export async function connectRealm(app, realm) {
 
         user.lastGamePlayed = now
 
+        if (!app.games.evolution.realms[realm.key].leaderboard.names) app.games.evolution.realms[realm.key].leaderboard.names = {}
+
         app.games.evolution.realms[realm.key].leaderboard.names[user.address] = user.username
 
         if (!app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address]) {
