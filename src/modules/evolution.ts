@@ -75,7 +75,7 @@ async function updateRealm(app, realm) {
     realm.speculatorCount = data.speculatorCount
     realm.version = data.version
 
-    realm.games = data.app.games.map(game => ({
+    realm.games = data.games.map(game => ({
       id: game.id,
       playerCount: game.playerCount,
       speculatorCount: game.speculatorCount,
@@ -141,7 +141,7 @@ async function updateRealms(app) {
       server.playerCount = 0
     }
 
-    const evolutionServers = app.db.evolutionRealms.map(r => r.app.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
+    const evolutionServers = app.db.evolutionRealms.map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
 
     for (const evolutionServer of evolutionServers) {
       const server = app.db.evolutionServers.find(s => s.key === evolutionServer.key)
