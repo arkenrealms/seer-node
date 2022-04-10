@@ -35,7 +35,7 @@ type App = {
 }
 
 async function init() {
-  catchExceptions()
+  catchExceptions(true)
 
   try {
     const app: any = {}

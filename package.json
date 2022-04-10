@@ -72,7 +72,7 @@
     "ipfs-http-client": "^50.1.2",
     "js-md5": "^0.7.3",
     "json-beautify": "^1.1.1",
-    "rune-backend-sdk": "^1.0.41",
+    "rune-backend-sdk": "^1.0.50",
     "shortid": "^2.2.16",
     "sqlite3": "^5.0.2",
     "tsconfig-paths": "^3.12.0"
