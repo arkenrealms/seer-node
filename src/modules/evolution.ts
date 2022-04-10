@@ -597,6 +597,8 @@ export async function connectRealm(app, realm) {
         const player = req.data.round.winners[index]
         const user = users.find(u => u.address === player.address)
 
+        if (!user) continue // He wasn't valid
+
         if (!user.rewards.runes['zod']) {
           user.rewards.runes['zod'] = 0
         }

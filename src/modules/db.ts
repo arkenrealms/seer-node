@@ -516,6 +516,10 @@ export function initDb(app) {
     }
   }
 
+  app.db.saveLeaderboard = async () => {
+    await app.db.saveEvolutionLeaderboards()
+  }
+
   const guildInfoMap = {
     1: {
       name: "The First Ones",

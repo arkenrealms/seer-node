@@ -40,13 +40,19 @@ function _initProvider(app) {
     app.contracts.busd = new ethers.Contract(getAddress(app.contractInfo.busd), app.contractMetadata.BEP20.abi, app.signers.read)
     app.contracts.wbnb = new ethers.Contract(getAddress(app.contractInfo.wbnb), app.contractMetadata.BEP20.abi, app.signers.read)
 
+    app.web3.on('networkChanged', function(networkId) {
+      process.exit()
+    })
     
-    // ethersProvider.on("network", (newNetwork, oldNetwork) => {
+    app.ethersProvider.on("network", (newNetwork, oldNetwork) => {
       // When a Provider makes its initial connection, it emits a "network"
       // event with a null oldNetwork along with the newNetwork. So, if the
       // oldNetwork exists, it represents a changing network
-      // process.exit()
-    // });
+      if (oldNetwork) {
+        process.exit()
+      }
+    })
+
   } catch(e) {
     log(`Couldn't setup provider.`)
 
