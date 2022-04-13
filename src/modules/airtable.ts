@@ -1,248 +1,238 @@
-// const doc = new GoogleSpreadsheet('1-lzY9Jj7poBFB5Od4FUmgv-vYxKjPPtV7Nnz_X4vFs0');
+import Airtable from 'airtable'
+import { log, logError } from '@rune-backend-sdk/util'
 
+async function getGames(app) {
+  try {
+    app.airtable.database('Game').select({
+      // Selecting the first 3 records in Grid view:
+      maxRecords: 3,
+      view: "Grid view"
+    }).eachPage(function page(records, fetchNextPage) {
+      // This function (`page`) will get called for each page of records.
 
-// process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL = 'database@rune-database-333823.iam.gserviceaccount.com'
-// process.env.GOOGLE_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC+pZ7jToWHJwul\nBm7BEK137VZO3jQno3LV4l/J+fWAZUA7FTGFStYWzFdS2Xxi+HEQ6sVLiOUFK3RU\nZ2Gg0YKrgCkAy2vP1KaGFERQsnLUcnmu3ILpoqJhHUnQ98glCZd61OTCL7h+TQxU\nug2WM0s5Dp8Ce4I8CCAfSgR1WVFGWmaABCLp/bXXX2nqvyXO0fmtHXWnXIQ2oDMY\n4N2kkka4lnHZ7wnoEQ2zzYWSWW4rrb+G10O61X+EjPTT22FAXwRNniArIjPbRYIn\ny/ngAqh/C0a8l+n3iKFKlBBu1hQqv/0ipWH/aAyTdl3DA5FvrKs44JDzj+kx2hfd\nd58l6nITAgMBAAECggEABMatwCsPlvmy8HuZ8GCZv+yPDM3DR7pFXmIGnU7o8sJW\nmsRRUnIJWAE0L4FUUj8Vcg43oB36AtL6XezzGgN1qb89smU7j7WCRc9MgNW09mk3\nGYWGYBJbeAxdn4xoPrP1UAtKVH+74v93eh3pHjoDE0GwWRsSrFdVxVg7hrG/TVWw\n+IerzKotL5v/taiQpmXCyszvOKGH7VAGEY/FeP4F4FIAGdIID7tLmnb/QfbSGyzb\nJDKxZ/v4E4zFAfG+WHLIB99xtMem22zQJfliLvZbIbvgbhFNUyrN8r29cprAf7rF\nZcREoBFNqTlbw2rFVI6HUXA+Qj5bjwsTh8CExnpUDQKBgQD2kz5NhU9E9SDX34m/\nlOFenK9uclO/F2wGSq+wCBAS9etAre1XfbJngJVA92vuivfBc+kvY/6b/0j1ZdzV\nrO8bdeT4YKfYuZEudPMShM0s0qprvHzDTctExH1ODrZb4VfldCPUETCjJ2HRhA6U\n/2bFO+nMiCAY1lHIdtu8fXybxQKBgQDF7x2RJoYUgbL4LMsQRDf9LqtoE8iFRQyC\n1fYT8mWjApcrER1+5NFbQ64V1ZGSIZ0FeMy4u48uOxidvIO14REwfckSwiHZIbQv\ngXDM5jv9wFXPtGUnQ/rG9dSeTbGfNkOPh16XrOVO/Snv8R61fo/go9F4igFs0OVH\n6tL//3779wKBgBvqt9cXDM6F4l4OlQ330TxhCQu8Lfcos7ZSpmmLwCYlaak9B+4r\n8RL+3+cnHDU5zqs8cF5JN/55fM0r50DZ/4hgZLgqWVaUS/eyjgK+vmwgveLMyGNk\nX2s9w+IekE7+yHDWIWhVOeh/APgzt2LvN7eE/QeHMfsd6MyFiINiwcTxAoGBAKlQ\nky1AE//ktrB+uLHQeUh1rKBaE/SUjVA6MMb9Wh3oMGHhwSZ0G/aC3Z7F00F6yXQN\n0qnPn3o/iR4dTVm/DlI5t0/5irTPlO/yPQi5heXZqk4DlWfSSen6DgfglCmKZJ6Z\ngLwkZP99pmsfClLc0byqxZvkCbYIt6keYaIk734fAoGBAIVm/ZSn0tF5Qt9MIYpG\nw8B5h9SVlvNSShkXysYaT7W3Bws2QWXvpjd9PbJewYCvbMKvIJ9m+T1x0qSHBS00\nnC6g6mi5NLPfxST1GzGe1ng9Mkxmh6OXCWRT+YSuipb5d2bjB9rhNzfUBVV+15Kv\nHl6CnRKwNgK+mTgG61ysnrHk\n-----END PRIVATE KEY-----\n"
+      records.forEach(function(record) {
+          log('Retrieved', record.get('name'))
 
-// async function getItemRecipes(sheet) {
-//     const rows = await sheet.getRows();
+          // app.airtable.database('Game').find(record.get('id'), function(err, record) {
+          //     if (err) { console.error(err); return; }
+          //     log('Retrieved', record.id);
+          // })
+      })
 
-//     const itemRecipes = []
+      // To fetch the next page of records, call `fetchNextPage`.
+      // If there are more records, `page` will get called again.
+      // If there are no more records, `done` will get called.
+      fetchNextPage()
+    }, function done(err) {
+      if (err) { console.error(err); return; }
+    })
+  } catch(e) {
+    logError(e)
+  }
+}
+
+async function getItemType(app, key) {
+  const cache = {}
+
+  if (cache[key]) return cache[key]
+
+  const res = await app.airtable.database('ItemType').find(key)
+
+  cache[key] = {
+    id: res.get('id'),
+    name: res.get('name')
+  }
+
+  return cache[key]
+}
+
+async function getItemSubType(app, key) {
+  const cache = {}
+
+  if (cache[key]) return cache[key]
+
+  const res = await app.airtable.database('ItemSubType').find(key)
+
+  cache[key] = {
+    id: res.get('id'),
+    name: res.get('name')
+  }
+
+  return cache[key]
+}
+
+async function getItemSpecificType(app, key) {
+  const cache = {}
+
+  if (cache[key]) return cache[key]
+
+  const res = await app.airtable.database('ItemSpecificType').find(key)
+
+  cache[key] = {
+    id: res.get('id'),
+    name: res.get('name')
+  }
+
+  return cache[key]
+}
+
+async function getItems(app) {
+  const skillCache = {}
+  const materialCache = {}
+
+  try {
+    const items = []
+
+    const res = await app.airtable.database('Item').select({
+      maxRecords: 200,
+      view: "Published Only"
+    }).eachPage(async function page(records, fetchNextPage) {
+      // log('Fetched items', records)
+
+      for (const record of records) {
+        // if (!record.get('isPublished')) continue
+
+        const item = {} as any
+
+        item.name = record.get('name')
+        item.id = record.get('id')
+        item.description = record.get('description')
+        item.shortDescription = record.get('shortDescription')
+        item.type = (await Promise.all((record.get('type') || []).map((key) => getItemType(app, key))))[0]?.name
+        item.subType = (await Promise.all((record.get('subType') || []).map((key) => getItemSubType(app, key))))[0]?.name
+        item.specificType = (await Promise.all((record.get('specificType') || []).map((key) => getItemSpecificType(app, key))))[0]?.name
+        item.icon = record.get('image')?.[0]?.url
+        item.skills = []
+        item.materials = []
+
+        const skillIds = record.get('skills')
+
+        if (skillIds) {
+          for (const skillId of skillIds) {
+            // log('Fetching skill ', skillId)
   
-//     for (const row of rows) {
-//       if (row.name && row.isEnabled === 'TRUE') {
-//         const itemRecipe = {
-//           id: row.id,
-//           name: row.name,
-//           rune1: row.rune1,
-//           rune2: row.rune2,
-//           rune3: row.rune3,
-//           rune4: row.rune4,
-//           rune5: row.rune5,
-//           type: row.type,
-//           itemType: row.itemType,
-//           isRetired: row.isRetired,
-//           isPaused: row.isPaused,
-//           numPerfectionRolls: row.numPerfectionRolls,
-//           m1v: row.m1v,
-//           m1a: row.m1a,
-//           m1min: row.m1min,
-//           m1max: row.m1max,
-//           m2v: row.m2v,
-//           m2a: row.m2a,
-//           m2min: row.m2min,
-//           m2max: row.m2max,
-//           m3v: row.m3v,
-//           m3a: row.m3a,
-//           m3min: row.m3min,
-//           m3max: row.m3max,
-//           m4v: row.m4v,
-//           m4a: row.m4a,
-//           m4min: row.m4min,
-//           m4max: row.m4max,
-//           m5v: row.m5v,
-//           m5a: row.m5a,
-//           m5min: row.m5min,
-//           m5max: row.m5max,
-//           m6v: row.m6v,
-//           m6a: row.m6a,
-//           m6min: row.m6min,
-//           m6max: row.m6max,
-//           m7v: row.m7v,
-//           m7a: row.m7a,
-//           m7min: row.m7min,
-//           m7max: row.m7max,
-//           m8v: row.m8v,
-//           m8a: row.m8a,
-//           m8min: row.m8min,
-//           m8max: row.m8max,
-//         }
+            const record2 = skillCache[skillId] || await app.airtable.database('Skill').find(skillId)
 
-//         itemRecipes.push(itemRecipe)
-//       }
-//     }
-
-//     return itemRecipes
-// }
-
-// async function getItemAttributes(sheet) {
-//   const rows = await sheet.getRows();
-
-//   const itemAttributes = []
-
-//   for (const row of rows) {
-//     if (row.name && row.isEnabled === 'TRUE') {
-//       const itemAttribute = {
-//         id: row.id,
-//         game: row.game,
-//         name: row.name,
-//         isEnabled: row.isEnabled,
-//         value: row.value,
-//         min: row.min,
-//         max: row.max,
-//         params: row.params,
-//         description: row.description,
-//         nature: row.nature,
-//         influences: row.influences
-//       }
-
-//       itemAttributes.push(itemAttribute)
-//     }
-//   }
-
-//   return itemAttributes
-// }
-
-// async function initGoogleSheets(regenSheets) {
-//     // Initialize Auth - see https://theoephraim.github.io/node-google-spreadsheet/#/getting-started/authentication
-//     await doc.useServiceAccountAuth({
-//       // env var values are copied from service account credentials generated by google
-//       // see "Authentication" section in docs for more info
-//       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-//       private_key: process.env.GOOGLE_PRIVATE_KEY,
-//     });
+            skillCache[skillId] = record2
   
-//     await doc.loadInfo(); // loads document properties and worksheets
-//     console.log('Connected to: ' + doc.title);
+            if (!record2) continue
   
-//     let sheetsByName = {}
+            item.skills.push(record2.get('id'))
+          }
+        }
+
+        const materialIds = record.get('materials')
+
+        if (materialIds) {
+          for (const materialId of materialIds) {
+            // log('Fetching materials ', materialId)
   
-//     for (const sheet of doc.sheetsByIndex) {
-//       sheetsByName[sheet.title] = sheet
-//     }
+            const record2 = materialCache[materialId] || await app.airtable.database('ItemMaterial').find(materialId)
+
+            materialCache[materialId] = record2
   
-//     // Regen Sheet: Item
-//     if (regenSheets.includes('Item')) {
-//       const sheet = sheetsByName['Item'];
-//       const rows = await sheet.getRows();
+            if (!record2) continue
+  
+            item.materials.push(record2.get('id'))
+          }
+        }
+
+        items.push(item)
+      }
+
+      app.db.saveItems(items)
+    })
     
-//       const itemRecipes = await getItemRecipes(sheetsByName['ItemRecipe'])
-//       const itemAttributes = await getItemAttributes(sheetsByName['ItemAttribute'])
-  
-//       for (const row of rows) {
-//         if (row.name && row.isEnabled === 'TRUE') {
-//           console.log(row.name)
-  
-//           const attributes = []
-  
-//           const details = {}
-  
-//           if (row.type) details["Type"] = row.type
-//           if (row.subType) details["Subtype"] = row.subType
-//           if (row.distribution) details["Distribution"] = row.distribution
-//           if (row.date) details["Date"] = row.date
-//           if (row.maxSupply) details["Max Supply"] = row.maxSupply
-  
-//           const gameMap = {
-//             1: 'Raid',
-//             2: 'Evolution',
-//             3: 'Infinite'
-//           }
-  
-//           const branches = {}
-  
-//           for (const gameId in gameMap) {
-//             const attributes = []
-  
-//             for (let i = 1; i <= 12; i++) {
-//               const attr = row[`a${i}${gameMap[gameId]}`]
-//               if (attr) {
-//                 const realAttribute = itemAttributes.find(a => a.name === attr && a.game === gameMap[gameId])
-  
-//                 if (!realAttribute) {
-//                   console.log(`Missing attribute: ${attr} (${gameMap[gameId]})`)
-//                   continue
-//                 }
-//                 const param1 = row[`a${i}Param1${gameMap[gameId]}`]
-//                 const param2 = row[`a${i}Param2${gameMap[gameId]}`]
-//                 const param3 = row[`a${i}Param3${gameMap[gameId]}`]
-//                 attributes.push({
-//                   "id": parseInt(realAttribute.id),
-//                   "param1": param1,
-//                   "param2": param2,
-//                   "param3": param3,
-//                   "description": realAttribute.description?.replace('{param1}', param1).replace('{param2}', param2).replace('{param3}', param3).replace('{value}', param1).replace('{Value}', param1),
-//                   "descriptionRaw": realAttribute.description
-//                 })
-//               }
-//             }
-  
-//             branches[gameId] = {
-//               description: row.description,
-//               attributes
-//             }
-//           }
-  
-//           let recipe
-//           let itemRecipe
-  
-//           if (row.recipeId) {
-//             itemRecipe = itemRecipes.find(r => r.id === row.recipeId)
-  
-//             recipe = [itemRecipe.rune1, itemRecipe.rune2, itemRecipe.rune3, itemRecipe.rune4, itemRecipe.rune5].filter(r => !!r).map(r => ({
-//               id: r,
-//               quantity: 1
-//             }))
-//           }
-  
-//           if (recipe && row.isSecret !== 'TRUE' && row.isUltraSecret !== 'TRUE') {
-//             details["Rune Word"] = recipe.map(r => r.id).join(" ")
-//           }
-  
-//           const item = {
-//             "description": row.description,
-//             "home_url": "https://rune.game",
-//             "external_url": "https://rune.game/catalog/" + row.id,
-//             "image_url": "https://rune.game/images/items/" + pad(row.id, 5) + ".png",
-//             "language": "en-US",
-//             "id": row.id,
-//             "name": row.name,
-//             "icon": "https://rune.game/images/items/" + pad(row.id, 5) + ".png",
-//             "type": row.type,
-//             "slots": [
-//               row.slot1,
-//               row.slot2,
-//               row.slot3
-//             ].filter(r => !!r),
-//             "isNew": row.isNew,
-//             "isEquipable": row.isEquipable === 'TRUE',
-//             "isUnequipable": row.isUnequipable === 'TRUE',
-//             "isTradeable": row.isTradeable === 'TRUE',
-//             "isTransferable": row.isTransferable === 'TRUE',
-//             "isUpgradable": row.isUpgradable === 'TRUE',
-//             "isCraftable": itemRecipe ? itemRecipe.isRetired !== 'TRUE' && itemRecipe.isPaused !== 'TRUE' : false,
-//             "isDisabled": row.isDisabled === 'TRUE',
-//             "isRuneword": row.isRuneword === 'TRUE',
-//             "isRetired": itemRecipe ? itemRecipe.isRetired === 'TRUE' : false,
-//             "isSecret": itemRecipe ? itemRecipe.isSecret === 'TRUE' : false,
-//             "isSuperSecret": itemRecipe ? itemRecipe.isSuperSecret === 'TRUE' : false,
-//             "attributes": attributes,
-//             "details": details,
-//             "recipe": recipe,
-//             "branches": branches
-//           }
-  
-//           jetpack.write(path.resolve(`../rune-databaser/db/items/${item.id}/meta.json`), JSON.stringify(item, null, 2), { atomic: true })
-//         }
-//       }
-//     }
-  
-  
-//     // Regen Sheet: ItemAttribute
-//     if (regenSheets.includes('ItemAttribute')) {
-//       const ItemAttributes = await getItemAttributes(sheetsByName['ItemAttribute'])
-  
-//       jetpack.write(path.resolve(`../rune-databaser/db/itemAttributes.json`), JSON.stringify(ItemAttributes, null, 2), { atomic: true })
-//     }
-  
-//     // Regen Sheet: ItemRecipe
-//     if (regenSheets.includes('ItemRecipe')) {
-//       const ItemRecipes = await getItemRecipes(sheetsByName['ItemRecipe'])
-  
-//       jetpack.write(path.resolve(`../rune-databaser/db/ItemRecipes.json`), JSON.stringify(ItemRecipes, null, 2), { atomic: true })
-//     }
-//   }
+    if (!res) {
+      log('Error fetching items')
+    }
 
-export function monitorAirtable(app) {
+    // To fetch the next page of records, call `fetchNextPage`.
+    // If there are more records, `page` will get called again.
+    // If there are no more records, `done` will get called.
+    // fetchNextPage()
+  } catch(e) {
+    logError(e)
+  }
+}
 
+
+async function getSkills(app) {
+  const itemCache = {}
+
+  try {
+    const skills = []
+
+    app.airtable.database('Skill').select({
+      maxRecords: 200,
+      view: "All"
+    }).eachPage(async function page(records, fetchNextPage) {
+      // log('Fetched skills', records)
+      
+      for (const record of records) {
+        if (!record.get('isPublished')) continue
+
+        const skill = {} as any
+
+        skill.name = record.get('name')
+        skill.id = record.get('id')
+        skill.description = record.get('description')
+        skill.shortDescription = record.get('shortDescription')
+        skill.type = record.get('type')
+        skill.icon = record.get('icon')?.[0]?.url
+        skill.items = []
+
+        const itemIds = record.get('items')
+
+        if (itemIds) {
+          for (const itemId of itemIds) {
+            // log('Fetching item ', itemId)
+  
+            const record2 = itemCache[itemId] || await app.airtable.database('Item').find(itemId)
+
+            itemCache[itemId] = record2
+  
+            if (!record2) continue
+  
+            const item = {} as any
+  
+            skill.items.push(record2.get('id'))
+          }
+        }
+
+        skills.push(skill)
+      }
+
+      app.db.saveSkills(skills)
+    })
+
+    // To fetch the next page of records, call `fetchNextPage`.
+    // If there are more records, `page` will get called again.
+    // If there are no more records, `done` will get called.
+    // fetchNextPage()
+  } catch(e) {
+    logError(e)
+  }
+}
+
+export async function monitorAirtable(app) {
+  try {
+    app.airtable = {}
+    app.airtable.apiKey = 'keybm28X0xKzSTmSG'
+
+    Airtable.configure({
+      endpointUrl: 'https://api.airtable.com',
+      apiKey: app.airtable.apiKey
+    })
+
+    app.airtable.database = Airtable.base('appSk5DGjf8WaidIK');
+
+    await getSkills(app)
+    await getItems(app)
+
+    setInterval(async () => await getSkills(app), 24 * 60 * 60 * 1000)
+    setInterval(async () => await getItems(app), 7 * 24 * 60 * 60 * 1000)
+  } catch(e) {
+    logError(e)
+  }
 }

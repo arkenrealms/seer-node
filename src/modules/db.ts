@@ -869,4 +869,20 @@ export function initDb(app) {
   app.db.saveModList = () => {
     jetpack.write(path.resolve('./db/evolution/modList.json'), beautify(app.db.evolution.modList, null, 2, 100), { atomic: true })
   }
+
+  app.db.saveSkills = async (skills) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/skills.json`), beautify(skills, null, 2))
+    } catch(e) {
+      logError('Couldnt save skills', e)
+    }
+  }
+
+  app.db.saveItems = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/items.json`), beautify(items, null, 2))
+    } catch(e) {
+      logError('Couldnt save items', e)
+    }
+  }
 }

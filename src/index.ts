@@ -17,6 +17,7 @@ import { monitorGeneralStats } from './modules/stats'
 import { monitorCraftingStats } from './modules/crafting'
 import { monitorMeta } from './modules/meta'
 import { monitorCoordinator } from './modules/coordinator'
+import { monitorAirtable } from './modules/airtable'
 import { monitorSenderEvents } from './modules/sender'
 import { initCubeBridge } from './modules/cube'
 // import { runTest } from './modules/tests/test-a'
@@ -218,6 +219,12 @@ async function init() {
         instance: monitorCoordinator,
         async: false,
         timeout: 1 * 1000
+      },
+      {
+        name: 'monitorAirtable',
+        instance: monitorAirtable,
+        async: false,
+        timeout: 30 * 1000
       },
     ]
 

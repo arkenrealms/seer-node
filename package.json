@@ -69,6 +69,7 @@
     "test": "test"
   },
   "dependencies": {
+    "airtable": "^0.11.3",
     "ipfs-http-client": "^50.1.2",
     "js-md5": "^0.7.3",
     "json-beautify": "^1.1.1",

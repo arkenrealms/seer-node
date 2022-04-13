@@ -11,14 +11,14 @@ export async function monitorMeta(app) {
     console.log('Saving achievement data')
     jetpack.write(path.resolve('./db/achievements.json'), beautify(achievementData, null, 2), { atomic: true })
   
-    console.log('Saving item data')
-    jetpack.write(path.resolve('./db/items.json'), beautify(itemData, null, 2), { atomic: true })
+    // console.log('Saving item data')
+    // jetpack.write(path.resolve('./db/items.json'), beautify(itemData, null, 2), { atomic: true })
   
     console.log('Saving item attribute data')
     jetpack.write(path.resolve('./db/itemAttributes.json'), beautify(ItemAttributes, null, 2), { atomic: true })
   
-    console.log('Saving skill data')
-    jetpack.write(path.resolve('./db/skills.json'), beautify(SkillNames, null, 2), { atomic: true })
+    // console.log('Saving skill data')
+    // jetpack.write(path.resolve('./db/skills.json'), beautify(SkillNames, null, 2), { atomic: true })
   
     console.log('Saving class data')
     jetpack.write(path.resolve('./db/classes.json'), beautify(ClassNames, null, 2), { atomic: true })
