@@ -511,6 +511,8 @@ export function initDb(app) {
         // realm.leaderboard.raw.rewards[user.address] = 0
         // realm.leaderboard.raw.pickups[user.address] = 0
 
+        log(`Saving evolution leaderboard ${realm.key} for season ${app.games.evolution.currentSeason}`)
+
         jetpack.write(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), beautify(realm.leaderboard, null, 2), { atomic: true })
       }
     } catch(e) {

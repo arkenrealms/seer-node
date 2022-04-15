@@ -55,7 +55,7 @@ function _initProvider(app) {
     })
 
   } catch(e) {
-    log(`Couldn't setup provider.`)
+    log(`Couldn't setup provider.`, e)
 
     setTimeout(() => _initProvider(app), 60 * 1000)
   }
