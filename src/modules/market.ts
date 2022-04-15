@@ -27,6 +27,8 @@ export async function getAllMarketEvents(app, retry = false) {
             id: getHighestId(app.db.trades) + 1
           }
 
+          const decodedItem = decodeItem(tokenId.toString())
+
           trade.seller = seller
           trade.buyer = buyer
           trade.tokenId = tokenId.toString()
@@ -36,7 +38,7 @@ export async function getAllMarketEvents(app, retry = false) {
           trade.createdAt = new Date().getTime()
           trade.updatedAt = new Date().getTime()
           trade.blockNumber = logInfo.blockNumber
-          trade.item = { id: decodeItem(tokenId.toString()).id }
+          trade.item = { id: decodedItem.id, name: decodedItem.name }
           // trade.item = decodeItem(trade.tokenId)
 
           app.db.trades.push(trade)
@@ -59,11 +61,13 @@ export async function getAllMarketEvents(app, retry = false) {
         const specificTrades = app.db.trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < logInfo.blockNumber)
 
         for (const specificTrade of specificTrades) {
+          const decodedItem = decodeItem(tokenId.toString())
+
           specificTrade.buyer = buyer
           specificTrade.price = toShort(price)
           specificTrade.updatedAt = new Date().getTime()
           specificTrade.blockNumber = logInfo.blockNumber
-          specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+          specificTrade.item = { id: decodedItem.id, name: decodedItem.name }
           // specificTrade.item = decodeItem(specificTrade.tokenId)
 
           await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
@@ -81,10 +85,12 @@ export async function getAllMarketEvents(app, retry = false) {
         const specificTrades = app.db.trades.filter(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < logInfo.blockNumber)
         
         for (const specificTrade of specificTrades) {
+          const decodedItem = decodeItem(tokenId.toString())
+
           specificTrade.status = "delisted"
           specificTrade.updatedAt = new Date().getTime()
           specificTrade.blockNumber = logInfo.blockNumber
-          specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+          specificTrade.item = { id: decodedItem.id, name: decodedItem.name }
           // specificTrade.item = decodeItem(specificTrade.tokenId)
 
           log('Delisting trade', specificTrade)
@@ -104,11 +110,13 @@ export async function getAllMarketEvents(app, retry = false) {
         const specificTrades = app.db.trades.filter(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < logInfo.blockNumber)
 
         for (const specificTrade of specificTrades) {
+          const decodedItem = decodeItem(tokenId.toString())
+
           specificTrade.status = "sold"
           specificTrade.buyer = buyer
           specificTrade.updatedAt = new Date().getTime()
           specificTrade.blockNumber = logInfo.blockNumber
-          specificTrade.item = { id: decodeItem(tokenId.toString()).id }
+          specificTrade.item = { id: decodedItem.id, name: decodedItem.name }
           // specificTrade.item = decodeItem(specificTrade.tokenId)
     
           await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
@@ -148,7 +156,7 @@ export async function getAllMarketEvents(app, retry = false) {
     ]
     
     for (const event of events) {
-      await iterateBlocks(app, `Market Events: ${event}`, getAddress(app.contractInfo.trader), app.config.trades.lastBlock[event], blockNumber, app.contracts.trader.filters[event](), processLog, async function (blockNumber2) {
+      await iterateBlocks(app, `Market Events: ${event}`, getAddress(app.contractInfo.market), app.config.trades.lastBlock[event], blockNumber, app.contracts.market.filters[event](), processLog, async function (blockNumber2) {
         app.config.trades.lastBlock[event] = blockNumber2
         // await saveConfig()
       })
@@ -179,7 +187,7 @@ export async function monitorMarketEvents(app) {
   // event Recover(address indexed user, address indexed seller, uint256 tokenId);
 
   try {
-    app.contracts.trader.on('List', async () => {
+    app.contracts.market.on('List', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
@@ -187,7 +195,7 @@ export async function monitorMarketEvents(app) {
       }
     })
 
-    app.contracts.trader.on('Update', async () => {
+    app.contracts.market.on('Update', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
@@ -195,7 +203,7 @@ export async function monitorMarketEvents(app) {
       }
     })
 
-    app.contracts.trader.on('Delist', async () => {
+    app.contracts.market.on('Delist', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
@@ -203,7 +211,7 @@ export async function monitorMarketEvents(app) {
       }
     })
 
-    app.contracts.trader.on('Buy', async () => {
+    app.contracts.market.on('Buy', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {

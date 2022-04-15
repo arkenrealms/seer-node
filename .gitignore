@@ -1,3 +1,6 @@
+rune.db
+rune.db.*
+
 build
 secrets.json
 db

@@ -32,51 +32,53 @@ async function getGames(app) {
 }
 
 async function getItemType(app, key) {
-  const cache = {}
+  if (!app.airtable.cache.getItemType) app.airtable.cache.getItemType = {}
 
-  if (cache[key]) return cache[key]
+  if (app.airtable.cache.getItemType[key]) return app.airtable.cache.getItemType[key]
 
   const res = await app.airtable.database('ItemType').find(key)
 
-  cache[key] = {
+  app.airtable.cache.getItemType[key] = {
     id: res.get('id'),
     name: res.get('name')
   }
 
-  return cache[key]
+  return app.airtable.cache.getItemType[key]
 }
 
 async function getItemSubType(app, key) {
-  const cache = {}
+  if (!app.airtable.cache.getItemSubType) app.airtable.cache.getItemSubType = {}
 
-  if (cache[key]) return cache[key]
+  if (app.airtable.cache.getItemSubType[key]) return app.airtable.cache.getItemSubType[key]
 
   const res = await app.airtable.database('ItemSubType').find(key)
 
-  cache[key] = {
+  app.airtable.cache.getItemSubType[key] = {
     id: res.get('id'),
     name: res.get('name')
   }
 
-  return cache[key]
+  return app.airtable.cache.getItemSubType[key]
 }
 
 async function getItemSpecificType(app, key) {
-  const cache = {}
+  if (!app.airtable.cache.getItemSpecificType) app.airtable.cache.getItemSpecificType = {}
 
-  if (cache[key]) return cache[key]
+  if (app.airtable.cache.getItemSpecificType[key]) return app.airtable.cache.getItemSpecificType[key]
 
   const res = await app.airtable.database('ItemSpecificType').find(key)
 
-  cache[key] = {
+  app.airtable.cache.getItemSpecificType[key] = {
     id: res.get('id'),
     name: res.get('name')
   }
 
-  return cache[key]
+  return app.airtable.cache.getItemSpecificType[key]
 }
 
 async function getItems(app) {
+  log('Fetching airtable data: Item')
+
   const skillCache = {}
   const materialCache = {}
 
@@ -156,8 +158,25 @@ async function getItems(app) {
   }
 }
 
+async function getSkillGame(app, key) {
+  if (!app.airtable.cache.getSkillGame) app.airtable.cache.getSkillGame = {}
+
+  if (app.airtable.cache.getSkillGame[key]) return app.airtable.cache.getSkillGame[key]
+
+  const res = await app.airtable.database('Game').find(key)
+
+  app.airtable.cache.getSkillGame[key] = {
+    id: res.get('id'),
+    name: res.get('name')
+  }
+
+  return app.airtable.cache.getSkillGame[key]
+}
+
 
 async function getSkills(app) {
+  log('Fetching airtable data: Skill')
+
   const itemCache = {}
 
   try {
@@ -165,12 +184,12 @@ async function getSkills(app) {
 
     app.airtable.database('Skill').select({
       maxRecords: 200,
-      view: "All"
+      view: "Published Only"
     }).eachPage(async function page(records, fetchNextPage) {
       // log('Fetched skills', records)
       
       for (const record of records) {
-        if (!record.get('isPublished')) continue
+        // if (!record.get('isPublished')) continue
 
         const skill = {} as any
 
@@ -178,6 +197,7 @@ async function getSkills(app) {
         skill.id = record.get('id')
         skill.description = record.get('description')
         skill.shortDescription = record.get('shortDescription')
+        skill.game = (await Promise.all((record.get('game') || []).map((key) => getSkillGame(app, key))))[0]?.name
         skill.type = record.get('type')
         skill.icon = record.get('icon')?.[0]?.url
         skill.items = []
@@ -218,6 +238,7 @@ async function getSkills(app) {
 export async function monitorAirtable(app) {
   try {
     app.airtable = {}
+    app.airtable.cache = {}
     app.airtable.apiKey = 'keybm28X0xKzSTmSG'
 
     Airtable.configure({
@@ -230,8 +251,8 @@ export async function monitorAirtable(app) {
     await getSkills(app)
     await getItems(app)
 
-    setInterval(async () => await getSkills(app), 24 * 60 * 60 * 1000)
-    setInterval(async () => await getItems(app), 7 * 24 * 60 * 60 * 1000)
+    setInterval(async () => await getSkills(app), 6 * 60 * 60 * 1000)
+    setInterval(async () => await getItems(app), 12 * 60 * 60 * 1000)
   } catch(e) {
     logError(e)
   }

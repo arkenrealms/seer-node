@@ -34,6 +34,7 @@ function _initProvider(app) {
     app.contracts.characters = new ethers.Contract(getAddress(app.contractInfo.characters), app.contractMetadata.ArcaneCharacters.abi, app.signers.read)
     app.contracts.barracks = new ethers.Contract(getAddress(app.contractInfo.barracks), app.contractMetadata.ArcaneBarracksFacetV1.abi, app.signers.read)
     app.contracts.trader = new ethers.Contract(getAddress(app.contractInfo.trader), app.contractMetadata.ArcaneTraderV1.abi, app.signers.read)
+    app.contracts.market = new ethers.Contract(getAddress(app.contractInfo.market), app.contractMetadata.ArcaneTraderV1.abi, app.signers.read)
     app.contracts.characterFactory = new ethers.Contract(getAddress(app.contractInfo.characterFactory), app.contractMetadata.ArcaneCharacterFactoryV3.abi, app.signers.read)
     app.contracts.profile = new ethers.Contract(getAddress(app.contractInfo.profile), app.contractMetadata.ArcaneProfile.abi, app.signers.read)
     app.contracts.sender = new ethers.Contract(getAddress(app.contractInfo.sender), app.contractMetadata.RuneSenderV1.abi, app.signers.read)
