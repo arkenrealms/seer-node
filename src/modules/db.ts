@@ -492,6 +492,7 @@ export function initDb(app) {
 
     try {
       for (const realm of app.games.evolution.realms) {
+        log(realm)
         // Calculate totals
 
         //                 user.evolution.servers[server.key].winRatio = rounds > 5 ? wins / rounds : 0
@@ -501,9 +502,12 @@ export function initDb(app) {
         //                 user.evolution.servers[server.key].timeSpent = parseFloat((rounds * 5 / 60).toFixed(1))
 
         for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'pickups', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
+          log(statKey)
+
           let results = []
 
           for (const address of realm.leaderboard.raw[statKey]) {
+            log(address)
             results.push({
               name: realm.leaderboard.raw.names[address],
               address: address,
@@ -516,6 +520,7 @@ export function initDb(app) {
           realm.leaderboard[statKey][0].data = []
 
           for (const result of results) {
+            log(result)
             realm.leaderboard[statKey][0].data.push({
               name: result.name,
               address: result.address,
@@ -532,7 +537,7 @@ export function initDb(app) {
         // realm.leaderboard.raw.rewards[user.address] = 0
         // realm.leaderboard.raw.pickups[user.address] = 0
 
-        log(`Saving evolution leaderboard ${realm.key} for season ${app.games.evolution.currentSeason}`)
+        log(`Saved evolution leaderboard ${realm.key} for season ${app.games.evolution.currentSeason}`)
 
         jetpack.write(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), beautify(realm.leaderboard, null, 2), { atomic: true })
       }
