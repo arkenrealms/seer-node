@@ -507,6 +507,8 @@ export function initDb(app) {
 
           let results = []
 
+          if (!realm.leaderboard.raw[statKey]) realm.leaderboard.raw[statKey] = {}
+
           for (const address of Object.keys(realm.leaderboard.raw[statKey])) {
             log(address)
             results.push({
