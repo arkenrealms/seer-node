@@ -19,5 +19,5 @@ export async function monitorSaves(app) {
     console.log('Save error', e)
   }
 
-  setTimeout(() => monitorSaves(app), 10 * 60 * 1000)
+  setTimeout(() => monitorSaves(app), 1 * 60 * 1000)
 }
