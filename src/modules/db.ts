@@ -418,16 +418,18 @@ export function initDb(app) {
     await app.db.saveToken(token)
   }
 
-  function read(filePath) {
-    // try {
+  function read(filePath, defaultValue) {
+    try {
       return jetpack.read(path.resolve(filePath), 'json')
-    // } catch (e) {
-    //   return defaultValue
-    // }
+    } catch (e) {
+      return defaultValue
+    }
   }
 
   app.db.loadUser = async (address) => {
-    return {
+    const exists = jetpack.exists(path.resolve(`./db/users/${address}/overview.json`)) && jetpack.exists(path.resolve(`./db/users/${address}/achievements.json`))
+
+    const baseUser = {
       address,
       lastGamePlayed: 0,
       inventoryItemCount: 0,
@@ -451,18 +453,35 @@ export function initDb(app) {
         runes: {},
         items: {}
       },
-      ...((read(`./db/users/${address}/overview.json`)) || {}),
-      achievements: (read(`./db/users/${address}/achievements.json`)) || [],
-      characters: (read(`./db/users/${address}/characters.json`)) || [],
-      evolution: (read(`./db/users/${address}/evolution.json`)) || {},
+      achievements: [],
+      characters: [],
+      evolution: {},
       inventory: {
-        items: [],
-        ...((read(`./db/users/${address}/inventory.json`)) || {})
+        items: []
       },
       market: {
-        trades: [],
-        ...((read(`./db/users/${address}/market.json`)) || {})
+        trades: []
       }
+    }
+      
+    if (exists) {
+      return {
+        ...baseUser,
+        ...read(`./db/users/${address}/overview.json`, {}),
+        achievements: read(`./db/users/${address}/achievements.json`, []),
+        characters: read(`./db/users/${address}/characters.json`, []),
+        evolution: read(`./db/users/${address}/evolution.json`, {}),
+        inventory: {
+          items: [],
+          ...(read(`./db/users/${address}/inventory.json`, {}))
+        },
+        market: {
+          trades: [],
+          ...(read(`./db/users/${address}/market.json`, {}))
+        }
+      }
+    } else {
+      return baseUser
     }
   }
 
