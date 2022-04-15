@@ -420,7 +420,7 @@ export function initDb(app) {
 
   function read(filePath) {
     // try {
-      return jetpack.readAsync(path.resolve(filePath), 'json')
+      return jetpack.read(path.resolve(filePath), 'json')
     // } catch (e) {
     //   return defaultValue
     // }
@@ -451,22 +451,24 @@ export function initDb(app) {
         runes: {},
         items: {}
       },
-      ...((await read(`./db/users/${address}/overview.json`)) || {}),
-      achievements: (await read(`./db/users/${address}/achievements.json`)) || [],
-      characters: (await read(`./db/users/${address}/characters.json`)) || [],
-      evolution: (await read(`./db/users/${address}/evolution.json`)) || {},
+      ...((read(`./db/users/${address}/overview.json`)) || {}),
+      achievements: (read(`./db/users/${address}/achievements.json`)) || [],
+      characters: (read(`./db/users/${address}/characters.json`)) || [],
+      evolution: (read(`./db/users/${address}/evolution.json`)) || {},
       inventory: {
         items: [],
-        ...((await read(`./db/users/${address}/inventory.json`)) || {})
+        ...((read(`./db/users/${address}/inventory.json`)) || {})
       },
       market: {
         trades: [],
-        ...((await read(`./db/users/${address}/market.json`)) || {})
+        ...((read(`./db/users/${address}/market.json`)) || {})
       }
     }
   }
 
   app.db.saveEvolutionLeaderboards = async () => {
+    log('Save evolution leaderboard')
+
     try {
       for (const realm of app.games.evolution.realms) {
         // Calculate totals
@@ -517,6 +519,8 @@ export function initDb(app) {
   }
 
   app.db.saveLeaderboard = async () => {
+    log('Save leaderboards')
+
     await app.db.saveEvolutionLeaderboards()
   }
 
