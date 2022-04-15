@@ -481,6 +481,8 @@ export function initDb(app) {
         }
       }
     } else {
+      log('User didnt exist: ', address)
+
       return baseUser
     }
   }
