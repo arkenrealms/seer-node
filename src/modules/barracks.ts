@@ -90,23 +90,27 @@ export async function getAllBarracksEvents(app, retry = false) {
 
     const blockNumber = await app.web3.eth.getBlockNumber()
 
-    const events = [
-      'Equip(address,uint256,uint16)',
-      'Unequip(address,uint256,uint16)',
-      'ActionBurn(address,uint256)',
-      'ActionBonus(address,uint256)',
-      'ActionHiddenPool(address,uint256)',
-      'ActionFee(address,address,uint256)',
-      'ActionSwap(address,address,uint256)',
-    ]
-    
-    for (const event of events) {
-      await iterateBlocks(app, `Barracks Events: ${event}`, getAddress(app.contractInfo.barracks), app.config.barracks.lastBlock[event], blockNumber, app.contracts.barracks.filters[event](), processLog, async function (blockNumber2) {
-        app.config.barracks.lastBlock[event] = blockNumber2
-        // await app.db.saveConfig()
-      })
+    if (parseInt(blockNumber) > 10000) {
+      const events = [
+        'Equip(address,uint256,uint16)',
+        'Unequip(address,uint256,uint16)',
+        'ActionBurn(address,uint256)',
+        'ActionBonus(address,uint256)',
+        'ActionHiddenPool(address,uint256)',
+        'ActionFee(address,address,uint256)',
+        'ActionSwap(address,address,uint256)',
+      ]
+      
+      for (const event of events) {
+        await iterateBlocks(app, `Barracks Events: ${event}`, getAddress(app.contractInfo.barracks), app.config.barracks.lastBlock[event], blockNumber, app.contracts.barracks.filters[event](), processLog, async function (blockNumber2) {
+          app.config.barracks.lastBlock[event] = blockNumber2
+          // await app.db.saveConfig()
+        })
+      }
+    } else {
+      log('Error parsing block number', blockNumber)
     }
-
+    
     log('Finished')
   } catch(e) {
     logError(e)

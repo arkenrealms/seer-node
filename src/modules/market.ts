@@ -148,21 +148,25 @@ export async function getAllMarketEvents(app, retry = false) {
 
     const blockNumber = await app.web3.eth.getBlockNumber()
 
-    const events = [
-      'List(address,address,uint256,uint256)',
-      'Update(address,address,uint256,uint256)',
-      'Delist(address,uint256)',
-      'Buy(address,address,uint256,uint256)',
-    ]
-    
-    for (const event of events) {
-      await iterateBlocks(app, `Market Events: ${event}`, getAddress(app.contractInfo.market), app.config.trades.lastBlock[event], blockNumber, app.contracts.market.filters[event](), processLog, async function (blockNumber2) {
-        app.config.trades.lastBlock[event] = blockNumber2
-        // await saveConfig()
-      })
-    }
+    if (parseInt(blockNumber) > 10000) {
+      const events = [
+        'List(address,address,uint256,uint256)',
+        'Update(address,address,uint256,uint256)',
+        'Delist(address,uint256)',
+        'Buy(address,address,uint256,uint256)',
+      ]
+      
+      for (const event of events) {
+        await iterateBlocks(app, `Market Events: ${event}`, getAddress(app.contractInfo.market), app.config.trades.lastBlock[event], blockNumber, app.contracts.market.filters[event](), processLog, async function (blockNumber2) {
+          app.config.trades.lastBlock[event] = blockNumber2
+          // await saveConfig()
+        })
+      }
 
-    log('Finished')
+      log('Finished')
+    } else {
+      log('Error parsing block number', blockNumber)
+    }
   } catch(e) {
     logError(e)
   }

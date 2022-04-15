@@ -101,15 +101,20 @@ export async function getAllSenderEvents(app, retry = false) {
 
     const blockNumber = await app.web3.eth.getBlockNumber()
 
-    const events = [
-      'RewardsSent(address,uint256,string)'
-    ]
-    
-    for (const event of events) {
-      await iterateBlocks(app, `Sender Events: ${event}`, getAddress(app.contractInfo.sender), app.config.sender.lastBlock[event] || 15000000, blockNumber, app.contracts.sender.filters[event](), processLog, async function (blockNumber2) {
-        app.config.sender.lastBlock[event] = blockNumber2
-        // await saveConfig()
-      })
+
+    if (parseInt(blockNumber) > 10000) {
+      const events = [
+        'RewardsSent(address,uint256,string)'
+      ]
+      
+      for (const event of events) {
+        await iterateBlocks(app, `Sender Events: ${event}`, getAddress(app.contractInfo.sender), app.config.sender.lastBlock[event] || 15000000, blockNumber, app.contracts.sender.filters[event](), processLog, async function (blockNumber2) {
+          app.config.sender.lastBlock[event] = blockNumber2
+          // await saveConfig()
+        })
+      }
+    } else {
+      log('Error parsing block number', blockNumber)
     }
 
     // console.log(JSON.stringify(newCoordinatorRequests, null, 2))

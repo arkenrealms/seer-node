@@ -67,17 +67,22 @@ export async function getAllCharacterEvents(app, retry = false) {
 
     const blockNumber = await app.web3.eth.getBlockNumber()
 
-    const events = [
-      'Transfer'
-    ]
-    
-    for (const event of events) {
-      await iterateBlocks(app, `Characters Events: ${event}`, getAddress(app.contractInfo.characters), app.config.characters.lastBlock[event], blockNumber, app.contracts.characters.filters[event](), processLog, async function (blockNumber2) {
-        app.config.characters.lastBlock[event] = blockNumber2
-        // await saveConfig()
-      })
-    }
 
+    if (parseInt(blockNumber) > 10000) {
+      const events = [
+        'Transfer'
+      ]
+      
+      for (const event of events) {
+        await iterateBlocks(app, `Characters Events: ${event}`, getAddress(app.contractInfo.characters), app.config.characters.lastBlock[event], blockNumber, app.contracts.characters.filters[event](), processLog, async function (blockNumber2) {
+          app.config.characters.lastBlock[event] = blockNumber2
+          // await saveConfig()
+        })
+      }
+    } else {
+      log('Error parsing block number', blockNumber)
+    }
+    
     log('Finished')
   } catch(e) {
     logError(e)
