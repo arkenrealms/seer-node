@@ -491,8 +491,8 @@ export function initDb(app) {
     log('Saving evolution leaderboard')
 
     try {
-      log(app.games.evolution)
-      for (const realm of app.games.evolution.realms) {
+      for (const realmKey of Object.keys(app.games.evolution.realms)) {
+        const realm = app.games.evolution.realms[realmKey]
         log(realm)
         // Calculate totals
 
