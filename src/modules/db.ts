@@ -467,7 +467,7 @@ export function initDb(app) {
   }
 
   app.db.saveEvolutionLeaderboards = async () => {
-    log('Save evolution leaderboard')
+    log('Saving evolution leaderboard')
 
     try {
       for (const realm of app.games.evolution.realms) {
@@ -519,7 +519,7 @@ export function initDb(app) {
   }
 
   app.db.saveLeaderboard = async () => {
-    log('Save leaderboards')
+    log('Saving leaderboards')
 
     await app.db.saveEvolutionLeaderboards()
   }
