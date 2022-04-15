@@ -50,6 +50,7 @@ function _initProvider(app) {
       // event with a null oldNetwork along with the newNetwork. So, if the
       // oldNetwork exists, it represents a changing network
       if (oldNetwork) {
+        log(newNetwork, oldNetwork)
         process.exit()
       }
     })
