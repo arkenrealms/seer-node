@@ -164,7 +164,7 @@ async function init() {
         name: 'monitorSaves',
         instance: monitorSaves,
         async: false,
-        timeout: 50 * 1000
+        timeout: 5 * 60 * 1000
       },
       {
         name: 'getAllMarketEvents',

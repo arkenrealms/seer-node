@@ -512,7 +512,7 @@ export function initDb(app) {
           if (!realm.leaderboard.raw[statKey]) realm.leaderboard.raw[statKey] = {}
 
           for (const address of Object.keys(realm.leaderboard.raw[statKey])) {
-            if (!realm.leaderboard.raw.names[address]) {
+            if (!realm.leaderboard.names[address]) {
               log('No username set for address: ', address)
               // realm.leaderboard.raw.names[address] = await app.db.loadUser(address).username
               continue
@@ -521,7 +521,7 @@ export function initDb(app) {
             log(address)
 
             results.push({
-              name: realm.leaderboard.raw.names[address],
+              name: realm.leaderboard.names[address],
               address: address,
               count: realm.leaderboard.raw[statKey][address]
             })
