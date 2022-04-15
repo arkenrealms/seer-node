@@ -82,7 +82,7 @@ export async function getAllCharacterEvents(app, retry = false) {
     } else {
       log('Error parsing block number', blockNumber)
     }
-    
+
     log('Finished')
   } catch(e) {
     logError(e)
@@ -102,6 +102,6 @@ export async function getAllCharacterEvents(app, retry = false) {
 
 export async function monitorCharacterEvents(app) {
   app.contracts.characters.on('Transfer', async (from, to, tokenId, log) => {
-    await app.modules.getAllCharacterEvents()
+    await app.modules.getAllCharacterEvents(app)
   })
 }
