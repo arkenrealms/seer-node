@@ -507,7 +507,7 @@ export function initDb(app) {
 
           let results = []
 
-          for (const address of realm.leaderboard.raw[statKey]) {
+          for (const address of Object.keys(realm.leaderboard.raw[statKey])) {
             log(address)
             results.push({
               name: realm.leaderboard.raw.names[address],
