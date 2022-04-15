@@ -502,6 +502,8 @@ export function initDb(app) {
         //                 user.evolution.servers[server.key].averageLatency = rounds >= 5 ? average(latency) : 0
         //                 user.evolution.servers[server.key].timeSpent = parseFloat((rounds * 5 / 60).toFixed(1))
 
+        if (!realm.leaderboard.raw.names) realm.leaderboard.raw.names = {}
+
         for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'pickups', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
           log(statKey)
 
