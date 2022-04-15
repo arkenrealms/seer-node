@@ -427,7 +427,7 @@ export function initDb(app) {
   }
 
   app.db.loadUser = async (address) => {
-    const exists = jetpack.exists(path.resolve(`./db/users/${address}/overview.json`)) && jetpack.exists(path.resolve(`./db/users/${address}/achievements.json`))
+    const exists = jetpack.exists(path.resolve(`./db/users/${address}/overview.json`))
 
     const baseUser = {
       address,
