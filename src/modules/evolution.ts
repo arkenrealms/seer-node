@@ -136,7 +136,8 @@ async function updateRealms(app) {
     app.db.evolution.playerCount = playerCount
 
     for (const server of app.db.evolutionServers) {
-      if (server.key.indexOf('tournament') !== -1) continue
+      if (server.status === 'inactive' || server.updateMode === 'manual') continue
+      // if (server.key.indexOf('tournament') !== -1) continue
       server.status = 'offline'
       server.playerCount = 0
     }
@@ -144,6 +145,8 @@ async function updateRealms(app) {
     const evolutionServers = app.db.evolutionRealms.map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
 
     for (const evolutionServer of evolutionServers) {
+      if (evolutionServer.status === 'inactive' || evolutionServer.updateMode === 'manual') continue
+
       const server = app.db.evolutionServers.find(s => s.key === evolutionServer.key)
 
       if (!server) {
