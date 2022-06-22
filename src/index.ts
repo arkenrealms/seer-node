@@ -20,6 +20,7 @@ import { monitorCoordinator } from './modules/coordinator'
 import { monitorAirtable } from './modules/airtable'
 import { monitorSenderEvents } from './modules/sender'
 import { initCubeBridge } from './modules/cube'
+import { initNotices } from './modules/notices'
 import { generateAccounts } from './modules/account-generator'
 // import { runTest } from './modules/tests/test-a'
 import * as tests from './tests'
@@ -116,6 +117,12 @@ async function init() {
       {
         name: 'initWeb3',
         instance: initWeb3,
+        async: false,
+        timeout: 0
+      },
+      {
+        name: 'initNotices',
+        instance: initNotices,
         async: false,
         timeout: 0
       },

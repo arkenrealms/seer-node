@@ -20,6 +20,7 @@ async function add(type, data) {
 
   jetpack.write(path.resolve(`./db/notices.json`), beautify(notices, null, 2), { atomic: true })
 }
+
 export async function initNotices(app) {
   // Update coordinator refers
   try {
