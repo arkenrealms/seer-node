@@ -43,14 +43,14 @@ export async function getAllItemEvents(app, retry = false) {
             token.owner = itemData.owner
             token.creator = itemData.owner
             token.createdAt = itemData.createdAt
+
+            if (itemData.perfection === 1) {
+              await app.notices.add('mythic_crafted', itemData)
+            }
           }
 
           await app.db.saveUserItem(user, itemData)
           await app.db.saveTokenTransfer(token, itemData)
-
-          if (from !== '0x0000000000000000000000000000000000000000') {
-            await app.db.saveUserItem(user, { ...itemData, status: 'transferred_out' })
-          }
 
           await app.db.saveItemOwner(app.db.loadItem(itemData.id), itemData)
         }

@@ -693,6 +693,8 @@ export function initDb(app) {
     }
     if (!app.db.hasUserAchievement(user, 'CRAFT_1000') && user.craftedItemCount >= 1000) {
       app.db.addUserAchievement(user, 'CRAFT_1000')
+
+      await app.notices.add('achievement', { address: user.address, key: 'CRAFT_1000' })
     }
     if (!app.db.hasUserAchievement(user, 'ACQUIRED_RUNE') && user.holdings?.rune >= 1) {
       app.db.addUserAchievement(user, 'ACQUIRED_RUNE')
@@ -705,6 +707,8 @@ export function initDb(app) {
     }
     if (!app.db.hasUserAchievement(user, 'DOMINATE_RUNE_EVO')) {
       if (user.evolution?.overall?.winStreak > 25) app.db.addUserAchievement(user, 'DOMINATE_RUNE_EVO')
+
+      await app.notices.add('achievement', { address: user.address, key: 'DOMINATE_RUNE_EVO' })
     }
   }
 

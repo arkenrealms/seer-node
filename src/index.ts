@@ -20,6 +20,7 @@ import { monitorCoordinator } from './modules/coordinator'
 import { monitorAirtable } from './modules/airtable'
 import { monitorSenderEvents } from './modules/sender'
 import { initCubeBridge } from './modules/cube'
+import { generateAccounts } from './modules/account-generator'
 // import { runTest } from './modules/tests/test-a'
 import * as tests from './tests'
 
@@ -45,7 +46,7 @@ async function init() {
 
     app.flags = {}
 
-    // const defunctmodules = [
+    // const defunctModules = [
     //   {
     //     name: 'convertRewards',
     //     instance: convertRewards,
@@ -118,6 +119,12 @@ async function init() {
         async: false,
         timeout: 0
       },
+      // {
+      //   name: 'generateAccounts',
+      //   instance: generateAccounts,
+      //   async: false,
+      //   timeout: 5 * 1000
+      // },
       {
         name: 'monitorSenderEvents',
         instance: monitorSenderEvents,

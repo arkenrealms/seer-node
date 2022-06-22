@@ -83,7 +83,7 @@ export async function getAllSenderEvents(app, retry = false) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            signature: await getSignedRequest(app.web3, app.secrets, 'rune-databaser/sender')
+            signature: await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'coordinator-signer'), 'rune-databaser/sender')
           }),
         }
     

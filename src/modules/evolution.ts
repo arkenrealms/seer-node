@@ -14,7 +14,7 @@ const ioCallbacks = {}
 
 async function rsCall(app, realm, name, data = undefined) {
   const id = shortId()
-  const signature = await getSignedRequest(app.web3, app.secrets, data)
+  const signature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data)
   
   return new Promise(async (resolve) => {
     ioCallbacks[id] = {}
@@ -623,6 +623,10 @@ export async function connectRealm(app, realm) {
         }
       }
 
+      if (req.data.round.winners.length > 0) {
+        await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, reward: `${rewardWinnerMap[0]} ZOD` })
+      }
+
       for (const user of users) {
         await app.db.saveUser(user)
       }
@@ -842,7 +846,7 @@ export async function monitorEvolutionRealms(app) {
   if (!app.realm) {
     app.realm = {}
     app.realm.apiAddress = '0x4b64Ff29Ee3B68fF9de11eb1eFA577647f83151C'
-    app.realm.apiSignature = await getSignedRequest(app.web3, app.secrets, 'evolution')
+    app.realm.apiSignature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), 'evolution')
     app.realm.emitAll = emitAll.bind(null, app)
   }
 

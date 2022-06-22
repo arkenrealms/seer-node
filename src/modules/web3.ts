@@ -19,7 +19,7 @@ function _initProvider(app) {
     log('Setting up provider')
 
     app.secrets = secrets
-    app.web3Provider = getRandomProvider(secrets)
+    app.web3Provider = getRandomProvider(secrets.find(s => s.id === 'default-signer'))
     app.web3 = new Web3(app.web3Provider)
 
     app.ethersProvider = new ethers.providers.Web3Provider(app.web3Provider, 'any')
