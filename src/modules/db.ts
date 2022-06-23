@@ -706,9 +706,11 @@ export function initDb(app) {
       if (user.evolution?.overall?.wins > 0) app.db.addUserAchievement(user, 'MEGA_RUNE_EVO')
     }
     if (!app.db.hasUserAchievement(user, 'DOMINATE_RUNE_EVO')) {
-      if (user.evolution?.overall?.winStreak > 25) app.db.addUserAchievement(user, 'DOMINATE_RUNE_EVO')
+      if (user.evolution?.overall?.winStreak > 25) {
+        app.db.addUserAchievement(user, 'DOMINATE_RUNE_EVO')
 
-      await app.notices.add('achievement', { address: user.address, key: 'DOMINATE_RUNE_EVO' })
+        await app.notices.add('achievement', { address: user.address, key: 'DOMINATE_RUNE_EVO' })
+      }
     }
   }
 
