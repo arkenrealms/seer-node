@@ -40,6 +40,8 @@ async function rsCall(app, realm, name, data = undefined) {
 }
 
 function setRealmOffline(realm) {
+  if (realm.status === 'inactive' || realm.updateMode === 'manual') return
+
   realm.status = 'offline'
   realm.playerCount = 0
   realm.speculatorCount = 0
@@ -626,8 +628,8 @@ export async function connectRealm(app, realm) {
         }
       }
 
-      if (req.data.round.winners.length > 0) {
-        await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, reward: `${rewardWinnerMap[0]} ZOD` })
+      if (req.data.round.players.length >= 10 && req.data.round.winners.length > 0) {
+        await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, message: `${users.find(u => u.address === req.data.round.winners[0].address).username} won ${rewardWinnerMap[0]} ZOD in Evolution!` })
       }
 
       for (const user of users) {
