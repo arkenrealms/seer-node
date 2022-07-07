@@ -113,7 +113,8 @@ async function updateRealms(app) {
     let playerCount = 0
 
     for (const realm of app.db.evolutionRealms) {
-      if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
+      // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
+      if (realm.status === 'inactive' || realm.updateMode === 'manual') continue
 
       await updateRealm(app, realm)
 
@@ -144,7 +145,7 @@ async function updateRealms(app) {
       server.playerCount = 0
     }
 
-    const evolutionServers = app.db.evolutionRealms.map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
+    const evolutionServers = app.db.evolutionRealms.filter(r => r.status !== 'inactive').map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
 
     for (const evolutionServer of evolutionServers) {
       if (evolutionServer.status === 'inactive' || evolutionServer.updateMode === 'manual') continue
@@ -220,6 +221,8 @@ function disconnectClient(client) {
 const runes = ['el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'amn', 'sol', 'shael', 'dol', 'hel', 'io', 'lum', 'ko', 'fal', 'lem',  'pul', 'um', 'mal', 'ist', 'gul', 'vex', 'ohm', 'lo', 'sur', 'ber', 'jah', 'cham', 'zod']
 
 export async function connectRealm(app, realm) {
+  if (realm.status === 'inactive') return
+
   log('Connecting to realm', realm)
   const { client } = app.games.evolution.realms[realm.key]
 
@@ -827,7 +830,8 @@ export async function connectRealms(app) {
         realm.roundId = 1
       }
 
-      if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
+      // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
+      if(realm.status === 'inactive' || realm.updateMode === 'manual') continue
 
       if (!app.games.evolution.realms[realm.key].client.isConnected && !app.games.evolution.realms[realm.key].client.isConnecting && !app.games.evolution.realms[realm.key].client.isAuthed) {
         await connectRealm(app, realm)
