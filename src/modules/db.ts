@@ -9,27 +9,27 @@ import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById
 
 export function initDb(app) {
   app.db = {
-    app: jetpack.read(path.resolve('./db/app.json'), 'json'),
-    trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json')),
-    farms: jetpack.read(path.resolve('./db/farms.json'), 'json'),
-    runes: jetpack.read(path.resolve('./db/runes.json'), 'json'),
-    classes: jetpack.read(path.resolve('./db/classes.json'), 'json'),
-    guilds: jetpack.read(path.resolve('./db/guilds.json'), 'json'),
-    stats: jetpack.read(path.resolve('./db/stats.json'), 'json'),
-    historical: jetpack.read(path.resolve('./db/historical.json'), 'json'),
-    barracksEvents: jetpack.read(path.resolve('./db/barracks/events.json'), 'json'),
-    blacksmithEvents: jetpack.read(path.resolve('./db/blacksmith/events.json'), 'json'),
-    raidEvents: jetpack.read(path.resolve('./db/raid/events.json'), 'json'),
-    guildsEvents: jetpack.read(path.resolve('./db/guilds/events.json'), 'json'),
-    itemsEvents: jetpack.read(path.resolve('./db/items/events.json'), 'json'),
-    charactersEvents: jetpack.read(path.resolve('./db/characters/events.json'), 'json'),
-    usersEvents: jetpack.read(path.resolve('./db/users/events.json'), 'json'),
-    tradesEvents: jetpack.read(path.resolve('./db/trades/events.json'), 'json'),
+    app: jetpack.read(path.resolve('./db/app.json'), 'json') || {config: { characterMintCost: 0.1, profileRegisterCost: 0 }},
+    trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
+    farms: jetpack.read(path.resolve('./db/farms.json'), 'json') || {},
+    runes: jetpack.read(path.resolve('./db/runes.json'), 'json') || {},
+    classes: jetpack.read(path.resolve('./db/classes.json'), 'json') || [],
+    guilds: jetpack.read(path.resolve('./db/guilds.json'), 'json') || [],
+    stats: jetpack.read(path.resolve('./db/stats.json'), 'json') || {},
+    historical: jetpack.read(path.resolve('./db/historical.json'), 'json') || {},
+    barracksEvents: jetpack.read(path.resolve('./db/barracks/events.json'), 'json') || [],
+    blacksmithEvents: jetpack.read(path.resolve('./db/blacksmith/events.json'), 'json') || [],
+    raidEvents: jetpack.read(path.resolve('./db/raid/events.json'), 'json') || [],
+    guildsEvents: jetpack.read(path.resolve('./db/guilds/events.json'), 'json') || [],
+    itemsEvents: jetpack.read(path.resolve('./db/items/events.json'), 'json') || [],
+    charactersEvents: jetpack.read(path.resolve('./db/characters/events.json'), 'json') || [],
+    usersEvents: jetpack.read(path.resolve('./db/users/events.json'), 'json') || [],
+    tradesEvents: jetpack.read(path.resolve('./db/trades/events.json'), 'json') || [],
     // evolutionLeaderboardHistory: jetpack.read(path.resolve('./db/evolution/leaderboardHistory.json'), 'json'),
     // evolutionRewardHistory: jetpack.read(path.resolve('./db/evolution/rewardHistory.json'), 'json'),
-    evolutionHistorical: jetpack.read(path.resolve('./db/evolution/historical.json'), 'json'),
+    evolutionHistorical: jetpack.read(path.resolve('./db/evolution/historical.json'), 'json') || [],
     evolutionRealms: jetpack.read(path.resolve('./db/evolution/realms.json'), 'json') || [],
-    evolutionServers: jetpack.read(path.resolve('./db/evolution/servers.json'), 'json'),
+    evolutionServers: jetpack.read(path.resolve('./db/evolution/servers.json'), 'json') || [],
     evolutionConfig: jetpack.read(path.resolve('./db/evolution/config.json'), 'json') || {
       "rewardItemAmountPerLegitPlayer": 0.0015,
       "rewardItemAmountMax": 0.03,
@@ -935,6 +935,14 @@ export function initDb(app) {
       await jetpack.writeAsync(path.resolve(`./db/items.json`), beautify(items, null, 2))
     } catch(e) {
       logError('Couldnt save items', e)
+    }
+  }
+
+  app.db.saveRecipes = async (recipes) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/recipes.json`), beautify(recipes, null, 2))
+    } catch(e) {
+      logError('Couldnt save recipes', e)
     }
   }
 }

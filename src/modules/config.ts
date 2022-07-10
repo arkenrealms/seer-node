@@ -2,7 +2,16 @@ import jetpack from 'fs-jetpack'
 import path from 'path'
 
 export function initConfig(app) {
-  app.config = jetpack.read(path.resolve('./db/config.json'), 'json')
+  app.config = jetpack.read(path.resolve('./db/config.json'), 'json') || {
+    trades: {},
+    barracks: {},
+    blacksmith: {},
+    items: {},
+    characters: {},
+    test: {},
+    sender: {}
+  }
+
   app.config.trades.updating = false
   app.config.barracks.updating = false
   app.config.blacksmith.updating = false
