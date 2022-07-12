@@ -1,6 +1,6 @@
 import Airtable from 'airtable'
 import { log, logError } from '@rune-backend-sdk/util'
-import { RuneNames, Games, ClassNames, SkillNames, ItemRarityNameById, RuneId, SkillIdByName, ConditionIdByName, StatIdByName, ModIdByName, TypeIdByName, ConditionNames, ConditionParamNames, EffectNames, StatNames, ModNames, TypeNames } from '@rune-backend-sdk/data/items'
+import { RuneNames, Games, ClassIdByName, ClassNames, SkillNames, ItemRarityNameById, RuneId, SkillIdByName, ConditionIdByName, StatIdByName, ModIdByName, TypeIdByName, ConditionNames, ConditionParamNames, EffectNames, StatNames, ModNames, TypeNames } from '@rune-backend-sdk/data/items'
 import Skills from '../../db/skills.json'
 
 
@@ -66,13 +66,14 @@ async function getItem(app, key) {
   item.subType = subType?.id
   item.specificType = specificType?.id
   item.slots = type?.slots
-  item.isNew = !!recipe?.isNew
-  item.isSecret = !!recipe?.isSecret
-  item.isUltraSecret = !!recipe?.isUltraSecret
-  item.isPaused = !!recipe?.isPaused
-  item.isRetired = !!recipe?.isRetired
-  item.isDisabled = !!recipe?.isEnabled
-  item.isCraftable = !!recipe?.isCraftable
+  item.isPolled = !!record.get('isPolled')
+  item.isNew = !!record.get('isNew')
+  item.isSecret = !!record.get('isSecret')
+  item.isUltraSecret = !!record.get('isUltraSecret')
+  item.isPaused = !!record.get('isPaused')
+  item.isRetired = !!record.get('isRetired')
+  item.isDisabled = !!record.get('isEnabled')
+  item.isCraftable = !!record.get('isCraftable')
   item.isEnabled = !!record.get('isEnabled')
   item.isDisabled = !record.get('isEnabled')
   item.isEquipable = !!record.get('isEquipable')
@@ -82,7 +83,7 @@ async function getItem(app, key) {
   item.isUpgradable = !!record.get('isUpgradable')
   item.isPublishable = !!record.get('isPublishable')
   item.isRuneword = !!record.get('isRuneword')
-  item.createdDate = recipe?.createdDate || 0
+  item.createdDate = record.get('createdDate') || 0
   item.hotness = record.get('hotness') || 0
   item.numPerfectionRolls = record.get('numPerfectionRolls')
   item.attributes = []
@@ -96,7 +97,7 @@ async function getItem(app, key) {
   }
   item.recipe = {
     requirement: recipe?.runes.map(r => ({
-      id: r.id,
+      id: r.id - 1,
       quantity: 1
     })) || []
   }
@@ -105,9 +106,8 @@ async function getItem(app, key) {
   item.visualDescription = (record.get('visualDescription') || '').replace(/\n$/g, '')
   item.branches = await getItemBranches(app, record)
 
-  item.skills = []
-  item.materials = []
-  item.category = 'accessory'
+  item.skills = []// (await Promise.all((record.get('skills') || []).map(async (key) => (await app.airtable.database('Skill').find(key)).get('id'))))
+  item.materials = [] //(await Promise.all((record.get('materials') || []).map(async (key) => (await app.airtable.database('ItemMaterial').find(key)).get('id'))))
 
   if (item.isSecret || item.isUltraSecret) {
     delete item.details['Rune Word']
@@ -177,7 +177,7 @@ async function getItem(app, key) {
     [ItemType.WristArmor]: 'armor',
   }
 
-  item.category = itemTypeToCategory[item.type?.id] || 'accessory'
+  item.category = itemTypeToCategory[item.type] || 'accessory'
 
   const skillIds = record.get('skills')
 
@@ -323,15 +323,6 @@ async function getItemRecipe(app, key) {
 
   recipe.id = record.get('id')
   recipe.name = record.get('name')
-  recipe.isNew = !!record.get('isNew')
-  recipe.isSecret = !!record.get('isSecret')
-  recipe.isUltraSecret = !!record.get('isUltraSecret')
-  recipe.isPaused = !!record.get('isPaused')
-  recipe.isRetired = !!record.get('isRetired')
-  recipe.isDisabled = !!record.get('isEnabled')
-  recipe.isCraftable = !!record.get('isCraftable')
-  recipe.createdDate = record.get('createdDate') || 0
-  recipe.numPerfectionRolls = record.get('numPerfectionRolls')
   recipe.runes = runes.map(r => ({
     id: r.id,
     quantity: 1
@@ -561,11 +552,12 @@ function processItemAttributes(specs) {
       rune: (key) => RuneId[key], //RuneOnWinChance
       conditions: (key) => ConditionIdByName[key],
       skill: (key) => SkillIdByName[key],
-      skills: (list) => list?.split(', ').map(key => SkillIdByName[key]),
-      stat: (list) => list?.split(', ').map(key => StatIdByName[key]),
-      stats: (list) => list?.split(', ').map(key => StatIdByName[key]),
-      mod: (list) => list?.split(', ').map(key => ModIdByName[key]),
+      skills: (key) => SkillIdByName[key],
+      stat: (key) => StatIdByName[key],
+      stats: (key) => StatIdByName[key],
+      mod: (key) => ModIdByName[key],
       type: (key) => TypeIdByName[key],
+      classid: (key) => ClassIdByName[key],
     }
     const mapParamIdToReadable = {
       tokenId: (key) => RuneNames[key],
@@ -574,11 +566,12 @@ function processItemAttributes(specs) {
       conditionparams: (key) => ConditionParamNames[key],
       effect: (key) => EffectNames[key],
       skill: (key) => SkillNames[key],
-      skills: (list) => list?.map(key => SkillNames[key]),
-      stat: (list) => list?.map(key => StatNames[key]),
-      stats: (list) => list?.map(key => StatNames[key]),
-      mod: (list) => list?.map(key => ModNames[key]),
+      skills: (key) => SkillNames[key],
+      stat: (key) => StatNames[key],
+      stats: (key) => StatNames[key],
+      mod: (key) => ModNames[key],
       type: (key) => TypeNames[key],
+      classid: (key) => ClassNames[key],
     }
     const maps = {
       3: RuneNames,
@@ -734,7 +727,7 @@ function processItemAttributes(specs) {
     const isDebuff = !!attribute.nature?.includes('Debuff')
 
     attributes.push(attribute)
-    perfection.push(isBuff ? attribute.param1?.max : (isDebuff ? attribute.param1?.min : undefined))
+    perfection.push(attribute.param1?.min === attribute.param1?.max ? undefined : (isBuff ? attribute.param1?.max : (isDebuff ? attribute.param1?.min : undefined)))
   }
 
   return {
