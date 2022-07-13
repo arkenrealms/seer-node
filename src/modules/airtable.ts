@@ -932,6 +932,183 @@ async function getRecipes(app) {
   }
 }
 
+function convertToPercent(value) {
+  if (value === undefined) return undefined
+
+  return `${value}%`
+  // if (value.split('-').length < 2) return `${value}%`
+  // if (value.split('-').length > 2) return `${value}%`
+
+  // return `${value.split('-')[0]}-${value.split('-')[1]}%`
+}
+
+async function convertItemParams(app) {
+  log('Converting airtable data: Item -> params')
+
+  try {
+    const items = []
+
+    const res = await app.airtable.database('Item').select({
+      maxRecords: 10000,
+      view: "All Data"
+    }).eachPage(async function page(records, fetchNextPage) {
+      // log('Fetched items', records)
+
+      for (const record of records) {
+        try {
+          // if (!record.get('isPublished')) continue
+          console.log(record.get('name'))
+
+          const convertParam = async (game, num) => {
+            const result = []
+
+            for (let i = 1; i <= 3; i++) {
+              const paramValue = record.get(`a${num}Param${i}${game}`)
+
+              if (paramValue && record.get(`a${num}${game}`)) {
+                const attr = await app.airtable.database('ItemAttribute').find(record.get(`a${num}${game}`))
+  console.log(game, num, i, attr.get(`paramType${i}`))
+                if (attr.get(`paramType${i}`) === 'percent') {
+                  result.push(convertToPercent(paramValue))
+                } else {
+                  result.push(paramValue)
+                }
+              }
+            }
+
+            return result
+          }
+
+          const data = {
+            'a1RaidParams': [...(await convertParam('Raid', 1))].filter(r => !!r),
+            'a2RaidParams': [...(await convertParam('Raid', 2))].filter(r => !!r),
+            'a3RaidParams': [...(await convertParam('Raid', 3))].filter(r => !!r),
+            'a4RaidParams': [...(await convertParam('Raid', 4))].filter(r => !!r),
+            'a5RaidParams': [...(await convertParam('Raid', 5))].filter(r => !!r),
+            'a6RaidParams': [...(await convertParam('Raid', 6))].filter(r => !!r),
+            'a7RaidParams': [...(await convertParam('Raid', 7))].filter(r => !!r),
+            'a8RaidParams': [...(await convertParam('Raid', 8))].filter(r => !!r),
+            'a1EvolutionParams': [...(await convertParam('Evolution', 1))].filter(r => !!r),
+            'a2EvolutionParams': [...(await convertParam('Evolution', 2))].filter(r => !!r),
+            'a3EvolutionParams': [...(await convertParam('Evolution', 3))].filter(r => !!r),
+            'a4EvolutionParams': [...(await convertParam('Evolution', 4))].filter(r => !!r),
+            'a5EvolutionParams': [...(await convertParam('Evolution', 5))].filter(r => !!r),
+            'a6EvolutionParams': [...(await convertParam('Evolution', 6))].filter(r => !!r),
+            'a7EvolutionParams': [...(await convertParam('Evolution', 7))].filter(r => !!r),
+            'a8EvolutionParams': [...(await convertParam('Evolution', 8))].filter(r => !!r),
+            'a9EvolutionParams': [...(await convertParam('Evolution', 9))].filter(r => !!r),
+            'a10EvolutionParams': [...(await convertParam('Evolution', 10))].filter(r => !!r),
+            'a11EvolutionParams': [...(await convertParam('Evolution', 11))].filter(r => !!r),
+            'a12EvolutionParams': [...(await convertParam('Evolution', 12))].filter(r => !!r),
+            'a1InfiniteParams': [...(await convertParam('Infinite', 1))].filter(r => !!r),
+            'a2InfiniteParams': [...(await convertParam('Infinite', 2))].filter(r => !!r),
+            'a3InfiniteParams': [...(await convertParam('Infinite', 3))].filter(r => !!r),
+            'a4InfiniteParams': [...(await convertParam('Infinite', 4))].filter(r => !!r),
+            'a5InfiniteParams': [...(await convertParam('Infinite', 5))].filter(r => !!r),
+            'a6InfiniteParams': [...(await convertParam('Infinite', 6))].filter(r => !!r),
+            'a7InfiniteParams': [...(await convertParam('Infinite', 7))].filter(r => !!r),
+            'a8InfiniteParams': [...(await convertParam('Infinite', 8))].filter(r => !!r),
+            'a9InfiniteParams': [...(await convertParam('Infinite', 9))].filter(r => !!r),
+            'a10InfiniteParams': [...(await convertParam('Infinite', 10))].filter(r => !!r),
+            'a11InfiniteParams': [...(await convertParam('Infinite', 11))].filter(r => !!r),
+            'a12InfiniteParams': [...(await convertParam('Infinite', 12))].filter(r => !!r),
+          }
+
+          // console.log(data)
+          
+          app.airtable.database('Item').update(
+              record.id,
+              data,
+              {typecast: true}
+          )
+          .then(function(rec) {
+            // console.log(rec)
+            console.log('Done')
+          })
+          // record.putUpdate({'a1RaidParams': [record.get('a1Param1Raid'), record.get('a1Param2Raid')].filter(r => !!r)})
+
+          // return
+        } catch(e) {
+          console.log(e)
+          return
+        }
+      }
+
+      fetchNextPage()
+    })
+    
+    if (!res) {
+      log('Error fetching items')
+    }
+
+    // To fetch the next page of records, call `fetchNextPage`.
+    // If there are more records, `page` will get called again.
+    // If there are no more records, `done` will get called.
+    // fetchNextPage()
+  } catch(e) {
+    logError(e)
+  }
+}
+
+
+async function convertItemAttributes(app) {
+  log('Converting airtable data: ItemAttribute -> params')
+
+  try {
+    const items = []
+
+    const res = await app.airtable.database('ItemAttribute').select({
+      maxRecords: 10000,
+      view: "Grid view"
+    }).eachPage(async function page(records, fetchNextPage) {
+      // log('Fetched items', records)
+
+      for (const record of records) {
+        try {
+          // if (!record.get('isPublished')) continue
+          console.log(record.get('name'))
+
+          const data = {
+            'paramValues': [record.get('paramType1') === 'percent' ? convertToPercent(record.get('paramValue1')) : record.get('paramValue1'), record.get('paramType2') === 'percent' ? convertToPercent(record.get('paramValue2')) : record.get('paramValue2'), record.get('paramType3') === 'percent' ? convertToPercent(record.get('paramValue3')) : record.get('paramValue3')].filter(r => !!r),
+            'paramTypes': [record.get('paramType1')?.replace('percent', 'value'), record.get('paramType2')?.replace('percent', 'value'), record.get('paramType3')?.replace('percent', 'value')].filter(r => !!r),
+          }
+
+          console.log(data)
+          
+          app.airtable.database('ItemAttribute').update(
+              record.id,
+              data,
+              {typecast: true}
+          )
+          .then(function(rec) {
+            // console.log(rec)
+            console.log('Done')
+          })
+          // record.putUpdate({'a1RaidParams': [record.get('a1Param1Raid'), record.get('a1Param2Raid')].filter(r => !!r)})
+
+          // return
+        } catch(e) {
+          console.log(e)
+          return
+        }
+      }
+
+      fetchNextPage()
+    })
+    
+    if (!res) {
+      log('Error fetching item attributes')
+    }
+
+    // To fetch the next page of records, call `fetchNextPage`.
+    // If there are more records, `page` will get called again.
+    // If there are no more records, `done` will get called.
+    // fetchNextPage()
+  } catch(e) {
+    logError(e)
+  }
+}
+
 export async function monitorAirtable(app) {
   try {
     app.airtable = {}
@@ -954,8 +1131,12 @@ export async function monitorAirtable(app) {
     // await getItems(app)
     // setInterval(async () => await getItems(app), 12 * 60 * 60 * 1000)
 
-    await getItems(app)
-    setInterval(async () => await getItems(app), 12 * 60 * 60 * 1000)
+    // await getItems(app)
+    // setInterval(async () => await getItems(app), 12 * 60 * 60 * 1000)
+
+
+    // await convertItemParams(app)
+    await convertItemAttributes(app)
   } catch(e) {
     logError(e)
   }
