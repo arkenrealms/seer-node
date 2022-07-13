@@ -126,12 +126,18 @@ async function init() {
         async: false,
         timeout: 0
       },
-      {
-        name: 'generateAccounts',
-        instance: generateAccounts,
-        async: false,
-        timeout: 5 * 1000
-      },
+      // {
+      //   name: 'generateAccounts',
+      //   instance: generateAccounts,
+      //   async: false,
+      //   timeout: 5 * 1000
+      // },
+      // {
+      //   name: 'monitorAirtable',
+      //   instance: monitorAirtable,
+      //   async: false,
+      //   timeout: 30 * 1000
+      // },
       {
         name: 'monitorSenderEvents',
         instance: monitorSenderEvents,
@@ -234,12 +240,6 @@ async function init() {
         async: false,
         timeout: 1 * 1000
       },
-      // {
-      //   name: 'monitorAirtable',
-      //   instance: monitorAirtable,
-      //   async: false,
-      //   timeout: 30 * 1000
-      // },
     ]
 
     app.modules = {}
