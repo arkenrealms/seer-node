@@ -14,7 +14,7 @@
 
     //       publishEvent('OnRoundWinner', leaders[0].name)
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[1]?.address) {
@@ -25,7 +25,7 @@
         
     //       app.db.evolution.playerRewards[leaders[1].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[1].address].pending.zod + app.config.rewardWinnerAmount * 0.25) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[2]?.address) {
@@ -36,7 +36,7 @@
         
     //       app.db.evolution.playerRewards[leaders[2].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[2].address].pending.zod + app.config.rewardWinnerAmount * 0.15) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[3]?.address) {
@@ -47,7 +47,7 @@
         
     //       app.db.evolution.playerRewards[leaders[3].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[3].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[4]?.address) {
@@ -58,7 +58,7 @@
         
     //       app.db.evolution.playerRewards[leaders[4].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[4].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[5]?.address) {
@@ -69,7 +69,7 @@
         
     //       app.db.evolution.playerRewards[leaders[5].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[5].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[6]?.address) {
@@ -80,7 +80,7 @@
         
     //       app.db.evolution.playerRewards[leaders[6].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[6].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[7]?.address) {
@@ -91,7 +91,7 @@
         
     //       app.db.evolution.playerRewards[leaders[7].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[7].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[8]?.address) {
@@ -102,7 +102,7 @@
         
     //       app.db.evolution.playerRewards[leaders[8].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[8].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     //   if (leaders[9]?.address) {
@@ -113,7 +113,7 @@
         
     //       app.db.evolution.playerRewards[leaders[9].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[9].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
     //     } catch(e) {
-    //       log(e)
+    //       log('Error', e)
     //     }
     //   }
     // }
@@ -147,11 +147,11 @@
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), beautify(data, null, 2), { atomic: true })
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
   
@@ -400,7 +400,7 @@
 //             }
 //               await app.db.saveUser(user)
 //             } catch(e) {
-//               log(e)
+//               log('Error', e)
 //             }
 //           }
 
@@ -436,7 +436,7 @@
 //           jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboard2.json`), beautify(leaderboards[server.key], null, 2), { atomic: true })
 //         }
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 
@@ -585,7 +585,7 @@
 
 //     jetpack.write(path.resolve(`./db/evolution/leaderboard.json`), beautify(leaderboards.overall, null, 2), { atomic: true })
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 //   // Update evolution hash map
@@ -624,11 +624,11 @@
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/hashmap.json`), beautify(data, null, 2), { atomic: true })
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 //   // Update evolution stats
@@ -680,11 +680,11 @@
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/stats.json`), beautify(stats, null, 2), { atomic: true })
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 //   // Update evolution reward history
@@ -752,11 +752,11 @@
 //           playerRewardWinners[server.key] = data
 //         }
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 //   // Update evolution rewards
@@ -775,11 +775,11 @@
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/rewards.json`), beautify(data, null, 2), { atomic: true })
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 //   // Update evolution ban list
@@ -811,11 +811,11 @@
 //           await app.db.saveUser(user)
 //         }
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
   
@@ -837,11 +837,11 @@
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/log.json`), beautify(data, null, 2), { atomic: true })
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 
@@ -861,11 +861,11 @@
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/playerReports.json`), beautify(data, null, 2), { atomic: true })
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 //   // Update evolution leaderboard
@@ -1150,7 +1150,7 @@
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboard.json`), beautify(data, null, 2), { atomic: true })
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   }
@@ -1191,7 +1191,7 @@
 
 //           server.status = "online"
 //         } catch(e) {
-//           if ((e + '').toString().indexOf('invalid json response body') === -1) log(e)
+//           if ((e + '').toString().indexOf('invalid json response body') === -1) log('Error', e)
 
 //           // server.status = "offline"
 //           server.playerCount = 0
@@ -1233,7 +1233,7 @@
 //       log('Update evolution historical 2')
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 //   // Update evolution info
@@ -1249,11 +1249,11 @@
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/info.json`), beautify(data, null, 2), { atomic: true })
 //       } catch(e) {
-//         log(e)
+//         log('Error', e)
 //       }
 //     }
 //   } catch(e) {
-//     log(e)
+//     log('Error', e)
 //   }
 
 //   setTimeout(() => monitorEvolutionStats2(app), 30 * 1000)

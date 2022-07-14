@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import { getHighestId, toShort, log, logError } from '@rune-backend-sdk/util'
+import { getHighestId, toShort, log, log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 
@@ -168,7 +168,7 @@ export async function getAllMarketEvents(app, retry = false) {
       log('Error parsing block number', blockNumber)
     }
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 
   app.config.trades.updating = false
@@ -195,7 +195,7 @@ export async function monitorMarketEvents(app) {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
-        log(e)
+        log('Error', e)
       }
     })
 
@@ -203,7 +203,7 @@ export async function monitorMarketEvents(app) {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
-        log(e)
+        log('Error', e)
       }
     })
 
@@ -211,7 +211,7 @@ export async function monitorMarketEvents(app) {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
-        log(e)
+        log('Error', e)
       }
     })
 
@@ -219,10 +219,10 @@ export async function monitorMarketEvents(app) {
       try {
         await app.modules.getAllMarketEvents(app)
       } catch(e) {
-        log(e)
+        log('Error', e)
       }
     })
   } catch(e) {
-    log(e)
+    log('Error', e)
   }
 }

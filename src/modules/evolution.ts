@@ -4,7 +4,7 @@ import jetpack, { find } from 'fs-jetpack'
 import beautify from 'json-beautify'
 import { fancyTimeFormat } from '@rune-backend-sdk/util/time'
 import md5 from 'js-md5'
-import { log, logError } from '@rune-backend-sdk/util'
+import { log, log } from '@rune-backend-sdk/util'
 import { getClientSocket } from '@rune-backend-sdk/util/websocket'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
 
@@ -22,14 +22,14 @@ async function rsCall(app, realm, name, data = undefined) {
     ioCallbacks[id].resolve = resolve
 
     ioCallbacks[id].reqTimeout = setTimeout(function() {
-      logError('Request timeout')
+      log('Request timeout')
       resolve({ status: 0, message: 'Request timeout' })
 
       delete ioCallbacks[id]
     }, 60 * 1000)
 
     if (!realm.client.socket?.connected) {
-      logError('Not connected to realm server.')
+      log('Not connected to realm server.')
       return
     }
 
@@ -96,7 +96,7 @@ async function updateRealm(app, realm) {
 
     realm.status = 'online'
   } catch(e) {
-    logError(e)
+    log('Error', e)
 
     setRealmOffline(realm)
   }
@@ -195,7 +195,7 @@ async function updateRealms(app) {
 
     jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(hist, null, 2), { atomic: true })
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 
@@ -275,7 +275,7 @@ export async function connectRealm(app, realm) {
 
       client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
     } catch(e) {
-      logError(e)
+      log('Error', e)
       log(`Disconnecting ${realm.key} due to error`)
       cleanupClient(client)
     }
@@ -326,7 +326,7 @@ export async function connectRealm(app, realm) {
   //       })
   //     }
   //   } catch (e) {
-  //     logError(e)
+  //     log('Error', e)
       
   //     client.socket.emit('BanUserResponse', {
   //       id: req.id,
@@ -359,7 +359,7 @@ export async function connectRealm(app, realm) {
         data: { status: 1 }
       })
     } catch (e) {
-      logError(e)
+      log('Error', e)
       
       client.socket.emit('BanPlayerResponse', {
         id: req.id,
@@ -665,7 +665,7 @@ export async function connectRealm(app, realm) {
         data: { status: 1 }
       })
     } catch (e) {
-      logError(e)
+      log('Error', e)
       
       client.socket.emit('SaveRoundResponse', {
         id: req.id,
@@ -838,7 +838,7 @@ export async function connectRealms(app) {
       }
     }
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 

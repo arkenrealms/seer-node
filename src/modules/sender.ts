@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import * as ethers from 'ethers'
-import { log, logError, wait } from '@rune-backend-sdk/util'
+import { log, log, wait } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress, getSignedRequest } from '@rune-backend-sdk/util/web3'
 
 export async function getAllSenderEvents(app, retry = false) {
@@ -93,8 +93,8 @@ export async function getAllSenderEvents(app, retry = false) {
           await app.db.saveUser(user)
         }
       } catch (ex) {
-        logError(ex)
-        logError("Error parsing log: ", log2)
+        log(ex)
+        log("Error parsing log: ", log2)
         await wait(1000)
       }
     }
@@ -121,7 +121,7 @@ export async function getAllSenderEvents(app, retry = false) {
 
     log('Finished')
   } catch(e) {
-    logError(e)
+    log('Error', e)
     await wait(1000)
   }
 

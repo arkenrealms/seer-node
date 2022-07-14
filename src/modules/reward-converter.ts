@@ -312,7 +312,7 @@ export async function convertRewards(app) {
         app.db.saveUser(user)
       }
     } catch(e) {
-      log(e)
+      log('Error', e)
     }
   }
 
@@ -643,7 +643,7 @@ export async function convertRewards(app) {
 
 //       console.log('Done')
 //     } catch(e) {
-//       log(e)
+//       log('Error', e)
 //     }
 //   }
 // }

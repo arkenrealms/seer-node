@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { log, logError } from '@rune-backend-sdk/util'
+import { log, log } from '@rune-backend-sdk/util'
 
 export async function monitorGuildMemberDetails(app) {
   try {
@@ -64,7 +64,7 @@ export async function monitorGuildMemberDetails(app) {
       await app.db.saveGuild(guild)
     }
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 
   setTimeout(() => monitorGuildMemberDetails(app), 5 * 60 * 60 * 1000)

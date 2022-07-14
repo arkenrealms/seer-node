@@ -1,6 +1,6 @@
 import fs from 'fs'
 import express from 'express'
-import { log, logError } from '@rune-backend-sdk/util'
+import { log, log } from '@rune-backend-sdk/util'
 import * as websocketUtil from '@rune-backend-sdk/util/websocket'
 
 const path = require('path')
@@ -118,7 +118,7 @@ function initEventHandler(app) {
             }
           })
         } catch (e) {
-          logError(e)
+          log('Error', e)
 
           emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
@@ -164,7 +164,7 @@ function initEventHandler(app) {
       socket.on('disconnect', function() {
       })
     } catch(e) {
-      logError(e)
+      log('Error', e)
     }
   })
 }
@@ -221,6 +221,6 @@ export async function initCubeBridge(app) {
 
     initEventHandler(app)
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }

@@ -159,7 +159,7 @@ export async function monitorGeneralStats(app) {
 
           app.db.farms[farm.lpSymbol] = farm
         } catch(e) {
-          log(e)
+          log('Error', e)
 
           // i -= 1
         }
@@ -494,7 +494,7 @@ export async function monitorGeneralStats(app) {
             }
           }
         } catch(e) {
-          log(e)
+          log('Error', e)
         }
       }
     
@@ -567,6 +567,6 @@ export async function monitorGeneralStats(app) {
 
     setTimeout(() => monitorGeneralStats(app), 30 * 60 * 1000)
   } catch (e) {
-    log(e)
+    log('Error', e)
   }
 }

@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import { log, logError, isDebug } from '@rune-backend-sdk/util'
+import { log, log, isDebug } from '@rune-backend-sdk/util'
 import { subProcesses, catchExceptions } from '@rune-backend-sdk/util/process'
 import { initConfig } from './modules/config'
 import { initDb } from './modules/db'
@@ -276,7 +276,7 @@ async function init() {
     if (app.flags.testMonitorMarketEvents)
       tests.monitorMarketEvents(app)
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 

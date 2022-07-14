@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 import { getAddress, getRandomProvider } from '@rune-backend-sdk/util/web3'
-import { log, logError } from '@rune-backend-sdk/util'
+import { log, log } from '@rune-backend-sdk/util'
 import jetpack from 'fs-jetpack'
 
 export async function generateAccounts(app) {
@@ -19,6 +19,6 @@ export async function generateAccounts(app) {
       app.accountGenerator.accounts.push(res)
     }
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }

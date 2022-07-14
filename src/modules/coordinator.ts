@@ -14,7 +14,7 @@ export async function monitorCoordinator(app) {
 
     jetpack.write(path.resolve(`./db/affiliate/refers.json`), beautify(data, null, 2), { atomic: true })
   } catch(e) {
-    console.log(e)
+    console.log('Error', e)
   }
 
   setTimeout(() => monitorCoordinator(app), 2 * 60 * 1000)

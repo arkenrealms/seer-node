@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import { log, logError } from '@rune-backend-sdk/util'
+import { log, log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 
@@ -72,8 +72,8 @@ export async function getAllItemEvents(app, retry = false) {
         //   saveConfig()
         // }
       } catch (ex) {
-        logError(ex)
-        logError("Error parsing log: ", logInfo)
+        log(ex)
+        log("Error parsing log: ", logInfo)
       }
     }
 
@@ -96,7 +96,7 @@ export async function getAllItemEvents(app, retry = false) {
     
     log('Finished')
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 
   app.config.items.updating = false

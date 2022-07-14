@@ -396,7 +396,7 @@ export async function monitorMeta(app) {
 
     }
   } catch (e) {
-    console.log(e)
+    console.log('Error', e)
   }
 
   setTimeout(() => monitorMeta(app), 10 * 60 * 1000)

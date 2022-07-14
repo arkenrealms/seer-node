@@ -28,6 +28,6 @@ export async function initNotices(app) {
       add,
     }
   } catch(e) {
-    console.log(e)
+    console.log('Error', e)
   }
 }

@@ -1,5 +1,5 @@
 import Airtable from 'airtable'
-import { log, logError } from '@rune-backend-sdk/util'
+import { log, log } from '@rune-backend-sdk/util'
 import { RuneNames, Games, ClassIdByName, ClassNames, SkillNames, ItemRarityNameById, RuneId, SkillIdByName, ConditionIdByName, StatIdByName, ModIdByName, TypeIdByName, ConditionNames, ConditionParamNames, EffectNames, StatNames, ModNames, TypeNames } from '@rune-backend-sdk/data/items'
 import Skills from '../../db/skills.json'
 
@@ -35,7 +35,7 @@ async function getGames(app) {
       if (err) { console.error(err); return; }
     })
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 
@@ -374,7 +374,7 @@ async function getItems(app) {
 
           // if (item.id > 50) break // temp
         } catch(e) {
-          console.log(e)
+          console.log('Error', e)
         }
       }
 
@@ -390,7 +390,7 @@ async function getItems(app) {
     // If there are no more records, `done` will get called.
     // fetchNextPage()
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 
@@ -467,7 +467,7 @@ async function getSkills(app) {
     // If there are no more records, `done` will get called.
     // fetchNextPage()
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 
@@ -529,7 +529,7 @@ async function getStats(app) {
     // If there are no more records, `done` will get called.
     // fetchNextPage()
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 
@@ -928,7 +928,7 @@ async function getRecipes(app) {
     // If there are no more records, `done` will get called.
     // fetchNextPage()
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 
@@ -1029,7 +1029,7 @@ async function convertItemParams(app) {
 
           // return
         } catch(e) {
-          console.log(e)
+          console.log('Error', e)
           return
         }
       }
@@ -1046,7 +1046,7 @@ async function convertItemParams(app) {
     // If there are no more records, `done` will get called.
     // fetchNextPage()
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 
@@ -1088,7 +1088,7 @@ async function convertItemAttributes(app) {
 
           // return
         } catch(e) {
-          console.log(e)
+          console.log('Error', e)
           return
         }
       }
@@ -1105,7 +1105,7 @@ async function convertItemAttributes(app) {
     // If there are no more records, `done` will get called.
     // fetchNextPage()
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }
 
@@ -1136,8 +1136,8 @@ export async function monitorAirtable(app) {
 
 
     // await convertItemParams(app)
-    await convertItemAttributes(app)
+    // await convertItemAttributes(app)
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 }

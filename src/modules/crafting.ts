@@ -1,7 +1,7 @@
 import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { log, logError } from '@rune-backend-sdk/util'
+import { log, log } from '@rune-backend-sdk/util'
 
 export async function monitorCraftingStats(app) {
   try {
@@ -63,7 +63,7 @@ export async function monitorCraftingStats(app) {
       jetpack.write(path.resolve('../db/crafting/leaderboard.json'), beautify(data, null, 2), { atomic: true })
     }
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 
   setTimeout(() => monitorCraftingStats(app), 2 * 60 * 1000)

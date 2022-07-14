@@ -2,7 +2,7 @@ import * as ethers from 'ethers'
 import beautify from 'json-beautify'
 import jetpack from 'fs-jetpack'
 import path from 'path'
-import { log, logError, removeDupes } from '@rune-backend-sdk/util'
+import { log, log, removeDupes } from '@rune-backend-sdk/util'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 import { achievementData } from '@rune-backend-sdk/data/achievements'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
@@ -556,7 +556,7 @@ export function initDb(app) {
         jetpack.write(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), beautify(realm.leaderboard, null, 2), { atomic: true })
       }
     } catch(e) {
-      logError(e)
+      log('Error', e)
     }
   }
 
@@ -819,7 +819,7 @@ export function initDb(app) {
       await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2))
       await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2))
     } catch(e) {
-      logError('Couldnt save user', user.address, e)
+      log('Couldnt save user', user.address, e)
     }
   }
 
@@ -926,7 +926,7 @@ export function initDb(app) {
     try {
       await jetpack.writeAsync(path.resolve(`./db/skills.json`), beautify(skills, null, 2))
     } catch(e) {
-      logError('Couldnt save skills', e)
+      log('Couldnt save skills', e)
     }
   }
 
@@ -934,7 +934,7 @@ export function initDb(app) {
     try {
       await jetpack.writeAsync(path.resolve(`./db/items.json`), beautify(items, null, 2))
     } catch(e) {
-      logError('Couldnt save items', e)
+      log('Couldnt save items', e)
     }
   }
 
@@ -942,7 +942,7 @@ export function initDb(app) {
     try {
       await jetpack.writeAsync(path.resolve(`./db/recipes.json`), beautify(recipes, null, 2))
     } catch(e) {
-      logError('Couldnt save recipes', e)
+      log('Couldnt save recipes', e)
     }
   }
 }

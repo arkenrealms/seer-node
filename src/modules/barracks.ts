@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import { log, logError } from '@rune-backend-sdk/util'
+import { log, log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 
@@ -113,7 +113,7 @@ export async function getAllBarracksEvents(app, retry = false) {
     
     log('Finished')
   } catch(e) {
-    logError(e)
+    log('Error', e)
   }
 
   app.config.barracks.updating = false
