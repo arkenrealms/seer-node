@@ -1,5 +1,5 @@
 import Airtable from 'airtable'
-import { log, log } from '@rune-backend-sdk/util'
+import { log } from '@rune-backend-sdk/util'
 import { RuneNames, Games, ClassIdByName, ClassNames, SkillNames, ItemRarityNameById, RuneId, SkillIdByName, ConditionIdByName, StatIdByName, ModIdByName, TypeIdByName, ConditionNames, ConditionParamNames, EffectNames, StatNames, ModNames, TypeNames } from '@rune-backend-sdk/data/items'
 import Skills from '../../db/skills.json'
 

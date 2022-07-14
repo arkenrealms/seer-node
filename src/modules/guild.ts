@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { log, log } from '@rune-backend-sdk/util'
+import { log } from '@rune-backend-sdk/util'
 
 export async function monitorGuildMemberDetails(app) {
   try {

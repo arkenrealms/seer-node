@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import { log, log } from '@rune-backend-sdk/util'
+import { log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 

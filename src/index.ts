@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import { log, log, isDebug } from '@rune-backend-sdk/util'
+import { log, isDebug } from '@rune-backend-sdk/util'
 import { subProcesses, catchExceptions } from '@rune-backend-sdk/util/process'
 import { initConfig } from './modules/config'
 import { initDb } from './modules/db'

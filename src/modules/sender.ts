@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import * as ethers from 'ethers'
-import { log, log, wait } from '@rune-backend-sdk/util'
+import { log, wait } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress, getSignedRequest } from '@rune-backend-sdk/util/web3'
 
 export async function getAllSenderEvents(app, retry = false) {

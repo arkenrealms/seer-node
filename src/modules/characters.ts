@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import { getHighestId, log, log } from '@rune-backend-sdk/util'
+import { getHighestId, log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 
 export async function getAllCharacterEvents(app, retry = false) {

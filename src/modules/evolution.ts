@@ -4,7 +4,7 @@ import jetpack, { find } from 'fs-jetpack'
 import beautify from 'json-beautify'
 import { fancyTimeFormat } from '@rune-backend-sdk/util/time'
 import md5 from 'js-md5'
-import { log, log } from '@rune-backend-sdk/util'
+import { log } from '@rune-backend-sdk/util'
 import { getClientSocket } from '@rune-backend-sdk/util/websocket'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
 
