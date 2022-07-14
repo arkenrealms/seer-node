@@ -254,20 +254,24 @@ export async function connectRealm(app, realm) {
       client.isConnecting = false
 
       const pinger = async () => {
-        clearTimeout(client.pingReplyTimeout)
+        try {
+          clearTimeout(client.pingReplyTimeout)
 
-        client.pingReplyTimeout = setTimeout(function() {
-          log(`Realm ${realm.key} didnt respond in time, disconnecting`)
-          cleanupClient(client)
-        }, 70 * 1000)
+          client.pingReplyTimeout = setTimeout(function() {
+            log(`Realm ${realm.key} didnt respond in time, disconnecting`)
+            cleanupClient(client)
+          }, 70 * 1000)
 
-        await rsCall(app, app.games.evolution.realms[realm.key], 'PingRequest')
+          await rsCall(app, app.games.evolution.realms[realm.key], 'PingRequest')
 
-        clearTimeout(client.pingReplyTimeout)
+          clearTimeout(client.pingReplyTimeout)
 
-        if (!client.isConnected) return
-        
-        client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
+          if (!client.isConnected) return
+          
+          client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
+        } catch(e) {
+          log(e)
+        }
       }
 
       clearTimeout(client.pingerTimeout)
