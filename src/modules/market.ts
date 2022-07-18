@@ -157,6 +157,11 @@ export async function getAllMarketEvents(app, retry = false) {
       ]
       
       for (const event of events) {
+        if (!app.contracts.market.filters[event]) {
+          console.log('No handler for market event:', event)
+          continue
+        }
+
         await iterateBlocks(app, `Market Events: ${event}`, getAddress(app.contractInfo.market), app.config.trades.lastBlock[event], blockNumber, app.contracts.market.filters[event](), processLog, async function (blockNumber2) {
           app.config.trades.lastBlock[event] = blockNumber2
           // await saveConfig()
