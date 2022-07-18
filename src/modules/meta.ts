@@ -36,7 +36,7 @@ export async function monitorMeta(app) {
       const item = _item as any
       item.icon = item.icon.replace('undefined', 'https://rune.game/')
 
-      if (item.recipe) {
+      if (item.recipe?.requirement) {
         item.recipe.requirement = item.recipe.requirement.map(r => ({...r, id: RuneNames[r.id]}))
       }
 
@@ -52,7 +52,7 @@ export async function monitorMeta(app) {
         "language": "en-US",
         ...item,
         "type": ItemTypeToText[item.type],
-        "slots": item.slots.map(s => ItemSlotToText[s])
+        "slots": item.slots?.map(s => ItemSlotToText[s]) || []
       } as any
       // const itemJson = {
       //   "id": 1,
