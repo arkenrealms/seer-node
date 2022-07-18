@@ -12,7 +12,7 @@ import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById
 
 export function initDb(app) {
   const Knex = require('knex')
-  const knexfile = require('../../knexfile')
+  const knexfile = require('../knexfile')
   const knex = Knex(knexfile)
   
   knex.on('query', (query): any => {
