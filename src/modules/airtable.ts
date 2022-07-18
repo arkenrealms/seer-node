@@ -298,7 +298,7 @@ async function getItemAttribute(app, key) {
     paramValue3: record.get('paramValue3'),
     nature: record.get('nature'),
     influences: record.get('influences'),
-    description: record.get('description'),
+    description: record.get('description') || '',
   }
 
   return app.airtable.cache.getItemAttribute[key]
@@ -431,8 +431,8 @@ async function getSkills(app) {
 
         skill.name = record.get('name')
         skill.id = record.get('id')
-        skill.description = record.get('description')
-        skill.shortDescription = record.get('shortDescription')
+        skill.description = record.get('description') || ''
+        skill.shortDescription = record.get('shortDescription') || ''
         skill.game = (await Promise.all((record.get('game') || []).map((key) => getSkillGame(app, key))))[0]?.name
         skill.type = record.get('type')
         skill.icon = record.get('icon')?.[0]?.url
@@ -493,8 +493,8 @@ async function getStats(app) {
 
         skill.name = record.get('name')
         skill.id = record.get('id')
-        skill.description = record.get('description')
-        skill.shortDescription = record.get('shortDescription')
+        skill.description = record.get('description') || ''
+        skill.shortDescription = record.get('shortDescription') || ''
         skill.game = (await Promise.all((record.get('game') || []).map((key) => getSkillGame(app, key))))[0]?.name
         skill.type = record.get('type')
         skill.icon = record.get('icon')?.[0]?.url

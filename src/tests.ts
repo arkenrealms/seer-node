@@ -16,3 +16,11 @@ export function saveToken(app) {
 export function monitorMarketEvents(app) {
   setTimeout(() => app.modules.getAllMarketEvents(app), 1 * 60 * 1000)
 }
+
+export async function userLoadAndSave(app) {
+  const user = await app.db.loadUser("0x2465176C461AfB316ebc773C61fAEe85A6515DAA")
+
+  user.inventoryItemCount = 2
+
+  await app.db.saveUser(user)
+}

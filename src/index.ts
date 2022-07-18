@@ -27,6 +27,8 @@ import * as tests from './tests'
 
 dotenv.config()
 
+// console.log('env', process.env)
+
 process.env.REACT_APP_PUBLIC_URL = "https://rune.game/"
 
 if (isDebug) {
@@ -126,6 +128,9 @@ async function init() {
         async: false,
         timeout: 0
       },
+
+
+      // LOCAL
       // {
       //   name: 'generateAccounts',
       //   instance: generateAccounts,
@@ -138,6 +143,20 @@ async function init() {
       //   async: false,
       //   timeout: 30 * 1000
       // },
+      // {
+      //   name: 'userLoadAndSave',
+      //   instance: tests.userLoadAndSave,
+      //   async: false,
+      //   timeout: 10 * 1000
+      // },
+
+
+
+
+
+
+
+      // PROD
       {
         name: 'monitorSenderEvents',
         instance: monitorSenderEvents,

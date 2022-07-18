@@ -5,9 +5,22 @@ import path from 'path'
 import { log, removeDupes } from '@rune-backend-sdk/util'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 import { achievementData } from '@rune-backend-sdk/data/achievements'
+import Profile from '@rune-backend-sdk/models/profile'
+import Account from '@rune-backend-sdk/models/account'
+import Model from '@rune-backend-sdk/models/base'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 
 export function initDb(app) {
+  const Knex = require('knex')
+  const knexfile = require('../../knexfile')
+  const knex = Knex(knexfile)
+  
+  knex.on('query', (query): any => {
+    // console.log(query)
+  })
+  
+  Model.knex(knex)
+
   app.db = {
     app: jetpack.read(path.resolve('./db/app.json'), 'json') || {config: { characterMintCost: 0.1, profileRegisterCost: 0 }},
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
@@ -429,7 +442,7 @@ export function initDb(app) {
   app.db.loadUser = async (address) => {
     const exists = jetpack.exists(path.resolve(`./db/users/${address}/overview.json`))
 
-    const baseUser = {
+    let baseUser = {
       address,
       lastGamePlayed: 0,
       inventoryItemCount: 0,
@@ -465,7 +478,7 @@ export function initDb(app) {
     }
       
     if (exists) {
-      return {
+      baseUser = {
         ...baseUser,
         ...read(`./db/users/${address}/overview.json`, {}),
         achievements: read(`./db/users/${address}/achievements.json`, []),
@@ -481,9 +494,81 @@ export function initDb(app) {
         }
       }
     } else {
-      log('User didnt exist: ', address)
+      log('User didnt exist on filesystem: ', address)
+    }
 
-      return baseUser
+    let profile = await Profile.query(knex).where({ address }).first()
+
+    if (!profile) {
+      log('User didnt exist in database: ', address)
+
+      const account = await Account.query(knex).upsertGraph({
+        email: '',
+        firstName: 'Raider',
+        lastName: address,
+        password: '',
+        avatar: '',
+        meta: {}
+      }, {
+        relate: true
+      })
+
+      await Profile.query(knex).upsertGraph({
+        name: address,
+        account,
+        address,
+        avatar: null,
+        role: 'user', // [developer, user]
+        value: '',
+        // ownedProducts: [1, 2, 3, 4, 5],
+        meta: baseUser
+      } as any, {
+        relate: true
+      })
+
+      profile = await Profile.query(knex).where({ address }).first()
+    }
+
+
+    return profile.meta
+  }
+  
+  app.db.saveUser = async (user) => {
+    try {
+      // log('Save user', user.address, user)
+
+      // await app.db.updateGuildByUser(user)
+      app.db.updatePointsByUser(user)
+
+      // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
+      //   ...user,
+      //   inventory: undefined,
+      //   market: undefined,
+      //   characters: undefined,
+      //   achievements: undefined,
+      //   evolution: undefined,
+      //   craftedItemCount: user.inventory.items.filter(i => i.status === 'created').length,
+      //   inventoryItemCount: user.inventory.items.filter(i => i.status === 'unequipped').length,
+      //   equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
+      //   transferredOutCount: user.inventory.items.filter(i => i.status === 'transferred_out').length,
+      //   transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
+      // }, null, 2))
+
+      // // await app.db.updateLeaderboardByUser(user)
+      await app.db.updateAchievementsByUser(user)
+
+      // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2))
+      // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2))
+      // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/characters.json`), beautify(user.characters, null, 2))
+      // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2))
+      // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2))
+
+
+      await Profile.query(knex).where({ address: user.address }).update({
+        meta: user
+      } as any)
+    } catch(e) {
+      log('Couldnt save user', user.address, e)
     }
   }
 
@@ -789,39 +874,6 @@ export function initDb(app) {
     }
   }
 
-  app.db.saveUser = async (user) => {
-    try {
-      // log('Save user', user.address, user)
-
-      // await app.db.updateGuildByUser(user)
-      app.db.updatePointsByUser(user)
-
-      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
-        ...user,
-        inventory: undefined,
-        market: undefined,
-        characters: undefined,
-        achievements: undefined,
-        evolution: undefined,
-        craftedItemCount: user.inventory.items.filter(i => i.status === 'created').length,
-        inventoryItemCount: user.inventory.items.filter(i => i.status === 'unequipped').length,
-        equippedItemCount: user.inventory.items.filter(i => i.status === 'equipped').length,
-        transferredOutCount: user.inventory.items.filter(i => i.status === 'transferred_out').length,
-        transferredInCount: user.inventory.items.filter(i => i.status === 'transferred_in').length
-      }, null, 2))
-
-      // await app.db.updateLeaderboardByUser(user)
-      await app.db.updateAchievementsByUser(user)
-
-      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2))
-      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2))
-      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/characters.json`), beautify(user.characters, null, 2))
-      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2))
-      await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2))
-    } catch(e) {
-      log('Couldnt save user', user.address, e)
-    }
-  }
 
   app.db.saveUserItem = async (user, item) => {
     const savedItem = user.inventory.items.find(i => i.tokenId === item.tokenId)
