@@ -9,6 +9,7 @@ import Profile from '@rune-backend-sdk/models/profile'
 import Account from '@rune-backend-sdk/models/account'
 import Model from '@rune-backend-sdk/models/base'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
+import { userInfo } from 'os'
 
 export function initDb(app) {
   const Knex = require('knex')
@@ -503,7 +504,7 @@ export function initDb(app) {
       log('User didnt exist in database: ', address)
 
       const account = await Account.query(knex).upsertGraph({
-        email: address + '@rune.farm',
+        email: address + '@protonmail.com',
         firstName: 'Raider',
         lastName: address,
         password: '',
@@ -514,7 +515,7 @@ export function initDb(app) {
       })
 
       await Profile.query(knex).upsertGraph({
-        name: address,
+        name: baseUser.username || baseUser.address,
         account,
         address,
         avatar: null,
