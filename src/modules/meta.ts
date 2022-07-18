@@ -40,7 +40,7 @@ export async function monitorMeta(app) {
         item.recipe.requirement = item.recipe.requirement.map(r => ({...r, id: RuneNames[r.id]}))
       }
 
-      if (!item.branches?.[1]) continue
+      if (!item.branches?.[1]?.attributes) continue
 
       item.branches[1].attributes.map(a => ({...a, description: ItemAttributesById[a.id]?.description }))
 
