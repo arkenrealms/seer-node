@@ -504,7 +504,7 @@ export function initDb(app) {
       log('User didnt exist in database: ', address)
 
       const account = await Account.query(knex).upsertGraph({
-        email: address + '@protonmail.com',
+        email: address + '@rune.farm',
         firstName: 'Raider',
         lastName: address,
         password: '',
