@@ -15,7 +15,7 @@ const ioCallbacks = {}
 async function rsCall(app, realm, name, data = undefined) {
   try {
     const id = shortId()
-    const signature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data)
+    const signature = data === undefined || data === null ? await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data) : null
     
     return new Promise(async (resolve) => {
       ioCallbacks[id] = {}
