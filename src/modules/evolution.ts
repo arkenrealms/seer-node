@@ -13,30 +13,34 @@ const shortId = require('shortid')
 const ioCallbacks = {}
 
 async function rsCall(app, realm, name, data = undefined) {
-  const id = shortId()
-  const signature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data)
+  try {
+    const id = shortId()
+    const signature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data)
+    
+    return new Promise(async (resolve) => {
+      ioCallbacks[id] = {}
   
-  return new Promise(async (resolve) => {
-    ioCallbacks[id] = {}
-
-    ioCallbacks[id].resolve = resolve
-
-    ioCallbacks[id].reqTimeout = setTimeout(function() {
-      log('Request timeout')
-      resolve({ status: 0, message: 'Request timeout' })
-
-      delete ioCallbacks[id]
-    }, 60 * 1000)
-
-    if (!realm.client.socket?.connected) {
-      log('Not connected to realm server.')
-      return
-    }
-
-    log('Emit Realm', realm.key, name, { id, data })
-
-    realm.client.socket.emit(name, { id, signature, data })
-  })
+      ioCallbacks[id].resolve = resolve
+  
+      ioCallbacks[id].reqTimeout = setTimeout(function() {
+        log('Request timeout')
+        resolve({ status: 0, message: 'Request timeout' })
+  
+        delete ioCallbacks[id]
+      }, 60 * 1000)
+  
+      if (!realm.client.socket?.connected) {
+        log('Not connected to realm server.')
+        return
+      }
+  
+      log('Emit Realm', realm.key, name, { id, data })
+  
+      realm.client.socket.emit(name, { id, signature, data })
+    })
+  } catch(e) {
+    log(e)
+  }
 }
 
 function setRealmOffline(realm) {
