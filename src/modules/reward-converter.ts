@@ -600,7 +600,7 @@ export async function convertRewards(app) {
       const playerRewards = jetpack.read(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), 'json') || {}
 
       for (const address of Object.keys(playerRewards)) {
-        if (address.toLowerCase() !== "0xa987f487639920A3c2eFe58C8FBDedB96253ed9B".toLowerCase()) continue
+        if (address.toLowerCase() !== "0x162635b488DCEe9d8Ec93b4dD09ea3abF4fC281c".toLowerCase()) continue
         console.log(playerRewards[address])
         const user = userCache[address.toLowerCase()] || await app.db.loadUser(address)
 
