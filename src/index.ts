@@ -119,12 +119,12 @@ async function init() {
       //   async: false,
       //   timeout: 1 * 1000
       // },
-      {
-        name: 'convertRewards',
-        instance: convertRewards,
-        async: true,
-        timeout: 0
-      },
+      // {
+      //   name: 'convertRewards',
+      //   instance: convertRewards,
+      //   async: true,
+      //   timeout: 0
+      // },
 
 
 
@@ -133,108 +133,108 @@ async function init() {
 
 
       // PROD
-      // {
-      //   name: 'monitorSenderEvents',
-      //   instance: monitorSenderEvents,
-      //   async: false,
-      //   timeout: 5 * 1000
-      // },
-      // {
-      //   name: 'initCubeBridge',
-      //   instance: initCubeBridge,
-      //   async: false,
-      //   timeout: 0
-      // },
-      // {
-      //   name: 'monitorEvolutionRealms',
-      //   instance: monitorEvolutionRealms,
-      //   async: false,
-      //   timeout: 0
-      // },
-      // {
-      //   name: 'getAllItemEvents',
-      //   instance: getAllItemEvents,
-      //   async: false,
-      //   timeout: 1 * 60 * 1000
-      // },
-      // {
-      //   name: 'getAllBarracksEvents',
-      //   instance: getAllBarracksEvents,
-      //   async: false,
-      //   timeout: 1 * 60 * 1000
-      // },
-      // {
-      //   name: 'getAllCharacterEvents',
-      //   instance: getAllCharacterEvents,
-      //   async: false,
-      //   timeout: 1 * 60 * 1000
-      // },
-      // {
-      //   name: 'monitorGuildMemberDetails',
-      //   instance: monitorGuildMemberDetails,
-      //   async: false,
-      //   timeout: 1 * 60 * 1000
-      // },
-      // {
-      //   name: 'monitorSaves',
-      //   instance: monitorSaves,
-      //   async: false,
-      //   timeout: 5 * 60 * 1000
-      // },
-      // {
-      //   name: 'getAllMarketEvents',
-      //   instance: getAllMarketEvents,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'monitorItemEvents',
-      //   instance: monitorItemEvents,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'monitorBarracksEvents',
-      //   instance: monitorBarracksEvents,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'monitorMarketEvents',
-      //   instance: monitorMarketEvents,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'monitorCharacterEvents',
-      //   instance: monitorCharacterEvents,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'monitorGeneralStats',
-      //   instance: monitorGeneralStats,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'monitorCraftingStats',
-      //   instance: monitorCraftingStats,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'monitorMeta',
-      //   instance: monitorMeta,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'monitorCoordinator',
-      //   instance: monitorCoordinator,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
+      {
+        name: 'monitorSenderEvents',
+        instance: monitorSenderEvents,
+        async: false,
+        timeout: 5 * 1000
+      },
+      {
+        name: 'initCubeBridge',
+        instance: initCubeBridge,
+        async: false,
+        timeout: 0
+      },
+      {
+        name: 'monitorEvolutionRealms',
+        instance: monitorEvolutionRealms,
+        async: false,
+        timeout: 0
+      },
+      {
+        name: 'getAllItemEvents',
+        instance: getAllItemEvents,
+        async: false,
+        timeout: 1 * 60 * 1000
+      },
+      {
+        name: 'getAllBarracksEvents',
+        instance: getAllBarracksEvents,
+        async: false,
+        timeout: 1 * 60 * 1000
+      },
+      {
+        name: 'getAllCharacterEvents',
+        instance: getAllCharacterEvents,
+        async: false,
+        timeout: 1 * 60 * 1000
+      },
+      {
+        name: 'monitorGuildMemberDetails',
+        instance: monitorGuildMemberDetails,
+        async: false,
+        timeout: 1 * 60 * 1000
+      },
+      {
+        name: 'monitorSaves',
+        instance: monitorSaves,
+        async: false,
+        timeout: 5 * 60 * 1000
+      },
+      {
+        name: 'getAllMarketEvents',
+        instance: getAllMarketEvents,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorItemEvents',
+        instance: monitorItemEvents,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorBarracksEvents',
+        instance: monitorBarracksEvents,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorMarketEvents',
+        instance: monitorMarketEvents,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorCharacterEvents',
+        instance: monitorCharacterEvents,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorGeneralStats',
+        instance: monitorGeneralStats,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorCraftingStats',
+        instance: monitorCraftingStats,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorMeta',
+        instance: monitorMeta,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorCoordinator',
+        instance: monitorCoordinator,
+        async: false,
+        timeout: 1 * 1000
+      },
     ]
 
     app.modules = {}
