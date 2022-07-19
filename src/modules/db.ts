@@ -986,6 +986,14 @@ export function initDb(app) {
     }
   }
 
+  app.db.removeBanList = (game, target) => {
+    if (!app.db[game].banList) app.db[game].banList = []
+
+    if (app.db[game].banList.includes(target)) {
+      app.db[game].banList = app.db[game].banList.filter(t => t !== target)
+    }
+  }
+
   app.db.saveBanList = () => {
     jetpack.write(path.resolve('./db/evolution/banList.json'), beautify(app.db.evolution.banList, null, 2, 100), { atomic: true })
   }

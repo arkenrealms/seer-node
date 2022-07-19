@@ -343,6 +343,40 @@ export async function connectRealm(app, realm) {
   //   }
   // })
 
+  client.socket.on('UnbanPlayerRequest', async function (req) {
+    try {
+      log('Ban', realm.key, req)
+
+      const user = await app.db.loadUser(req.data.target)
+
+      delete user.isBanned
+      delete user.bannedReason
+
+      await app.db.saveUser(user)
+
+      app.db.removeBanList('evolution', req.data.target)
+      app.db.saveBanList()
+
+      app.realm.emitAll('UnbanUserRequest', {
+        data: {
+          target: req.data.target
+        }
+      })
+      
+      client.socket.emit('UnbanPlayerResponse', {
+        id: req.id,
+        data: { status: 1 }
+      })
+    } catch (e) {
+      log('Error', e)
+      
+      client.socket.emit('UnbanPlayerResponse', {
+        id: req.id,
+        data: { status: 0, message: e }
+      })
+    }
+  })
+
   client.socket.on('BanPlayerRequest', async function (req) {
     try {
       log('Ban', realm.key, req)
