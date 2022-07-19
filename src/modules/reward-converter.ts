@@ -601,7 +601,6 @@ export async function convertRewards(app) {
 
       for (const address of Object.keys(playerRewards)) {
         if (address.toLowerCase() !== "0x162635b488DCEe9d8Ec93b4dD09ea3abF4fC281c".toLowerCase()) continue
-        console.log(playerRewards[address])
         const user = userCache[address.toLowerCase()] || await app.db.loadUser(address)
 
         userCache[address.toLowerCase()] = user
@@ -612,7 +611,8 @@ export async function convertRewards(app) {
           hasBeenWiped[address.toLowerCase()] = true
         }
 
-        user.rewards.items = [...user.rewards.items, ...user.lifetimeRewards.items]
+        user.rewards.items = [...user.rewards.items, ...playerRewards[address].pendingItems]
+        user.lifetimeRewards.items = [...user.lifetimeRewards.items, ...playerRewards[address].pendingItems]
 
         await app.db.saveUser(user)
       }
