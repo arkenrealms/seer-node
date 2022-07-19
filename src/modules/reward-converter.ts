@@ -611,8 +611,10 @@ export async function convertRewards(app) {
           hasBeenWiped[address.toLowerCase()] = true
         }
 
-        user.rewards.items = [...user.rewards.items, ...playerRewards[address].pendingItems]
-        user.lifetimeRewards.items = [...user.lifetimeRewards.items, ...playerRewards[address].pendingItems]
+        if (playerRewards[address].pendingItems) {
+          user.rewards.items = [...user.rewards.items, ...playerRewards[address].pendingItems]
+          user.lifetimeRewards.items = [...user.lifetimeRewards.items, ...playerRewards[address].pendingItems]
+        }
 
         await app.db.saveUser(user)
       }
