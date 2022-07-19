@@ -600,13 +600,14 @@ export async function convertRewards(app) {
       const playerRewards = jetpack.read(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), 'json') || {}
 
       for (const address of Object.keys(playerRewards)) {
-        if (address.toLowerCase() !== "0x162635b488DCEe9d8Ec93b4dD09ea3abF4fC281c".toLowerCase()) continue
+        // if (address.toLowerCase() !== "0x162635b488DCEe9d8Ec93b4dD09ea3abF4fC281c".toLowerCase()) continue
         const user = userCache[address.toLowerCase()] || await app.db.loadUser(address)
 
         userCache[address.toLowerCase()] = user
 
         if (!hasBeenWiped[address.toLowerCase()]) {
           user.rewards.items = []
+          user.lifetimeRewards.items = []
 
           hasBeenWiped[address.toLowerCase()] = true
         }
