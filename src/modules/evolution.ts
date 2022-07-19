@@ -634,7 +634,7 @@ export async function connectRealm(app, realm) {
 
         user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
 
-        if (req.data.round.winners.indexOf(index) === 0) {
+        if (req.data.round.winners[0].address === player.address) {
           if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
           if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0
 
@@ -724,17 +724,17 @@ export async function connectRealms(app) {
         }
       }
 
-      if (!app.games.evolution.realms[realm.key].leaderboard) app.games.evolution.realms[realm.key].leaderboard = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.rounds) app.games.evolution.realms[realm.key].leaderboard.raw.rounds = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.kills) app.games.evolution.realms[realm.key].leaderboard.raw.kills = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.points) app.games.evolution.realms[realm.key].leaderboard.raw.points = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.deaths) app.games.evolution.realms[realm.key].leaderboard.raw.deaths = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.powerups) app.games.evolution.realms[realm.key].leaderboard.raw.powerups = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.evolves) app.games.evolution.realms[realm.key].leaderboard.raw.evolves = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.rewards) app.games.evolution.realms[realm.key].leaderboard.raw.rewards = {}
-      if (!app.games.evolution.realms[realm.key].leaderboard.raw.pickups) app.games.evolution.realms[realm.key].leaderboard.raw.pickups = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard) app.games.evolution.realms[realm.key].leaderboard = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.rounds) app.games.evolution.realms[realm.key].leaderboard.raw.rounds = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.kills) app.games.evolution.realms[realm.key].leaderboard.raw.kills = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.points) app.games.evolution.realms[realm.key].leaderboard.raw.points = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.deaths) app.games.evolution.realms[realm.key].leaderboard.raw.deaths = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.powerups) app.games.evolution.realms[realm.key].leaderboard.raw.powerups = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.evolves) app.games.evolution.realms[realm.key].leaderboard.raw.evolves = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.rewards) app.games.evolution.realms[realm.key].leaderboard.raw.rewards = {}
+      // if (!app.games.evolution.realms[realm.key].leaderboard.raw.pickups) app.games.evolution.realms[realm.key].leaderboard.raw.pickups = {}
 
       if (!app.games.evolution.realms[realm.key].leaderboard) {
         app.games.evolution.realms[realm.key].leaderboard = jetpack.read(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), 'json') || {
@@ -746,7 +746,8 @@ export async function connectRealms(app) {
             kills: {},
             deaths: {},
             powerups: {},
-            evolves: {}
+            evolves: {},
+            pickups: {}
           },
           names: {},
           [app.games.evolution.currentSeason]: {
@@ -869,8 +870,6 @@ export async function monitorEvolutionRealms(app) {
     app.realm.apiSignature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), 'evolution')
     app.realm.emitAll = emitAll.bind(null, app)
   }
-
-  app.games.evolution.currentSeason = 1
 
   await connectRealms(app)
   await updateRealms(app)
