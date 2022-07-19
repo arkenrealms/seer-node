@@ -167,12 +167,16 @@ export function initDb(app) {
   app.db.setUserActive = (user) => {
     const activeUser = app.db.activeUsers.find(u => u.address === user.address)
     
+    const now = new Date().getTime() / 1000
+
+    user.lastActive = now
+  
     if (activeUser) {
-      activeUser.updated = user.updated
+      activeUser.updated = now
     } else {
       app.db.activeUsers.push({
         address: user.address,
-        updated: user.lastActive
+        updated: now
       })
     }
 
