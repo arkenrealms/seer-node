@@ -54,25 +54,26 @@ export function initDb(app) {
     },
     evolution: {
       playerCount: 0,
-      banList: [],
+      banList: jetpack.read(path.resolve('./db/evolution/banList.json'), 'json') || [],
       modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
     },
     infinite: {
-      banList: [],
+      banList: jetpack.read(path.resolve('./db/infinite/banList.json'), 'json') || [],
       modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
     },
     sanctuary: {
-      banList: [],
+      banList: jetpack.read(path.resolve('./db/sanctuary/banList.json'), 'json') || [],
       modList: []
     },
     guardians: {
-      banList: [],
+      banList: jetpack.read(path.resolve('./db/guardians/banList.json'), 'json') || [],
       modList: []
     },
     raid: {
-      banList: [],
+      banList: jetpack.read(path.resolve('./db/raid/banList.json'), 'json') || [],
       modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
-    }
+    },
+    activeUsers: jetpack.read(path.resolve('./db/activeUsers.json'), 'json') || []
   }
 
   if (process.env.RUNE_ENV === 'local') {
@@ -154,6 +155,28 @@ export function initDb(app) {
   app.db.saveApp = async () => {
     log('Saving: app')
     jetpack.write(path.resolve('./db/app.json'), beautify(app, null, 2, 100), { atomic: true })
+  }
+
+  app.db.saveActiveUsers = async () => {
+    const now = new Date().getTime() / 1000
+    app.db.activeUsers = app.db.activeUsers.filter(u => u.updated > now - (5 * 60))
+
+    jetpack.write(path.resolve('./db/activeUsers.json'), beautify(app.db.activeUsers, null, 2, 100), { atomic: true })
+  }
+
+  app.db.setUserActive = (user) => {
+    const activeUser = app.db.activeUsers.find(u => u.address === user.address)
+    
+    if (activeUser) {
+      activeUser.updated = user.updated
+    } else {
+      app.db.activeUsers.push({
+        address: user.address,
+        updated: user.lastActive
+      })
+    }
+
+    app.db.saveActiveUsers()
   }
 
   app.db.updateLeaderboardByUser = async (user) => {

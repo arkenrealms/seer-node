@@ -350,6 +350,7 @@ export async function connectRealm(app, realm) {
       const user = await app.db.loadUser(req.data.target)
 
       user.isBanned = true
+      user.bannedReason = req.data.reason
 
       await app.db.saveUser(user)
 
@@ -516,6 +517,8 @@ export async function connectRealm(app, realm) {
         const now = new Date().getTime() / 1000
 
         if (user.lastGamePlayed > now - (4 * 60)) continue // Make sure this player isn't in 2 games or somehow getting double rewards
+
+        app.db.setUserActive(user)
 
         log(player.address, player.pickups)
         for (const pickup of player.pickups) {
