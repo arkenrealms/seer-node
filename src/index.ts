@@ -19,9 +19,11 @@ import { monitorMeta } from './modules/meta'
 import { monitorCoordinator } from './modules/coordinator'
 import { monitorAirtable } from './modules/airtable'
 import { monitorSenderEvents } from './modules/sender'
+import { monitorDelaran } from './modules/delaran'
 import { initCubeBridge } from './modules/cube'
 import { initNotices } from './modules/notices'
 import { generateAccounts } from './modules/account-generator'
+import { migrateTokens } from './migrate'
 // import { runTest } from './modules/tests/test-a'
 import * as tests from './tests'
 
@@ -126,7 +128,13 @@ async function init() {
       // },
       // {
       //   name: 'convertRewards',
-      //   instance: convertRewards,
+      //   instance: tests.convertRewards,
+      //   async: true,
+      //   timeout: 0
+      // },
+      // {
+      //   name: 'migrateTokens',
+      //   instance: migrateTokens,
       //   async: true,
       //   timeout: 0
       // },
@@ -237,6 +245,12 @@ async function init() {
       {
         name: 'monitorCoordinator',
         instance: monitorCoordinator,
+        async: false,
+        timeout: 1 * 1000
+      },
+      {
+        name: 'monitorDelaran',
+        instance: monitorDelaran,
         async: false,
         timeout: 1 * 1000
       },

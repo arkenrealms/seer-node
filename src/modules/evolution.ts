@@ -89,6 +89,7 @@ async function updateRealm(app, realm) {
       rewardItemAmount: game.rewardItemAmount,
       rewardWinnerAmount: game.rewardWinnerAmount,
       gameMode: game.gameMode,
+      connectedPlayers: game.connectedPlayers,
       roundId: game.round.id,
       roundStartedAt: game.round.startedAt,
       timeLeft: ~~(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
@@ -630,6 +631,15 @@ export async function connectRealm(app, realm) {
         app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] += player.pickups.length
 
         users.push(user)
+      }
+
+
+      if (req.data.rewardWinnerAmount > app.evolutionConfig.rewardWinnerAmountMax) {
+        throw new Error('Big problem with reward amount')
+      }
+
+      if (req.data.rewardWinnerAmount > app.evolutionConfig.rewardWinnerAmountPerLegitPlayer*req.data.round.players) {
+        throw new Error('Big problem with reward amount 2')
       }
 
       const rewardWinnerMap = {

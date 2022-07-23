@@ -1,6 +1,6 @@
 import Airtable from 'airtable'
 import { log } from '@rune-backend-sdk/util'
-import { RuneNames, Games, ClassIdByName, ClassNames, SkillNames, ItemRarityNameById, RuneId, SkillIdByName, ConditionIdByName, StatIdByName, ModIdByName, TypeIdByName, ConditionNames, ConditionParamNames, EffectNames, StatNames, ModNames, TypeNames } from '@rune-backend-sdk/data/items'
+import { RuneNames, Games, ClassIdByName, ClassNames, SkillNames, ItemTypeIdByName, ItemTypeNames, ItemRarityNameById, RuneId, SkillIdByName, ConditionIdByName, StatIdByName, ModIdByName, TypeIdByName, ConditionNames, ConditionParamNames, EffectNames, StatNames, ModNames, TypeNames } from '@rune-backend-sdk/data/items'
 import Skills from '../../db/skills.json'
 
 
@@ -59,7 +59,7 @@ async function getItem(app, key) {
   
   item.id = record.get('id')
   item.name = record.get('name')
-  item.icon = `https://rune.game/images/items/${pad(item.id, 5)}.png`
+  item.icon = `/images/items/${pad(item.id, 5)}.png`
   item.image = record.get('image')?.[0]?.url
   item.value = '0',
   item.type = type?.id
@@ -358,7 +358,7 @@ async function getItems(app) {
     const items = []
 
     const res = await app.airtable.database('Item').select({
-      maxRecords: 500,
+      maxRecords: 1000,
       view: "Enabled Only"
     }).eachPage(async function page(records, fetchNextPage) {
       // log('Fetched items', records)
@@ -378,17 +378,13 @@ async function getItems(app) {
         }
       }
 
-      app.db.saveItems(items)
+      // To fetch the next page of records, call `fetchNextPage`.
+      // If there are more records, `page` will get called again.
+      // If there are no more records, `done` will get called.
+      fetchNextPage()
     })
-    
-    if (!res) {
-      log('Error fetching items')
-    }
 
-    // To fetch the next page of records, call `fetchNextPage`.
-    // If there are more records, `page` will get called again.
-    // If there are no more records, `done` will get called.
-    // fetchNextPage()
+    app.db.saveItems(items)
   } catch(e) {
     log('Error', e)
   }
@@ -534,7 +530,7 @@ async function getStats(app) {
 }
 
 
-function processItemAttributes(specs) {
+function processItemAttributes(record, specs) {
   console.log(specs)
   const attributes = []
   const perfection = []
@@ -557,6 +553,7 @@ function processItemAttributes(specs) {
       stats: (key) => StatIdByName[key],
       mod: (key) => ModIdByName[key],
       type: (key) => TypeIdByName[key],
+      itemtype: (key) => ItemTypeIdByName[key],
       classid: (key) => ClassIdByName[key],
     }
     const mapParamIdToReadable = {
@@ -571,6 +568,7 @@ function processItemAttributes(specs) {
       stats: (key) => StatNames[key],
       mod: (key) => ModNames[key],
       type: (key) => TypeNames[key],
+      itemtype: (key) => ItemTypeNames[key],
       classid: (key) => ClassNames[key],
     }
     const maps = {
@@ -589,6 +587,11 @@ function processItemAttributes(specs) {
       if (param.spec.indexOf('-') > 0) {
         const rawLeft = param.spec.split('-')[0]
         const rawRight = param.spec.split('-')[1]
+
+        if (param.spec.indexOf('%') !== -1) {
+          param.spec = param.spec.replace('%', '')
+          param.isPercent = true
+        }
   
         param.min = attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](rawLeft) : parseFloat(rawLeft)
         param.max = attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](rawRight) : parseFloat(rawRight)
@@ -727,7 +730,7 @@ function processItemAttributes(specs) {
     const isDebuff = !!attribute.nature?.includes('Debuff')
 
     attributes.push(attribute)
-    perfection.push(attribute.param1?.min === attribute.param1?.max ? undefined : (isBuff ? attribute.param1?.max : (isDebuff ? attribute.param1?.min : undefined)))
+    perfection.push(attribute.param1?.min === attribute.param1?.max ? undefined : (isBuff && !record.get('isRandomRunePerfectionOmit') ? attribute.param1?.max : (isDebuff ? attribute.param1?.min : undefined)))
   }
 
   return {
@@ -760,7 +763,7 @@ async function getItemBranches(app, record) {
     },
   }
 
-  branches[Games.Raid.id] = processItemAttributes([
+  branches[Games.Raid.id] = processItemAttributes(record, [
     { attr: (await Promise.all((record.get('a1Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a1Param1Raid'), param2: record.get('a1Param2Raid') },
     { attr: (await Promise.all((record.get('a2Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a2Param1Raid'), param2: record.get('a2Param2Raid') },
     { attr: (await Promise.all((record.get('a3Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a3Param1Raid'), param2: record.get('a3Param2Raid') },
@@ -771,7 +774,7 @@ async function getItemBranches(app, record) {
     { attr: (await Promise.all((record.get('a8Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a8Param1Raid'), param2: record.get('a8Param2Raid') },
   ])
 
-  branches[Games.Evolution.id] = processItemAttributes([
+  branches[Games.Evolution.id] = processItemAttributes(record, [
     { attr: (await Promise.all((record.get('a1Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a1Param1Evolution'), param2: record.get('a1Param2Evolution') },
     { attr: (await Promise.all((record.get('a2Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a2Param1Evolution'), param2: record.get('a2Param2Evolution') },
     { attr: (await Promise.all((record.get('a3Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a3Param1Evolution'), param2: record.get('a3Param2Evolution') },
@@ -786,7 +789,7 @@ async function getItemBranches(app, record) {
     { attr: (await Promise.all((record.get('a12Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a12Param1Evolution'), param2: record.get('a12Param2Evolution') },
   ])
 
-  branches[Games.Infinite.id] = processItemAttributes([
+  branches[Games.Infinite.id] = processItemAttributes(record, [
     { attr: (await Promise.all((record.get('a1Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a1Param1Infinite'), param2: record.get('a1Param2Infinite') },
     { attr: (await Promise.all((record.get('a2Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a2Param1Infinite'), param2: record.get('a2Param2Infinite') },
     { attr: (await Promise.all((record.get('a3Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a3Param1Infinite'), param2: record.get('a3Param2Infinite') },
@@ -1131,7 +1134,7 @@ export async function monitorAirtable(app) {
     // await getItems(app)
     // setInterval(async () => await getItems(app), 12 * 60 * 60 * 1000)
 
-    // await getItems(app)
+    await getItems(app)
     // setInterval(async () => await getItems(app), 12 * 60 * 60 * 1000)
 
 

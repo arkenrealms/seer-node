@@ -27,6 +27,9 @@ export function initDb(app) {
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
     farms: jetpack.read(path.resolve('./db/farms.json'), 'json') || {},
     runes: jetpack.read(path.resolve('./db/runes.json'), 'json') || {},
+    items: jetpack.read(path.resolve('./db/items.json'), 'json') || {},
+    recipes: jetpack.read(path.resolve('./db/recipes.json'), 'json') || {},
+    skills: jetpack.read(path.resolve('./db/skills.json'), 'json') || {},
     classes: jetpack.read(path.resolve('./db/classes.json'), 'json') || [],
     guilds: jetpack.read(path.resolve('./db/guilds.json'), 'json') || [],
     stats: jetpack.read(path.resolve('./db/stats.json'), 'json') || {},
@@ -309,7 +312,7 @@ export function initDb(app) {
       owners: undefined,
       market: undefined,
       tokens: undefined,
-      perfectCount: item.tokens.filter(i => i.item.perfection === 1).length,
+      perfectCount: 0, //item.tokens.filter(i => i.item.perfection === 1).length,
       ownersCount: item.owners.length,
       marketTradesPerfectCount: item.market.filter(i => i.item.perfection === 1).length,
       marketTradesListedCount: item.market.filter(i => i.status === 'listed').length,
@@ -350,15 +353,18 @@ export function initDb(app) {
   }
 
   app.db.saveItemToken = async (item, token) => {
-    const found = item.tokens.find(i => i.id === token.id)
+    if (item.tokens.includes(token)) return
 
-    if (found) {
-      for (const key of Object.keys(token)) {
-        found[key] = token[key]
-      }
-    } else {
-      item.tokens.push(token)
-    }
+    item.tokens.push(token)
+    // const found = item.tokens.find(i => i.id === token.id)
+
+    // if (found) {
+    //   for (const key of Object.keys(token)) {
+    //     found[key] = token[key]
+    //   }
+    // } else {
+    //   item.tokens.push(token)
+    // }
 
     await app.db.saveItem(item)
   }

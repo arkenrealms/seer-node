@@ -45,10 +45,12 @@ export async function getAllMarketEvents(app, retry = false) {
 
           log('Adding trade', trade)
 
+          const item = app.db.loadItem(trade.item.id)
+
           await app.db.saveUserTrade(await app.db.loadUser(seller), trade)
           await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
-          await app.db.saveItemTrade(app.db.loadItem(trade.item.id), trade)
-          await app.db.saveItemToken(app.db.loadItem(trade.item.id), { id: trade.tokenId, item: trade.item })
+          await app.db.saveItemTrade(item, trade)
+          await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller, item: trade.item })
           // await saveConfig()
           
           log('List', trade)
@@ -70,10 +72,12 @@ export async function getAllMarketEvents(app, retry = false) {
           specificTrade.item = { id: decodedItem.id, name: decodedItem.name }
           // specificTrade.item = decodeItem(specificTrade.tokenId)
 
+          const item = app.db.loadItem(specificTrade.item.id)
+
           await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
           await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
-          await app.db.saveItemTrade(app.db.loadItem(specificTrade.item.id), specificTrade)
-          await app.db.saveItemToken(app.db.loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+          await app.db.saveItemTrade(item, specificTrade)
+          await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller, item: specificTrade.item })
           
           log('Update', specificTrade)
         }
@@ -95,10 +99,12 @@ export async function getAllMarketEvents(app, retry = false) {
 
           log('Delisting trade', specificTrade)
 
+          const item = app.db.loadItem(specificTrade.item.id)
+
           await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
           await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
-          await app.db.saveItemTrade(app.db.loadItem(specificTrade.item.id), specificTrade)
-          await app.db.saveItemToken(app.db.loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+          await app.db.saveItemTrade(item, specificTrade)
+          await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller, item: specificTrade.item })
           
           log('Delist', specificTrade)
         }
@@ -118,12 +124,14 @@ export async function getAllMarketEvents(app, retry = false) {
           specificTrade.blockNumber = logInfo.blockNumber
           specificTrade.item = { id: decodedItem.id, name: decodedItem.name }
           // specificTrade.item = decodeItem(specificTrade.tokenId)
+
+          const item = app.db.loadItem(specificTrade.item.id)
     
           await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
           await app.db.saveUserTrade(await app.db.loadUser(buyer), specificTrade)
           await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
-          await app.db.saveItemTrade(app.db.loadItem(specificTrade.item.id), specificTrade)
-          await app.db.saveItemToken(app.db.loadItem(specificTrade.item.id), { id: specificTrade.tokenId, item: specificTrade.item })
+          await app.db.saveItemTrade(item, specificTrade)
+          await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: buyer, item: specificTrade.item })
           
           log('Buy', specificTrade)
         }
@@ -150,6 +158,11 @@ export async function getAllMarketEvents(app, retry = false) {
 
     if (parseInt(blockNumber) > 10000) {
       const events = [
+        // event List(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+        // event Update(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+        // event Delist(address indexed seller, uint256 tokenId);
+        // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
+        // event Recover(address indexed user, address indexed seller, uint256 tokenId);
         'List(address,address,uint256,uint256)',
         'Update(address,address,uint256,uint256)',
         'Delist(address,uint256)',
