@@ -45,6 +45,8 @@ async function monitorPlayerConnections(app) {
   } catch(e) {
     log('Error in delaran', e)
   }
+
+  setTimeout(() => monitorPlayerConnections(app), 60 * 1000)
 }
 
 export async function engageDelaran(app) {

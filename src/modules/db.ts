@@ -65,6 +65,12 @@ export function initDb(app) {
       banList: jetpack.read(path.resolve('./db/infinite/banList.json'), 'json') || [],
       modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
     },
+    infiniteHistorical: jetpack.read(path.resolve('./db/infinite/historical.json'), 'json') || [],
+    infiniteRealms: jetpack.read(path.resolve('./db/infinite/realms.json'), 'json') || [],
+    infiniteServers: jetpack.read(path.resolve('./db/infinite/servers.json'), 'json') || [],
+    infiniteConfig: jetpack.read(path.resolve('./db/infinite/config.json'), 'json') || {
+      "something": 0.0015
+    },
     sanctuary: {
       banList: jetpack.read(path.resolve('./db/sanctuary/banList.json'), 'json') || [],
       modList: []
