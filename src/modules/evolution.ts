@@ -634,11 +634,11 @@ export async function connectRealm(app, realm) {
       }
 
 
-      if (req.data.rewardWinnerAmount > app.evolutionConfig.rewardWinnerAmountMax) {
+      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountMax) {
         throw new Error('Big problem with reward amount')
       }
 
-      if (req.data.rewardWinnerAmount > app.evolutionConfig.rewardWinnerAmountPerLegitPlayer*req.data.round.players) {
+      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer*req.data.round.players) {
         throw new Error('Big problem with reward amount 2')
       }
 
