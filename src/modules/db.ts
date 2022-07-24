@@ -51,10 +51,10 @@ export function initDb(app) {
     evolutionConfig: jetpack.read(path.resolve('./db/evolution/config.json'), 'json') || {
       "rewardItemAmountPerLegitPlayer": 0.0015,
       "rewardItemAmountMax": 0.03,
-      "rewardWinnerAmountPerLegitPlayer": 0.0053,
-      "rewardWinnerAmountMax": 0.08,
+      "rewardWinnerAmountPerLegitPlayer": 0.01,
+      "rewardWinnerAmountMax": 0.3,
       "rewardItemAmount": 0.02,
-      "rewardWinnerAmount": 0.04
+      "rewardWinnerAmount": 0.05
     },
     evolution: {
       playerCount: 0,
