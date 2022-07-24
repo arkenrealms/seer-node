@@ -45,7 +45,7 @@ export async function getAllItemEvents(app, retry = false) {
             token.createdAt = itemData.createdAt
 
             if (itemData.perfection === 1) {
-              await app.notices.add('mythic_crafted', itemData)
+              await app.notices.add('mythic_crafted', { address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, message: `${user.username} found a mythic ${decodedItem.name}!` })
             }
           }
 

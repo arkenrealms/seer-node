@@ -3,6 +3,10 @@ import * as ethers from 'ethers'
 import { log, wait } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress, getSignedRequest } from '@rune-backend-sdk/util/web3'
 
+async function monitorBalances(app) {
+  
+}
+
 export async function getAllSenderEvents(app, retry = false) {
   if (app.config.sender.updating) return
 

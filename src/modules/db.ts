@@ -10,6 +10,7 @@ import Account from '@rune-backend-sdk/models/account'
 import Model from '@rune-backend-sdk/models/base'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 import { userInfo } from 'os'
+import getUsername from '../util/getUsername'
 
 export function initDb(app) {
   const Knex = require('knex')
@@ -563,6 +564,10 @@ export function initDb(app) {
       profile = await Profile.query(knex).where({ address }).first()
     }
 
+    if (!profile.meta.name) { // Must have been migrated
+      profile.meta.username = getUsername(profile.address)
+      profile.name = profile.meta.username
+    }
 
     return profile.meta
   }
