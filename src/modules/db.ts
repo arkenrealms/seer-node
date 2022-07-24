@@ -10,7 +10,7 @@ import Account from '@rune-backend-sdk/models/account'
 import Model from '@rune-backend-sdk/models/base'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 import { userInfo } from 'os'
-import getUsername from '../util/getUsername'
+import { getUsername } from '../util/getUsername'
 
 export function initDb(app) {
   const Knex = require('knex')
@@ -51,7 +51,7 @@ export function initDb(app) {
     evolutionConfig: jetpack.read(path.resolve('./db/evolution/config.json'), 'json') || {
       "rewardItemAmountPerLegitPlayer": 0.0015,
       "rewardItemAmountMax": 0.03,
-      "rewardWinnerAmountPerLegitPlayer": 0.01,
+      "rewardWinnerAmountPerLegitPlayer": 0.015,
       "rewardWinnerAmountMax": 0.3,
       "rewardItemAmount": 0.02,
       "rewardWinnerAmount": 0.05
