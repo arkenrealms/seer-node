@@ -79,6 +79,7 @@ export function initWeb3(app) {
   app.contractMetadata = {}
   app.contractMetadata.ArcaneRaidV1 = ArcaneRaidV1
   app.contractMetadata.ArcaneTraderV1 = ArcaneTraderV1
+  app.contractMetadata.RXSMarketplace = RXSMarketplace
   app.contractMetadata.ArcaneCharacters = ArcaneCharacters
   app.contractMetadata.ArcaneCharacterFactoryV3 = ArcaneCharacterFactoryV3
   app.contractMetadata.ArcaneBarracksFacetV1 = ArcaneBarracksFacetV1
