@@ -17,14 +17,16 @@ async function monitorPlayerConnections(app) {
   }
   
   for (const realm of app.db.infiniteRealms) {
-    for (const game of app.games.infinite.realms[realm.key].games) {
-      for (const player of game.connectedPlayers) {
-        if (connectedPlayers.includes(player)) {
-          warnPlayers.push(player)
+    if (app.games.infinite.realms[realm.key].games) {
+      for (const game of app.games.infinite.realms[realm.key].games) {
+        for (const player of game.connectedPlayers) {
+          if (connectedPlayers.includes(player)) {
+            warnPlayers.push(player)
+          }
         }
+  
+        connectedPlayers = [...connectedPlayers, ...game.connectedPlayers]
       }
-
-      connectedPlayers = [...connectedPlayers, ...game.connectedPlayers]
     }
   }
 

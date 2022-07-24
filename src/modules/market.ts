@@ -11,7 +11,7 @@ export async function getAllMarketEvents(app, retry = false) {
   app.config.trades.updating = true
 
   try {
-    const iface = new ethers.utils.Interface(app.contractMetadata.ArcaneTraderV1.abi);
+    const iface = new ethers.utils.Interface(app.contractMetadata.RXSMarketplace.abi);
 
     // @ts-ignore
     async function processLog(logInfo, updateConfig = true) {
