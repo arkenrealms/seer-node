@@ -2,6 +2,8 @@ import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
 import { getHighestId, toShort, log } from '@rune-backend-sdk/util'
 
 async function monitorPlayerConnections(app) {
+  log('[delaran] Monitoring player connections')
+
   try {
     let connectedPlayers = []
     let warnPlayers = []
@@ -40,8 +42,10 @@ async function monitorPlayerConnections(app) {
       const data = { target: player }
       const signature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data)
     
-      app.realm.emitAll('CallRequest', { method: 'RS_KickUser', signature, data: { data } })
+      app.realm.emitAll('CallRequest', { data: { method: 'RS_KickUser', signature, data } })
     }
+
+    log(`[delaran] Warning players: ${warnPlayers.join(', ')}`)
   } catch(e) {
     log('Error in delaran', e)
   }
