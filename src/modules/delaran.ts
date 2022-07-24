@@ -36,7 +36,7 @@ async function monitorPlayerConnections(app) {
       }
     }
 
-    warnPlayers.push('0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') // Testman
+    // warnPlayers.push('0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') // Testman
 
     for (const player of warnPlayers) {
       const data = { target: player }
