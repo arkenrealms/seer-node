@@ -339,9 +339,14 @@ export function initDb(app) {
 
     if (!app.db.stats.items[item.id]) app.db.stats.items[item.id] = {}
 
+    if (!item.tokens.includes(itemData.tokenId)) {
+      item.tokens.push(itemData.tokenId)
+    }
+
     app.db.stats.items[item.id].total = (await app.contracts.items.itemCount(item.id)).toNumber()
     app.db.stats.items[item.id].burned = 0 //(await items.itemBurnCount(item.id)).toNumber()
     
+
     await app.db.saveItem(item)
   }
 
