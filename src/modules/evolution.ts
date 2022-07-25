@@ -687,7 +687,11 @@ export async function connectRealm(app, realm) {
       }
 
       if (req.data.round.players.length >= 10 && req.data.round.winners.length > 0) {
-        await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, message: `${users.find(u => u.address === req.data.round.winners[0].address).username} won ${rewardWinnerMap[0]} ZOD in Evolution!` })
+        const username = users.find(u => u.address === req.data.round.winners[0].address)?.username
+
+        if (username) {
+          await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, message: `${username} won ${rewardWinnerMap[0]} ZOD in Evolution!` })
+        }
       }
 
       for (const user of users) {
