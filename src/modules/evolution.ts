@@ -134,7 +134,7 @@ async function updateRealms(app) {
         hist.playerCount.push([newTime, realm.playerCount])
       }
 
-      jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), beautify(hist, null, 2), { atomic: true })
+      jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), JSON.stringify(hist), { atomic: true })
 
       playerCount += realm.playerCount
 
@@ -179,10 +179,10 @@ async function updateRealms(app) {
       server.endpoint = evolutionServer.endpoint
     }
 
-    jetpack.write(path.resolve('./db/evolution/realms.json'), beautify(app.db.evolutionRealms, null, 2), { atomic: true })
+    jetpack.write(path.resolve('./db/evolution/realms.json'), JSON.stringify(app.db.evolutionRealms), { atomic: true })
 
     // Update old servers file
-    jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
+    jetpack.write(path.resolve('./db/evolution/servers.json'), JSON.stringify(app.db.evolutionServers), { atomic: true })
 
     log('Realm and server info generated')
 
@@ -198,7 +198,7 @@ async function updateRealms(app) {
       hist.playerCount.push([newTime, playerCount])
     }
 
-    jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(hist, null, 2), { atomic: true })
+    jetpack.write(path.resolve(`./db/evolution/historical.json`), JSON.stringify(hist), { atomic: true })
   } catch(e) {
     log('Error', e)
   }
