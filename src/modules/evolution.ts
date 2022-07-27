@@ -569,6 +569,7 @@ export async function connectRealm(app, realm) {
         const user = await app.db.loadUser(player.address)
         const now = new Date().getTime() / 1000
 
+        if (!user.username) continue // Make sure cant earn without a character
         if (user.lastGamePlayed > now - (4 * 60)) continue // Make sure this player isn't in 2 games or somehow getting double rewards
 
         app.db.setUserActive(user)
@@ -679,6 +680,7 @@ export async function connectRealm(app, realm) {
         const user = users.find(u => u.address === player.address)
 
         if (!user) continue // He wasn't valid
+        if (!user.username) continue // Make sure cant earn without a character
 
         if (!user.rewards.runes['zod']) {
           user.rewards.runes['zod'] = 0
