@@ -574,15 +574,16 @@ export async function connectRealm(app, realm) {
 
         app.db.setUserActive(user)
 
-        log(player.address, player.pickups)
         for (const pickup of player.pickups) {
           if (pickup.type === 'rune') {
             // TODO: change to authoritative
-            if (req.data.rewardWinnerAmount > (req.data.round.players * app.db.evolutionConfig.rewardItemAmountPerLegitPlayer) * 2) {
+            if (pickup.quantity > req.data.round.players.length * app.db.evolutionConfig.rewardItemAmountPerLegitPlayer * 2) {
+              log(pickup.quantity, app.db.evolutionConfig.rewardItemAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
               throw new Error('Big problem with item reward amount')
             }
 
             if (pickup.quantity > app.db.evolutionConfig.rewardItemAmountMax) {
+              log(pickup.quantity, app.db.evolutionConfig.rewardItemAmountMax)
               throw new Error('Big problem with item reward amount 2')
             }
 
@@ -654,10 +655,12 @@ export async function connectRealm(app, realm) {
 
 
       if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountMax) {
+        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountMax)
         throw new Error('Big problem with reward amount')
       }
 
-      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer*req.data.round.players) {
+      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * req.data.round.players.length * 2) {
+        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
         throw new Error('Big problem with reward amount 2')
       }
 
@@ -744,14 +747,14 @@ export async function connectRealm(app, realm) {
         data: { status: 1 }
       })
     } catch (e) {
+      log('Error', e)
+
       client.socket.emit('SaveRoundResponse', {
         id: req.id,
         data: { status: 0, message: e }
       })
 
       disconnectClient(client)
-
-      log('Error', e)
     }
   })
 
