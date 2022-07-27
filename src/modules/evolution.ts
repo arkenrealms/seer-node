@@ -579,7 +579,7 @@ export async function connectRealm(app, realm) {
             // TODO: change to authoritative
             if (pickup.quantity > req.data.round.players.length * app.db.evolutionConfig.rewardItemAmountPerLegitPlayer * 2) {
               log(pickup.quantity, app.db.evolutionConfig.rewardItemAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
-              throw new Error('Big problem with item reward amount')
+              // throw new Error('Big problem with item reward amount')
             }
 
             if (pickup.quantity > app.db.evolutionConfig.rewardItemAmountMax) {
