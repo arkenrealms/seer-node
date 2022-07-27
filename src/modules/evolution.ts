@@ -546,7 +546,10 @@ export async function connectRealm(app, realm) {
       const users = []
 
       // Iterate the winners, determine the winning amounts, validate, save to user rewards
-      // Iterate all players and save their log / stats 
+      // Iterate all players and save their log / stats
+      // @ts-ignore
+      req.data.round.players = [...new Map(req.data.round.players.map(player => [player.address, player])).values()] // [...new Set(req.data.round.players.map(obj => obj.key)) ] // 
+
       for (const player of req.data.round.players) {
         const user = await app.db.loadUser(player.address)
         const now = new Date().getTime() / 1000
@@ -559,12 +562,12 @@ export async function connectRealm(app, realm) {
         for (const pickup of player.pickups) {
           if (pickup.type === 'rune') {
             // TODO: change to authoritative
+            if (req.data.rewardWinnerAmount > (req.data.round.players * app.db.evolutionConfig.rewardItemAmountPerLegitPlayer) * 2) {
+              throw new Error('Big problem with item reward amount')
+            }
+
             if (pickup.quantity > app.db.evolutionConfig.rewardItemAmountMax) {
-              client.socket.emit('SaveRoundResponse', {
-                id: req.id,
-                data: { status: 0, message: 'Invalid reward' }
-              })
-              return
+              throw new Error('Big problem with item reward amount 2')
             }
 
             const runeSymbol = pickup.rewardItemName.toLowerCase()
@@ -724,14 +727,14 @@ export async function connectRealm(app, realm) {
         data: { status: 1 }
       })
     } catch (e) {
-      log('Error', e)
-      
       client.socket.emit('SaveRoundResponse', {
         id: req.id,
         data: { status: 0, message: e }
       })
 
       disconnectClient(client)
+
+      log('Error', e)
     }
   })
 

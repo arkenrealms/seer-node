@@ -575,7 +575,7 @@ export function initDb(app) {
       profile = await Profile.query(knex).where({ address }).first()
     }
 
-    if (!profile.meta.name) { // Must have been migrated
+    if (!profile.meta.name || typeof profile.meta.username !== 'string') { // Must have been migrated
       profile.meta.username = getUsername(profile.address)
       profile.name = profile.meta.username
     }
