@@ -547,8 +547,23 @@ export async function connectRealm(app, realm) {
 
       // Iterate the winners, determine the winning amounts, validate, save to user rewards
       // Iterate all players and save their log / stats
-      // @ts-ignore
-      req.data.round.players = [...new Map(req.data.round.players.map(player => [player.address, player])).values()] // [...new Set(req.data.round.players.map(obj => obj.key)) ] // 
+
+      const removeDupes = (list) => {
+        const seen = {};
+        return list.filter(function(item) {
+          console.log(item)
+          const k1 = item.addreess
+          const exists = seen.hasOwnProperty(k1)
+
+          if (!exists) {
+            seen[k1] = true
+          }
+
+          return !exists
+        })
+      }
+
+      req.data.round.players = removeDupes(req.data.round.players) // [...new Set(req.data.round.players.map(obj => obj.key)) ] // 
 
       for (const player of req.data.round.players) {
         const user = await app.db.loadUser(player.address)
