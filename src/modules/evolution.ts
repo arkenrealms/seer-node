@@ -552,7 +552,7 @@ export async function connectRealm(app, realm) {
         const seen = {};
         return list.filter(function(item) {
           console.log(item)
-          const k1 = item.addreess
+          const k1 = item.address
           const exists = seen.hasOwnProperty(k1)
 
           if (!exists) {
