@@ -576,7 +576,7 @@ export function initDb(app) {
     }
 
     if (!profile.meta.name || typeof profile.meta.username !== 'string') { // Must have been migrated
-      profile.meta.username = getUsername(profile.address)
+      profile.meta.username = await getUsername(profile.address)
       profile.name = profile.meta.username
     }
 

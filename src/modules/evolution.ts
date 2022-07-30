@@ -7,6 +7,7 @@ import md5 from 'js-md5'
 import { log } from '@rune-backend-sdk/util'
 import { getClientSocket } from '@rune-backend-sdk/util/websocket'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
+import { getUsername } from '../util/getUsername'
 
 const shortId = require('shortid')
 
@@ -535,6 +536,35 @@ export async function connectRealm(app, realm) {
         return
       }
 
+      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountMax) {
+        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountMax)
+        throw new Error('Big problem with reward amount')
+      }
+
+      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * req.data.round.players.length * 2) {
+        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
+        throw new Error('Big problem with reward amount 2')
+      }
+
+      if (req.data.roundId > realm.roundId) {
+        realm.roundId = req.data.roundId
+      } else if (req.data.roundId < realm.roundId) {
+        const err = `Round id too low (realm.roundId = ${realm.roundId})`
+
+        log(err)
+        
+        client.socket.emit('SaveRoundResponse', {
+          id: req.id,
+          data: { status: 0, message: err }
+        })
+
+        await setRealmConfig(app, realm)
+
+        return
+      } else {
+        realm.roundId += 1
+      }
+
       // if (req.data.roundId > realm.roundId) {
       //   client.socket.emit('SaveRoundResponse', {
       //     id: req.id,
@@ -542,6 +572,19 @@ export async function connectRealm(app, realm) {
       //   })
       //   return
       // }
+
+      const rewardWinnerMap = {
+        0: Math.round((req.data.rewardWinnerAmount * 1) * 1000) / 1000,
+        1: Math.round((req.data.rewardWinnerAmount * 0.25) * 1000) / 1000,
+        2: Math.round((req.data.rewardWinnerAmount * 0.15) * 1000) / 1000,
+        3: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        4: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        5: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        6: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        7: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        8: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        9: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+      }
 
       const users = []
 
@@ -551,7 +594,7 @@ export async function connectRealm(app, realm) {
       const removeDupes = (list) => {
         const seen = {};
         return list.filter(function(item) {
-          console.log(item)
+          // console.log(item)
           const k1 = item.address
           const exists = seen.hasOwnProperty(k1)
 
@@ -565,12 +608,17 @@ export async function connectRealm(app, realm) {
 
       req.data.round.players = removeDupes(req.data.round.players) // [...new Set(req.data.round.players.map(obj => obj.key)) ] // 
 
+      const winners = req.data.round.winners.slice(0, 10)
+
       for (const player of req.data.round.players) {
         const user = await app.db.loadUser(player.address)
         const now = new Date().getTime() / 1000
 
-        if (!user.username) continue // Make sure cant earn without a character
         if (user.lastGamePlayed > now - (4 * 60)) continue // Make sure this player isn't in 2 games or somehow getting double rewards
+
+        if (typeof user.username === 'object' || !user.username) user.username = await getUsername(user.address)
+
+        if (!user.username) continue // Make sure cant earn without a character
 
         app.db.setUserActive(user)
 
@@ -623,12 +671,15 @@ export async function connectRealm(app, realm) {
 
         user.lastGamePlayed = now
 
+        users.push(user)
+
         if (!app.games.evolution.realms[realm.key].leaderboard.names) app.games.evolution.realms[realm.key].leaderboard.names = {}
 
         app.games.evolution.realms[realm.key].leaderboard.names[user.address] = user.username
 
         if (!app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address]) {
           // 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency'
+          app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] = 0
           app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] = 0
           app.games.evolution.realms[realm.key].leaderboard.raw.rounds[user.address] = 0
           app.games.evolution.realms[realm.key].leaderboard.raw.kills[user.address] = 0
@@ -650,94 +701,43 @@ export async function connectRealm(app, realm) {
         app.games.evolution.realms[realm.key].leaderboard.raw.rewards[user.address] += player.rewards
         app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] += player.pickups.length
 
-        users.push(user)
-      }
+        if (winners.find(winner => winner.address === player.address)) {
+          const index = winners.findIndex(winner => winner.address === player.address)
+          // const player = req.data.round.winners[index]
+          // const user = users.find(u => u.address === player.address)
 
+          // if (!user) continue // He wasn't valid
+          if (user.username) { // Make sure cant earn without a character
+            if (!user.rewards.runes['zod']) {
+              user.rewards.runes['zod'] = 0
+            }
 
-      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountMax) {
-        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountMax)
-        throw new Error('Big problem with reward amount')
-      }
+            if (user.rewards.runes['zod'] < 0) {
+              user.rewards.runes['zod'] = 0
+            }
 
-      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * req.data.round.players.length * 2) {
-        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
-        throw new Error('Big problem with reward amount 2')
-      }
+            user.rewards.runes['zod'] += rewardWinnerMap[index]
 
-      const rewardWinnerMap = {
-        0: Math.round((req.data.rewardWinnerAmount * 1) * 1000) / 1000,
-        1: Math.round((req.data.rewardWinnerAmount * 0.25) * 1000) / 1000,
-        2: Math.round((req.data.rewardWinnerAmount * 0.15) * 1000) / 1000,
-        3: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        4: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        5: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        6: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        7: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        8: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        9: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-      }
+            if (!user.lifetimeRewards.runes['zod']) {
+              user.lifetimeRewards.runes['zod'] = 0
+            }
 
-      // Calculate winnings
-      for (const index in req.data.round.winners.slice(0, 10)) {
-        const player = req.data.round.winners[index]
-        const user = users.find(u => u.address === player.address)
+            user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
 
-        if (!user) continue // He wasn't valid
-        if (!user.username) continue // Make sure cant earn without a character
+            app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 
-        if (!user.rewards.runes['zod']) {
-          user.rewards.runes['zod'] = 0
+            if (req.data.round.winners[0].address === player.address) {
+              if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
+              if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0
+
+              app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] += 1
+
+              await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, message: `${user.username} won ${rewardWinnerMap[0]} ZOD in Evolution!` })
+            }
+          }
         }
 
-        if (user.rewards.runes['zod'] < 0) {
-          user.rewards.runes['zod'] = 0
-        }
-
-        user.rewards.runes['zod'] += rewardWinnerMap[index]
-
-        if (!user.lifetimeRewards.runes['zod']) {
-          user.lifetimeRewards.runes['zod'] = 0
-        }
-
-        user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
-
-        if (req.data.round.winners[0].address === player.address) {
-          if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
-          if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0
-
-          app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] += 1
-        }
-      }
-
-      if (req.data.round.players.length >= 10 && req.data.round.winners.length > 0) {
-        const username = users.find(u => u.address === req.data.round.winners[0].address)?.username
-
-        if (username) {
-          await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, message: `${username} won ${rewardWinnerMap[0]} ZOD in Evolution!` })
-        }
-      }
-
-      for (const user of users) {
         await app.db.saveUser(user)
-      }
-
-      if (req.data.roundId > realm.roundId) {
-        realm.roundId = req.data.roundId
-      } else if (req.data.roundId < realm.roundId) {
-        const err = `Round id too low (realm.roundId = ${realm.roundId})`
-
-        log(err)
-        
-        client.socket.emit('SaveRoundResponse', {
-          id: req.id,
-          data: { status: 0, message: err }
-        })
-
-        await setRealmConfig(app, realm)
-
-        return
-      } else {
-        realm.roundId += 1
       }
 
       log('Round saved')
