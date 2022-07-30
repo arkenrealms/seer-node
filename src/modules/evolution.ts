@@ -810,6 +810,7 @@ export async function connectRealms(app) {
       if (!app.games.evolution.realms[realm.key].leaderboard) {
         app.games.evolution.realms[realm.key].leaderboard = jetpack.read(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), 'json') || {
           raw: {
+            monetary: {},
             wins: {},
             rounds: {},
             rewards: {},
