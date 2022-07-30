@@ -31,7 +31,7 @@ async function rsCall(app, realm, name, data = undefined) {
       }, 60 * 1000)
   
       if (!realm.client.socket?.connected) {
-        log('Not connected to realm server.')
+        log('Not connected to realm server: ' + realm.key)
         return
       }
   
@@ -125,7 +125,7 @@ async function updateRealms(app) {
       await updateRealm(app, realm)
 
       const hist = jetpack.read(path.resolve(`./db/evolution/${realm.key}/historical.json`), 'json') || {}
-
+      
       if (!hist.playerCount) hist.playerCount = []
 
       const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
@@ -147,6 +147,7 @@ async function updateRealms(app) {
     for (const server of app.db.evolutionServers) {
       if (server.status === 'inactive' || server.updateMode === 'manual') continue
       // if (server.key.indexOf('tournament') !== -1) continue
+
       server.status = 'offline'
       server.playerCount = 0
     }
@@ -154,8 +155,6 @@ async function updateRealms(app) {
     const evolutionServers = app.db.evolutionRealms.filter(r => r.status !== 'inactive').map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
 
     for (const evolutionServer of evolutionServers) {
-      if (evolutionServer.status === 'inactive' || evolutionServer.updateMode === 'manual') continue
-
       const server = app.db.evolutionServers.find(s => s.key === evolutionServer.key)
 
       if (!server) {
@@ -164,6 +163,8 @@ async function updateRealms(app) {
         }
         continue
       }
+
+      if (evolutionServer.status === 'inactive' || evolutionServer.updateMode === 'manual') continue
 
       server.status = evolutionServer.status
       server.version = evolutionServer.version
@@ -227,7 +228,7 @@ function disconnectClient(client) {
 const runes = ['el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'amn', 'sol', 'shael', 'dol', 'hel', 'io', 'lum', 'ko', 'fal', 'lem',  'pul', 'um', 'mal', 'ist', 'gul', 'vex', 'ohm', 'lo', 'sur', 'ber', 'jah', 'cham', 'zod']
 
 export async function connectRealm(app, realm) {
-  if (realm.status === 'inactive') return
+  if (realm.status === 'inactive' || realm.ignore) return
 
   log('Connecting to realm', realm)
   const { client } = app.games.evolution.realms[realm.key]
