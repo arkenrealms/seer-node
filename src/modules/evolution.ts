@@ -760,10 +760,10 @@ export async function connectRealm(app, realm) {
 
               app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] += 1
 
-              if (!app.games.evolution.realms.global.leaderboard.raw) app.games.evolution.realms.global.leaderboard.raw = {}
-              if (!app.games.evolution.realms.global.leaderboard.raw.wins) app.games.evolution.realms.global.leaderboard.raw.wins = 0
+              if (!app.games.evolution.global.leaderboard.raw) app.games.evolution.global.leaderboard.raw = {}
+              if (!app.games.evolution.global.leaderboard.raw.wins) app.games.evolution.global.leaderboard.raw.wins = 0
 
-              app.games.evolution.realms.global.leaderboard.raw.wins[user.address] += 1
+              app.games.evolution.global.leaderboard.raw.wins[user.address] += 1
 
               await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, message: `${user.username} won ${rewardWinnerMap[0]} ZOD in Evolution!` })
             }
