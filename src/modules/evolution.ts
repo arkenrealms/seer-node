@@ -752,6 +752,8 @@ export async function connectRealm(app, realm) {
 
             user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
 
+            app.games.evolution.global.leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
+
             app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 
             if (req.data.round.winners[0].address === player.address) {
