@@ -639,7 +639,7 @@ export function initDb(app) {
 
         if (!realm.leaderboard.raw.names) realm.leaderboard.raw.names = {}
 
-        for (const statKey of ['kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'pickups', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
+        for (const statKey of ['monetary', 'kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'pickups', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
           log(statKey)
 
           let results = []
