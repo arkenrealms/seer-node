@@ -702,6 +702,33 @@ export async function connectRealm(app, realm) {
         app.games.evolution.realms[realm.key].leaderboard.raw.rewards[user.address] += player.rewards
         app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] += player.pickups.length
 
+        if (!app.games.evolution.global.leaderboard.names) app.games.evolution.global.leaderboard.names = {}
+
+        app.games.evolution.global.leaderboard.names[user.address] = user.username
+
+        if (!app.games.evolution.global.leaderboard.raw.points[user.address]) {
+          // 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency'
+          app.games.evolution.global.leaderboard.raw.monetary[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.wins[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.rounds[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.kills[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.points[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.deaths[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.powerups[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.evolves[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.rewards[user.address] = 0
+          app.games.evolution.global.leaderboard.raw.pickups[user.address] = 0
+        }
+
+        // Update leaderboard stats
+        app.games.evolution.global.leaderboard.raw.rounds[user.address] += 1
+        app.games.evolution.global.leaderboard.raw.kills[user.address] += player.kills
+        app.games.evolution.global.leaderboard.raw.points[user.address] += player.points
+        app.games.evolution.global.leaderboard.raw.deaths[user.address] += player.deaths
+        app.games.evolution.global.leaderboard.raw.powerups[user.address] += player.powerups
+        app.games.evolution.global.leaderboard.raw.evolves[user.address] += player.evolves
+        app.games.evolution.global.leaderboard.raw.rewards[user.address] += player.rewards
+        app.games.evolution.global.leaderboard.raw.pickups[user.address] += player.pickups.length
         if (winners.find(winner => winner.address === player.address)) {
           const index = winners.findIndex(winner => winner.address === player.address)
           // const player = req.data.round.winners[index]
@@ -807,6 +834,102 @@ export async function connectRealms(app) {
       // if (!app.games.evolution.realms[realm.key].leaderboard.raw.evolves) app.games.evolution.realms[realm.key].leaderboard.raw.evolves = {}
       // if (!app.games.evolution.realms[realm.key].leaderboard.raw.rewards) app.games.evolution.realms[realm.key].leaderboard.raw.rewards = {}
       // if (!app.games.evolution.realms[realm.key].leaderboard.raw.pickups) app.games.evolution.realms[realm.key].leaderboard.raw.pickups = {}
+
+      if (!app.games.evolution.global) {
+        app.games.evolution.global = {
+          key: 'global'
+        }
+      }
+  
+      if (!app.games.evolution.global.leaderboard) {
+        app.games.evolution.global.leaderboard = jetpack.read(path.resolve(`./db/evolution/global/season${app.games.evolution.currentSeason}/leaderboard.json`), 'json') || {
+          raw: {
+            monetary: {},
+            wins: {},
+            rounds: {},
+            rewards: {},
+            points: {},
+            kills: {},
+            deaths: {},
+            powerups: {},
+            evolves: {},
+            pickups: {}
+          },
+          names: {},
+          [app.games.evolution.currentSeason]: {
+            all: [
+              {
+                name: 'Overall',
+                count: 10,
+                data: []
+              }
+            ],
+            monetary: [
+              {
+                name: 'Earnings',
+                count: 10,
+                data: []
+              }
+            ],
+            wins: [
+              {
+                name: 'Wins',
+                count: 10,
+                data: []
+              }
+            ],
+            rounds: [
+              {
+                name: 'Rounds',
+                count: 10,
+                data: []
+              }
+            ],
+            rewards: [
+              {
+                name: 'Rewards',
+                count: 10,
+                data: []
+              }
+            ],
+            points: [
+              {
+                name: 'Points',
+                count: 10,
+                data: []
+              }
+            ],
+            kills: [
+              {
+                name: 'Kills',
+                count: 10,
+                data: []
+              }
+            ],
+            deaths: [
+              {
+                name: 'Deaths',
+                count: 10,
+                data: []
+              }
+            ],
+            powerups: [
+              {
+                name: 'Powerups',
+                count: 10,
+                data: []
+              }
+            ],
+            evolves: [
+              {
+                name: 'Evolves',
+                count: 10,
+                data: []
+              }
+            ],
+          }
+        }
+      }
 
       if (!app.games.evolution.realms[realm.key].leaderboard) {
         app.games.evolution.realms[realm.key].leaderboard = jetpack.read(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), 'json') || {
