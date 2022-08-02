@@ -11,7 +11,7 @@ async function add(type, data) {
   const now = new Date().getTime() / 1000
   const notices = (jetpack.read(path.resolve('./db/notices.json'), 'json') || []).filter(n => n.createdAt > now - (7 * 24 * 60 * 60))
 
-  if (notices.find(n => n.type === type && JSON.stringify(n.data) === JSON.stringify(data))) return // already exists
+  if (notices.find(n => n.type === type && data.message === n.data.message)) return // already exists
 
   notices.push({
     id: shortId(),
