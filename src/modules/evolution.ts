@@ -554,8 +554,22 @@ export async function connectRealm(app, realm) {
         throw new Error('Big problem with reward amount')
       }
 
-      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * req.data.round.winners.length * 2) {
-        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.round.winners.length, JSON.stringify(req.data.round.winners))
+      let totalLegitPlayers = 0
+
+      for (const client of req.data.lastClients) {
+        if (client.name.indexOf('Guest') !== -1 || client.name.indexOf('Unknown') !== -1) continue
+
+        if ((client.powerups > 100 && client.kills > 1) || (client.evolves > 20 && client.powerups > 200) || (client.rewards > 3 && client.powerups > 200) || (client.evolves > 100) || (client.points > 1000)) {
+          totalLegitPlayers += 1
+        }
+      }
+
+      if (totalLegitPlayers === 0) {
+        totalLegitPlayers = 1
+      }
+
+      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * req.data.lastClients.length) {
+        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.lastClients.length, JSON.stringify(req.data.lastClients))
         throw new Error('Big problem with reward amount 2')
       }
 
