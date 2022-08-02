@@ -537,13 +537,25 @@ export async function connectRealm(app, realm) {
         return
       }
 
+      if (req.data.round.winners.length === 0) {
+        realm.roundId += 1
+
+        log('Round saved')
+
+        client.socket.emit('SaveRoundResponse', {
+          id: req.id,
+          data: { status: 1 }
+        })
+        return
+      }
+
       if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountMax) {
         log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountMax)
         throw new Error('Big problem with reward amount')
       }
 
-      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * req.data.round.players.length * 2) {
-        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
+      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * req.data.round.winners.length * 2) {
+        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.round.winners.length, JSON.stringify(req.data.round.winners))
         throw new Error('Big problem with reward amount 2')
       }
 
