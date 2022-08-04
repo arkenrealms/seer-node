@@ -9,36 +9,6 @@ function pad(n, width, z = '0') {
   return nn.length >= width ? nn : new Array(width - nn.length + 1).join(z) + nn
 }
 
-async function getGames(app) {
-  try {
-    app.airtable.database('Game').select({
-      // Selecting the first 3 records in Grid view:
-      maxRecords: 3,
-      view: "Grid view"
-    }).eachPage(function page(records, fetchNextPage) {
-      // This function (`page`) will get called for each page of records.
-
-      records.forEach(function(record) {
-          log('Retrieved', record.get('name'))
-
-          // app.airtable.database('Game').find(record.get('id'), function(err, record) {
-          //     if (err) { console.error(err); return; }
-          //     log('Retrieved', record.id);
-          // })
-      })
-
-      // To fetch the next page of records, call `fetchNextPage`.
-      // If there are more records, `page` will get called again.
-      // If there are no more records, `done` will get called.
-      fetchNextPage()
-    }, function done(err) {
-      if (err) { console.error(err); return; }
-    })
-  } catch(e) {
-    log('Error', e)
-  }
-}
-
 async function getItem(app, key) {
   const skillCache = {}
   const materialCache = {}
@@ -807,7 +777,7 @@ async function getItemBranches(app, record) {
   return branches
 }
 
-async function getRecipes(app) {
+async function getItemRecipes(app) {
   log('Fetching airtable data: ItemRecipe')
 
   const recipeCache = {}
@@ -919,17 +889,56 @@ async function getRecipes(app) {
         log('Fetched recipe', recipe)
       }
 
-      app.db.saveRecipes(recipes)
+      app.db.saveItemRecipes(recipes)
+
+      // To fetch the next page of records, call `fetchNextPage`.
+      // If there are more records, `page` will get called again.
+      // If there are no more records, `done` will get called.
+      fetchNextPage()
     })
     
     if (!res) {
       log('Error fetching recipes')
     }
+  } catch(e) {
+    log('Error', e)
+  }
+}
 
-    // To fetch the next page of records, call `fetchNextPage`.
-    // If there are more records, `page` will get called again.
-    // If there are no more records, `done` will get called.
-    // fetchNextPage()
+
+async function getItemAttributes(app) {
+  log('Fetching airtable data: ItemAttribute')
+
+  try {
+    const attributes = []
+
+    const res = await app.airtable.database('ItemAttribute').select({
+      maxRecords: 200,
+      view: "Grid view"
+    }).eachPage(async function page(records, fetchNextPage) {
+      log('Fetched attributes', records)
+
+      for (const record of records) {
+        // if (!record.get('isPublished')) continue
+
+        const attribute = await getItemAttribute(app, record.key)
+
+        attributes.push(attribute)
+
+        log('Fetched attribute', attribute)
+      }
+
+      app.db.saveItemAttributes(attributes)
+
+      // To fetch the next page of records, call `fetchNextPage`.
+      // If there are more records, `page` will get called again.
+      // If there are no more records, `done` will get called.
+      fetchNextPage()
+    })
+    
+    if (!res) {
+      log('Error fetching attributes')
+    }
   } catch(e) {
     log('Error', e)
   }
@@ -1112,6 +1121,55 @@ async function convertItemAttributes(app) {
   }
 }
 
+async function getGames(app) {
+  log('Fetching airtable data: Game')
+
+  try {
+    const games = []
+
+    const res = await app.airtable.database('Game').select({
+      maxRecords: 10,
+      view: "Grid view"
+    }).eachPage(async function page(records, fetchNextPage) {
+      log('Fetched games', records)
+
+      for (const record of records) {
+        // if (!record.get('isPublished')) continue
+
+        const game = {} as any
+
+        game.name = record.get('name')
+        game.nexusLink = record.get('nexusLink')
+        game.primaryColor = record.get('primaryColor')
+        game.secondaryColor = record.get('secondaryColor')
+        game.logoLink = record.get('logoLink')
+        game.shortDescription = record.get('shortDescription')
+        game.description = record.get('description')
+        game.storyline = record.get('storyline')
+        game.cmcDescription = record.get('cmcDescription')
+        game.contracts = record.get('contracts')
+  
+        games.push(game)
+
+        log('Fetched game', game)
+      }
+
+      app.db.saveGames(games)
+    })
+    
+    if (!res) {
+      log('Error fetching games')
+    }
+
+    // To fetch the next page of records, call `fetchNextPage`.
+    // If there are more records, `page` will get called again.
+    // If there are no more records, `done` will get called.
+    // fetchNextPage()
+  } catch(e) {
+    log('Error', e)
+  }
+}
+
 export async function monitorAirtable(app) {
   try {
     app.airtable = {}
@@ -1134,9 +1192,8 @@ export async function monitorAirtable(app) {
     // await getItems(app)
     // setInterval(async () => await getItems(app), 12 * 60 * 60 * 1000)
 
-    await getItems(app)
-    // setInterval(async () => await getItems(app), 12 * 60 * 60 * 1000)
-
+    await getGames(app)
+    await getItemAttributes(app)
 
     // await convertItemParams(app)
     // await convertItemAttributes(app)

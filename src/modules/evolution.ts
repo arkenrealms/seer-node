@@ -537,6 +537,14 @@ export async function connectRealm(app, realm) {
         return
       }
 
+      if (!req.data.lastClients) {
+        client.socket.emit('SaveRoundResponse', {
+          id: req.id,
+          data: { status: 0, message: 'Error processing' }
+        })
+        return
+      }
+
       if (req.data.round.winners.length === 0) {
         realm.roundId += 1
 

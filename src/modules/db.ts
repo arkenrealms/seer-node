@@ -1053,11 +1053,27 @@ export function initDb(app) {
     }
   }
 
-  app.db.saveRecipes = async (recipes) => {
+  app.db.saveItemRecipes = async (recipes) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/recipes.json`), beautify(recipes, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/itemRecipes.json`), beautify(recipes, null, 2))
     } catch(e) {
       log('Couldnt save recipes', e)
+    }
+  }
+
+  app.db.saveItemAttributes = async (attributes) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemAttributes.json`), beautify(attributes, null, 2))
+    } catch(e) {
+      log('Couldnt save attributes', e)
+    }
+  }
+
+  app.db.saveGames = async (games) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/games.json`), beautify(games, null, 2))
+    } catch(e) {
+      log('Couldnt save games', e)
     }
   }
 }

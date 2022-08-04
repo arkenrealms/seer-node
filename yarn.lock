@@ -11383,10 +11383,10 @@ run-async@^2.2.0:
   resolved "https://registry.yarnpkg.com/run-async/-/run-async-2.4.1.tgz#8440eccf99ea3e70bd409d49aab88e10c189a455"
   integrity sha512-tvVnVv01b8c1RrA6Ep7JkStj85Guv/YrMcwqYQnwjsAS2cTmmPGBBjAjpCW7RrSodNSoE2/qg9O4bceNvUuDgQ==
 
-rune-backend-sdk@^1.2.39:
-  version "1.2.39"
-  resolved "https://registry.yarnpkg.com/rune-backend-sdk/-/rune-backend-sdk-1.2.39.tgz#32b0ef30e5bdafdc76648dc84fdc4e486c2f6cd1"
-  integrity sha512-jnI4KfvoYWfivgAVseRDoOLH7PLJetahdLOfYnn996xC1ynS2+ORnJluCWBLfFFsfjdLxEUc0VyXdQaqVaKVFw==
+rune-backend-sdk@^1.2.43:
+  version "1.2.43"
+  resolved "https://registry.yarnpkg.com/rune-backend-sdk/-/rune-backend-sdk-1.2.43.tgz#6f3260c9b3dff7aef89b6a8d4ac3f652fb5ad4e5"
+  integrity sha512-kqasApQQLVijk9DLZ56jxAdcEj4Tv7OcerK1E7s3DaZ9NYe0RIxyYeIr6Gb57xkHNZ+NCnNWmvPQM8S+nhyccA==
   dependencies:
     "@truffle/hdwallet-provider" "^2.0.3"
     "@typechain/ethers-v4" "^1.0.0"
