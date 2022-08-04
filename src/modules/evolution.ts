@@ -576,7 +576,9 @@ export async function connectRealm(app, realm) {
         totalLegitPlayers = 1
       }
 
-      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * req.data.lastClients.length) {
+      const legitLength = req.data.lastClients.length || 1
+
+      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * legitLength) {
         log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.lastClients.length, JSON.stringify(req.data.lastClients))
         throw new Error('Big problem with reward amount 2')
       }
