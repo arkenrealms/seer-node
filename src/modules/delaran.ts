@@ -43,9 +43,18 @@ async function monitorPlayerConnections(app) {
       const signature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data)
     
       app.realm.emitAll('CallRequest', { data: { method: 'RS_KickUser', signature, data } })
+
+      const user = await app.db.loadUser(player)
+
+      if (!user.warnings) user.warnings = {}
+      if (!user.warnings.delaran) user.warnings.delaran = 0
+
+      user.warnings.delaran += 1
+
+      await app.db.saveUser(user)
     }
 
-    log(`[delaran] Warning players: ${warnPlayers.join(', ')}`)
+    log(`[delaran] Warned players: ${warnPlayers.join(', ')}`)
   } catch(e) {
     log('Error in delaran', e)
   }
