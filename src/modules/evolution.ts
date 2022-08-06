@@ -1123,37 +1123,7 @@ export async function monitorEvolutionRealms(app) {
       "runes": [
         {
           "type": "rune",
-          "symbol": "sol",
-          "quantity": 100
-        },
-        {
-          "type": "rune",
-          "symbol": "tir",
-          "quantity": 100
-        },
-        {
-          "type": "rune",
-          "symbol": "nef",
-          "quantity": 100
-        },
-        {
-          "type": "rune",
           "symbol": "ith",
-          "quantity": 10000
-        },
-        {
-          "type": "rune",
-          "symbol": "hel",
-          "quantity": 100
-        },
-        {
-          "type": "rune",
-          "symbol": "ral",
-          "quantity": 10000
-        },
-        {
-          "type": "rune",
-          "symbol": "thul",
           "quantity": 10000
         },
         {
@@ -1168,24 +1138,79 @@ export async function monitorEvolutionRealms(app) {
         },
         {
           "type": "rune",
-          "symbol": "shael",
-          "quantity": 100
-        },
-        {
-          "type": "rune",
           "symbol": "tal",
           "quantity": 10000
         },
         {
           "type": "rune",
           "symbol": "dol",
-          "quantity": 100
+          "quantity": 10000
         },
-        {
-          "type": "rune",
-          "symbol": "zod",
-          "quantity": 0
-        }
+        // {
+        //   "type": "rune",
+        //   "symbol": "sol",
+        //   "quantity": 0
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "tir",
+        //   "quantity": 0
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "nef",
+        //   "quantity": 0
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "hel",
+        //   "quantity": 10000
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "ral",
+        //   "quantity": 0
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "thul",
+        //   "quantity": 0
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "shael",
+        //   "quantity": 0
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "ist",
+        //   "quantity": 10000
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "mal",
+        //   "quantity": 10000
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "um",
+        //   "quantity": 10000
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "pul",
+        //   "quantity": 10000
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "lum",
+        //   "quantity": 10000
+        // },
+        // {
+        //   "type": "rune",
+        //   "symbol": "zod",
+        //   "quantity": 0
+        // }
       ],
       "items": []
     }
