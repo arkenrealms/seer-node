@@ -46,7 +46,8 @@ export async function getAllItemEvents(app, retry = false) {
             token.createdAt = itemData.createdAt
 
             for (const runeId of decodedItem.recipe.requirement) {
-              app.oracle.income.runes.week[RuneNames(runeId).toLowerCase()] += 1
+              const runeSymbol = RuneNames(runeId).toLowerCase()
+              app.oracle.income.runes.week[runeSymbol] += 1
             }
 
             if (itemData.perfection === 1) {

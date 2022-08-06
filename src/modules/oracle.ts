@@ -64,32 +64,41 @@ async function runOracle(app) {
       app.oracle.lastYearDate = now
 
       app.oracle.income.runes.year = {...app.oracle.defaultRunes}
+      app.oracle.rewarded.runes.year = {...app.oracle.defaultRunes}
     }
 
-    if (now > app.oracle.lastMonthDate + (7 * 24 * 60 * 60 * 1000)) {
+    if (now > app.oracle.lastMonthDate + (30 * 24 * 60 * 60 * 1000)) {
       app.oracle.lastMonthDate = now
 
       for (const rune of Object.keys(app.oracle.income.runes.month)) {
         app.oracle.income.runes.year[rune] += app.oracle.income.runes.month[rune]
       }
 
+      for (const rune of Object.keys(app.oracle.rewarded.runes.month)) {
+        app.oracle.rewarded.runes.year[rune] += app.oracle.rewarded.runes.month[rune]
+      }
+
       app.oracle.income.runes.month = {...app.oracle.defaultRunes}
+      app.oracle.rewarded.runes.month = {...app.oracle.defaultRunes}
     }
   
-    if (now > app.oracle.lastWeekDate + (7 * 24 * 60 * 60 * 1000)) {
+    if (now > app.oracle.lastWeekDate + (365 * 24 * 60 * 60 * 1000)) {
       app.oracle.lastWeekDate = now
 
       for (const rune of Object.keys(app.oracle.income.runes.week)) {
         app.oracle.income.runes.month[rune] += app.oracle.income.runes.week[rune]
       }
 
+      for (const rune of Object.keys(app.oracle.rewarded.runes.week)) {
+        app.oracle.rewarded.runes.month[rune] += app.oracle.rewarded.runes.week[rune]
+      }
+
       await calculateGameRewards(app)
 
       // Reset the rune values to zero
       app.oracle.income.runes.week = {...app.oracle.defaultRunes}
+      app.oracle.rewarded.runes.week = {...app.oracle.defaultRunes}
     }
-    
-    await app.db.saveOracle()
   } catch(e) {
     log('Error', e)
   }
@@ -98,41 +107,58 @@ async function runOracle(app) {
 }
 
 export async function monitorOracle(app) {
-  app.oracle.defaultRunes = {
-    "el": 0,
-    "tir": 0,
-    "eld": 0,
-    "nef": 0,
-    "ith": 0,
-    "tal": 0,
-    "ort": 0,
-    "thul": 0,
-    "amn": 0,
-    "bnb": 0,
-    "sol": 0,
-    "wbnb": 0,
-    "shael": 0,
-    "dol": 0,
-    "hel": 0,
-    "io": 0,
-    "lum": 0,
-    "ko": 0,
-    "fal": 0,
-    "lem": 0,
-    "pul": 0,
-    "um": 0,
-    "mal": 0,
-    "ist": 0,
-    "gul": 0,
-    "vex": 0,
-    "ohm": 0,
-    "lo": 0,
-    "sur": 0,
-    "ber": 0,
-    "jah": 0,
-    "cham": 0,
-    "zod": 0,
+  const now = new Date().getTime()
+
+  if (!app.oracle) {
+    app.oracle = {
+      lastWeekDate: now,
+      lastMonthDate: now,
+      lastYearDate: now,
+      income: {
+        runes: {
+        }
+      },
+      defaultRunes: {
+        "el": 0,
+        "tir": 0,
+        "eld": 0,
+        "nef": 0,
+        "ith": 0,
+        "tal": 0,
+        "ort": 0,
+        "thul": 0,
+        "amn": 0,
+        "bnb": 0,
+        "sol": 0,
+        "wbnb": 0,
+        "shael": 0,
+        "dol": 0,
+        "hel": 0,
+        "io": 0,
+        "lum": 0,
+        "ko": 0,
+        "fal": 0,
+        "lem": 0,
+        "pul": 0,
+        "um": 0,
+        "mal": 0,
+        "ist": 0,
+        "gul": 0,
+        "vex": 0,
+        "ohm": 0,
+        "lo": 0,
+        "sur": 0,
+        "ber": 0,
+        "jah": 0,
+        "cham": 0,
+        "zod": 0,
+      }
+    } as any
   }
+
+  if (!app.oracle.rewarded.runes.week) app.oracle.rewarded.runes.week = {...app.oracle.defaultRunes}
+  if (!app.oracle.rewarded.runes.month) app.oracle.rewarded.runes.month = {...app.oracle.defaultRunes}
+  if (!app.oracle.rewarded.runes.year) app.oracle.rewarded.runes.year = {...app.oracle.defaultRunes}
 
   if (!app.oracle.income.runes.week) app.oracle.income.runes.week = {...app.oracle.defaultRunes}
   if (!app.oracle.income.runes.month) app.oracle.income.runes.month = {...app.oracle.defaultRunes}

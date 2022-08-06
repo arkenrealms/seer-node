@@ -24,7 +24,6 @@ export function initDb(app) {
   
   Model.knex(knex)
 
-  const now = new Date().getTime()
 
   app.db = {
     app: jetpack.read(path.resolve('./db/app.json'), 'json') || {
@@ -34,13 +33,7 @@ export function initDb(app) {
       }
     },
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
-    oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json') || {
-      lastWeekDate: now,
-      income: {
-        runes: {
-        }
-      }
-    },
+    oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json'),
     oprah: jetpack.read(path.resolve('./db/oprah.json'), 'json') || {},
     farms: jetpack.read(path.resolve('./db/farms.json'), 'json') || {},
     runes: jetpack.read(path.resolve('./db/runes.json'), 'json') || {},
