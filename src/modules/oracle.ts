@@ -110,59 +110,63 @@ export async function monitorOracle(app) {
   const now = new Date().getTime()
 
   if (!app.oracle) {
+    const defaultRunes = {
+      "el": 0,
+      "tir": 0,
+      "eld": 0,
+      "nef": 0,
+      "ith": 0,
+      "tal": 0,
+      "ort": 0,
+      "thul": 0,
+      "amn": 0,
+      "bnb": 0,
+      "sol": 0,
+      "wbnb": 0,
+      "shael": 0,
+      "dol": 0,
+      "hel": 0,
+      "io": 0,
+      "lum": 0,
+      "ko": 0,
+      "fal": 0,
+      "lem": 0,
+      "pul": 0,
+      "um": 0,
+      "mal": 0,
+      "ist": 0,
+      "gul": 0,
+      "vex": 0,
+      "ohm": 0,
+      "lo": 0,
+      "sur": 0,
+      "ber": 0,
+      "jah": 0,
+      "cham": 0,
+      "zod": 0,
+    }
+  
     app.oracle = {
       lastWeekDate: now,
       lastMonthDate: now,
       lastYearDate: now,
       income: {
         runes: {
+          week: {...defaultRunes},
+          month: {...defaultRunes},
+          year: {...defaultRunes},
         }
       },
-      defaultRunes: {
-        "el": 0,
-        "tir": 0,
-        "eld": 0,
-        "nef": 0,
-        "ith": 0,
-        "tal": 0,
-        "ort": 0,
-        "thul": 0,
-        "amn": 0,
-        "bnb": 0,
-        "sol": 0,
-        "wbnb": 0,
-        "shael": 0,
-        "dol": 0,
-        "hel": 0,
-        "io": 0,
-        "lum": 0,
-        "ko": 0,
-        "fal": 0,
-        "lem": 0,
-        "pul": 0,
-        "um": 0,
-        "mal": 0,
-        "ist": 0,
-        "gul": 0,
-        "vex": 0,
-        "ohm": 0,
-        "lo": 0,
-        "sur": 0,
-        "ber": 0,
-        "jah": 0,
-        "cham": 0,
-        "zod": 0,
-      }
+      rewarded: {
+        runes: {
+          week: {...defaultRunes},
+          month: {...defaultRunes},
+          year: {...defaultRunes},
+        }
+      },
+      defaultRunes
     } as any
   }
-
-  if (!app.oracle.rewarded.runes.week) app.oracle.rewarded.runes.week = {...app.oracle.defaultRunes}
-  if (!app.oracle.rewarded.runes.month) app.oracle.rewarded.runes.month = {...app.oracle.defaultRunes}
-  if (!app.oracle.rewarded.runes.year) app.oracle.rewarded.runes.year = {...app.oracle.defaultRunes}
-
-  if (!app.oracle.income.runes.week) app.oracle.income.runes.week = {...app.oracle.defaultRunes}
-  if (!app.oracle.income.runes.month) app.oracle.income.runes.month = {...app.oracle.defaultRunes}
-  if (!app.oracle.income.runes.year) app.oracle.income.runes.year = {...app.oracle.defaultRunes}
 
   setTimeout(() => runOracle(app), 1 * 60 * 1000)
 }
