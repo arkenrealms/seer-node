@@ -2,6 +2,7 @@ import * as ethers from 'ethers'
 import { log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
+import { RuneNames } from '@rune-backend-sdk/data/items'
 
 export async function getAllItemEvents(app, retry = false) {
   if (app.config.items.updating) return
@@ -43,6 +44,10 @@ export async function getAllItemEvents(app, retry = false) {
             token.owner = itemData.owner
             token.creator = itemData.owner
             token.createdAt = itemData.createdAt
+
+            for (const runeId of decodedItem.recipe.requirement) {
+              app.oracle.income.runes.week[RuneNames(runeId).toLowerCase()] += 1
+            }
 
             if (itemData.perfection === 1) {
               await app.notices.add('mythic_crafted', { address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, message: `${user.username} found a mythic ${decodedItem.name}!` })

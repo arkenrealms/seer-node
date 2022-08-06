@@ -8,7 +8,7 @@ export async function convertRewardsOld(app) {
 
   const userCache = {}
 
-  const evolutionServers = [
+  const evolution.servers = [
     {
       "key": "oceanic1",
       "name": "Oceanic",
@@ -276,7 +276,7 @@ export async function convertRewardsOld(app) {
     }
   ]
 
-  for (const server of evolutionServers) {
+  for (const server of evolution.servers) {
     log('Server', server.key)
 
     try {
@@ -322,7 +322,7 @@ export async function convertRewardsOld(app) {
 export async function convertRewards(app) {
   log('Convert rewards')
 
-  const evolutionServers = [
+  const evolution.servers = [
     {
       "key": "oceanic1",
       "name": "Oceanic",
@@ -593,7 +593,7 @@ export async function convertRewards(app) {
   const userCache = {}
   const hasBeenWiped = {}
 
-  for (const server of evolutionServers) {
+  for (const server of evolution.servers) {
     log('Server', server.key)
 
     try {
@@ -632,7 +632,7 @@ export async function convertRewards(app) {
 
 //   const userCache = {}
 
-//   const evolutionServers = [
+//   const evolution.servers = [
 //     {
 //       "key": "oceanic1",
 //       "name": "Oceanic",
@@ -902,7 +902,7 @@ export async function convertRewards(app) {
 
 //   // Iterate every realm playerRewards
 //   // Combine into the user.evolution.rewards object
-//   for (const server of evolutionServers) {
+//   for (const server of evolution.servers) {
 //     log('Server', server.key)
 
 //     try {

@@ -55,7 +55,7 @@ function setRealmOffline(realm) {
 }
 
 async function setRealmConfig(app, realm) {
-  const configRes = await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', { config: { ...app.db.evolutionConfig, roundId: realm.roundId } }) as any
+  const configRes = await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', { config: { ...app.db.evolution.config, roundId: realm.roundId } }) as any
 
   if (configRes.status !== 1) {
     setRealmOffline(realm)
@@ -118,7 +118,7 @@ async function updateRealms(app) {
 
     let playerCount = 0
 
-    for (const realm of app.db.evolutionRealms) {
+    for (const realm of app.db.evolution.realms) {
       // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
       if (realm.status === 'inactive' || realm.updateMode === 'manual') continue
 
@@ -144,7 +144,7 @@ async function updateRealms(app) {
 
     app.db.evolution.playerCount = playerCount
 
-    for (const server of app.db.evolutionServers) {
+    for (const server of app.db.evolution.servers) {
       if (server.status === 'inactive' || server.updateMode === 'manual') continue
       // if (server.key.indexOf('tournament') !== -1) continue
 
@@ -152,14 +152,14 @@ async function updateRealms(app) {
       server.playerCount = 0
     }
 
-    const evolutionServers = app.db.evolutionRealms.filter(r => r.status !== 'inactive').map(r => r.games.length > 0 ? { ...(app.db.evolutionServers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
+    const evolution.servers = app.db.evolution.realms.filter(r => r.status !== 'inactive').map(r => r.games.length > 0 ? { ...(app.db.evolution.servers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
 
-    for (const evolutionServer of evolutionServers) {
-      const server = app.db.evolutionServers.find(s => s.key === evolutionServer.key)
+    for (const evolutionServer of evolution.servers) {
+      const server = app.db.evolution.servers.find(s => s.key === evolutionServer.key)
 
       if (!server) {
         if (evolutionServer.key) {
-          app.db.evolutionServers.push(evolutionServer)
+          app.db.evolution.servers.push(evolutionServer)
         }
         continue
       }
@@ -181,10 +181,10 @@ async function updateRealms(app) {
       server.endpoint = evolutionServer.endpoint
     }
 
-    jetpack.write(path.resolve('./db/evolution/realms.json'), JSON.stringify(app.db.evolutionRealms), { atomic: true })
+    jetpack.write(path.resolve('./db/evolution/realms.json'), JSON.stringify(app.db.evolution.realms), { atomic: true })
 
     // Update old servers file
-    jetpack.write(path.resolve('./db/evolution/servers.json'), JSON.stringify(app.db.evolutionServers), { atomic: true })
+    jetpack.write(path.resolve('./db/evolution/servers.json'), JSON.stringify(app.db.evolution.servers), { atomic: true })
 
     log('Realm and server info generated')
 
@@ -557,8 +557,8 @@ export async function connectRealm(app, realm) {
         return
       }
 
-      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountMax) {
-        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountMax)
+      if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountMax) {
+        log(req.data.rewardWinnerAmount, app.db.evolution.config.rewardWinnerAmountMax)
         throw new Error('Big problem with reward amount')
       }
 
@@ -576,10 +576,8 @@ export async function connectRealm(app, realm) {
         totalLegitPlayers = 1
       }
 
-      const legitLength = req.data.lastClients.length || 1
-
-      if (req.data.rewardWinnerAmount > app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer * legitLength) {
-        log(req.data.rewardWinnerAmount, app.db.evolutionConfig.rewardWinnerAmountPerLegitPlayer, req.data.lastClients.length, JSON.stringify(req.data.lastClients))
+      if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountPerLegitPlayer * totalLegitPlayers) {
+        log(req.data.rewardWinnerAmount, app.db.evolution.config.rewardWinnerAmountPerLegitPlayer, totalLegitPlayers, req.data.lastClients.length, JSON.stringify(req.data.lastClients))
         throw new Error('Big problem with reward amount 2')
       }
 
@@ -662,13 +660,13 @@ export async function connectRealm(app, realm) {
         for (const pickup of player.pickups) {
           if (pickup.type === 'rune') {
             // TODO: change to authoritative
-            if (pickup.quantity > req.data.round.players.length * app.db.evolutionConfig.rewardItemAmountPerLegitPlayer * 2) {
-              log(pickup.quantity, app.db.evolutionConfig.rewardItemAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
+            if (pickup.quantity > req.data.round.players.length * app.db.evolution.config.rewardItemAmountPerLegitPlayer * 2) {
+              log(pickup.quantity, app.db.evolution.config.rewardItemAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
               throw new Error('Big problem with item reward amount')
             }
 
-            if (pickup.quantity > app.db.evolutionConfig.rewardItemAmountMax) {
-              log(pickup.quantity, app.db.evolutionConfig.rewardItemAmountMax)
+            if (pickup.quantity > app.db.evolution.config.rewardItemAmountMax) {
+              log(pickup.quantity, app.db.evolution.config.rewardItemAmountMax)
               throw new Error('Big problem with item reward amount 2')
             }
 
@@ -860,7 +858,7 @@ export async function connectRealms(app) {
   log('Connecting to Evolution realms')
 
   try {
-    for (const realm of app.db.evolutionRealms) {
+    for (const realm of app.db.evolution.realms) {
       if (!app.games.evolution.realms[realm.key]) {
         app.games.evolution.realms[realm.key] = {}
         for (const key in Object.keys(realm)) {
@@ -1096,7 +1094,7 @@ export async function connectRealms(app) {
 }
 
 export async function emitAll(app, ...args) {
-  for (const realm of app.db.evolutionRealms) {
+  for (const realm of app.db.evolution.realms) {
     if (app.games.evolution.realms[realm.key]?.client?.isAuthed) {
       console.log('emitAll', realm.key, ...args)
       app.games.evolution.realms[realm.key]?.client?.socket.emit(...args)
@@ -1110,6 +1108,91 @@ export async function monitorEvolutionRealms(app) {
     app.realm.apiAddress = '0x4b64Ff29Ee3B68fF9de11eb1eFA577647f83151C'
     app.realm.apiSignature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), 'evolution')
     app.realm.emitAll = emitAll.bind(null, app)
+  }
+
+  if (!app.evolution.config.rewardWinnerAmountPerLegitPlayerQueued) {
+    app.evolution.config.rewardWinnerAmountPerLegitPlayerQueued = app.evolution.config.rewardWinnerAmountPerLegitPlayer
+  }
+
+  if (!app.evolution.config.rewardWinnerAmountMaxQueued) {
+    app.evolution.config.rewardWinnerAmountMaxQueued = app.evolution.config.rewardWinnerAmountMax
+  }
+
+  if (!app.evolution.config.itemRewards) {
+    app.evolution.config.itemRewards = {
+      "runes": [
+        {
+          "type": "rune",
+          "symbol": "sol",
+          "quantity": 100
+        },
+        {
+          "type": "rune",
+          "symbol": "tir",
+          "quantity": 100
+        },
+        {
+          "type": "rune",
+          "symbol": "nef",
+          "quantity": 100
+        },
+        {
+          "type": "rune",
+          "symbol": "ith",
+          "quantity": 10000
+        },
+        {
+          "type": "rune",
+          "symbol": "hel",
+          "quantity": 100
+        },
+        {
+          "type": "rune",
+          "symbol": "ral",
+          "quantity": 10000
+        },
+        {
+          "type": "rune",
+          "symbol": "thul",
+          "quantity": 10000
+        },
+        {
+          "type": "rune",
+          "symbol": "amn",
+          "quantity": 10000
+        },
+        {
+          "type": "rune",
+          "symbol": "ort",
+          "quantity": 10000
+        },
+        {
+          "type": "rune",
+          "symbol": "shael",
+          "quantity": 100
+        },
+        {
+          "type": "rune",
+          "symbol": "tal",
+          "quantity": 10000
+        },
+        {
+          "type": "rune",
+          "symbol": "dol",
+          "quantity": 100
+        },
+        {
+          "type": "rune",
+          "symbol": "zod",
+          "quantity": 0
+        }
+      ],
+      "items": []
+    }
+  }
+
+  if (!app.evolution.config.itemRewardsQueued) {
+    app.evolution.config.itemRewardsQueued = app.evolution.config.itemRewards
   }
 
   await connectRealms(app)

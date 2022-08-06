@@ -134,7 +134,7 @@
 //   // Update evolution player rewards
 //   try {
 //     log('Update evolution player rewards')
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 
 //       log('Server', server.key)
@@ -180,7 +180,7 @@
 
 //     const mapAddressToUsername = {}
 
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 //       log('Server', server.key)
 
@@ -592,7 +592,7 @@
 //   try {
 //     log('Update evolution hash map')
 
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 //       if (!playerRoundWinners[server.key]) continue
 
@@ -635,7 +635,7 @@
 //   try {
 //     log('Update evolution stats')
 
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 
 
@@ -690,7 +690,7 @@
 //   // Update evolution reward history
 //   try {
 //     log('Update evolution reward history')
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 
 //       log('Server', server.key)
@@ -762,7 +762,7 @@
 //   // Update evolution rewards
 //   try {
 //     log('Update evolution rewards')
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 
 //       log('Server', server.key)
@@ -785,7 +785,7 @@
 //   // Update evolution ban list
 //   try {
 //     log('Update evolution ban list')
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 
 //       log('Server', server.key)
@@ -824,7 +824,7 @@
 //   // Update evolution player rewards
 //   try {
 //     log('Update evolution player rewards')
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 
 //       log('Server', server.key)
@@ -848,7 +848,7 @@
 //   // Update evolution player rewards
 //   try {
 //     log('Update evolution player rewards')
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 
 //       log('Server', server.key)
@@ -870,7 +870,7 @@
 
 //   // Update evolution leaderboard
 //   {
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 //       if (!playerRoundWinners[server.key] || !Array.isArray(playerRewardWinners[server.key])) continue
 
@@ -1166,11 +1166,11 @@
 //     {
 //       log('Update evolution historical 1')
 
-//       if (!app.db.evolutionHistorical.playerCount) app.db.evolutionHistorical.playerCount = []
+//       if (!app.db.evolution.historical.playerCount) app.db.evolution.historical.playerCount = []
 
 //       let playerCount = 0
 
-//       for (const server of app.db.evolutionServers) {
+//       for (const server of app.db.evolution.servers) {
 //         try {
 //           const rand = Math.floor(Math.random() * Math.floor(999999))
 //           const response = await fetch(`https://${server.endpoint}/info?${rand}`)
@@ -1216,18 +1216,18 @@
 //         playerCount += server.playerCount
 //       }
 
-//       jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolutionServers, null, 2), { atomic: true })
+//       jetpack.write(path.resolve('./db/evolution/servers.json'), beautify(app.db.evolution.servers, null, 2), { atomic: true })
 
 //       // app.db.updateGames()
 
-//       const oldTime = (new Date(app.db.evolutionHistorical.playerCount[app.db.evolutionHistorical.playerCount.length-1]?.[0] || 0)).getTime()
+//       const oldTime = (new Date(app.db.evolution.historical.playerCount[app.db.evolution.historical.playerCount.length-1]?.[0] || 0)).getTime()
 //       const newTime = (new Date()).getTime()
 //       const diff = newTime - oldTime
 //       if (diff / (1000 * 60 * 60 * 1) > 1) {
-//         app.db.evolutionHistorical.playerCount.push([newTime, playerCount])
+//         app.db.evolution.historical.playerCount.push([newTime, playerCount])
 //       }
 
-//       jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(app.db.evolutionHistorical, null, 2), { atomic: true })
+//       jetpack.write(path.resolve(`./db/evolution/historical.json`), beautify(app.db.evolution.historical, null, 2), { atomic: true })
 //     }
 //     {
 //       log('Update evolution historical 2')
@@ -1239,7 +1239,7 @@
 //   // Update evolution info
 //   try {
 //     log('Update evolution info')
-//     for (const server of app.db.evolutionServers) {
+//     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 //       try {
 //         const rand = Math.floor(Math.random() * Math.floor(999999))

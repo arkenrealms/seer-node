@@ -144,7 +144,7 @@ function initEventHandler(app) {
           id: req.id,
           data: {
             status: 1,
-            list: app.db.evolutionServers
+            list: app.db.evolution.servers
           }
         })
       })

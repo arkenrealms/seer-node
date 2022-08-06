@@ -20,6 +20,7 @@ import { monitorCoordinator } from './modules/coordinator'
 import { monitorAirtable } from './modules/airtable'
 import { monitorSenderEvents } from './modules/sender'
 import { engageDelaran } from './modules/delaran'
+import { monitorOracle } from './modules/oracle'
 import { initCubeBridge } from './modules/cube'
 import { initNotices } from './modules/notices'
 import { generateAccounts } from './modules/account-generator'
@@ -191,6 +192,12 @@ async function init() {
       {
         name: 'monitorSaves',
         instance: monitorSaves,
+        async: false,
+        timeout: 5 * 60 * 1000
+      },
+      {
+        name: 'monitorOracle',
+        instance: monitorOracle,
         async: false,
         timeout: 5 * 60 * 1000
       },

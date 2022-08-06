@@ -8,7 +8,7 @@ async function monitorPlayerConnections(app) {
     let connectedPlayers = []
     let warnPlayers = []
     
-    for (const realm of app.db.evolutionRealms) {
+    for (const realm of app.db.evolution.realms) {
       if (app.games.evolution.realms[realm.key]?.games) {
         for (const game of app.games.evolution.realms[realm.key].games) {
           for (const player of game.connectedPlayers) {
@@ -22,7 +22,7 @@ async function monitorPlayerConnections(app) {
       }
     }
     
-    for (const realm of app.db.infiniteRealms) {
+    for (const realm of app.db.infinite.realms) {
       if (app.games.infinite.realms[realm.key]?.games) {
         for (const game of app.games.infinite.realms[realm.key].games) {
           for (const player of game.connectedPlayers) {

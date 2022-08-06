@@ -11,6 +11,7 @@ import Model from '@rune-backend-sdk/models/base'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 import { userInfo } from 'os'
 import { getUsername } from '../util/getUsername'
+// import { now } from 'rune-backend-sdk/build/util/time'
 
 export function initDb(app) {
   const Knex = require('knex')
@@ -23,9 +24,24 @@ export function initDb(app) {
   
   Model.knex(knex)
 
+  const now = new Date().getTime()
+
   app.db = {
-    app: jetpack.read(path.resolve('./db/app.json'), 'json') || {config: { characterMintCost: 0.1, profileRegisterCost: 0 }},
+    app: jetpack.read(path.resolve('./db/app.json'), 'json') || {
+      config: {
+        characterMintCost: 0.1,
+        profileRegisterCost: 0
+      }
+    },
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
+    oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json') || {
+      lastWeekDate: now,
+      income: {
+        runes: {
+        }
+      }
+    },
+    oprah: jetpack.read(path.resolve('./db/oprah.json'), 'json') || {},
     farms: jetpack.read(path.resolve('./db/farms.json'), 'json') || {},
     runes: jetpack.read(path.resolve('./db/runes.json'), 'json') || {},
     items: jetpack.read(path.resolve('./db/items.json'), 'json') || {},
@@ -45,31 +61,31 @@ export function initDb(app) {
     tradesEvents: jetpack.read(path.resolve('./db/trades/events.json'), 'json') || [],
     // evolutionLeaderboardHistory: jetpack.read(path.resolve('./db/evolution/leaderboardHistory.json'), 'json'),
     // evolutionRewardHistory: jetpack.read(path.resolve('./db/evolution/rewardHistory.json'), 'json'),
-    evolutionHistorical: jetpack.read(path.resolve('./db/evolution/historical.json'), 'json') || [],
-    evolutionRealms: jetpack.read(path.resolve('./db/evolution/realms.json'), 'json') || [],
-    evolutionServers: jetpack.read(path.resolve('./db/evolution/servers.json'), 'json') || [],
-    evolutionConfig: jetpack.read(path.resolve('./db/evolution/config.json'), 'json') || {
-      "rewardItemAmountPerLegitPlayer": 0.0015,
-      "rewardItemAmountMax": 0.03,
-      "rewardWinnerAmountPerLegitPlayer": 0.015,
-      "rewardWinnerAmountMax": 0.3,
-      "rewardItemAmount": 0.02,
-      "rewardWinnerAmount": 0.05
-    },
     evolution: {
       playerCount: 0,
       banList: jetpack.read(path.resolve('./db/evolution/banList.json'), 'json') || [],
-      modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
+      modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7'],
+      config: jetpack.read(path.resolve('./db/evolution/config.json'), 'json') || {
+        "rewardItemAmountPerLegitPlayer": 0.0015,
+        "rewardItemAmountMax": 0.03,
+        "rewardWinnerAmountPerLegitPlayer": 0.015,
+        "rewardWinnerAmountMax": 0.3,
+        "rewardItemAmount": 0.02,
+        "rewardWinnerAmount": 0.05
+      },
+      realms: jetpack.read(path.resolve('./db/evolution/realms.json'), 'json') || [],
+      servers: jetpack.read(path.resolve('./db/evolution/servers.json'), 'json') || [],
+      historical: jetpack.read(path.resolve('./db/evolution/historical.json'), 'json') || []
     },
     infinite: {
       banList: jetpack.read(path.resolve('./db/infinite/banList.json'), 'json') || [],
-      modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
-    },
-    infiniteHistorical: jetpack.read(path.resolve('./db/infinite/historical.json'), 'json') || [],
-    infiniteRealms: jetpack.read(path.resolve('./db/infinite/realms.json'), 'json') || [],
-    infiniteServers: jetpack.read(path.resolve('./db/infinite/servers.json'), 'json') || [],
-    infiniteConfig: jetpack.read(path.resolve('./db/infinite/config.json'), 'json') || {
-      "something": 0.0015
+      modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7'],
+      config: jetpack.read(path.resolve('./db/infinite/config.json'), 'json') || {
+        "something": 0.0015
+      },
+      realms: jetpack.read(path.resolve('./db/infinite/realms.json'), 'json') || [],
+      servers: jetpack.read(path.resolve('./db/infinite/servers.json'), 'json') || [],
+      historical: jetpack.read(path.resolve('./db/infinite/historical.json'), 'json') || []
     },
     sanctuary: {
       banList: jetpack.read(path.resolve('./db/sanctuary/banList.json'), 'json') || [],
@@ -87,11 +103,11 @@ export function initDb(app) {
   }
 
   if (process.env.RUNE_ENV === 'local') {
-    app.db.evolutionRealms = [
+    app.db.evolution.realms = [
       {
         "key": "local1",
         "name": "Local",
-        "roundId": app.db.evolutionRealms?.[0]?.roundId || 1,
+        "roundId": app.db.evolution.realms?.[0]?.roundId || 1,
         "regionId": 1,
         "playerCount": 0,
         "speculatorCount": 0,
@@ -110,6 +126,21 @@ export function initDb(app) {
     app.config.updatedDate = (new Date().getTime()).toString()
     app.config.updatedTimestamp = new Date().getTime()
     jetpack.write(path.resolve('./db/config.json'), beautify(app.config, null, 2, 100), { atomic: true })
+  }
+
+  app.db.saveOracle = async () => {
+    log('Saving: oracle')
+    jetpack.write(path.resolve('./db/oracle.json'), beautify(removeDupes(app.db.oracle), null, 2, 100), { atomic: true })
+  }
+
+  app.db.saveEvolution = async () => {
+    log('Saving: evolution')
+    jetpack.write(path.resolve('./db/evolution/config.json'), beautify(removeDupes(app.db.evolution.config), null, 2, 100), { atomic: true })
+  }
+
+  app.db.saveOprah = async () => {
+    log('Saving: oprah')
+    jetpack.write(path.resolve('./db/oprah.json'), beautify(removeDupes(app.db.oprah), null, 2, 100), { atomic: true })
   }
 
   app.db.saveTrades = async () => {
