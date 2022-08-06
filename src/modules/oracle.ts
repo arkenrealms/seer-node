@@ -107,9 +107,9 @@ async function runOracle(app) {
 }
 
 export async function monitorOracle(app) {
-  const now = new Date().getTime()
-
   if (!app.oracle) {
+    const now = new Date().getTime()
+  
     const defaultRunes = {
       "el": 0,
       "tir": 0,
@@ -164,7 +164,7 @@ export async function monitorOracle(app) {
           year: {...defaultRunes},
         }
       },
-      defaultRunes
+      defaultRunes: {...defaultRunes}
     } as any
   }
 
