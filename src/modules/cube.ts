@@ -1,7 +1,8 @@
 import fs from 'fs'
 import express from 'express'
-import { log } from '@rune-backend-sdk/util'
+import { getHighestId, toShort, log } from '@rune-backend-sdk/util'
 import * as websocketUtil from '@rune-backend-sdk/util/websocket'
+import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 
 const path = require('path')
 
@@ -145,6 +146,47 @@ function initEventHandler(app) {
           data: {
             status: 1,
             list: app.db.evolution.servers
+          }
+        })
+      })
+  
+      socket.on('RC_SaveTradeRequest', async function(req) {
+        log('RC_SaveTradeRequest', req)
+        
+        if (!socket.authed) {
+          emitDirect(socket, 'RC_SaveTradeResponse', {
+            id: req.id,
+            data: {
+              status: 0
+            }
+          })
+          return
+        }
+
+        const trade = req.data.trade
+        
+        trade.id = getHighestId(app.db.trades) + 1
+
+        const decodedItem = decodeItem(trade.tokenId.toString())
+
+        trade.item = { id: decodedItem.id, name: decodedItem.name }
+
+        app.db.trades.push(trade)
+
+        log('Adding trade', trade)
+
+        const item = app.db.loadItem(trade.item.id)
+
+        await app.db.saveUserTrade(await app.db.loadUser(trade.seller), trade)
+        await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
+        await app.db.saveItemTrade(item, trade)
+        await app.db.saveItemToken(item, { id: trade.tokenId, owner: trade.seller, item: trade.item })
+        
+        emitDirect(socket, 'RC_SaveTradeResponse', {
+          id: req.id,
+          data: {
+            status: 1,
+            tradeId: trade.id
           }
         })
       })

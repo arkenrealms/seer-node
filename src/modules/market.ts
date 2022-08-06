@@ -25,7 +25,8 @@ export async function getAllMarketEvents(app, retry = false) {
 
           if (!trade || trade.blockNumber < logInfo.blockNumber) {
             trade = {
-              id: getHighestId(app.db.trades) + 1
+              id: getHighestId(app.db.trades) + 1,
+              releaseAt: trade.releaseAt
             }
 
             const decodedItem = decodeItem(tokenId.toString())
