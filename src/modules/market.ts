@@ -26,7 +26,6 @@ export async function getAllMarketEvents(app, retry = false) {
           if (!trade || trade.blockNumber < logInfo.blockNumber) {
             trade = {
               id: getHighestId(app.db.trades) + 1,
-              releaseAt: trade.releaseAt
             }
 
             const decodedItem = decodeItem(tokenId.toString())
@@ -56,6 +55,47 @@ export async function getAllMarketEvents(app, retry = false) {
             // await saveConfig()
             
             log('List', trade)
+          }
+        }
+
+        if (e.name === 'ListTimelocked') {
+          const { seller, buyer, tokenId, price } = e.args
+
+          let trade = app.db.trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
+
+          if (!trade || trade.blockNumber < logInfo.blockNumber) {
+            trade = {
+              id: getHighestId(app.db.trades) + 1,
+            }
+
+            const decodedItem = decodeItem(tokenId.toString())
+
+            trade.seller = seller
+            trade.buyer = buyer
+            trade.tokenId = tokenId.toString()
+            trade.price = toShort(price)
+            trade.status = "available"
+            trade.hotness = 0
+            trade.createdAt = new Date().getTime()
+            trade.updatedAt = new Date().getTime()
+            trade.blockNumber = logInfo.blockNumber
+            trade.earliestBuyTime = logInfo.earliestBuyTime
+            trade.item = { id: decodedItem.id, name: decodedItem.name }
+            // trade.item = decodeItem(trade.tokenId)
+
+            app.db.trades.push(trade)
+
+            log('Adding trade', trade)
+
+            const item = app.db.loadItem(trade.item.id)
+
+            await app.db.saveUserTrade(await app.db.loadUser(seller), trade)
+            await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
+            await app.db.saveItemTrade(item, trade)
+            await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller, item: trade.item })
+            // await saveConfig()
+            
+            log('ListTimelocked', trade)
           }
         }
 
@@ -169,6 +209,7 @@ export async function getAllMarketEvents(app, retry = false) {
         // event Buy(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price);
         // event Recover(address indexed user, address indexed seller, uint256 tokenId);
         'List(address,address,uint256,uint256)',
+        'ListTimelocked(address,address,uint256,uint256,uint256)',
         'Update(address,address,uint256,uint256)',
         'Delist(address,uint256)',
         'Buy(address,address,uint256,uint256)',
