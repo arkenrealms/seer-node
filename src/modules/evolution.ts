@@ -152,9 +152,9 @@ async function updateRealms(app) {
       server.playerCount = 0
     }
 
-    const evolution.servers = app.db.evolution.realms.filter(r => r.status !== 'inactive').map(r => r.games.length > 0 ? { ...(app.db.evolution.servers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
+    const evolutionServers = app.db.evolution.realms.filter(r => r.status !== 'inactive').map(r => r.games.length > 0 ? { ...(app.db.evolution.servers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
 
-    for (const evolutionServer of evolution.servers) {
+    for (const evolutionServer of evolutionServers) {
       const server = app.db.evolution.servers.find(s => s.key === evolutionServer.key)
 
       if (!server) {
