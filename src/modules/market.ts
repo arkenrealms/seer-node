@@ -79,7 +79,7 @@ export async function getAllMarketEvents(app, retry = false) {
             trade.createdAt = new Date().getTime()
             trade.updatedAt = new Date().getTime()
             trade.blockNumber = logInfo.blockNumber
-            trade.releaseAt = earliestBuyTime
+            trade.releaseAt = toShort(earliestBuyTime)
             trade.item = { id: decodedItem.id, name: decodedItem.name }
             // trade.item = decodeItem(trade.tokenId)
 
