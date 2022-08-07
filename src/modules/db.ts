@@ -604,7 +604,7 @@ export function initDb(app) {
       profile.name = profile.meta.username
     }
 
-    return profile.meta
+    return {...baseUser, ...profile.meta}
   }
   
   app.db.saveUser = async (user) => {
