@@ -944,6 +944,7 @@ export function initDb(app) {
 
         await app.db.saveGuild(guild)
       } catch (e) {
+        log('Getting guild error', e)
       }
     }
   }
