@@ -24,6 +24,7 @@ export async function getAllItemEvents(app, retry = false) {
 
         if (e.name === 'Transfer') {
           const { from, to: userAddress, tokenId } = e.args
+          log(from, userAddress, tokenId)
 
           const user = await app.db.loadUser(userAddress)
           const decodedItem = decodeItem(tokenId.toString())
