@@ -55,7 +55,7 @@ function setRealmOffline(realm) {
 }
 
 async function setRealmConfig(app, realm) {
-  const configRes = await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', { config: { ...app.evolution.config, roundId: realm.roundId } }) as any
+  const configRes = await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', { config: { ...app.db.evolution.config, roundId: realm.roundId } }) as any
 
   if (configRes.status !== 1) {
     setRealmOffline(realm)
@@ -557,8 +557,8 @@ export async function connectRealm(app, realm) {
         return
       }
 
-      if (req.data.rewardWinnerAmount > app.evolution.config.rewardWinnerAmountMax) {
-        log(req.data.rewardWinnerAmount, app.evolution.config.rewardWinnerAmountMax)
+      if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountMax) {
+        log(req.data.rewardWinnerAmount, app.db.evolution.config.rewardWinnerAmountMax)
         throw new Error('Big problem with reward amount')
       }
 
@@ -576,8 +576,8 @@ export async function connectRealm(app, realm) {
         totalLegitPlayers = 1
       }
 
-      if (req.data.rewardWinnerAmount > app.evolution.config.rewardWinnerAmountPerLegitPlayer * totalLegitPlayers) {
-        log(req.data.rewardWinnerAmount, app.evolution.config.rewardWinnerAmountPerLegitPlayer, totalLegitPlayers, req.data.lastClients.length, JSON.stringify(req.data.lastClients))
+      if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountPerLegitPlayer * totalLegitPlayers) {
+        log(req.data.rewardWinnerAmount, app.db.evolution.config.rewardWinnerAmountPerLegitPlayer, totalLegitPlayers, req.data.lastClients.length, JSON.stringify(req.data.lastClients))
         throw new Error('Big problem with reward amount 2')
       }
 
@@ -660,13 +660,13 @@ export async function connectRealm(app, realm) {
         for (const pickup of player.pickups) {
           if (pickup.type === 'rune') {
             // TODO: change to authoritative
-            if (pickup.quantity > req.data.round.players.length * app.evolution.config.rewardItemAmountPerLegitPlayer * 2) {
-              log(pickup.quantity, app.evolution.config.rewardItemAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
+            if (pickup.quantity > req.data.round.players.length * app.db.evolution.config.rewardItemAmountPerLegitPlayer * 2) {
+              log(pickup.quantity, app.db.evolution.config.rewardItemAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
               throw new Error('Big problem with item reward amount')
             }
 
-            if (pickup.quantity > app.evolution.config.rewardItemAmountMax) {
-              log(pickup.quantity, app.evolution.config.rewardItemAmountMax)
+            if (pickup.quantity > app.db.evolution.config.rewardItemAmountMax) {
+              log(pickup.quantity, app.db.evolution.config.rewardItemAmountMax)
               throw new Error('Big problem with item reward amount 2')
             }
 
@@ -688,7 +688,7 @@ export async function connectRealm(app, realm) {
 
             user.lifetimeRewards.runes[runeSymbol] += pickup.quantity
 
-            app.evolution.config.itemRewards.runes[runeSymbol.toLowerCase()] -= pickup.quantity
+            app.db.evolution.config.itemRewards.runes[runeSymbol.toLowerCase()] -= pickup.quantity
 
             app.oracle.rewarded.runes.week[runeSymbol.toLowerCase()] += pickup.quantity
           } else {
@@ -1116,16 +1116,16 @@ export async function monitorEvolutionRealms(app) {
     app.realm.emitAll = emitAll.bind(null, app)
   }
 
-  if (!app.evolution.config.rewardWinnerAmountPerLegitPlayerQueued) {
-    app.evolution.config.rewardWinnerAmountPerLegitPlayerQueued = app.evolution.config.rewardWinnerAmountPerLegitPlayer
+  if (!app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued) {
+    app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued = app.db.evolution.config.rewardWinnerAmountPerLegitPlayer
   }
 
-  if (!app.evolution.config.rewardWinnerAmountMaxQueued) {
-    app.evolution.config.rewardWinnerAmountMaxQueued = app.evolution.config.rewardWinnerAmountMax
+  if (!app.db.evolution.config.rewardWinnerAmountMaxQueued) {
+    app.db.evolution.config.rewardWinnerAmountMaxQueued = app.db.evolution.config.rewardWinnerAmountMax
   }
 
-  if (!app.evolution.config.itemRewards) {
-    app.evolution.config.itemRewards = {
+  if (!app.db.evolution.config.itemRewards) {
+    app.db.evolution.config.itemRewards = {
       "runes": [
         {
           "type": "rune",
@@ -1222,8 +1222,8 @@ export async function monitorEvolutionRealms(app) {
     }
   }
 
-  if (!app.evolution.config.itemRewardsQueued) {
-    app.evolution.config.itemRewardsQueued = app.evolution.config.itemRewards
+  if (!app.db.evolution.config.itemRewardsQueued) {
+    app.db.evolution.config.itemRewardsQueued = app.db.evolution.config.itemRewards
   }
 
   await connectRealms(app)
