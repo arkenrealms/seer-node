@@ -59,7 +59,7 @@ export async function getAllMarketEvents(app, retry = false) {
         }
 
         if (e.name === 'ListTimelocked') {
-          const { seller, buyer, tokenId, price } = e.args
+          const { seller, buyer, tokenId, price, earliestBuyTime } = e.args
 
           let trade = app.db.trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString())
 
@@ -79,7 +79,7 @@ export async function getAllMarketEvents(app, retry = false) {
             trade.createdAt = new Date().getTime()
             trade.updatedAt = new Date().getTime()
             trade.blockNumber = logInfo.blockNumber
-            trade.releaseAt = logInfo.earliestBuyTime
+            trade.releaseAt = earliestBuyTime
             trade.item = { id: decodedItem.id, name: decodedItem.name }
             // trade.item = decodeItem(trade.tokenId)
 
