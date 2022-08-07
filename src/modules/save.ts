@@ -1,5 +1,8 @@
+import { log } from '@rune-backend-sdk/util'
 
 async function fastSaves(app) {
+  log('[Save] Fast save')
+
   try {
     setTimeout(async () => await app.db.saveTrades(), 1 * 1000)
     setTimeout(async () => await app.db.saveFarms(), 25 * 1000)
@@ -14,6 +17,8 @@ async function fastSaves(app) {
 }
 
 async function slowSaves(app) {
+  log('[Save] Slow save')
+
   try {
     setTimeout(async () => await app.db.saveTradesEvents(), 5 * 1000)
     setTimeout(async () => await app.db.saveItemsEvents(), 10 * 1000)

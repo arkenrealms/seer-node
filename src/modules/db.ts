@@ -123,22 +123,17 @@ export function initDb(app) {
 
   app.db.saveOracle = async () => {
     log('Saving: oracle')
-    jetpack.write(path.resolve('./db/oracle.json'), beautify(removeDupes(app.db.oracle), null, 2, 100), { atomic: true })
+    jetpack.write(path.resolve('./db/oracle.json'), beautify(app.db.oracle, null, 2, 100), { atomic: true })
   }
 
   app.db.saveEvolution = async () => {
     log('Saving: evolution')
-    jetpack.write(path.resolve('./db/evolution/config.json'), beautify(removeDupes(app.db.evolution.config), null, 2, 100), { atomic: true })
-  }
-
-  app.db.saveOprah = async () => {
-    log('Saving: oprah')
-    jetpack.write(path.resolve('./db/oprah.json'), beautify(removeDupes(app.db.oprah), null, 2, 100), { atomic: true })
+    jetpack.write(path.resolve('./db/evolution/config.json'), beautify(app.db.evolution.config, null, 2, 100), { atomic: true })
   }
 
   app.db.saveTrades = async () => {
     log('Saving: trades')
-    jetpack.write(path.resolve('./db/trades.json'), beautify(removeDupes(app.db.trades), null, 2, 100), { atomic: true })
+    jetpack.write(path.resolve('./db/trades.json'), beautify(app.db.trades, null, 2, 100), { atomic: true }) // removeDupes(
   }
 
   app.db.saveTradesEvents = async () => {
