@@ -530,6 +530,8 @@ export async function connectRealm(app, realm) {
       log('SaveRoundRequest', realm.key, req)
 
       if (!await isValidRequest(app.web3, req) && app.db.evolution.modList.includes(req.signature.address)) {
+        log('Round invalid')
+
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
           data: { status: 0, message: 'Invalid signature' }
@@ -538,6 +540,8 @@ export async function connectRealm(app, realm) {
       }
 
       if (!req.data.lastClients) {
+        log('Round no clients')
+
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
           data: { status: 0, message: 'Error processing' }
@@ -548,7 +552,7 @@ export async function connectRealm(app, realm) {
       if (req.data.round.winners.length === 0) {
         realm.roundId += 1
 
-        log('Round saved')
+        log('Round skipped')
 
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
