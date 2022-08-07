@@ -199,7 +199,7 @@ async function init() {
         name: 'monitorOracle',
         instance: monitorOracle,
         async: false,
-        timeout: 5 * 60 * 1000
+        timeout: 0 * 1000
       },
       {
         name: 'getAllMarketEvents',
