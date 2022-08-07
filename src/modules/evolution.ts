@@ -694,7 +694,7 @@ export async function connectRealm(app, realm) {
 
             app.db.evolution.config.itemRewards.runes[runeSymbol.toLowerCase()] -= pickup.quantity
 
-            app.oracle.rewarded.runes.week[runeSymbol.toLowerCase()] += pickup.quantity
+            app.db.oracle.rewarded.runes.week[runeSymbol.toLowerCase()] += pickup.quantity
           } else {
             user.rewards.items[pickup.id] = {
               name: pickup.name,
@@ -794,7 +794,7 @@ export async function connectRealm(app, realm) {
 
             user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
 
-            app.oracle.rewarded.runes.week['zod'] += rewardWinnerMap[index]
+            app.db.oracle.rewarded.runes.week['zod'] += rewardWinnerMap[index]
 
             app.games.evolution.global.leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 

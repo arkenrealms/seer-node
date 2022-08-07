@@ -48,7 +48,7 @@ export async function getAllItemEvents(app, retry = false) {
 
             for (const runeId of decodedItem.recipe.requirement) {
               const runeSymbol = RuneNames(runeId).toLowerCase()
-              app.oracle.income.runes.week[runeSymbol] += 1
+              app.db.oracle.income.runes.week[runeSymbol] += 1
             }
 
             if (itemData.perfection === 1) {

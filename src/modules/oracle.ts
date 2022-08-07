@@ -11,8 +11,8 @@ async function calculateGameRewards(app) {
   let rewardWinnerAmountMax = 0
 
   // Set the round reward based on vault zod income in last 1 week, and the desired average player count for 2016 rounds per week
-  rewardWinnerAmountMax = (app.oracle.income.week.runes.zod * app.oracle.incomeRewarded) / app.oracle.roundsPerWeek / app.oracle.estimatedActivePlayerCount / app.oracle.consolidationPrizeMultiplier * app.oracle.boostMultiplier
-  rewardWinnerAmountPerLegitPlayer = rewardWinnerAmountMax / app.oracle.estimatedActivePlayerCount
+  rewardWinnerAmountMax = (app.db.oracle.income.week.runes.zod * app.db.oracle.incomeRewarded) / app.db.oracle.roundsPerWeek / app.db.oracle.estimatedActivePlayerCount / app.db.oracle.consolidationPrizeMultiplier * app.db.oracle.boostMultiplier
+  rewardWinnerAmountPerLegitPlayer = rewardWinnerAmountMax / app.db.oracle.estimatedActivePlayerCount
 
   // Round to the nearest 0.005
   rewardWinnerAmountPerLegitPlayer = parseFloat((Math.ceil(rewardWinnerAmountPerLegitPlayer * 200) / 200).toFixed(3))
@@ -36,11 +36,11 @@ async function calculateGameRewards(app) {
   }
 
   // Set the rune rewards based on vault rune income in last 1 week
-  for (const rune of app.oracle.income.runes) {
+  for (const rune of app.db.oracle.income.runes) {
     itemRewards.runes.push({
       type: 'rune',
       symbol: rune,
-      quantity: app.oracle.income.week.runes[rune] * app.oracle.incomeRewarded
+      quantity: app.db.oracle.income.week.runes[rune] * app.db.oracle.incomeRewarded
     })
   }
 
@@ -51,47 +51,49 @@ async function calculateGameRewards(app) {
 }
 
 async function runOracle(app) {
+  log('[Oracle] Running')
+
   try {
     const now = new Date().getTime()
 
-    if (now > app.oracle.lastYearDate + (7 * 24 * 60 * 60 * 1000)) {
-      app.oracle.lastYearDate = now
+    if (now > app.db.oracle.lastYearDate + (7 * 24 * 60 * 60 * 1000)) {
+      app.db.oracle.lastYearDate = now
 
-      app.oracle.income.runes.year = {...app.oracle.defaultRunes}
-      app.oracle.rewarded.runes.year = {...app.oracle.defaultRunes}
+      app.db.oracle.income.runes.year = {...app.db.oracle.defaultRunes}
+      app.db.oracle.rewarded.runes.year = {...app.db.oracle.defaultRunes}
     }
 
-    if (now > app.oracle.lastMonthDate + (30 * 24 * 60 * 60 * 1000)) {
-      app.oracle.lastMonthDate = now
+    if (now > app.db.oracle.lastMonthDate + (30 * 24 * 60 * 60 * 1000)) {
+      app.db.oracle.lastMonthDate = now
 
-      for (const rune of Object.keys(app.oracle.income.runes.month)) {
-        app.oracle.income.runes.year[rune] += app.oracle.income.runes.month[rune]
+      for (const rune of Object.keys(app.db.oracle.income.runes.month)) {
+        app.db.oracle.income.runes.year[rune] += app.db.oracle.income.runes.month[rune]
       }
 
-      for (const rune of Object.keys(app.oracle.rewarded.runes.month)) {
-        app.oracle.rewarded.runes.year[rune] += app.oracle.rewarded.runes.month[rune]
+      for (const rune of Object.keys(app.db.oracle.rewarded.runes.month)) {
+        app.db.oracle.rewarded.runes.year[rune] += app.db.oracle.rewarded.runes.month[rune]
       }
 
-      app.oracle.income.runes.month = {...app.oracle.defaultRunes}
-      app.oracle.rewarded.runes.month = {...app.oracle.defaultRunes}
+      app.db.oracle.income.runes.month = {...app.db.oracle.defaultRunes}
+      app.db.oracle.rewarded.runes.month = {...app.db.oracle.defaultRunes}
     }
   
-    if (now > app.oracle.lastWeekDate + (365 * 24 * 60 * 60 * 1000)) {
-      app.oracle.lastWeekDate = now
+    if (now > app.db.oracle.lastWeekDate + (365 * 24 * 60 * 60 * 1000)) {
+      app.db.oracle.lastWeekDate = now
 
-      for (const rune of Object.keys(app.oracle.income.runes.week)) {
-        app.oracle.income.runes.month[rune] += app.oracle.income.runes.week[rune]
+      for (const rune of Object.keys(app.db.oracle.income.runes.week)) {
+        app.db.oracle.income.runes.month[rune] += app.db.oracle.income.runes.week[rune]
       }
 
-      for (const rune of Object.keys(app.oracle.rewarded.runes.week)) {
-        app.oracle.rewarded.runes.month[rune] += app.oracle.rewarded.runes.week[rune]
+      for (const rune of Object.keys(app.db.oracle.rewarded.runes.week)) {
+        app.db.oracle.rewarded.runes.month[rune] += app.db.oracle.rewarded.runes.week[rune]
       }
 
       await calculateGameRewards(app)
 
       // Reset the rune values to zero
-      app.oracle.income.runes.week = {...app.oracle.defaultRunes}
-      app.oracle.rewarded.runes.week = {...app.oracle.defaultRunes}
+      app.db.oracle.income.runes.week = {...app.db.oracle.defaultRunes}
+      app.db.oracle.rewarded.runes.week = {...app.db.oracle.defaultRunes}
     }
   } catch(e) {
     log('Error', e)
@@ -101,7 +103,7 @@ async function runOracle(app) {
 }
 
 export async function monitorOracle(app) {
-  if (!app.oracle) {
+  if (!app.db.oracle) {
     const now = new Date().getTime()
   
     const defaultRunes = {
@@ -140,7 +142,7 @@ export async function monitorOracle(app) {
       "zod": 0,
     }
   
-    app.oracle = {
+    app.db.oracle = {
       incomeRewarded: 0.25,
       roundsPerWeek: 7 * 24 * 60 / 5,
       estimatedActivePlayerCount: 10,
