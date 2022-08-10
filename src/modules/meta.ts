@@ -33,7 +33,7 @@ export async function monitorMeta(app) {
     jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText), { atomic: true })
   
     for (const _item of itemData[ItemsMainCategoriesType.OTHER]) {
-      const item = _item as any
+      const item = JSON.parse(JSON.stringify(_item)) as any
       item.icon = item.icon.replace('undefined', 'https://rune.game/')
 
       if (item.recipe?.requirement) {
