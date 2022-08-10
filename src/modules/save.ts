@@ -8,7 +8,7 @@ async function fastSaves(app) {
     setTimeout(async () => await app.db.saveFarms(), 25 * 1000)
     setTimeout(async () => await app.db.saveStats(), 35 * 1000)
     setTimeout(async () => await app.db.saveRunes(), 40 * 1000)
-    setTimeout(async () => await app.db.saveConfig(), 50 * 1000)
+    setTimeout(async () => await app.db.saveOracle(), 45 * 1000)
   } catch(e) {
     console.log('Save error', e)
   }
@@ -27,15 +27,15 @@ async function slowSaves(app) {
     setTimeout(async () => await app.db.saveGuilds(), 30 * 1000)
     setTimeout(async () => await app.db.saveHistorical(), 45 * 1000)
     setTimeout(async () => await app.db.saveLeaderboard(), 2 * 60 * 1000)
-    setTimeout(async () => await app.db.saveOracle(), 2.5 * 60 * 1000)
     setTimeout(async () => await app.db.saveEvolution(), 3 * 60 * 1000)
+    setTimeout(async () => await app.db.saveConfig(), 3.5 * 60 * 1000)
     // setTimeout(async () => await app.db.saveApp(), 1 * 1000)
     // setTimeout(async () => await app.db.updateGit(), 1 * 1000)
   } catch(e) {
     console.log('Save error', e)
   }
 
-  setTimeout(() => slowSaves(app), 10 * 60 * 1000)
+  setTimeout(() => slowSaves(app), 5 * 60 * 1000)
 }
 
 export async function monitorSaves(app) {

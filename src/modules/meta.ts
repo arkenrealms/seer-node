@@ -2,37 +2,38 @@ import path from 'path'
 import * as ethers from 'ethers'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
+import { log } from '@rune-backend-sdk/util'
 import { achievementData } from '@rune-backend-sdk/data/achievements'
 import { ItemsMainCategoriesType } from '@rune-backend-sdk/data/items.type'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 
 export async function monitorMeta(app) {
   try {
-    console.log('Saving achievement data')
+    log('Saving achievement data')
     jetpack.write(path.resolve('./db/achievements.json'), JSON.stringify(achievementData), { atomic: true })
   
-    console.log('Saving item data')
+    log('Saving item data')
     jetpack.write(path.resolve('./db/items.json'), JSON.stringify(itemData.runeword), { atomic: true })
   
-    console.log('Saving item attribute data')
+    log('Saving item attribute data')
     jetpack.write(path.resolve('./db/itemAttributes.json'), JSON.stringify(ItemAttributes), { atomic: true })
   
-    // console.log('Saving skill data')
+    // log('Saving skill data')
     // jetpack.write(path.resolve('./db/skills.json'), JSON.stringify(SkillNames), { atomic: true })
   
-    console.log('Saving class data')
+    log('Saving class data')
     jetpack.write(path.resolve('./db/classes.json'), JSON.stringify(ClassNames), { atomic: true })
   
-    console.log('Saving item rarity data')
+    log('Saving item rarity data')
     jetpack.write(path.resolve('./db/itemRarity.json'), JSON.stringify(ItemRarity), { atomic: true })
   
-    console.log('Saving item type data')
+    log('Saving item type data')
     jetpack.write(path.resolve('./db/itemTypes.json'), JSON.stringify(ItemTypeToText), { atomic: true })
   
-    console.log('Saving item slot data')
+    log('Saving item slot data')
     jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText), { atomic: true })
   
-    console.log('Saving item meta')
+    log('Saving item meta')
 
     for (const _item of itemData[ItemsMainCategoriesType.OTHER]) {
       const item = JSON.parse(JSON.stringify(_item)) as any
@@ -375,7 +376,7 @@ export async function monitorMeta(app) {
       //   delete item.meta
       // }
 
-      // console.log('Saving item meta', itemJson.id)
+      // log('Saving item meta', itemJson.id)
 
       jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), JSON.stringify(itemJson), { atomic: true })
 
@@ -394,11 +395,11 @@ export async function monitorMeta(app) {
       //   // cid: 'QmcZ774UPRJ3Qzuyg76ayc2AFM26ZfZQai8Ub5THKmwtbF', 
       // )
 
-      // console.log(cid)
+      // log(cid)
 
     }
   } catch (e) {
-    console.log('Error', e)
+    log('Error', e)
   }
 
   setTimeout(() => monitorMeta(app), 10 * 60 * 1000)

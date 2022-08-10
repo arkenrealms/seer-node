@@ -54,7 +54,9 @@ async function monitorPlayerConnections(app) {
       await app.db.saveUser(user)
     }
 
-    log(`[delaran] Warned players: ${warnPlayers.join(', ')}`)
+    if (warnPlayers.length > 0) {
+      log(`[delaran] Warned players: ${warnPlayers.join(', ')}`)
+    }
   } catch(e) {
     log('Error in delaran', e)
   }
