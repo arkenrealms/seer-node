@@ -61,28 +61,7 @@ async function runOracle(app) {
       app.db.oracle.inflow.fundraisers.tokens.month.rxs = (1000000 + 500000 + 200000)
       app.db.oracle.inflow.fundraisers.tokens.week.rxs = (200000 + 100000)
 
-      if (!app.db.oracle.outflow.salaries) {
-        app.db.oracle.outflow.salaries = {
-          tokens: {
-            week: {...app.db.oracle.defaultTokens},
-            month: {...app.db.oracle.defaultTokens},
-            year: {...app.db.oracle.defaultTokens},
-          }
-        }
-      }
-
       app.db.oracle.outflow.salaries.tokens.week.usd = 2000
-
-      if (!app.db.oracle.inflow.investments) {
-        app.db.oracle.inflow.investments = {
-          tokens: {
-            week: {...app.db.oracle.defaultTokens},
-            month: {...app.db.oracle.defaultTokens},
-            year: {...app.db.oracle.defaultTokens},
-          }
-        }
-      }
-
       app.db.oracle.inflow.investments.tokens.week.usd = 2000
     }
 
@@ -273,5 +252,46 @@ export async function monitorOracle(app) {
     } as any
   }
 
-  setTimeout(() => runOracle(app), 0)
+
+  if (!app.db.oracle.outflow.salaries) {
+    app.db.oracle.outflow.salaries = {
+      tokens: {
+        week: {usd: 0},
+        month: {usd: 0},
+        year: {usd: 0},
+      }
+    }
+  }
+
+  if (!app.db.oracle.inflow.investments) {
+    app.db.oracle.inflow.investments = {
+      tokens: {
+        week: {usd: 0},
+        month: {usd: 0},
+        year: {usd: 0},
+      }
+    }
+  }
+
+  if (!app.db.oracle.inflow.marketFees) {
+    app.db.oracle.inflow.marketFees = {
+      tokens: {
+        week: {rxs: 0},
+        month: {rxs: 0},
+        year: {rxs: 0},
+      }
+    }
+  }
+
+  if (!app.db.oracle.inflow.characterFees) {
+    app.db.oracle.inflow.characterFees = {
+      tokens: {
+        week: {rxs: 0},
+        month: {rxs: 0},
+        year: {rxs: 0},
+      }
+    }
+  }
+
+  setTimeout(() => runOracle(app), 1 * 60 * 1000)
 }
