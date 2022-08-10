@@ -72,6 +72,18 @@ async function runOracle(app) {
       }
 
       app.db.oracle.outflow.salaries.tokens.week.usd = 2000
+
+      if (!app.db.oracle.inflow.investments) {
+        app.db.oracle.inflow.investments = {
+          tokens: {
+            week: {...app.db.oracle.defaultTokens},
+            month: {...app.db.oracle.defaultTokens},
+            year: {...app.db.oracle.defaultTokens},
+          }
+        }
+      }
+
+      app.db.oracle.inflow.investments.tokens.week.usd = 2000
     }
 
     if (now > app.db.oracle.lastYearDate + (7 * 24 * 60 * 60 * 1000)) {
