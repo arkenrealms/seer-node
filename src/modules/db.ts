@@ -420,7 +420,7 @@ export function initDb(app) {
       item.icon = item.icon.replace('undefined', 'https://rune.game/')
 
       if (item.recipe) {
-        item.recipe.requirement = item.recipe.requirement.map(r => ({...r, id: RuneNames[r.id]}))
+        item.recipe.requirement = item.recipe.requirement.map(r => ({...r, symbol: RuneNames[r.id]}))
       }
 
       item.branches[1].attributes.map(a => ({
