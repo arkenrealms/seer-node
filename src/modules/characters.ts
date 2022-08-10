@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import { getHighestId, log } from '@rune-backend-sdk/util'
+import { getHighestId, log, toShort } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 
 export async function getAllCharacterEvents(app, retry = false) {
@@ -41,7 +41,10 @@ export async function getAllCharacterEvents(app, retry = false) {
         await app.db.saveUserCharacter(user, characterData)
         // app.db.saveTokenTransfer(app.db.loadToken(characterData.tokenId), characterData)
 
-        if (from !== '0x0000000000000000000000000000000000000000') {
+        if (from === '0x0000000000000000000000000000000000000000') {
+          log('8888', logInfo, e)
+          // app.db.oracle.inflow.characterFees.tokens.week.rxs += toShort(price)
+        } else {
           await app.db.saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
         }
 

@@ -273,5 +273,5 @@ export async function monitorOracle(app) {
     } as any
   }
 
-  setTimeout(() => runOracle(app), 1 * 60 * 1000)
+  setTimeout(() => runOracle(app), 0)
 }

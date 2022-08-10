@@ -174,6 +174,8 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
             await app.db.saveItemTrade(item, specificTrade)
             await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: buyer, item: specificTrade.item })
+
+            app.db.oracle.inflow.marketFees.tokens.week.rxs += toShort(price) * 0.05
             
             log('Buy', specificTrade)
           }
