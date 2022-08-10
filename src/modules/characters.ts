@@ -42,8 +42,8 @@ export async function getAllCharacterEvents(app, retry = false) {
         // app.db.saveTokenTransfer(app.db.loadToken(characterData.tokenId), characterData)
 
         if (from === '0x0000000000000000000000000000000000000000') {
-          log('8888', logInfo, e)
-          // app.db.oracle.inflow.characterFees.tokens.week.rxs += toShort(price)
+          // log('8888', logInfo, e)
+          app.db.oracle.inflow.characterFees.tokens.week.rxs += app.config.characterMintCost
         } else {
           await app.db.saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
         }
