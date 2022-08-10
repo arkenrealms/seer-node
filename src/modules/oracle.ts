@@ -149,48 +149,48 @@ async function runOracle(app) {
 }
 
 export async function monitorOracle(app) {
+  const defaultTokens = {
+    "el": 0,
+    "tir": 0,
+    "eld": 0,
+    "nef": 0,
+    "ith": 0,
+    "tal": 0,
+    "ort": 0,
+    "thul": 0,
+    "amn": 0,
+    "bnb": 0,
+    "sol": 0,
+    "wbnb": 0,
+    "shael": 0,
+    "dol": 0,
+    "hel": 0,
+    "io": 0,
+    "lum": 0,
+    "ko": 0,
+    "fal": 0,
+    "lem": 0,
+    "pul": 0,
+    "um": 0,
+    "mal": 0,
+    "ist": 0,
+    "gul": 0,
+    "vex": 0,
+    "ohm": 0,
+    "lo": 0,
+    "sur": 0,
+    "ber": 0,
+    "jah": 0,
+    "cham": 0,
+    "zod": 0,
+    "usd": 0,
+    "rxs": 0,
+    "rune": 0
+  }
+  
   if (!app.db.oracle) {
     const now = new Date().getTime()
-  
-    const defaultTokens = {
-      "el": 0,
-      "tir": 0,
-      "eld": 0,
-      "nef": 0,
-      "ith": 0,
-      "tal": 0,
-      "ort": 0,
-      "thul": 0,
-      "amn": 0,
-      "bnb": 0,
-      "sol": 0,
-      "wbnb": 0,
-      "shael": 0,
-      "dol": 0,
-      "hel": 0,
-      "io": 0,
-      "lum": 0,
-      "ko": 0,
-      "fal": 0,
-      "lem": 0,
-      "pul": 0,
-      "um": 0,
-      "mal": 0,
-      "ist": 0,
-      "gul": 0,
-      "vex": 0,
-      "ohm": 0,
-      "lo": 0,
-      "sur": 0,
-      "ber": 0,
-      "jah": 0,
-      "cham": 0,
-      "zod": 0,
-      "usd": 0,
-      "rxs": 0,
-      "rune": 0
-    }
-  
+
     app.db.oracle = {
       incomeRewarded: 0.25,
       roundsPerWeek: 7 * 24 * 60 / 5,
@@ -289,6 +289,26 @@ export async function monitorOracle(app) {
         week: {rxs: 0},
         month: {rxs: 0},
         year: {rxs: 0},
+      }
+    }
+  }
+
+  if (!app.db.oracle.outflow.affiliates) {
+    app.db.oracle.outflow.affiliates = {
+      tokens: {
+        week: {...defaultTokens},
+        month: {...defaultTokens},
+        year: {...defaultTokens},
+      }
+    }
+  }
+
+  if (!app.db.oracle.outflow.giveaways) {
+    app.db.oracle.outflow.giveaways = {
+      tokens: {
+        week: {...defaultTokens},
+        month: {...defaultTokens},
+        year: {...defaultTokens},
       }
     }
   }
