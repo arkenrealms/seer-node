@@ -652,7 +652,7 @@ export function initDb(app) {
 
       for (const realmKey of Object.keys(target)) {
         const realm = target[realmKey]
-        log(realm)
+        // log(realm)
         // Calculate totals
 
         //                 user.evolution.servers[server.key].winRatio = rounds > 5 ? wins / rounds : 0
@@ -664,7 +664,7 @@ export function initDb(app) {
         if (!realm.leaderboard.raw.names) realm.leaderboard.raw.names = {}
 
         for (const statKey of ['monetary', 'kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'pickups', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
-          log(statKey)
+          // log(statKey)
 
           let results = []
 
@@ -677,7 +677,7 @@ export function initDb(app) {
               continue
             }
 
-            log(address)
+            // log(address)
 
             results.push({
               name: realm.leaderboard.names[address],
@@ -693,7 +693,7 @@ export function initDb(app) {
           realm.leaderboard[statKey][0].data = []
 
           for (const result of results) {
-            log(result)
+            // log(result)
             realm.leaderboard[statKey][0].data.push({
               name: result.name,
               address: result.address,
@@ -770,6 +770,42 @@ export function initDb(app) {
       name: "The Destroyers",
       description: `After the destruction of the Worldstone, these dark souls serve Hell in the destruction of all living things.`,
       icon: 'https://rune.game/images/teams/the-destroyers.png',
+      backgroundColor: '#fff',
+      discord: {
+        role: '',
+        channel: ''
+      }
+    },
+    6: {
+      id: 6,
+      name: 'Drocos Legion',
+      description:
+        'Dragon riders and defenders, this elite group seeks to defend the few remaining dragons from the onslaught of humanoids.',
+      icon: 'https://rune.game/images/teams/drocos-legion.png',
+      backgroundColor: '#fff',
+      discord: {
+        role: '',
+        channel: ''
+      }
+    },
+    7: {
+      id: 7,
+      name: 'Heden Saf',
+      description:
+        'A group of clerics and miracle-workers dedicated to the Cull: the eradication of all non-energy users in Haerra.',
+      icon: 'https://rune.game/images/teams/heden-saf.png',
+      backgroundColor: '#fff',
+      discord: {
+        role: '',
+        channel: ''
+      }
+    },
+    8: {
+      id: 8,
+      name: 'Radiant Viziers',
+      description:
+        'The Radiant Viziers are a group of expert fighters dedicated to Relia, with bastions of influence all over Haerra.',
+      icon: 'https://rune.game/images/teams/radiant-viziers.png',
       backgroundColor: '#fff',
       discord: {
         role: '',
