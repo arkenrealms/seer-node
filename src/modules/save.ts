@@ -39,6 +39,6 @@ async function slowSaves(app) {
 }
 
 export async function monitorSaves(app) {
-  setTimeout(() => fastSaves(app), 2 * 60 * 1000)
-  setTimeout(() => slowSaves(app), 5 * 60 * 1000)
+  setTimeout(() => fastSaves(app), 0)
+  setTimeout(() => slowSaves(app), 2 * 60 * 1000)
 }

@@ -48,9 +48,9 @@ export async function getAllItemEvents(app, retry = false) {
 
             if (Array.isArray(decodedItem.recipe?.requirement)) {
               for (const rune of decodedItem.recipe.requirement) {
-                console.log(rune, decodedItem.recipe.requirement, RuneNames)
+                // console.log(rune, decodedItem.recipe.requirement, RuneNames)
                 const runeSymbol = RuneNames[rune.id].toLowerCase()
-                app.db.oracle.income.runes.week[runeSymbol] += 1
+                app.db.oracle.inflow.crafting.tokens.week[runeSymbol] += 1
               }
             }
 
