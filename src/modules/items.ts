@@ -47,7 +47,7 @@ export async function getAllItemEvents(app, retry = false) {
             token.createdAt = itemData.createdAt
 
             for (const runeId of decodedItem.recipe.requirement) {
-              const runeSymbol = RuneNames(runeId).toLowerCase()
+              const runeSymbol = RuneNames[runeId].toLowerCase()
               app.db.oracle.income.runes.week[runeSymbol] += 1
             }
 
