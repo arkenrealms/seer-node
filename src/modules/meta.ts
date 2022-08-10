@@ -32,6 +32,8 @@ export async function monitorMeta(app) {
     console.log('Saving item slot data')
     jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText), { atomic: true })
   
+    console.log('Saving item meta')
+
     for (const _item of itemData[ItemsMainCategoriesType.OTHER]) {
       const item = JSON.parse(JSON.stringify(_item)) as any
       item.icon = item.icon.replace('undefined', 'https://rune.game/')
@@ -373,7 +375,7 @@ export async function monitorMeta(app) {
       //   delete item.meta
       // }
 
-      console.log('Saving item meta', itemJson.id)
+      // console.log('Saving item meta', itemJson.id)
 
       jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), JSON.stringify(itemJson), { atomic: true })
 
