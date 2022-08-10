@@ -200,6 +200,7 @@ export async function monitorOracle(app) {
       lastWeekDate: now,
       lastMonthDate: now,
       lastYearDate: now,
+      defaultTokens: {...defaultTokens},
       totals: {
         inflow: {
           tokens: {
@@ -226,9 +227,9 @@ export async function monitorOracle(app) {
         },
         fundraisers: {
           tokens: {
-            week: {...defaultTokens},
-            month: {...defaultTokens},
-            year: {...defaultTokens},
+            week: {usd: 0, rxs: 0},
+            month: {usd: 0, rxs: 0},
+            year: {usd: 0, rxs: 0},
           }
         }
       },
@@ -247,8 +248,7 @@ export async function monitorOracle(app) {
             year: {...defaultTokens},
           }
         }
-      },
-      defaultTokens: {...defaultTokens}
+      }
     } as any
   }
 
