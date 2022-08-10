@@ -415,7 +415,7 @@ export function initDb(app) {
 
   app.db.updateTokenMeta = async (token) => {
     try {
-      const item = decodeItem(token.id)
+      const item = JSON.parse(JSON.stringify(decodeItem(token.id)))
 
       item.icon = item.icon.replace('undefined', 'https://rune.game/')
 
