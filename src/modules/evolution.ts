@@ -917,70 +917,70 @@ export async function connectRealms(app) {
             all: [
               {
                 name: 'Overall',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             monetary: [
               {
                 name: 'Earnings',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             wins: [
               {
                 name: 'Wins',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             rounds: [
               {
                 name: 'Rounds',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             rewards: [
               {
                 name: 'Rewards',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             points: [
               {
                 name: 'Points',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             kills: [
               {
                 name: 'Kills',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             deaths: [
               {
                 name: 'Deaths',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             powerups: [
               {
                 name: 'Powerups',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             evolves: [
               {
                 name: 'Evolves',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
@@ -1007,70 +1007,70 @@ export async function connectRealms(app) {
             all: [
               {
                 name: 'Overall',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             monetary: [
               {
                 name: 'Earnings',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             wins: [
               {
                 name: 'Wins',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             rounds: [
               {
                 name: 'Rounds',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             rewards: [
               {
                 name: 'Rewards',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             points: [
               {
                 name: 'Points',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             kills: [
               {
                 name: 'Kills',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             deaths: [
               {
                 name: 'Deaths',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             powerups: [
               {
                 name: 'Powerups',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],
             evolves: [
               {
                 name: 'Evolves',
-                count: 10,
+                count: 1000,
                 data: []
               }
             ],

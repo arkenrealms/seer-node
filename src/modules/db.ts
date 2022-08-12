@@ -686,9 +686,9 @@ export function initDb(app) {
             })
           }
 
-          results = results.filter(a => !!a.count).sort((a, b) => b.count - a.count).slice(0, 50)
+          results = results.filter(a => !!a.count).sort((a, b) => b.count - a.count)
 
-          if (!realm.leaderboard[statKey]) realm.leaderboard[statKey] = [{name: statKey, count: 50, data: []}]
+          if (!realm.leaderboard[statKey]) realm.leaderboard[statKey] = [{name: statKey, count: 1000, data: []}]
 
           realm.leaderboard[statKey][0].data = []
 
