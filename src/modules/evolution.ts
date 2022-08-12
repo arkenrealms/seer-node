@@ -625,7 +625,7 @@ export async function connectRealm(app, realm) {
         9: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
       }
 
-      const users = []
+      // const users = []
 
       // Iterate the winners, determine the winning amounts, validate, save to user rewards
       // Iterate all players and save their log / stats
@@ -714,7 +714,10 @@ export async function connectRealm(app, realm) {
 
         user.lastGamePlayed = now
 
-        users.push(user)
+        if (!user.evolution.hashes) user.evolution.hashes = []
+        if (!user.evolution.hashes.includes(user.hash)) user.evolution.hashes.push(user.hash)
+
+        // users.push(user)
 
         if (!app.games.evolution.realms[realm.key].leaderboard.names) app.games.evolution.realms[realm.key].leaderboard.names = {}
 
@@ -771,6 +774,7 @@ export async function connectRealm(app, realm) {
         app.games.evolution.global.leaderboard.raw.evolves[user.address] += player.evolves
         app.games.evolution.global.leaderboard.raw.rewards[user.address] += player.rewards
         app.games.evolution.global.leaderboard.raw.pickups[user.address] += player.pickups.length
+
         if (winners.find(winner => winner.address === player.address)) {
           const index = winners.findIndex(winner => winner.address === player.address)
           // const player = req.data.round.winners[index]
