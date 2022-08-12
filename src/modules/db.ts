@@ -1148,18 +1148,29 @@ export function initDb(app) {
 
     await app.db.saveUser(toUser)
 
-    app.db.cubeHolders = app.db.cubeHolders.filter(h => h.address.toLowerCase() !== from.toLowerCase())
+    // app.db.cubeHolders = app.db.cubeHolders.filter(h => h.address.toLowerCase() !== from.toLowerCase())
 
-    if (!app.db.cubeHolders.find(holder => holder.address.toLowerCase() === to.toLowerCase())) {
+    const oldPatron = app.db.cubeHolders.find(holder => holder.address.toLowerCase() === from.toLowerCase())
+
+    if (oldPatron) {
+      oldPatron.isCubeHolder = false
+    }
+
+    const newPatron = app.db.cubeHolders.find(holder => holder.address.toLowerCase() === to.toLowerCase())
+
+    if (newPatron) {
+      newPatron.isCubeHolder = true
+    } else {
       app.db.cubeHolders.push({
         address: to,
         name: toUser.username,
+        isCubeHolder: true,
         rank: 1
       })
     }
 
     try {
-      await jetpack.writeAsync(path.resolve(`./db/cube-holders.json`), beautify(app.db.cubeHolders, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/patrons.json`), beautify(app.db.cubeHolders, null, 2))
     } catch(e) {
       log('Couldnt save games', e)
     }
