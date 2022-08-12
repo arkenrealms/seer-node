@@ -101,9 +101,11 @@ export async function getAllMarketEvents(app, retry = false) {
 
         if (e.name === 'Update') {
           const { seller, buyer, tokenId, price } = e.args
+console.log(seller.toLowerCase(), tokenId.toString())
 
           const specificTrades = app.db.trades.find(t => t.seller.toLowerCase() === seller.toLowerCase() && t.tokenId === tokenId.toString() && t.status === 'available' && t.blockNumber < logInfo.blockNumber)
 
+          console.log('trades', specificTrades)
           for (const specificTrade of specificTrades) {
             const decodedItem = decodeItem(tokenId.toString())
 
@@ -113,7 +115,7 @@ export async function getAllMarketEvents(app, retry = false) {
             specificTrade.blockNumber = logInfo.blockNumber
             specificTrade.item = { id: decodedItem.id, name: decodedItem.name }
             // specificTrade.item = decodeItem(specificTrade.tokenId)
-
+console.log('trying to save')
             const item = app.db.loadItem(specificTrade.item.id)
 
             await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
