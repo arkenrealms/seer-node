@@ -57,6 +57,10 @@ export async function getAllItemEvents(app, retry = false) {
             if (itemData.perfection === 1) {
               await app.notices.add('mythic_crafted', { address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, message: `${user.username} found a mythic ${decodedItem.name}!` })
             }
+          } else {
+            if (decodedItem.id === 1205) {
+              await app.db.saveCubeTransfer(from, userAddress)
+            }
           }
 
           await app.db.saveUserItem(user, itemData)

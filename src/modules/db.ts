@@ -34,6 +34,7 @@ export function initDb(app) {
     },
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
     oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json'),
+    cubeHolders: jetpack.read(path.resolve('./db/cube-holders.json'), 'json') || [],
     oprah: jetpack.read(path.resolve('./db/oprah.json'), 'json') || {},
     farms: jetpack.read(path.resolve('./db/farms.json'), 'json') || {},
     runes: jetpack.read(path.resolve('./db/runes.json'), 'json') || {},
@@ -1128,6 +1129,37 @@ export function initDb(app) {
   app.db.saveGames = async (games) => {
     try {
       await jetpack.writeAsync(path.resolve(`./db/games.json`), beautify(games, null, 2))
+    } catch(e) {
+      log('Couldnt save games', e)
+    }
+  }
+
+  app.db.saveCubeTransfer = async (from, to) => {
+    const fromUser = await app.db.loadUser(from)
+
+    fromUser.isCubeHolder = false
+
+    await app.db.saveUser(fromUser)
+
+
+    const toUser = await app.db.loadUser(from)
+
+    toUser.isCubeHolder = true
+
+    await app.db.saveUser(toUser)
+
+    app.db.cubeHolders = app.db.cubeHolders.filter(h => h.address.toLowerCase() !== from.toLowerCase())
+
+    if (!app.db.cubeHolders.find(holder => holder.address.toLowerCase() === to.toLowerCase())) {
+      app.db.cubeHolders.push({
+        address: to,
+        name: toUser.username,
+        rank: 1
+      })
+    }
+
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/cube-holders.json`), beautify(app.db.cubeHolders, null, 2))
     } catch(e) {
       log('Couldnt save games', e)
     }
