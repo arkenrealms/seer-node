@@ -34,7 +34,7 @@ export function initDb(app) {
     },
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
     oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json'),
-    cubeHolders: jetpack.read(path.resolve('./db/cube-holders.json'), 'json') || [],
+    patrons: jetpack.read(path.resolve('./db/patrons.json'), 'json') || [],
     oprah: jetpack.read(path.resolve('./db/oprah.json'), 'json') || {},
     farms: jetpack.read(path.resolve('./db/farms.json'), 'json') || {},
     runes: jetpack.read(path.resolve('./db/runes.json'), 'json') || {},
@@ -1148,20 +1148,20 @@ export function initDb(app) {
 
     await app.db.saveUser(toUser)
 
-    // app.db.cubeHolders = app.db.cubeHolders.filter(h => h.address.toLowerCase() !== from.toLowerCase())
+    // app.db.patrons = app.db.patrons.filter(h => h.address.toLowerCase() !== from.toLowerCase())
 
-    const oldPatron = app.db.cubeHolders.find(holder => holder.address.toLowerCase() === from.toLowerCase())
+    const oldPatron = app.db.patrons.find(holder => holder.address.toLowerCase() === from.toLowerCase())
 
     if (oldPatron) {
       oldPatron.isCubeHolder = false
     }
 
-    const newPatron = app.db.cubeHolders.find(holder => holder.address.toLowerCase() === to.toLowerCase())
+    const newPatron = app.db.patrons.find(holder => holder.address.toLowerCase() === to.toLowerCase())
 
     if (newPatron) {
       newPatron.isCubeHolder = true
     } else {
-      app.db.cubeHolders.push({
+      app.db.patrons.push({
         address: to,
         name: toUser.username,
         isCubeHolder: true,
@@ -1170,7 +1170,7 @@ export function initDb(app) {
     }
 
     try {
-      await jetpack.writeAsync(path.resolve(`./db/patrons.json`), beautify(app.db.cubeHolders, null, 2))
+      await jetpack.writeAsync(path.resolve(`./db/patrons.json`), beautify(app.db.patrons, null, 2))
     } catch(e) {
       log('Couldnt save games', e)
     }
