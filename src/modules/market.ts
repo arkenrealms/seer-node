@@ -265,6 +265,14 @@ export async function monitorMarketEvents(app) {
       }
     })
 
+    app.contracts.market.on('ListTimelocked', async () => {
+      try {
+        await app.modules.getAllMarketEvents(app)
+      } catch(e) {
+        log('Error', e)
+      }
+    })
+
     app.contracts.market.on('Update', async () => {
       try {
         await app.modules.getAllMarketEvents(app)
