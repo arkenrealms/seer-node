@@ -4,7 +4,7 @@ import jetpack, { find } from 'fs-jetpack'
 import beautify from 'json-beautify'
 import { fancyTimeFormat } from '@rune-backend-sdk/util/time'
 import md5 from 'js-md5'
-import { log } from '@rune-backend-sdk/util'
+import { log, removeDupes } from '@rune-backend-sdk/util'
 import { getClientSocket } from '@rune-backend-sdk/util/websocket'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
 import { getUsername } from '../util/getUsername'
@@ -630,7 +630,7 @@ export async function connectRealm(app, realm) {
       // Iterate the winners, determine the winning amounts, validate, save to user rewards
       // Iterate all players and save their log / stats
 
-      const removeDupes = (list) => {
+      const removeDupes2 = (list) => {
         const seen = {};
         return list.filter(function(item) {
           // console.log(item)
@@ -645,7 +645,7 @@ export async function connectRealm(app, realm) {
         })
       }
 
-      req.data.round.players = removeDupes(req.data.round.players) // [...new Set(req.data.round.players.map(obj => obj.key)) ] // 
+      req.data.round.players = removeDupes2(req.data.round.players) // [...new Set(req.data.round.players.map(obj => obj.key)) ] // 
 
       const winners = req.data.round.winners.slice(0, 10)
 
@@ -715,7 +715,9 @@ export async function connectRealm(app, realm) {
         user.lastGamePlayed = now
 
         if (!user.evolution.hashes) user.evolution.hashes = []
-        if (!user.evolution.hashes.includes(user.hash)) user.evolution.hashes.push(user.hash)
+        if (!user.evolution.hashes.includes(player.hash)) user.evolution.hashes.push(player.hash)
+
+        user.evolution.hashes = user.evolution.hashes.filter(function(item, pos) { user.evolution.hashes.indexOf(item) === pos })
 
         // users.push(user)
 
