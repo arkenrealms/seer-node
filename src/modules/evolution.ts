@@ -392,7 +392,7 @@ export async function connectRealm(app, realm) {
 
       await app.db.saveUser(user)
 
-      app.db.addBanList('evolution', { address: req.data.target, until: req.data.until })
+      app.db.addBanList('evolution', { address: req.data.target, reason: req.data.reason, until: req.data.until })
       app.db.saveBanList()
 
       app.realm.emitAll('BanUserRequest', {
