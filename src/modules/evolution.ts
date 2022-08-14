@@ -386,11 +386,9 @@ export async function connectRealm(app, realm) {
 
       const user = await app.db.loadUser(req.data.target)
 
-      if (!req.data.until) req.data.until = (new Date()).getTime() + (100 * 365 * 24 * 60 * 60) // 100 year ban by default
-
       user.isBanned = true
       user.bannedReason = req.data.reason
-      user.bannedUntil = req.data.until
+      user.bannedUntil = req.data.until ? parseInt(req.data.until) : (new Date()).getTime() + (100 * 365 * 24 * 60 * 60) // 100 year ban by default
 
       await app.db.saveUser(user)
 
