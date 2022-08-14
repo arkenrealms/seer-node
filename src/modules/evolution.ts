@@ -67,7 +67,7 @@ async function updateRealm(app, realm) {
   try {
     realm.games = []
 
-    const infoRes = await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { banList: app.db.evolution.banList, config: { } }) as any // roundId: realm.roundId 
+    const infoRes = await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
 
     if (!infoRes || infoRes.status !== 1) {
       setRealmOffline(realm)
@@ -397,7 +397,9 @@ export async function connectRealm(app, realm) {
 
       app.realm.emitAll('BanUserRequest', {
         data: {
-          target: req.data.target
+          target: req.data.target,
+          bannedUntil: user.bannedUntil,
+          bannedReason: user.bannedReason
         }
       })
       
