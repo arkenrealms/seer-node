@@ -398,6 +398,7 @@ export async function connectRealm(app, realm) {
       app.realm.emitAll('BanUserRequest', {
         data: {
           target: req.data.target,
+          createdAt: (new Date()).getTime(),
           bannedUntil: user.bannedUntil,
           bannedReason: user.bannedReason
         }
