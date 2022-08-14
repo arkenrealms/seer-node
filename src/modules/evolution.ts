@@ -67,7 +67,7 @@ async function updateRealm(app, realm) {
   try {
     realm.games = []
 
-    const infoRes = await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
+    const infoRes = await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { banList: app.db.evolution.banList, config: { } }) as any // roundId: realm.roundId 
 
     if (!infoRes || infoRes.status !== 1) {
       setRealmOffline(realm)
@@ -386,12 +386,15 @@ export async function connectRealm(app, realm) {
 
       const user = await app.db.loadUser(req.data.target)
 
+      if (!req.data.until) req.data.until = (new Date()).getTime() + (100 * 365 * 24 * 60 * 60) // 100 year ban by default
+
       user.isBanned = true
       user.bannedReason = req.data.reason
+      user.bannedUntil = req.data.until
 
       await app.db.saveUser(user)
 
-      app.db.addBanList('evolution', req.data.target)
+      app.db.addBanList('evolution', { address: req.data.target, until: req.data.until })
       app.db.saveBanList()
 
       app.realm.emitAll('BanUserRequest', {

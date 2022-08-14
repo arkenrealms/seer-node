@@ -1065,17 +1065,17 @@ export function initDb(app) {
   app.db.addBanList = (game, target) => {
     if (!app.db[game].banList) app.db[game].banList = []
 
-    if (!app.db[game].banList.includes(target)) {
+    // if (!app.db[game].banList.includes(target)) {
       app.db[game].banList.push(target)
-    }
+    // }
   }
 
   app.db.removeBanList = (game, target) => {
     if (!app.db[game].banList) app.db[game].banList = []
 
-    if (app.db[game].banList.includes(target)) {
-      app.db[game].banList = app.db[game].banList.filter(t => t !== target)
-    }
+    // if (app.db[game].banList.includes(target)) {
+      app.db[game].banList = app.db[game].banList.filter(t => t.address !== target)
+    // }
   }
 
   app.db.saveBanList = () => {
