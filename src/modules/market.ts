@@ -259,7 +259,7 @@ export async function monitorMarketEvents(app) {
   try {
     app.contracts.market.on('List', async () => {
       try {
-        await app.modules.getAllMarketEvents(app)
+        await getAllMarketEvents(app)
       } catch(e) {
         log('Error', e)
       }
@@ -267,7 +267,7 @@ export async function monitorMarketEvents(app) {
 
     app.contracts.market.on('ListTimelocked', async () => {
       try {
-        await app.modules.getAllMarketEvents(app)
+        await getAllMarketEvents(app)
       } catch(e) {
         log('Error', e)
       }
@@ -275,7 +275,7 @@ export async function monitorMarketEvents(app) {
 
     app.contracts.market.on('Update', async () => {
       try {
-        await app.modules.getAllMarketEvents(app)
+        await getAllMarketEvents(app)
       } catch(e) {
         log('Error', e)
       }
@@ -283,7 +283,7 @@ export async function monitorMarketEvents(app) {
 
     app.contracts.market.on('Delist', async () => {
       try {
-        await app.modules.getAllMarketEvents(app)
+        await getAllMarketEvents(app)
       } catch(e) {
         log('Error', e)
       }
@@ -291,7 +291,7 @@ export async function monitorMarketEvents(app) {
 
     app.contracts.market.on('Buy', async () => {
       try {
-        await app.modules.getAllMarketEvents(app)
+        await getAllMarketEvents(app)
       } catch(e) {
         log('Error', e)
       }
