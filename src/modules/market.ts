@@ -299,4 +299,6 @@ export async function monitorMarketEvents(app) {
   } catch(e) {
     log('Error', e)
   }
+
+  setTimeout(() => getAllMarketEvents(app, true), 10 * 1000)
 }

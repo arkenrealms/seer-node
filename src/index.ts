@@ -202,12 +202,6 @@ async function init() {
         timeout: 0 * 1000
       },
       {
-        name: 'getAllMarketEvents',
-        instance: getAllMarketEvents,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
         name: 'monitorItemEvents',
         instance: monitorItemEvents,
         async: false,
