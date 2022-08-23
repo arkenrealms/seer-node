@@ -68,12 +68,12 @@ export async function initLive(app) {
 
     // Finalize
     if (isHttps) {
-      const sslPort = process.env.LIVE_PORT || 443
+      const sslPort = process.env.LIVE_PORT || 8443
       app.live.https.listen(sslPort, function() {
         log(`:: Backend ready and listening on *:${sslPort}`)
       })
     } else {
-      const port = process.env.LIVE_PORT || 80
+      const port = process.env.LIVE_PORT || 8080
       app.live.http.listen(port, function() {
         log(`:: Backend ready and listening on *:${port}`)
       })
