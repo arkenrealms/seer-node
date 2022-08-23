@@ -96,7 +96,7 @@ export async function getAllSenderEvents(app, retry = false) {
         if (finalizeRes.status !== 1) {
           await app.db.saveUser(user)
 
-          //await app.live.emitAll('PlayerAction', { address: trade.seller, username: seller.username, itemName: item.name, tokenId: trade.tokenId, message: `${seller.username} claimed ` })
+          await app.live.emitAll('PlayerAction', { key: 'cube-claim', address: user.address, username: user.username, message: `${user.username} claimed rewards` })
         }
       } catch (ex) {
         log(ex)

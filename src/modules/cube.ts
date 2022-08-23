@@ -184,7 +184,6 @@ function initEventHandler(app) {
         await app.db.saveItemTrade(item, trade)
         await app.db.saveItemToken(item, { id: trade.tokenId, owner: trade.seller })
         
-        await app.live.emitAll('PlayerAction', { address: trade.seller, username: seller.username, itemName: item.name, tokenId: trade.tokenId, message: `${seller.username} listed a ${item.name} on the market` })
 
         emitDirect(socket, 'RC_SaveTradeResponse', {
           id: req.id,
