@@ -31,6 +31,8 @@ export async function getAllBarracksEvents(app, retry = false) {
           id: decodeItem(tokenId.toString()).id
         }
         
+        // await app.live.emitAll({ address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a ${decodedItem.name}!` })
+
         await app.db.saveUserItem(user, item)
       }
 

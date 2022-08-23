@@ -177,11 +177,15 @@ function initEventHandler(app) {
 
         const item = app.db.loadItem(trade.item.id)
 
-        await app.db.saveUserTrade(await app.db.loadUser(trade.seller), trade)
+        const seller = await app.db.loadUser(trade.seller)
+
+        await app.db.saveUserTrade(seller, trade)
         await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
         await app.db.saveItemTrade(item, trade)
-        await app.db.saveItemToken(item, { id: trade.tokenId, owner: trade.seller, item: trade.item })
+        await app.db.saveItemToken(item, { id: trade.tokenId, owner: trade.seller })
         
+        await app.live.emitAll({ address: trade.seller, username: seller.username, itemName: item.name, tokenId: trade.tokenId, message: `${seller.username} listed a ${item.name} on the market` })
+
         emitDirect(socket, 'RC_SaveTradeResponse', {
           id: req.id,
           data: {

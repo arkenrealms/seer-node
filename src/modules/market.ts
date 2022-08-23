@@ -51,7 +51,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveUserTrade(await app.db.loadUser(seller), trade)
             await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
             await app.db.saveItemTrade(item, trade)
-            await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller, item: trade.item })
+            await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller })
             // await saveConfig()
             
             log('List', trade)
@@ -92,7 +92,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveUserTrade(await app.db.loadUser(seller), trade)
             await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
             await app.db.saveItemTrade(item, trade)
-            await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller, item: trade.item })
+            await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller })
             // await saveConfig()
             
             log('ListTimelocked', trade)
@@ -119,7 +119,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
             await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
             await app.db.saveItemTrade(item, specificTrade)
-            await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller, item: specificTrade.item })
+            await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller })
             
             log('Update', specificTrade)
           }
@@ -146,7 +146,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
             await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
             await app.db.saveItemTrade(item, specificTrade)
-            await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller, item: specificTrade.item })
+            await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller })
             
             log('Delist', specificTrade)
           }
@@ -173,7 +173,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveUserTrade(await app.db.loadUser(buyer), specificTrade)
             await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
             await app.db.saveItemTrade(item, specificTrade)
-            await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: buyer, item: specificTrade.item })
+            await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: buyer })
 
             app.db.oracle.inflow.marketFees.tokens.week.rxs += toShort(price) * 0.05
             

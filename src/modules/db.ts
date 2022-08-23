@@ -385,7 +385,14 @@ export function initDb(app) {
   }
 
   app.db.saveItemToken = async (item, token) => {
-    if (item.tokens.includes(token)) return
+    // Temp fix
+    for (let i = 0; i < item.tokens.length; i++) {
+      if (typeof item.tokens[i] === 'string') {
+        item.tokens[i] = { id: item.tokens[i], owner: null }
+      }
+    }
+
+    if (item.tokens.find(i => i.id === token)) return
 
     item.tokens.push(token)
     // const found = item.tokens.find(i => i.id === token.id)
@@ -1175,4 +1182,518 @@ export function initDb(app) {
       log('Couldnt save games', e)
     }
   }
+
+  app.db.saveAreas = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/areas.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveBiomes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveNpcs = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveActs = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/acts.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveTimeGates = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveEnergies = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/energies.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.savePlanets = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/planets.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveSolarSystems = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterRaces = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterRaces.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterGenders = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterGenders.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterFactions = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterFactions.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterClasses = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterClasses.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterTypes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterTypes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterAttributes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterAttributes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterTitles = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterTitles.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterNameChoices = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterNameChoices.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveGameInfos = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/gameInfo.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveBiomes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveBiomeFeatures = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveAchievements = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveLores = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/lores.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveGames = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/games.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveGameInfos = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/gameInfos.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemMaterials = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemMaterials.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemAttributeParams = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemAttributeParams.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemParams = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemParams.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemSpecificTypes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemSpecificTypes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemSubTypes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemSubTypes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemTypes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemTypes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemAffixes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemAffixes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemSlots = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemSlots.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemRarities = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemRarities.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemSets = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemSets.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveItemTransmuteRules = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/itemTransmuteRules.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveSkillClassifications = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/skillClassifications.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveSkillMods = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/skillMods.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveSkillConditions = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/skillConditions.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveSkillConditionParams = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/skillConditionParams.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveSkillStatusEffects = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/skillStatusEffects.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveSkillTreeNodes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/skillTreeNodes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterGuilds = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterGuilds.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterRaces = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterRaces.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterGenders = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterGenders.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterFactions = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterFactions.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterClasses = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterClasses.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacters = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characters.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterTypes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterTypes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterAttributes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterAttributes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterStats = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterStats.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterTitles = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterTitles.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveCharacterNameChoices = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/characterNameChoices.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveAreas = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/areas.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveAreaNameChoices = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/areaNameChoices.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveLores = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/lores.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveNpcs = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveActs = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/acts.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveEras = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/eras.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveTimeGates = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveEnergies = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/energies.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveAchievements = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveBiomes = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveBiomeFeatures = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.saveSolarSystems = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+  app.db.savePlanets = async (items) => {
+    try {
+      await jetpack.writeAsync(path.resolve(`./db/planets.json`), beautify(items, null, 2))
+    } catch(e) {
+      log('Couldnt save', e)
+    }
+  }
+
+
 }

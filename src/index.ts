@@ -23,6 +23,7 @@ import { engageDelaran } from './modules/delaran'
 import { monitorOracle } from './modules/oracle'
 import { initCubeBridge } from './modules/cube'
 import { initNotices } from './modules/notices'
+import { initLive } from './modules/live'
 import { generateAccounts } from './modules/account-generator'
 import { migrateTokens } from './migrate'
 // import { runTest } from './modules/tests/test-a'
@@ -75,32 +76,34 @@ async function init() {
       }
     }
 
-    app.moduleConfig = [
-      {
-        name: 'initConfig',
-        instance: initConfig,
-        async: false,
-        timeout: 0
-      },
-      {
-        name: 'initDb',
-        instance: initDb,
-        async: false,
-        timeout: 0
-      },
-      {
-        name: 'initWeb3',
-        instance: initWeb3,
-        async: false,
-        timeout: 0
-      },
-      {
-        name: 'initNotices',
-        instance: initNotices,
-        async: false,
-        timeout: 0
-      },
-
+    if (process.env.RUNE_ENV === 'airtable') {
+      app.moduleConfig = [
+        {
+          name: 'initConfig',
+          instance: initConfig,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initDb',
+          instance: initDb,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initWeb3',
+          instance: initWeb3,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'monitorAirtable',
+          instance: monitorAirtable,
+          async: false,
+          timeout: 5 * 1000
+        },
+      ]
+    }
 
       // LOCAL
       // {
@@ -140,122 +143,149 @@ async function init() {
       //   timeout: 0
       // },
 
+    if (process.env.RUNE_ENV === 'production') {
+      app.moduleConfig = [
+        {
+          name: 'initConfig',
+          instance: initConfig,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initDb',
+          instance: initDb,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initWeb3',
+          instance: initWeb3,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initNotices',
+          instance: initNotices,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initLive',
+          instance: initLive,
+          async: false,
+          timeout: 0
+        },
 
-
-
-
-
-
-      // PROD
-      {
-        name: 'monitorSenderEvents',
-        instance: monitorSenderEvents,
-        async: false,
-        timeout: 5 * 1000
-      },
-      {
-        name: 'initCubeBridge',
-        instance: initCubeBridge,
-        async: false,
-        timeout: 0
-      },
-      {
-        name: 'monitorEvolutionRealms',
-        instance: monitorEvolutionRealms,
-        async: false,
-        timeout: 0
-      },
-      {
-        name: 'getAllItemEvents',
-        instance: getAllItemEvents,
-        async: false,
-        timeout: 1 * 60 * 1000
-      },
-      {
-        name: 'getAllBarracksEvents',
-        instance: getAllBarracksEvents,
-        async: false,
-        timeout: 1 * 60 * 1000
-      },
-      {
-        name: 'getAllCharacterEvents',
-        instance: getAllCharacterEvents,
-        async: false,
-        timeout: 1 * 60 * 1000
-      },
-      {
-        name: 'monitorGuildMemberDetails',
-        instance: monitorGuildMemberDetails,
-        async: false,
-        timeout: 1 * 60 * 1000
-      },
-      {
-        name: 'monitorSaves',
-        instance: monitorSaves,
-        async: false,
-        timeout: 3 * 60 * 1000
-      },
-      {
-        name: 'monitorOracle',
-        instance: monitorOracle,
-        async: false,
-        timeout: 0 * 1000
-      },
-      {
-        name: 'monitorItemEvents',
-        instance: monitorItemEvents,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
-        name: 'monitorBarracksEvents',
-        instance: monitorBarracksEvents,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
-        name: 'monitorMarketEvents',
-        instance: monitorMarketEvents,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
-        name: 'monitorCharacterEvents',
-        instance: monitorCharacterEvents,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
-        name: 'monitorGeneralStats',
-        instance: monitorGeneralStats,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
-        name: 'monitorCraftingStats',
-        instance: monitorCraftingStats,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
-        name: 'monitorMeta',
-        instance: monitorMeta,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
-        name: 'monitorCoordinator',
-        instance: monitorCoordinator,
-        async: false,
-        timeout: 1 * 1000
-      },
-      {
-        name: 'engageDelaran',
-        instance: engageDelaran,
-        async: false,
-        timeout: 30 * 1000
-      },
-    ]
+        {
+          name: 'monitorSenderEvents',
+          instance: monitorSenderEvents,
+          async: false,
+          timeout: 5 * 1000
+        },
+        {
+          name: 'initCubeBridge',
+          instance: initCubeBridge,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'monitorEvolutionRealms',
+          instance: monitorEvolutionRealms,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'getAllItemEvents',
+          instance: getAllItemEvents,
+          async: false,
+          timeout: 1 * 60 * 1000
+        },
+        {
+          name: 'getAllBarracksEvents',
+          instance: getAllBarracksEvents,
+          async: false,
+          timeout: 1 * 60 * 1000
+        },
+        {
+          name: 'getAllCharacterEvents',
+          instance: getAllCharacterEvents,
+          async: false,
+          timeout: 1 * 60 * 1000
+        },
+        {
+          name: 'monitorGuildMemberDetails',
+          instance: monitorGuildMemberDetails,
+          async: false,
+          timeout: 1 * 60 * 1000
+        },
+        {
+          name: 'monitorSaves',
+          instance: monitorSaves,
+          async: false,
+          timeout: 3 * 60 * 1000
+        },
+        {
+          name: 'monitorOracle',
+          instance: monitorOracle,
+          async: false,
+          timeout: 0 * 1000
+        },
+        {
+          name: 'monitorItemEvents',
+          instance: monitorItemEvents,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'monitorBarracksEvents',
+          instance: monitorBarracksEvents,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'monitorMarketEvents',
+          instance: monitorMarketEvents,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'monitorCharacterEvents',
+          instance: monitorCharacterEvents,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'monitorGeneralStats',
+          instance: monitorGeneralStats,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'monitorCraftingStats',
+          instance: monitorCraftingStats,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'monitorMeta',
+          instance: monitorMeta,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'monitorCoordinator',
+          instance: monitorCoordinator,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'engageDelaran',
+          instance: engageDelaran,
+          async: false,
+          timeout: 30 * 1000
+        },
+      ]
+    }
 
     app.modules = {}
     

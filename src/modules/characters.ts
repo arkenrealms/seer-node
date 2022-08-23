@@ -44,6 +44,8 @@ export async function getAllCharacterEvents(app, retry = false) {
         if (from === '0x0000000000000000000000000000000000000000') {
           // log('8888', logInfo, e)
           app.db.oracle.inflow.characterFees.tokens.week.rxs += app.config.characterMintCost
+
+          await app.live.emitAll({ address: userAddress, username: user.username, message: `${user.username} created a new character` })
         } else {
           await app.db.saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
         }
