@@ -48,12 +48,16 @@ export async function getAllMarketEvents(app, retry = false) {
 
             const item = app.db.loadItem(trade.item.id)
 
-            await app.db.saveUserTrade(await app.db.loadUser(seller), trade)
+            const sellerUser = await app.db.loadUser(seller)
+
+            await app.db.saveUserTrade(sellerUser, trade)
             await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
             await app.db.saveItemTrade(item, trade)
             await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller })
             // await saveConfig()
             
+            await app.live.emitAll('PlayerAction', { key: 'market-list', address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: trade.tokenId, tradeId: trade.id, message: `${sellerUser.username} listed a ${decodedItem.name} in Market` })
+
             log('List', trade)
           }
         }
@@ -89,12 +93,16 @@ export async function getAllMarketEvents(app, retry = false) {
 
             const item = app.db.loadItem(trade.item.id)
 
-            await app.db.saveUserTrade(await app.db.loadUser(seller), trade)
+            const sellerUser = await app.db.loadUser(seller)
+
+            await app.db.saveUserTrade(sellerUser, trade)
             await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
             await app.db.saveItemTrade(item, trade)
             await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller })
             // await saveConfig()
             
+            await app.live.emitAll('PlayerAction', { key: 'market-list', address: seller, username: sellerUser.username, itemName: decodedItem.name, releaseAt: earliestBuyTime.toNumber(), tokenId: trade.tokenId, tradeId: trade.id, message: `${sellerUser.username} listed a ${decodedItem.name} in Market` })
+
             log('ListTimelocked', trade)
           }
         }
@@ -169,7 +177,9 @@ export async function getAllMarketEvents(app, retry = false) {
 
             const item = app.db.loadItem(specificTrade.item.id)
       
-            await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
+            const sellerUser = await app.db.loadUser(seller)
+
+            await app.db.saveUserTrade(sellerUser, specificTrade)
             await app.db.saveUserTrade(await app.db.loadUser(buyer), specificTrade)
             await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
             await app.db.saveItemTrade(item, specificTrade)
@@ -177,6 +187,8 @@ export async function getAllMarketEvents(app, retry = false) {
 
             app.db.oracle.inflow.marketFees.tokens.week.rxs += toShort(price) * 0.05
             
+            await app.live.emitAll('PlayerAction', { key: 'market-buy', address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: specificTrade.tokenId, tradeId: specificTrade.id, message: `${sellerUser.username} bought a ${decodedItem.name}` })
+
             log('Buy', specificTrade)
           }
         }
