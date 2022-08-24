@@ -56,7 +56,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller })
             // await saveConfig()
             
-            await app.live.emitAll('PlayerAction', { key: 'market-list', address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: trade.tokenId, tradeId: trade.id, message: `${sellerUser.username} listed a ${decodedItem.name} in Market` })
+            await app.live.emitAll('PlayerAction', { key: 'market-list', address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: trade.tokenId, tradeId: trade.id, message: `${sellerUser.username} listed ${decodedItem.name} in Market` })
 
             log('List', trade)
           }
@@ -101,7 +101,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller })
             // await saveConfig()
             
-            await app.live.emitAll('PlayerAction', { key: 'market-list', address: seller, username: sellerUser.username, itemName: decodedItem.name, releaseAt: earliestBuyTime.toNumber(), tokenId: trade.tokenId, tradeId: trade.id, message: `${sellerUser.username} listed a ${decodedItem.name} in Market` })
+            await app.live.emitAll('PlayerAction', { key: 'market-list', address: seller, username: sellerUser.username, itemName: decodedItem.name, releaseAt: earliestBuyTime.toNumber(), tokenId: trade.tokenId, tradeId: trade.id, message: `${sellerUser.username} listed ${decodedItem.name} in Market` })
 
             log('ListTimelocked', trade)
           }
@@ -187,7 +187,7 @@ export async function getAllMarketEvents(app, retry = false) {
 
             app.db.oracle.inflow.marketFees.tokens.week.rxs += toShort(price) * 0.05
             
-            await app.live.emitAll('PlayerAction', { key: 'market-buy', address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: specificTrade.tokenId, tradeId: specificTrade.id, message: `${sellerUser.username} bought a ${decodedItem.name}` })
+            await app.live.emitAll('PlayerAction', { key: 'market-buy', address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: specificTrade.tokenId, tradeId: specificTrade.id, message: `${sellerUser.username} bought ${decodedItem.name} in Market` })
 
             log('Buy', specificTrade)
           }
