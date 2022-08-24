@@ -79,10 +79,10 @@ export async function initLive(app) {
       })
     }
 
-    app.live.emitDirect = async function(...props) {
-      websocketUtil.emitDirect(...props)
+    app.live.emitDirect = async function(socket, ...props) {
+      websocketUtil.emitDirect(socket, ...props)
     }
-    
+
     app.live.emitAll = async function(...props) {
       websocketUtil.emitAll(app.live.io, ...props)
     }
