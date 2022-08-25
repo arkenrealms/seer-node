@@ -922,7 +922,7 @@ export function initDb(app) {
       if (user.evolution?.overall?.winStreak > 25) {
         app.db.addUserAchievement(user, 'DOMINATE_RUNE_EVO')
         await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}` })
-        await app.notices.add('achievement', { key: 'achievement', address: user.address, key: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}!` })
+        await app.notices.add('achievement', { key: 'achievement', address: user.address, achievement: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}!` })
       }
     }
   }
