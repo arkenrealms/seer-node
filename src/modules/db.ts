@@ -900,7 +900,7 @@ export function initDb(app) {
     if (!app.db.hasUserAchievement(user, 'CRAFT_1000') && user.craftedItemCount >= 1000) {
       app.db.addUserAchievement(user, 'CRAFT_1000')
       await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'CRAFT_1000', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_1000').name}` })
-      await app.notices.add('achievement', { address: user.address, key: 'CRAFT_1000', message: `${user.username} has crafted over 1000 times!` })
+      await app.notices.add('achievement', { key: 'achievement', address: user.address, achievement: 'CRAFT_1000', message: `${user.username} has crafted over 1000 times!` })
     }
     if (!app.db.hasUserAchievement(user, 'ACQUIRED_RUNE') && user.holdings?.rune >= 1) {
       app.db.addUserAchievement(user, 'ACQUIRED_RUNE')
@@ -922,7 +922,7 @@ export function initDb(app) {
       if (user.evolution?.overall?.winStreak > 25) {
         app.db.addUserAchievement(user, 'DOMINATE_RUNE_EVO')
         await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}` })
-        await app.notices.add('achievement', { address: user.address, key: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}!` })
+        await app.notices.add('achievement', { key: 'achievement', address: user.address, key: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}!` })
       }
     }
   }

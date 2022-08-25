@@ -821,10 +821,10 @@ export async function connectRealm(app, realm) {
 
               app.games.evolution.global.leaderboard.raw.wins[user.address] += 1
 
-              await app.live.emitAll('PlayerAction', { key: 'evolution-win', address: req.data.round.winners[0].address, username: user.username, message: `${user.username} won ${rewardWinnerMap[0]} ZOD in Evolution` })
+              await app.live.emitAll('PlayerAction', { key: 'evolution-winner', address: req.data.round.winners[0].address, username: user.username, message: `${user.username} won ${rewardWinnerMap[0]} ZOD in Evolution` })
 
               if (rewardWinnerMap[0] > 0.1) {
-                await app.notices.add('evolution_winner', { address: req.data.round.winners[0].address, username: user.username, message: `${user.username} won ${rewardWinnerMap[0]} ZOD in Evolution` })
+                await app.notices.add('evolution-winner', { key: 'evolution-winner', address: req.data.round.winners[0].address, username: user.username, message: `${user.username} won ${rewardWinnerMap[0]} ZOD in Evolution` })
               }
             }
           }

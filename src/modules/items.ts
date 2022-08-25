@@ -56,7 +56,7 @@ export async function getAllItemEvents(app, retry = false) {
 
             if (itemData.perfection === 1) {
               await app.live.emitAll('PlayerAction', { key: 'craft-item', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a mythic ${decodedItem.name}` })
-              await app.notices.add('mythic_crafted', { key: 'craft-item', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a mythic ${decodedItem.name}` })
+              await app.notices.add('mythic-crafted', { key: 'craft-item', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a mythic ${decodedItem.name}` })
             } else if (itemData.perfection >= 0.9) {
               await app.live.emitAll('PlayerAction', { key: 'craft-item', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted an epic ${decodedItem.name}` })
             } else if (itemData.perfection >= 0.7) {
