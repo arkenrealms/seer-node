@@ -190,7 +190,7 @@ export function initDb(app) {
   app.db.saveActiveUsers = async () => {
     const now = new Date().getTime() / 1000
     app.db.activeUsers = app.db.activeUsers.filter(u => {
-      if (u.updated > now - (5 * 60)) {
+      if (u.updated > now - (10 * 60)) {
         return true
       } else {
         if (u.username) {
@@ -852,6 +852,8 @@ export function initDb(app) {
   app.db.addGuildMember = (guild, user) => {
     if (!guild.members.includes(user.address)) {
       guild.members.push(user.address)
+
+      app.live.emitAll('PlayerAction', { key: 'guild-join', address: user.address, username: user.username, guildName: guild.name, message: `${user.username} joined ${guild.name} guild` })
     }
   }
 
