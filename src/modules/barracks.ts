@@ -2,6 +2,15 @@ import * as ethers from 'ethers'
 import { log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
+import { RuneId } from '@rune-backend-sdk/data/items'
+import { getHighestId, toShort } from '@rune-backend-sdk/util'
+
+export const AddressToRune: any = {}
+
+for (const key of Object.keys(RuneId)) {
+  // @ts-ignore
+  AddressToRune[contracts[key.toLowerCase()][56]] = key
+}
 
 export async function getAllBarracksEvents(app, retry = false) {
   if (app.config.barracks.updating) return
@@ -23,54 +32,70 @@ export async function getAllBarracksEvents(app, retry = false) {
         const { user: userAddress, tokenId, itemId } = e.args
 
         const user = await app.db.loadUser(userAddress)
+        const decodedItem = decodeItem(tokenId.toString())
 
         const item = {
           status: "equipped",
           tokenId: tokenId.toString(),
           updatedAt: new Date().getTime(),
-          id: decodeItem(tokenId.toString()).id
+          id: decodedItem.id
         }
-        
-        // await app.live.emitAll('PlayerAction', { key: 'barracks-equipped', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a ${decodedItem.name}!` })
-
         await app.db.saveUserItem(user, item)
+        
+        await app.live.emitAll('PlayerAction', { key: 'raid1-equipped', address: user.address, username: user.username, itemName: decodedItem, tokenId: tokenId.toString(), message: `${user.username} equipped ${decodedItem.name}` })
+
       }
 
       if (e.name === 'Unequip') {
         const { user: userAddress, tokenId, itemId } = e.args
 
         const user = await app.db.loadUser(userAddress)
+        const decodedItem = decodeItem(tokenId.toString())
 
         const item = {
           status: "unequipped",
           tokenId: tokenId.toString(),
           itemId: itemId,
           updatedAt: new Date().getTime(),
-          id: decodeItem(tokenId.toString()).id
+          id: decodedItem.id
           // ...decodeItem(tokenId.toString())
         }
         
         await app.db.saveUserItem(user, item)
+        
+        await app.live.emitAll('PlayerAction', { key: 'raid1-unequipped', address: user.address, username: user.username, itemName: decodedItem, tokenId: tokenId.toString(), message: `${user.username} unequipped ${decodedItem.name}` })
       }
 
       if (e.name === 'ActionBurn') {
-        
+        const { user: userAddress, amount } = e.args
+
+        const user = await app.db.loadUser(userAddress)
+
+        await app.live.emitAll('PlayerAction', { key: 'raid1-burn', address: user.address, username: user.username, message: `${user.username} burned ${toShort(amount)} rune rewards` })
       }
 
       if (e.name === 'ActionBonus') {
-        
+        const { user: userAddress, amount } = e.args
+
+        const user = await app.db.loadUser(userAddress)
+
+        await app.live.emitAll('PlayerAction', { key: 'raid1-bonus', address: user.address, username: user.username, message: `${user.username} yielded ${toShort(amount)} extra rewards` })
       }
 
       if (e.name === 'ActionHiddenPool') {
-        
+        const { user: userAddress, amount } = e.args
+
+        const user = await app.db.loadUser(userAddress)
+
+        await app.live.emitAll('PlayerAction', { key: 'raid1-hidden-pool', address: user.address, username: user.username, message: `${user.username} sent ${toShort(amount)} rewards to the hidden pool` })
       }
 
       if (e.name === 'ActionFee') {
-        
-      }
+        const { user: userAddress, token, amount } = e.args
 
-      if (e.name === 'ActionSwap') {
-        
+        const user = await app.db.loadUser(userAddress)
+
+        await app.live.emitAll('PlayerAction', { key: 'raid1-fee', address: user.address, username: user.username, message: `${user.username} paid ${toShort(amount)} ${AddressToRune[token]} in fees` })
       }
 
       const e2 = app.db.barracksEvents.find(t => t.transactionHash === logInfo.transactionHash)
