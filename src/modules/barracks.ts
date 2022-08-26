@@ -4,12 +4,13 @@ import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 import { RuneId } from '@rune-backend-sdk/data/items'
 import { getHighestId, toShort } from '@rune-backend-sdk/util'
+import contractInfo from '@rune-backend-sdk/contractInfo'
 
 export const AddressToRune: any = {}
 
 for (const key of Object.keys(RuneId)) {
   // @ts-ignore
-  AddressToRune[contracts[key.toLowerCase()][56]] = key
+  AddressToRune[contractInfo[key.toLowerCase()][56]] = key
 }
 
 export async function getAllBarracksEvents(app, retry = false) {
