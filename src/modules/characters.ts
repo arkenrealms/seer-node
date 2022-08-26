@@ -48,6 +48,8 @@ export async function getAllCharacterEvents(app, retry = false) {
           await app.live.emitAll('PlayerAction', { key: 'character-create', address: userAddress, username: user.username, message: `${user.username} created a new character` })
         } else {
           await app.db.saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
+
+          await app.live.emitAll('PlayerAction', { key: 'character-transfer', address: userAddress, username: user.username, message: `${user.username} transferred a character` })
         }
 
         await app.db.saveCharacterOwner(app.db.loadCharacter(characterData.id), characterData)
