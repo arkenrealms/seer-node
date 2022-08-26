@@ -810,6 +810,12 @@ export async function connectRealm(app, realm) {
 
             app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 
+            await app.live.emitAll('PlayerAction', { key: 'evolution-winner', address: user.address, username: user.username, message: `${user.username} placed #${index+1} for ${rewardWinnerMap[index]} ZOD in Evolution` })
+
+            if (rewardWinnerMap[index] > 0.1) {
+              await app.notices.add('evolution-winner', { key: 'evolution-winner', address: req.data.round.winners[0].address, username: user.username, message: `${user.username} won ${rewardWinnerMap[index]} ZOD in Evolution` })
+            }
+
             if (req.data.round.winners[0].address === player.address) {
               if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
               if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0
@@ -820,12 +826,6 @@ export async function connectRealm(app, realm) {
               if (!app.games.evolution.global.leaderboard.raw.wins) app.games.evolution.global.leaderboard.raw.wins = 0
 
               app.games.evolution.global.leaderboard.raw.wins[user.address] += 1
-
-              await app.live.emitAll('PlayerAction', { key: 'evolution-winner', address: req.data.round.winners[0].address, username: user.username, message: `${user.username} won ${rewardWinnerMap[0]} ZOD in Evolution` })
-
-              if (rewardWinnerMap[0] > 0.1) {
-                await app.notices.add('evolution-winner', { key: 'evolution-winner', address: req.data.round.winners[0].address, username: user.username, message: `${user.username} won ${rewardWinnerMap[0]} ZOD in Evolution` })
-              }
             }
           }
         }
