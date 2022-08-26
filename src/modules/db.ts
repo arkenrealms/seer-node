@@ -189,7 +189,17 @@ export function initDb(app) {
 
   app.db.saveActiveUsers = async () => {
     const now = new Date().getTime() / 1000
-    app.db.activeUsers = app.db.activeUsers.filter(u => u.updated > now - (5 * 60))
+    app.db.activeUsers = app.db.activeUsers.filter(u => {
+      if (u.updated > now - (5 * 60)) {
+        return true
+      } else {
+        if (u.username) {
+          app.live.emitAll('PlayerAction', { key: 'player-inactive', address: u.address, username: u.username, message: `${u.username} is now inactive` })
+        }
+
+        return false
+      }
+    })
 
     jetpack.write(path.resolve('./db/activeUsers.json'), beautify(app.db.activeUsers, null, 2, 100), { atomic: true })
   }
@@ -204,7 +214,10 @@ export function initDb(app) {
     if (activeUser) {
       activeUser.updated = now
     } else {
+      app.live.emitAll('PlayerAction', { key: 'player-active', address: user.address, username: user.username, message: `${user.username} is now active` })
+
       app.db.activeUsers.push({
+        username: user.username,
         address: user.address,
         updated: now
       })
