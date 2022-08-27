@@ -6,7 +6,7 @@ import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 import { RuneId } from '@rune-backend-sdk/data/items'
 import { getHighestId, toShort } from '@rune-backend-sdk/util'
 import contractInfo from '@rune-backend-sdk/contractInfo'
-import { ItemSlot } from 'rune-backend-sdk/src/data/items'
+import { ItemSlot } from '@rune-backend-sdk/data/items'
 
 export const AddressToRune: any = {}
 
