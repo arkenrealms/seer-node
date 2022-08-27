@@ -384,9 +384,9 @@ export async function connectRealm(app, realm) {
     try {
       log('ModRequest', realm.key, req)
 
-      const user = await app.db.loadUser(req.body.signature.address)
+      const user = await app.db.loadUser(req.data.body.signature.address)
 
-      app.live.emitAll('PlayerAction', { key: 'moderator', address: user.address, method: req.params.method, message: `${user.username} called ${req.params.method}` })
+      app.live.emitAll('PlayerAction', { key: 'moderator', address: user.address, method: req.data.params.method, message: `${user.username} called ${req.params.method}` })
 
       client.socket.emit('ModResponse', {
         id: req.id,
