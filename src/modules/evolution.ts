@@ -380,9 +380,31 @@ export async function connectRealm(app, realm) {
     }
   })
 
+  client.socket.on('ModRequest', async function (req) {
+    try {
+      log('ModRequest', realm.key, req)
+
+      const user = await app.db.loadUser(req.body.signature.address)
+
+      app.live.emitAll('PlayerAction', { key: 'moderator', address: user.address, method: req.params.method, message: `${user.username} called ${req.params.method}` })
+
+      client.socket.emit('ModResponse', {
+        id: req.id,
+        data: { status: 1 }
+      })
+    } catch (e) {
+      log('Error', e)
+      
+      client.socket.emit('ModResponse', {
+        id: req.id,
+        data: { status: 0, message: e }
+      })
+    }
+  })
+
   client.socket.on('BanPlayerRequest', async function (req) {
     try {
-      log('Ban', realm.key, req)
+      log('BanPlayerRequest', realm.key, req)
 
       const user = await app.db.loadUser(req.data.target)
 
@@ -810,10 +832,10 @@ export async function connectRealm(app, realm) {
 
             app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 
-            await app.live.emitAll('PlayerAction', { key: 'evolution1-winner', address: user.address, username: user.username, message: `${user.username} placed #${index+1} for ${rewardWinnerMap[index]} ZOD in Evolution` })
+            await app.live.emitAll('PlayerAction', { key: 'evolution1-winner', address: user.address, username: user.username, placement: index+1, message: `${user.username} placed #${index+1} for ${rewardWinnerMap[index]} ZOD in Evolution` })
 
             if (rewardWinnerMap[index] > 0.1) {
-              await app.notices.add('evolution1-winner', { key: 'evolution1-winner', address: req.data.round.winners[0].address, username: user.username, message: `${user.username} won ${rewardWinnerMap[index]} ZOD in Evolution` })
+              await app.notices.add('evolution1-winner', { key: 'evolution1-winner', address: user.address, username: user.username, placement: index+1, message: `${user.username} won ${rewardWinnerMap[index]} ZOD in Evolution` })
             }
 
             if (req.data.round.winners[0].address === player.address) {
