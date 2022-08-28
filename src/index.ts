@@ -59,7 +59,7 @@ async function init() {
         realms: {}
       },
       evolution: {
-        currentSeason: 1,
+        currentSeason: 2,
         realms: {}
       },
       infinite: {
