@@ -386,7 +386,7 @@ export async function connectRealm(app, realm) {
 
       const user = await app.db.loadUser(req.data.body.signature.address)
 
-      app.live.emitAll('PlayerAction', { key: 'moderator-action', address: user.address, username: user.username, method: req.data.params.method, realmKey: realm.key, message: `${user.username} called ${req.data.params.method}` })
+      app.live.emitAll('PlayerAction', { key: 'moderator-action', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, method: req.data.params.method, realmKey: realm.key, message: `${user.username} called ${req.data.params.method}` })
 
       client.socket.emit('ModResponse', {
         id: req.id,
@@ -832,7 +832,7 @@ export async function connectRealm(app, realm) {
 
             app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 
-            await app.live.emitAll('PlayerAction', { key: 'evolution1-winner', address: user.address, username: user.username, realmKey: realm.key, placement: index+1, message: `${user.username} placed #${index+1} for ${rewardWinnerMap[index]} ZOD in Evolution` })
+            await app.live.emitAll('PlayerAction', { key: 'evolution1-winner', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, realmKey: realm.key, placement: index+1, message: `${user.username} placed #${index+1} for ${rewardWinnerMap[index]} ZOD in Evolution` })
 
             if (rewardWinnerMap[index] > 0.1) {
               await app.notices.add('evolution1-winner', { key: 'evolution1-winner', address: user.address, username: user.username, realmKey: realm.key, placement: index+1, message: `${user.username} won ${rewardWinnerMap[index]} ZOD in Evolution` })

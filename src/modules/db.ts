@@ -194,7 +194,7 @@ export function initDb(app) {
         return true
       } else {
         if (u.username) {
-          app.live.emitAll('PlayerAction', { key: 'player-inactive', address: u.address, username: u.username, message: `${u.username} is now inactive` })
+          app.live.emitAll('PlayerAction', { key: 'player-inactive', createdAt: new Date().getTime() / 1000, address: u.address, username: u.username, message: `${u.username} is now inactive` })
         }
 
         return false
@@ -214,7 +214,7 @@ export function initDb(app) {
     if (activeUser) {
       activeUser.updated = now
     } else {
-      app.live.emitAll('PlayerAction', { key: 'player-active', address: user.address, username: user.username, message: `${user.username} is now active` })
+      app.live.emitAll('PlayerAction', { key: 'player-active', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} is now active` })
 
       app.db.activeUsers.push({
         username: user.username,
@@ -853,7 +853,7 @@ export function initDb(app) {
     if (!guild.members.includes(user.address)) {
       guild.members.push(user.address)
 
-      app.live.emitAll('PlayerAction', { key: 'guild-join', address: user.address, username: user.username, guildName: guild.name, message: `${user.username} joined ${guild.name} guild` })
+      app.live.emitAll('PlayerAction', { key: 'guild-join', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, guildName: guild.name, message: `${user.username} joined ${guild.name} guild` })
     }
   }
 
@@ -902,41 +902,41 @@ export function initDb(app) {
   app.db.updateAchievementsByUser = async (user) => {
     if (!app.db.hasUserAchievement(user, 'CRAFT_1') && user.craftedItemCount >= 1) {
       app.db.addUserAchievement(user, 'CRAFT_1')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'CRAFT_1', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_1').name}` })
+      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'CRAFT_1', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_1').name}` })
     }
     if (!app.db.hasUserAchievement(user, 'CRAFT_10') && user.craftedItemCount >= 10) {
       app.db.addUserAchievement(user, 'CRAFT_10')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'CRAFT_10', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_10').name}` })
+      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'CRAFT_10', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_10').name}` })
     }
     if (!app.db.hasUserAchievement(user, 'CRAFT_100') && user.craftedItemCount >= 100) {
       app.db.addUserAchievement(user, 'CRAFT_100')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'CRAFT_100', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_100').name}` })
+      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'CRAFT_100', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_100').name}` })
     }
     if (!app.db.hasUserAchievement(user, 'CRAFT_1000') && user.craftedItemCount >= 1000) {
       app.db.addUserAchievement(user, 'CRAFT_1000')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'CRAFT_1000', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_1000').name}` })
+      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'CRAFT_1000', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_1000').name}` })
       await app.notices.add('achievement', { key: 'achievement', address: user.address, achievement: 'CRAFT_1000', message: `${user.username} has crafted over 1000 times!` })
     }
     if (!app.db.hasUserAchievement(user, 'ACQUIRED_RUNE') && user.holdings?.rune >= 1) {
       app.db.addUserAchievement(user, 'ACQUIRED_RUNE')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'ACQUIRED_RUNE', message: `${user.username} achieved ${achievementData.find(i => i.key === 'ACQUIRED_RUNE').name}` })
+      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'ACQUIRED_RUNE', message: `${user.username} achieved ${achievementData.find(i => i.key === 'ACQUIRED_RUNE').name}` })
     }
     if (!app.db.hasUserAchievement(user, 'BATTLE_RUNE_EVO')) {
       if (user.evolution?.overall?.rounds > 0) {
         app.db.addUserAchievement(user, 'BATTLE_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'BATTLE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'BATTLE_RUNE_EVO').name}` })
+        await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'BATTLE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'BATTLE_RUNE_EVO').name}` })
       }
     }
     if (!app.db.hasUserAchievement(user, 'MEGA_RUNE_EVO')) {
       if (user.evolution?.overall?.wins > 0) {
         app.db.addUserAchievement(user, 'MEGA_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'MEGA_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'MEGA_RUNE_EVO').name}` })
+        await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'MEGA_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'MEGA_RUNE_EVO').name}` })
       }
     }
     if (!app.db.hasUserAchievement(user, 'DOMINATE_RUNE_EVO')) {
       if (user.evolution?.overall?.winStreak > 25) {
         app.db.addUserAchievement(user, 'DOMINATE_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', { key: 'achievement', address: user.address, username: user.username, achievement: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}` })
+        await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}` })
         await app.notices.add('achievement', { key: 'achievement', address: user.address, achievement: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}!` })
       }
     }

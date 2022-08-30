@@ -2,7 +2,7 @@ import * as ethers from 'ethers'
 import { log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
-import { RuneNames } from '@rune-backend-sdk/data/items'
+import { ItemRarity, RuneNames } from '@rune-backend-sdk/data/items'
 
 export async function getAllItemEvents(app, retry = false) {
   if (app.config.items.updating) return
@@ -54,14 +54,14 @@ export async function getAllItemEvents(app, retry = false) {
               }
             }
 
-            if (itemData.perfection === 1) {
+            if (decodedItem.rarity.id === ItemRarity.Mythic.id) {
               await app.live.emitAll('PlayerAction', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a mythic ${decodedItem.name}` })
               await app.notices.add('mythic-crafted', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a mythic ${decodedItem.name}` })
-            } else if (itemData.perfection >= 0.9) {
+            } else if (decodedItem.rarity.id === ItemRarity.Epic.id) {
               await app.live.emitAll('PlayerAction', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted an epic ${decodedItem.name}` })
-            } else if (itemData.perfection >= 0.7) {
+            } else if (decodedItem.rarity.id === ItemRarity.Rare.id) {
               await app.live.emitAll('PlayerAction', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a rare ${decodedItem.name}` })
-            } else {
+            } else if (decodedItem.rarity.id === ItemRarity.Magical.id) {
               await app.live.emitAll('PlayerAction', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a magical ${decodedItem.name}` })
             }
           } else {

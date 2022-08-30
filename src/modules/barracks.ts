@@ -108,7 +108,7 @@ export async function getAllBarracksEvents(app, retry = false) {
         }
         await app.db.saveUserItem(user, item)
         
-        await app.live.emitAll('PlayerAction', { key: 'raid1-equipped', address: user.address, username: user.username, itemName: decodedItem, tokenId: tokenId.toString(), message: `${user.username} equipped ${decodedItem.name}` })
+        await app.live.emitAll('PlayerAction', { key: 'raid1-equipped', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, itemName: decodedItem, tokenId: tokenId.toString(), message: `${user.username} equipped ${decodedItem.name}` })
 
       }
 
@@ -129,7 +129,7 @@ export async function getAllBarracksEvents(app, retry = false) {
         
         await app.db.saveUserItem(user, item)
         
-        await app.live.emitAll('PlayerAction', { key: 'raid1-unequipped', address: user.address, username: user.username, itemName: decodedItem, tokenId: tokenId.toString(), message: `${user.username} unequipped ${decodedItem.name}` })
+        await app.live.emitAll('PlayerAction', { key: 'raid1-unequipped', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, itemName: decodedItem, tokenId: tokenId.toString(), message: `${user.username} unequipped ${decodedItem.name}` })
       }
 
       if (e.name === 'ActionBurn') {
@@ -137,7 +137,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', { key: 'raid1-burn', address: user.address, username: user.username, message: `${user.username} burned ${toShort(amount)} rune rewards` })
+        await app.live.emitAll('PlayerAction', { key: 'raid1-burn', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} burned ${toShort(amount)} rune rewards` })
       }
 
       if (e.name === 'ActionBonus') {
@@ -145,7 +145,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', { key: 'raid1-bonus', address: user.address, username: user.username, message: `${user.username} yielded ${toShort(amount)} extra rewards` })
+        await app.live.emitAll('PlayerAction', { key: 'raid1-bonus', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} yielded ${toShort(amount)} extra rewards` })
       }
 
       if (e.name === 'ActionHiddenPool') {
@@ -153,7 +153,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', { key: 'raid1-hidden-pool', address: user.address, username: user.username, message: `${user.username} sent ${toShort(amount)} rewards to the hidden pool` })
+        await app.live.emitAll('PlayerAction', { key: 'raid1-hidden-pool', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} sent ${toShort(amount)} rewards to the hidden pool` })
       }
 
       if (e.name === 'ActionFee') {
@@ -161,7 +161,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', { key: 'raid1-fee', address: user.address, username: user.username, message: `${user.username} paid ${toShort(amount)} ${AddressToRune[token]} in fees` })
+        await app.live.emitAll('PlayerAction', { key: 'raid1-fee', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} paid ${toShort(amount)} ${AddressToRune[token]} in fees` })
       }
 
       const e2 = app.db.barracksEvents.find(t => t.transactionHash === logInfo.transactionHash)
