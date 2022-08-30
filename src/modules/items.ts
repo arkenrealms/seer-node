@@ -71,7 +71,7 @@ export async function getAllItemEvents(app, retry = false) {
 
             const receiveUser = await app.db.loadUser(userAddress)
 
-            await app.live.emitAll('PlayerAction', { key: 'item-transfer', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, username2: receiveUser.name, message: `${user.username} transfered ${decodedItem.name} to ${receiveUser.name}` })
+            await app.live.emitAll('PlayerAction', { key: 'item-transfer', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, username2: receiveUser.name, message: `${user.username || `${from.replace(5)}...`} transfered ${decodedItem.name} to ${receiveUser.name || `${userAddress.replace(5)}...`}` })
           }
 
           await app.db.saveUserItem(user, itemData)
