@@ -55,14 +55,14 @@ export async function getAllItemEvents(app, retry = false) {
             }
 
             if (decodedItem.rarity.id === ItemRarity.Mythic.id) {
-              await app.live.emitAll('PlayerAction', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a mythic ${decodedItem.name}` })
+              await app.live.emitAll('PlayerAction', { key: 'item-craft', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a mythic ${decodedItem.name}` })
               await app.notices.add('mythic-crafted', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a mythic ${decodedItem.name}` })
             } else if (decodedItem.rarity.id === ItemRarity.Epic.id) {
-              await app.live.emitAll('PlayerAction', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted an epic ${decodedItem.name}` })
+              await app.live.emitAll('PlayerAction', { key: 'item-craft', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted an epic ${decodedItem.name}` })
             } else if (decodedItem.rarity.id === ItemRarity.Rare.id) {
-              await app.live.emitAll('PlayerAction', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a rare ${decodedItem.name}` })
+              await app.live.emitAll('PlayerAction', { key: 'item-craft', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a rare ${decodedItem.name}` })
             } else if (decodedItem.rarity.id === ItemRarity.Magical.id) {
-              await app.live.emitAll('PlayerAction', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a magical ${decodedItem.name}` })
+              await app.live.emitAll('PlayerAction', { key: 'item-craft', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username} crafted a magical ${decodedItem.name}` })
             }
           } else {
             if (decodedItem.id === 1205) {
@@ -71,7 +71,7 @@ export async function getAllItemEvents(app, retry = false) {
 
             const receiveUser = await app.db.loadUser(userAddress)
 
-            await app.live.emitAll('PlayerAction', { key: 'item-transfer', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, username2: receiveUser.name, message: `${user.username || `${from.replace(5)}...`} transfered ${decodedItem.name} to ${receiveUser.name || `${userAddress.replace(5)}...`}` })
+            await app.live.emitAll('PlayerAction', { key: 'item-transfer', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, username2: receiveUser.name, message: `${user.username || `${from.slice(5)}...`} transfered ${decodedItem.name} to ${receiveUser.name || `${userAddress.slice(5)}...`}` })
           }
 
           await app.db.saveUserItem(user, itemData)
