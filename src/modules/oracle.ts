@@ -3,9 +3,9 @@ import { log } from '@rune-backend-sdk/util'
 
 async function calculateGameRewards(app) {
   // Update current rewards to the previous calculation
-  app.evolution.config.itemRewards = app.evolution.config.itemRewardsQueued
-  app.evolution.config.rewardWinnerAmountPerLegitPlayer = app.evolution.config.rewardWinnerAmountPerLegitPlayerQueued
-  app.evolution.config.rewardWinnerAmountMax = app.evolution.config.rewardWinnerAmountMaxQueued
+  app.db.evolution.config.itemRewards = app.db.evolution.config.itemRewardsQueued
+  app.db.evolution.config.rewardWinnerAmountPerLegitPlayer = app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued
+  app.db.evolution.config.rewardWinnerAmountMax = app.db.evolution.config.rewardWinnerAmountMaxQueued
 
   let rewardWinnerAmountPerLegitPlayer = 0
   let rewardWinnerAmountMax = 0
@@ -45,11 +45,11 @@ async function calculateGameRewards(app) {
   }
 
   // Update the next queued rewards to the current calculation
-  app.evolution.config.itemRewardsQueued = itemRewards
-  app.evolution.config.rewardWinnerAmountPerLegitPlayerQueued = rewardWinnerAmountPerLegitPlayer
-  app.evolution.config.rewardWinnerAmountMaxQueued = rewardWinnerAmountMax
+  app.db.evolution.config.itemRewardsQueued = itemRewards
+  app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued = rewardWinnerAmountPerLegitPlayer
+  app.db.evolution.config.rewardWinnerAmountMaxQueued = rewardWinnerAmountMax
 
-  log('New evolution config: ', app.evolution.config)
+  log('New evolution config: ', app.db.evolution.config)
 }
 
 async function runOracle(app) {
