@@ -303,7 +303,8 @@ export async function getAllBarracksEvents(app, retry = false) {
 
 export async function monitorBarracksEvents(app) {
   app.barracks = {
-    getPlayerEquipment: getPlayerEquipment.bind(app)
+    getPlayerEquipment: getPlayerEquipment.bind(app),
+    getMetaFromEquipment: getMetaFromEquipment.bind(app)
   }
   
   app.contracts.barracks.on('Equip', async () => {
