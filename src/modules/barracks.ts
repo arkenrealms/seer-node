@@ -25,49 +25,49 @@ export async function getPlayerEquipment(app, address) {
   try {
     const leftHand = await app.contracts.barracks.getEquippedItem(address, ItemSlot.LeftHand)
 
-    if (leftHand) ids.push([ItemSlot.LeftHand, leftHand.toString()])
+    if (leftHand?.toString() !== '0') ids.push([ItemSlot.LeftHand, leftHand.toString()])
 
     const rightHand = await app.contracts.barracks.getEquippedItem(address, ItemSlot.RightHand)
-    if (rightHand) ids.push([ItemSlot.RightHand, rightHand.toString()])
+    if (rightHand?.toString() !== '0') ids.push([ItemSlot.RightHand, rightHand.toString()])
 
     const head = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Head)
-    if (head) ids.push([ItemSlot.Head, head.toString()])
+    if (head?.toString() !== '0') ids.push([ItemSlot.Head, head.toString()])
 
     const hands = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Hands)
-    if (hands) ids.push([ItemSlot.Hands, hands.toString()])
+    if (hands?.toString() !== '0') ids.push([ItemSlot.Hands, hands.toString()])
 
     const belt = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Waist)
-    if (belt) ids.push([ItemSlot.Waist, belt.toString()])
+    if (belt?.toString() !== '0') ids.push([ItemSlot.Waist, belt.toString()])
 
     const legs = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Legs)
-    if (legs) ids.push([ItemSlot.Legs, legs.toString()])
+    if (legs?.toString() !== '0') ids.push([ItemSlot.Legs, legs.toString()])
 
     const chest = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Chest)
-    if (chest) ids.push([ItemSlot.Chest, chest.toString()])
+    if (chest?.toString() !== '0') ids.push([ItemSlot.Chest, chest.toString()])
 
     const feet = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Feet)
-    if (feet) ids.push([ItemSlot.Feet, feet.toString()])
+    if (feet?.toString() !== '0') ids.push([ItemSlot.Feet, feet.toString()])
 
     const trinket1 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Trinket1)
-    if (trinket1) ids.push([ItemSlot.Trinket1, trinket1.toString()])
+    if (trinket1?.toString() !== '0') ids.push([ItemSlot.Trinket1, trinket1.toString()])
 
     const trinket2 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Trinket2)
-    if (trinket2) ids.push([ItemSlot.Trinket2, trinket2.toString()])
+    if (trinket2?.toString() !== '0') ids.push([ItemSlot.Trinket2, trinket2.toString()])
 
     const trinket3 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Trinket3)
-    if (trinket3) ids.push([ItemSlot.Trinket3, trinket3.toString()])
+    if (trinket3?.toString() !== '0') ids.push([ItemSlot.Trinket3, trinket3.toString()])
 
     const pet = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Pet)
-    if (pet) ids.push([ItemSlot.Pet, pet.toString()])
+    if (pet?.toString() !== '0') ids.push([ItemSlot.Pet, pet.toString()])
 
     const neck = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Neck)
-    if (neck) ids.push([ItemSlot.Neck, neck.toString()])
+    if (neck?.toString() !== '0') ids.push([ItemSlot.Neck, neck.toString()])
 
     const finger1 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Finger1)
-    if (finger1) ids.push([ItemSlot.Finger1, finger1.toString()])
+    if (finger1?.toString() !== '0') ids.push([ItemSlot.Finger1, finger1.toString()])
 
     const finger2 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Finger2)
-    if (finger2) ids.push([ItemSlot.Finger2, finger2.toString()])
+    if (finger2?.toString() !== '0') ids.push([ItemSlot.Finger2, finger2.toString()])
   } catch(e) {
     log(e)
   }
@@ -96,6 +96,8 @@ export async function getMetaFromEquipment(app, equipment) {
   
   try {
     for (const equip of equipment) {
+      if (!equip?.[1] || equip[1] === '0') continue
+
       const item = decodeItem(equip[1])
 
       if (!item || !item.meta) continue
