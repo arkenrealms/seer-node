@@ -191,7 +191,7 @@ export async function getAllBarracksEvents(app, retry = false) {
         }
         await app.db.saveUserItem(user, item)
         
-        await app.live.emitAll('PlayerAction', { key: 'raid1-equipped', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, itemName: decodedItem, tokenId: tokenId.toString(), message: `${user.username} equipped ${decodedItem.name}` })
+        await app.live.emitAll('PlayerAction', { key: 'raid1-equipped', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, itemName: decodedItem.name, tokenId: tokenId.toString(), message: `${user.username} equipped ${decodedItem.name}` })
 
       }
 
@@ -212,7 +212,7 @@ export async function getAllBarracksEvents(app, retry = false) {
         
         await app.db.saveUserItem(user, item)
         
-        await app.live.emitAll('PlayerAction', { key: 'raid1-unequipped', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, itemName: decodedItem, tokenId: tokenId.toString(), message: `${user.username} unequipped ${decodedItem.name}` })
+        await app.live.emitAll('PlayerAction', { key: 'raid1-unequipped', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, itemName: decodedItem.name, tokenId: tokenId.toString(), message: `${user.username} unequipped ${decodedItem.name}` })
       }
 
       if (e.name === 'ActionBurn') {
