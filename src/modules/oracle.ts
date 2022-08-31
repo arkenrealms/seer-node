@@ -70,59 +70,87 @@ async function runOracle(app) {
     if (now > app.db.oracle.lastYearDate + (365 * 24 * 60 * 60 * 1000)) {
       app.db.oracle.lastYearDate = now
 
-      app.db.oracle.inflow.crafting.tokens.year = {...app.db.oracle.defaultTokens}
-      app.db.oracle.outflow.evolutionRewards.tokens.year = {...app.db.oracle.defaultTokens}
+      for (const key of ['crafting', 'fundraisers', 'investments', 'marketFees', 'characterFees']) {
+        for (const rune of Object.keys(app.db.oracle.inflow[key].tokens.year)) {
+          if (!app.db.oracle.inflow[key].tokens.total) app.db.oracle.inflow[key].tokens.total = {}
+          if (!app.db.oracle.inflow[key].tokens.total[rune]) app.db.oracle.inflow[key].tokens.total[rune] = 0
+
+          app.db.oracle.inflow[key].tokens.total[rune] += app.db.oracle.inflow[key].tokens.year[rune]
+        }
+
+        app.db.oracle.inflow[key].tokens.year = {...app.db.oracle.defaultTokens}
+      }
+
+      for (const key of ['evolutionRewards', 'infiniteRewards', 'salaries', 'affiliates', 'giveaways']) {
+        for (const rune of Object.keys(app.db.oracle.outflow[key].tokens.year)) {
+          if (!app.db.oracle.outflow[key].tokens.total) app.db.oracle.outflow[key].tokens.total = {}
+          if (!app.db.oracle.outflow[key].tokens.total[rune]) app.db.oracle.outflow[key].tokens.total[rune] = 0
+
+          app.db.oracle.outflow[key].tokens.total[rune] += app.db.oracle.outflow[key].tokens.year[rune]
+        }
+
+        app.db.oracle.outflow[key].tokens.year = {...app.db.oracle.defaultTokens}
+      }
     }
 
     if (now > app.db.oracle.lastMonthDate + (30 * 24 * 60 * 60 * 1000)) {
       app.db.oracle.lastMonthDate = now
 
-      for (const rune of Object.keys(app.db.oracle.inflow.crafting.tokens.month)) {
-        app.db.oracle.inflow.crafting.tokens.year[rune] += app.db.oracle.inflow.crafting.tokens.month[rune]
+      for (const key of ['crafting', 'fundraisers', 'investments', 'marketFees', 'characterFees']) {
+        for (const rune of Object.keys(app.db.oracle.inflow[key].tokens.month)) {
+          app.db.oracle.inflow[key].tokens.year[rune] += app.db.oracle.inflow[key].tokens.month[rune]
+        }
+
+        app.db.oracle.inflow[key].tokens.month = {...app.db.oracle.defaultTokens}
       }
 
-      for (const rune of Object.keys(app.db.oracle.outflow.evolutionRewards.tokens.month)) {
-        app.db.oracle.outflow.evolutionRewards.tokens.year[rune] += app.db.oracle.outflow.evolutionRewards.tokens.month[rune]
-      }
+      for (const key of ['evolutionRewards', 'infiniteRewards', 'salaries', 'affiliates', 'giveaways']) {
+        for (const rune of Object.keys(app.db.oracle.outflow[key].tokens.month)) {
+          app.db.oracle.outflow[key].tokens.year[rune] += app.db.oracle.outflow[key].tokens.month[rune]
+        }
 
-      app.db.oracle.inflow.crafting.tokens.month = {...app.db.oracle.defaultTokens}
-      app.db.oracle.outflow.evolutionRewards.tokens.month = {...app.db.oracle.defaultTokens}
+        app.db.oracle.outflow[key].tokens.month = {...app.db.oracle.defaultTokens}
+      }
     }
   
     if (now > app.db.oracle.lastWeekDate + (7 * 24 * 60 * 60 * 1000)) {
       app.db.oracle.lastWeekDate = now
 
-      for (const rune of Object.keys(app.db.oracle.inflow.crafting.tokens.week)) {
-        app.db.oracle.inflow.crafting.tokens.month[rune] += app.db.oracle.inflow.crafting.tokens.week[rune]
+      for (const key of ['crafting', 'fundraisers', 'investments', 'marketFees', 'characterFees']) {
+        for (const rune of Object.keys(app.db.oracle.inflow[key].tokens.week)) {
+          app.db.oracle.inflow[key].tokens.month[rune] += app.db.oracle.inflow[key].tokens.week[rune]
+        }
+
+        app.db.oracle.inflow[key].tokens.week = {...app.db.oracle.defaultTokens}
       }
 
-      for (const rune of Object.keys(app.db.oracle.outflow.evolutionRewards.tokens.week)) {
-        app.db.oracle.outflow.evolutionRewards.tokens.month[rune] += app.db.oracle.outflow.evolutionRewards.tokens.week[rune]
+      for (const key of ['evolutionRewards', 'infiniteRewards', 'salaries', 'affiliates', 'giveaways']) {
+        for (const rune of Object.keys(app.db.oracle.outflow[key].tokens.week)) {
+          app.db.oracle.outflow[key].tokens.month[rune] += app.db.oracle.outflow[key].tokens.week[rune]
+        }
+
+        app.db.oracle.outflow[key].tokens.week = {...app.db.oracle.defaultTokens}
       }
 
       await calculateGameRewards(app)
-
-      // Reset the rune values to zero
-      app.db.oracle.inflow.crafting.tokens.week = {...app.db.oracle.defaultTokens}
-      app.db.oracle.outflow.evolutionRewards.tokens.week = {...app.db.oracle.defaultTokens}
     }
 
-    app.db.oracle.totals = {
-      inflow: {
-        tokens: {
-          week: {...app.db.oracle.defaultTokens},
-          month: {...app.db.oracle.defaultTokens},
-          year: {...app.db.oracle.defaultTokens},
-        }
-      },
-      outflow: {
-        tokens: {
-          week: {...app.db.oracle.defaultTokens},
-          month: {...app.db.oracle.defaultTokens},
-          year: {...app.db.oracle.defaultTokens},
-        }
-      }
-    }
+    // app.db.oracle.totals = {
+    //   inflow: {
+    //     tokens: {
+    //       week: {...app.db.oracle.defaultTokens},
+    //       month: {...app.db.oracle.defaultTokens},
+    //       year: {...app.db.oracle.defaultTokens},
+    //     }
+    //   },
+    //   outflow: {
+    //     tokens: {
+    //       week: {...app.db.oracle.defaultTokens},
+    //       month: {...app.db.oracle.defaultTokens},
+    //       year: {...app.db.oracle.defaultTokens},
+    //     }
+    //   }
+    // }
 
     for (const inflowKey of app.db.oracle.inflow) {
       for (const periodKey in inflowKey) {
