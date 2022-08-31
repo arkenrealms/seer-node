@@ -78,6 +78,86 @@ export async function getPlayerEquipment(app, address) {
   return []
 }
 
+export async function getMetaFromEquipment(app, equipment) {
+  const totalMeta = {
+    feeReduction: 0,
+    harvestYield: 0,
+    harvestBurn: 0,
+    totalYield: 0,
+    randomRuneExchange: 0,
+    worldstoneShardChance: 0,
+    chanceToSendHarvestToHiddenPool: 0,
+    chanceToLoseHarvest: 0,
+    harvestFeeToken: null,
+    harvestFeePercent: 0,
+    unstakeLocked: false,
+    classRequired: null,
+    harvestFees: {},
+  }
+  
+  try {
+    for (const equip of equipment) {
+      const item = decodeItem(equip[1])
+
+      for (const attributeKey of Object.keys(item.meta)) {
+        const value = item.meta[attributeKey]
+  
+        if (attributeKey === 'harvestYield') {
+          totalMeta.harvestYield += value
+  
+          totalMeta.totalYield += totalMeta.totalYield * (value / 100)
+        } else if (attributeKey === 'harvestBurn') {
+          totalMeta.harvestBurn += value
+  
+          totalMeta.totalYield -= totalMeta.totalYield * (value / 100)
+        } else if (attributeKey === 'harvestFeeToken') {
+          totalMeta.harvestFeeToken = item.meta.harvestFeeToken
+        } else if (attributeKey === 'harvestFeePercent') {
+          totalMeta.harvestFeePercent = item.meta.harvestFeePercent
+        } else if (attributeKey === 'unstakeLocked') {
+          totalMeta.unstakeLocked = item.meta.unstakeLocked
+        } else if (attributeKey === 'classRequired') {
+          totalMeta.classRequired = item.meta.classRequired
+        } else if (attributeKey === 'harvestFees') {
+          totalMeta.harvestFees = item.meta.harvestFees
+        } else if (typeof value === 'number') {
+          if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
+  
+          totalMeta[attributeKey] += value
+        } else if (Array.isArray(value)) {
+          if (!totalMeta[attributeKey]) totalMeta[attributeKey] = []
+  
+          for (const kk of Object.keys(value)) {
+            if (typeof value[kk] === 'number') {
+              totalMeta[attributeKey][kk] += value[kk]
+            } else {
+              totalMeta[attributeKey][kk] = value[kk]
+            }
+          }
+        } else if (value !== null && typeof value === 'object') {
+          if (!totalMeta[attributeKey]) totalMeta[attributeKey] = {}
+  
+          for (const kk of Object.keys(value)) {
+            if (typeof value[kk] === 'number') {
+              if (!totalMeta[attributeKey][kk]) totalMeta[attributeKey][kk] = 0
+  
+              totalMeta[attributeKey][kk] += value[kk]
+            } else {
+              totalMeta[attributeKey][kk] = value[kk]
+            }
+          }
+        } else {
+          totalMeta[attributeKey] = value
+        }
+      }
+    }
+  } catch (e) {
+    log(e)
+  }
+
+  return totalMeta
+}
+
 export async function getAllBarracksEvents(app, retry = false) {
   if (app.config.barracks.updating) return
 

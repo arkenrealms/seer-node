@@ -8,6 +8,7 @@ import { log, removeDupes } from '@rune-backend-sdk/util'
 import { getClientSocket } from '@rune-backend-sdk/util/websocket'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
 import { getUsername } from '../util/getUsername'
+import { ItemAttributes } from 'rune-backend-sdk/build/data/items'
 
 const shortId = require('shortid')
 
@@ -553,13 +554,15 @@ export async function connectRealm(app, realm) {
 
     try {
       const equipment = await app.barracks.getPlayerEquipment(req.data.address)
-      const bonuses = {
-        MovementSpeedIncrease: req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb' ? 200 : 0
+      const meta = app.barracks.getMetaFromEquipment(equipment)
+
+      if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
+        meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 200
       }
 
       const character = {
         equipment,
-        bonuses
+        meta
       }
 
       client.socket.emit('GetCharacterResponse', {
