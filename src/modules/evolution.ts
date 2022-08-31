@@ -564,9 +564,9 @@ export async function connectRealm(app, realm) {
           meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
         }
   
-        if (req.data.address === '0x6f756AFaC862A2486f4c1C96b46E00A98a70bEA2') {
-          meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
-        }
+        // if (req.data.address === '0x6f756AFaC862A2486f4c1C96b46E00A98a70bEA2') {
+        //   meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
+        // }
   
         character = {
           equipment,
