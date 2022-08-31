@@ -15,7 +15,7 @@ for (const key of Object.keys(RuneId)) {
   AddressToRune[contractInfo[key.toLowerCase()][56]] = key
 }
 
-const EquipmentCache = {}
+let EquipmentCache = {}
 
 export async function getPlayerEquipment(app, address) {
   try {
@@ -222,6 +222,10 @@ export async function getAllBarracksEvents(app, retry = false) {
 }
 
 export async function monitorBarracksEvents(app) {
+  app.barracks = {
+    getPlayerEquipment: getPlayerEquipment.bind(app)
+  }
+  
   app.contracts.barracks.on('Equip', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
@@ -249,4 +253,9 @@ export async function monitorBarracksEvents(app) {
   app.contracts.barracks.on('ActionSwap', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
+
+  // Clear equipment cache every 10 mins
+  setInterval(function() {
+    EquipmentCache = {}
+  }, 10 * 60 * 1000)
 }

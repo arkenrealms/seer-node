@@ -547,6 +547,31 @@ export async function connectRealm(app, realm) {
 //     }
 //   ]
 // }
+
+  client.socket.on('GetCharacterRequest', async function (req) {
+    try {
+      const equipment = await app.barracks.getPlayerEquipment(req.data.address)
+      const bonuses = {
+        MovementSpeedIncrease: req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb' ? 200 : 0
+      }
+
+      const character = {
+        equipment,
+        bonuses
+      }
+
+      client.socket.emit('GetCharacterResponse', {
+        id: req.id,
+        data: { status: 1, character }
+      })
+    } catch(e) {
+      client.socket.emit('GetCharacterResponse', {
+        id: req.id,
+        data: { status: 0, message: 'Invalid signature' }
+      })
+    }
+  })
+
   client.socket.on('SaveRoundRequest', async function (req) {
     // Iterate the items found, add to user.evolution.rewards
     // Itereate the runes found, add to user.evolution.runes
@@ -743,7 +768,7 @@ export async function connectRealm(app, realm) {
         if (!user.evolution.hashes) user.evolution.hashes = []
         if (!user.evolution.hashes.includes(player.hash)) user.evolution.hashes.push(player.hash)
 
-        user.evolution.hashes = user.evolution.hashes.filter(function(item, pos) { user.evolution.hashes.indexOf(item) === pos })
+        user.evolution.hashes = user.evolution.hashes.filter(function(item, pos) { return user.evolution.hashes.indexOf(item) === pos })
 
         // users.push(user)
 
