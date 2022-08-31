@@ -19,16 +19,16 @@ async function calculateGameRewards(app) {
   rewardWinnerAmountMax = parseFloat((Math.ceil(rewardWinnerAmountMax * 200) / 200).toFixed(3))
 
   // Set min
-  if (rewardWinnerAmountPerLegitPlayer < 0.005)
-      rewardWinnerAmountPerLegitPlayer = 0.005
+  if (rewardWinnerAmountPerLegitPlayer < 0.015)
+      rewardWinnerAmountPerLegitPlayer = 0.015
   if (rewardWinnerAmountMax < 0.3)
       rewardWinnerAmountMax = 0.3
 
   // Set max
-  if (rewardWinnerAmountPerLegitPlayer > 0.1)
-      rewardWinnerAmountPerLegitPlayer = 0.1
-  if (rewardWinnerAmountMax > 1)
-      rewardWinnerAmountMax = 1
+  if (rewardWinnerAmountPerLegitPlayer > 0.030)
+      rewardWinnerAmountPerLegitPlayer = 0.030
+  if (rewardWinnerAmountMax > 0.6)
+      rewardWinnerAmountMax = 0.6
 
   const itemRewards = {
     items: [],
