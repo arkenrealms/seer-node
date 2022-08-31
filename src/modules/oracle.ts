@@ -65,7 +65,7 @@ async function runOracle(app) {
       app.db.oracle.inflow.investments.tokens.week.usd = 2000
     }
 
-    if (now > app.db.oracle.lastYearDate + (7 * 24 * 60 * 60 * 1000)) {
+    if (now > app.db.oracle.lastYearDate + (365 * 24 * 60 * 60 * 1000)) {
       app.db.oracle.lastYearDate = now
 
       app.db.oracle.inflow.crafting.tokens.year = {...app.db.oracle.defaultTokens}
@@ -87,7 +87,7 @@ async function runOracle(app) {
       app.db.oracle.outflow.evolutionRewards.tokens.month = {...app.db.oracle.defaultTokens}
     }
   
-    if (now > app.db.oracle.lastWeekDate + (365 * 24 * 60 * 60 * 1000)) {
+    if (now > app.db.oracle.lastWeekDate + (7 * 24 * 60 * 60 * 1000)) {
       app.db.oracle.lastWeekDate = now
 
       for (const rune of Object.keys(app.db.oracle.inflow.crafting.tokens.week)) {
