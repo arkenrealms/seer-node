@@ -11,7 +11,7 @@ async function calculateGameRewards(app) {
   let rewardWinnerAmountMax = 0
 
   // Set the round reward based on vault zod income in last 1 week, and the desired average player count for 2016 rounds per week
-  rewardWinnerAmountMax = (app.db.oracle.inflow.crafting.week.tokens.zod * app.db.oracle.incomeRewarded) / app.db.oracle.roundsPerWeek / app.db.oracle.estimatedActivePlayerCount / app.db.oracle.consolidationPrizeMultiplier * app.db.oracle.boostMultiplier
+  rewardWinnerAmountMax = (app.db.oracle.inflow.crafting.tokens.week.zod * app.db.oracle.incomeRewarded) / app.db.oracle.roundsPerWeek / app.db.oracle.estimatedActivePlayerCount / app.db.oracle.consolidationPrizeMultiplier * app.db.oracle.boostMultiplier
   rewardWinnerAmountPerLegitPlayer = rewardWinnerAmountMax / app.db.oracle.estimatedActivePlayerCount
 
   // Round to the nearest 0.005
