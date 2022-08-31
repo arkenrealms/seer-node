@@ -553,8 +553,8 @@ export async function connectRealm(app, realm) {
     log('GetCharacterRequest', req)
 
     try {
-      const equipment = await app.barracks.getPlayerEquipment(req.data.address)
-      const meta = app.barracks.getMetaFromEquipment(equipment)
+      const equipment = await app.barracks.getPlayerEquipment(app, req.data.address)
+      const meta = app.barracks.getMetaFromEquipment(app, equipment)
 
       if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
         meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 200

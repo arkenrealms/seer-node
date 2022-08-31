@@ -99,6 +99,8 @@ export async function getMetaFromEquipment(app, equipment) {
     for (const equip of equipment) {
       const item = decodeItem(equip[1])
 
+      if (!item || !item.meta) continue
+
       for (const attributeKey of Object.keys(item.meta)) {
         const value = item.meta[attributeKey]
   
@@ -303,8 +305,8 @@ export async function getAllBarracksEvents(app, retry = false) {
 
 export async function monitorBarracksEvents(app) {
   app.barracks = {
-    getPlayerEquipment: getPlayerEquipment.bind(app),
-    getMetaFromEquipment: getMetaFromEquipment.bind(app)
+    getPlayerEquipment,
+    getMetaFromEquipment
   }
   
   app.contracts.barracks.on('Equip', async () => {
