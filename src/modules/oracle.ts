@@ -116,6 +116,8 @@ async function runOracle(app) {
     if (now > app.db.oracle.lastWeekDate + (7 * 24 * 60 * 60 * 1000)) {
       app.db.oracle.lastWeekDate = now
 
+      await calculateGameRewards(app) // Needs to be done before reset
+
       for (const key of ['crafting', 'fundraisers', 'investments', 'marketFees', 'characterFees']) {
         for (const rune of Object.keys(app.db.oracle.inflow[key].tokens.week)) {
           app.db.oracle.inflow[key].tokens.month[rune] += app.db.oracle.inflow[key].tokens.week[rune]
@@ -131,8 +133,6 @@ async function runOracle(app) {
 
         app.db.oracle.outflow[key].tokens.week = {...app.db.oracle.defaultTokens}
       }
-
-      await calculateGameRewards(app)
     }
 
     // app.db.oracle.totals = {
