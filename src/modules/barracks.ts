@@ -23,49 +23,50 @@ export async function getPlayerEquipment(app, address) {
 
     const ids = []
 
-    const leftHand = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.LeftHand).call()
+    const leftHand = await app.contracts.barracks.getEquippedItem(address, ItemSlot.LeftHand)
+    console.log('555555', leftHand)
     if (leftHand) ids.push([ItemSlot.LeftHand, new BigNumber(leftHand).toString()])
 
-    const rightHand = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.RightHand).call()
+    const rightHand = await app.contracts.barracks.getEquippedItem(address, ItemSlot.RightHand)
     if (rightHand) ids.push([ItemSlot.RightHand, new BigNumber(rightHand).toString()])
 
-    const head = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Head).call()
+    const head = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Head)
     if (head) ids.push([ItemSlot.Head, new BigNumber(head).toString()])
 
-    const hands = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Hands).call()
+    const hands = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Hands)
     if (hands) ids.push([ItemSlot.Hands, new BigNumber(hands).toString()])
 
-    const belt = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Waist).call()
+    const belt = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Waist)
     if (belt) ids.push([ItemSlot.Waist, new BigNumber(belt).toString()])
 
-    const legs = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Legs).call()
+    const legs = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Legs)
     if (legs) ids.push([ItemSlot.Legs, new BigNumber(legs).toString()])
 
-    const chest = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Chest).call()
+    const chest = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Chest)
     if (chest) ids.push([ItemSlot.Chest, new BigNumber(chest).toString()])
 
-    const feet = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Feet).call()
+    const feet = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Feet)
     if (feet) ids.push([ItemSlot.Feet, new BigNumber(feet).toString()])
 
-    const trinket1 = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Trinket1).call()
+    const trinket1 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Trinket1)
     if (trinket1) ids.push([ItemSlot.Trinket1, new BigNumber(trinket1).toString()])
 
-    const trinket2 = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Trinket2).call()
+    const trinket2 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Trinket2)
     if (trinket2) ids.push([ItemSlot.Trinket2, new BigNumber(trinket2).toString()])
 
-    const trinket3 = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Trinket3).call()
+    const trinket3 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Trinket3)
     if (trinket3) ids.push([ItemSlot.Trinket3, new BigNumber(trinket3).toString()])
 
-    const pet = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Pet).call()
+    const pet = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Pet)
     if (pet) ids.push([ItemSlot.Pet, new BigNumber(pet).toString()])
 
-    const neck = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Neck).call()
+    const neck = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Neck)
     if (neck) ids.push([ItemSlot.Neck, new BigNumber(neck).toString()])
 
-    const finger1 = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Finger1).call()
+    const finger1 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Finger1)
     if (finger1) ids.push([ItemSlot.Finger1, new BigNumber(finger1).toString()])
 
-    const finger2 = await app.contracts.barracks.methods.getEquippedItem(address, ItemSlot.Finger2).call()
+    const finger2 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Finger2)
     if (finger2) ids.push([ItemSlot.Finger2, new BigNumber(finger2).toString()])
 
     EquipmentCache[address] = ids
