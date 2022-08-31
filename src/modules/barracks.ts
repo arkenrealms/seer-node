@@ -100,34 +100,36 @@ export async function getMetaFromEquipment(app, equipment) {
 
       const item = decodeItem(equip[1])
 
-      if (!item || !item.meta) continue
+      if (!item || !item.meta || !item.meta.attributes) continue
 
-      for (const attributeKey of Object.keys(item.meta)) {
-        const value = item.meta[attributeKey]
+      for (const attributeKey of Object.keys(item.meta.attributes)) {
+        const value = item.meta.attributes[attributeKey]
   
-        if (attributeKey === 'harvestYield') {
-          totalMeta.harvestYield += value
+        // if (attributeKey === 'harvestYield') {
+        //   totalMeta.harvestYield += value
   
-          totalMeta.totalYield += totalMeta.totalYield * (value / 100)
-        } else if (attributeKey === 'harvestBurn') {
-          totalMeta.harvestBurn += value
+        //   totalMeta.totalYield += totalMeta.totalYield * (value / 100)
+        // } else if (attributeKey === 'harvestBurn') {
+        //   totalMeta.harvestBurn += value
   
-          totalMeta.totalYield -= totalMeta.totalYield * (value / 100)
-        } else if (attributeKey === 'harvestFeeToken') {
-          totalMeta.harvestFeeToken = item.meta.harvestFeeToken
-        } else if (attributeKey === 'harvestFeePercent') {
-          totalMeta.harvestFeePercent = item.meta.harvestFeePercent
-        } else if (attributeKey === 'unstakeLocked') {
-          totalMeta.unstakeLocked = item.meta.unstakeLocked
-        } else if (attributeKey === 'classRequired') {
-          totalMeta.classRequired = item.meta.classRequired
-        } else if (attributeKey === 'harvestFees') {
-          totalMeta.harvestFees = item.meta.harvestFees
-        } else if (typeof value === 'number') {
-          if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
+        //   totalMeta.totalYield -= totalMeta.totalYield * (value / 100)
+        // } else if (attributeKey === 'harvestFeeToken') {
+        //   totalMeta.harvestFeeToken = item.meta.harvestFeeToken
+        // } else if (attributeKey === 'harvestFeePercent') {
+        //   totalMeta.harvestFeePercent = item.meta.harvestFeePercent
+        // } else if (attributeKey === 'unstakeLocked') {
+        //   totalMeta.unstakeLocked = item.meta.unstakeLocked
+        // } else if (attributeKey === 'classRequired') {
+        //   totalMeta.classRequired = item.meta.classRequired
+        // } else if (attributeKey === 'harvestFees') {
+        //   totalMeta.harvestFees = item.meta.harvestFees
+        // } else if (typeof value === 'number') {
+        //   if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
   
-          totalMeta[attributeKey] += value
-        } else if (Array.isArray(value)) {
+        //   totalMeta[attributeKey] += value
+        // } else 
+        
+        if (Array.isArray(value)) {
           if (!totalMeta[attributeKey]) totalMeta[attributeKey] = []
   
           for (const kk of Object.keys(value)) {
