@@ -48,6 +48,8 @@ async function calculateGameRewards(app) {
   app.evolution.config.itemRewardsQueued = itemRewards
   app.evolution.config.rewardWinnerAmountPerLegitPlayerQueued = rewardWinnerAmountPerLegitPlayer
   app.evolution.config.rewardWinnerAmountMaxQueued = rewardWinnerAmountMax
+
+  log('New evolution config: ', app.evolution.config)
 }
 
 async function runOracle(app) {
