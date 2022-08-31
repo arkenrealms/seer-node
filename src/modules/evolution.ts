@@ -549,6 +549,8 @@ export async function connectRealm(app, realm) {
 // }
 
   client.socket.on('GetCharacterRequest', async function (req) {
+    log('GetCharacterRequest', req)
+
     try {
       const equipment = await app.barracks.getPlayerEquipment(req.data.address)
       const bonuses = {
