@@ -12,6 +12,7 @@ import { ItemAttributes } from 'rune-backend-sdk/build/data/items'
 
 const shortId = require('shortid')
 
+const CharacterCache = {}
 const ioCallbacks = {}
 
 async function rsCall(app, realm, name, data = undefined) {
@@ -553,16 +554,22 @@ export async function connectRealm(app, realm) {
     log('GetCharacterRequest', req)
 
     try {
-      const equipment = await app.barracks.getPlayerEquipment(app, req.data.address)
-      const meta = app.barracks.getMetaFromEquipment(app, equipment)
+      let character = CharacterCache[req.data.address]
 
-      if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
-        meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 200
-      }
+      if (!character) {
+        const equipment = await app.barracks.getPlayerEquipment(app, req.data.address)
+        const meta = app.barracks.getMetaFromEquipment(app, equipment)
+  
+        if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
+          meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 200
+        }
+  
+        character = {
+          equipment,
+          meta
+        }
 
-      const character = {
-        equipment,
-        meta
+        CharacterCache[req.data.address] = character
       }
 
       client.socket.emit('GetCharacterResponse', {
