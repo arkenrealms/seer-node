@@ -69,9 +69,9 @@ export async function getAllItemEvents(app, retry = false) {
               await app.db.saveCubeTransfer(from, userAddress)
             }
 
-            const receiveUser = await app.db.loadUser(userAddress)
+            const fromUser = await app.db.loadUser(from)
 
-            await app.live.emitAll('PlayerAction', { key: 'item-transfer', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, username2: receiveUser.name, message: `${user.username || `${from.slice(0, 5)}...`} transfered ${decodedItem.name} to ${receiveUser.name || `${userAddress.slice(0, 5)}...`}` })
+            await app.live.emitAll('PlayerAction', { key: 'item-transfer', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: fromUser.username, username2: user.username, message: `${fromUser.username || `${from.slice(0, 5)}...`} transfered ${decodedItem.name} to ${user.username || `${userAddress.slice(0, 5)}...`}` })
           }
 
           await app.db.saveUserItem(user, itemData)
