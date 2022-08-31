@@ -58,11 +58,11 @@ async function runOracle(app) {
 
     // Custom
     {
-      app.db.oracle.inflow.fundraisers.tokens.month.rxs = (1000000 + 500000 + 200000)
-      app.db.oracle.inflow.fundraisers.tokens.week.rxs = (200000 + 100000)
+      // app.db.oracle.inflow.fundraisers.tokens.month.rxs = (1000000 + 500000 + 200000)
+      // app.db.oracle.inflow.fundraisers.tokens.week.rxs = (200000 + 100000)
 
-      app.db.oracle.outflow.salaries.tokens.week.usd = 2000
-      app.db.oracle.inflow.investments.tokens.week.usd = 2000
+      // app.db.oracle.outflow.salaries.tokens.week.usd = 2000
+      // app.db.oracle.inflow.investments.tokens.week.usd = 2000
     }
 
     if (now > app.db.oracle.lastYearDate + (365 * 24 * 60 * 60 * 1000)) {
