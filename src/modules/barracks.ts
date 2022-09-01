@@ -78,21 +78,7 @@ export async function getPlayerEquipment(app, address) {
 }
 
 export async function getMetaFromEquipment(app, equipment) {
-  const totalMeta = {
-    feeReduction: 0,
-    harvestYield: 0,
-    harvestBurn: 0,
-    totalYield: 0,
-    randomRuneExchange: 0,
-    worldstoneShardChance: 0,
-    chanceToSendHarvestToHiddenPool: 0,
-    chanceToLoseHarvest: 0,
-    harvestFeeToken: null,
-    harvestFeePercent: 0,
-    unstakeLocked: false,
-    classRequired: null,
-    harvestFees: {},
-  }
+  const totalMeta = {}
   
   try {
     for (const equip of equipment) {
@@ -153,7 +139,13 @@ console.log(item)
             }
           }
         } else {
-          totalMeta[attributeKey] = value
+          if (typeof value === 'number') {
+            if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
+
+            totalMeta[attributeKey] += value
+          } else {
+            totalMeta[attributeKey] = value
+          }
         }
       }
     }
