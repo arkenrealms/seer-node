@@ -12,7 +12,7 @@ import { ItemAttributes } from 'rune-backend-sdk/build/data/items'
 
 const shortId = require('shortid')
 
-const CharacterCache = {}
+let CharacterCache = {}
 const ioCallbacks = {}
 
 async function rsCall(app, realm, name, data = undefined) {
@@ -1309,6 +1309,10 @@ export async function monitorEvolutionRealms(app) {
 
   await connectRealms(app)
   await updateRealms(app)
+
+  setInterval(function() {
+    CharacterCache = {}
+  }, 10 * 60 * 1000)
 
   setTimeout(() => monitorEvolutionRealms(app), 30 * 1000)
 }

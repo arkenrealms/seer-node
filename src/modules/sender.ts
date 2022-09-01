@@ -97,6 +97,8 @@ export async function getAllSenderEvents(app, retry = false) {
           await app.db.saveUser(user)
 
           await app.live.emitAll('PlayerAction', { key: 'reward-claim', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} claimed rewards` })
+        } else {
+          log('Error finalizing claim', e, finalizeRes)
         }
       } catch (ex) {
         log(ex)
