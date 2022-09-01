@@ -178,6 +178,7 @@ export async function getAllMarketEvents(app, retry = false) {
             const item = app.db.loadItem(specificTrade.item.id)
       
             const sellerUser = await app.db.loadUser(seller)
+            const buyerUser = await app.db.loadUser(buyer)
 
             await app.db.saveUserTrade(sellerUser, specificTrade)
             await app.db.saveUserTrade(await app.db.loadUser(buyer), specificTrade)
@@ -187,7 +188,7 @@ export async function getAllMarketEvents(app, retry = false) {
 
             app.db.oracle.inflow.marketFees.tokens.week.rxs += toShort(price) * 0.05
             
-            await app.live.emitAll('PlayerAction', { key: 'market-buy', createdAt: new Date().getTime() / 1000, address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: specificTrade.tokenId, tradeId: specificTrade.id, message: `${sellerUser.username} bought ${decodedItem.name} in Market` })
+            await app.live.emitAll('PlayerAction', { key: 'market-buy', createdAt: new Date().getTime() / 1000, address: seller, username: buyerUser.username, username2: sellerUser.username, itemName: decodedItem.name, tokenId: specificTrade.tokenId, tradeId: specificTrade.id, message: `${buyerUser.username || `${buyer.slice(0, 7)}...`} bought ${sellerUser.username || `${seller.slice(0, 7)}...`}'s ${decodedItem.name} in Market` })
 
             log('Buy', specificTrade)
           }
