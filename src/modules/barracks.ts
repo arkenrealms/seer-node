@@ -82,70 +82,74 @@ export async function getMetaFromEquipment(app, equipment) {
   
   try {
     for (const equip of equipment) {
-      if (!equip?.[1] || equip[1] === '0') continue
+      try {
+        if (!equip?.[1] || equip[1] === '0') continue
 
-      const item = decodeItem(equip[1])
+        const item = decodeItem(equip[1])
 
-      if (!item || !item.meta || !item.meta.attributes) continue
+        if (!item || !item.meta || !item.meta.attributes) continue
 
-      for (const attributeKey of Object.keys(item.meta.attributes)) {
-        const value = item.meta.attributes[attributeKey]
-  
-        // if (attributeKey === 'harvestYield') {
-        //   totalMeta.harvestYield += value
-  
-        //   totalMeta.totalYield += totalMeta.totalYield * (value / 100)
-        // } else if (attributeKey === 'harvestBurn') {
-        //   totalMeta.harvestBurn += value
-  
-        //   totalMeta.totalYield -= totalMeta.totalYield * (value / 100)
-        // } else if (attributeKey === 'harvestFeeToken') {
-        //   totalMeta.harvestFeeToken = item.meta.harvestFeeToken
-        // } else if (attributeKey === 'harvestFeePercent') {
-        //   totalMeta.harvestFeePercent = item.meta.harvestFeePercent
-        // } else if (attributeKey === 'unstakeLocked') {
-        //   totalMeta.unstakeLocked = item.meta.unstakeLocked
-        // } else if (attributeKey === 'classRequired') {
-        //   totalMeta.classRequired = item.meta.classRequired
-        // } else if (attributeKey === 'harvestFees') {
-        //   totalMeta.harvestFees = item.meta.harvestFees
-        // } else if (typeof value === 'number') {
-        //   if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
-  
-        //   totalMeta[attributeKey] += value
-        // } else 
-        
-        if (Array.isArray(value)) {
-          if (!totalMeta[attributeKey]) totalMeta[attributeKey] = []
-  
-          for (const kk of Object.keys(value)) {
-            if (typeof value[kk] === 'number') {
-              totalMeta[attributeKey][kk] += value[kk]
-            } else {
-              totalMeta[attributeKey][kk] = value[kk]
+        for (const attributeKey of Object.keys(item.meta.attributes)) {
+          const value = item.meta.attributes[attributeKey]
+    
+          // if (attributeKey === 'harvestYield') {
+          //   totalMeta.harvestYield += value
+    
+          //   totalMeta.totalYield += totalMeta.totalYield * (value / 100)
+          // } else if (attributeKey === 'harvestBurn') {
+          //   totalMeta.harvestBurn += value
+    
+          //   totalMeta.totalYield -= totalMeta.totalYield * (value / 100)
+          // } else if (attributeKey === 'harvestFeeToken') {
+          //   totalMeta.harvestFeeToken = item.meta.harvestFeeToken
+          // } else if (attributeKey === 'harvestFeePercent') {
+          //   totalMeta.harvestFeePercent = item.meta.harvestFeePercent
+          // } else if (attributeKey === 'unstakeLocked') {
+          //   totalMeta.unstakeLocked = item.meta.unstakeLocked
+          // } else if (attributeKey === 'classRequired') {
+          //   totalMeta.classRequired = item.meta.classRequired
+          // } else if (attributeKey === 'harvestFees') {
+          //   totalMeta.harvestFees = item.meta.harvestFees
+          // } else if (typeof value === 'number') {
+          //   if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
+    
+          //   totalMeta[attributeKey] += value
+          // } else 
+          
+          if (Array.isArray(value)) {
+            if (!totalMeta[attributeKey]) totalMeta[attributeKey] = []
+    
+            for (const kk of Object.keys(value)) {
+              if (typeof value[kk] === 'number') {
+                totalMeta[attributeKey][kk] += value[kk]
+              } else {
+                totalMeta[attributeKey][kk] = value[kk]
+              }
             }
-          }
-        } else if (value !== null && typeof value === 'object') {
-          if (!totalMeta[attributeKey]) totalMeta[attributeKey] = {}
-  
-          for (const kk of Object.keys(value)) {
-            if (typeof value[kk] === 'number') {
-              if (!totalMeta[attributeKey][kk]) totalMeta[attributeKey][kk] = 0
-  
-              totalMeta[attributeKey][kk] += value[kk]
-            } else {
-              totalMeta[attributeKey][kk] = value[kk]
+          } else if (value !== null && typeof value === 'object') {
+            if (!totalMeta[attributeKey]) totalMeta[attributeKey] = {}
+    
+            for (const kk of Object.keys(value)) {
+              if (typeof value[kk] === 'number') {
+                if (!totalMeta[attributeKey][kk]) totalMeta[attributeKey][kk] = 0
+    
+                totalMeta[attributeKey][kk] += value[kk]
+              } else {
+                totalMeta[attributeKey][kk] = value[kk]
+              }
             }
-          }
-        } else {
-          if (typeof value === 'number') {
-            if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
-
-            totalMeta[attributeKey] += value
           } else {
-            totalMeta[attributeKey] = value
+            if (typeof value === 'number') {
+              if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
+
+              totalMeta[attributeKey] += value
+            } else {
+              totalMeta[attributeKey] = value
+            }
           }
         }
+      } catch (e) {
+        log(e)
       }
     }
   } catch (e) {
