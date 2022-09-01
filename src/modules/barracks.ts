@@ -82,11 +82,10 @@ export async function getMetaFromEquipment(app, equipment) {
   
   try {
     for (const equip of equipment) {
-      console.log(equip)
       if (!equip?.[1] || equip[1] === '0') continue
 
       const item = decodeItem(equip[1])
-console.log(item)
+
       if (!item || !item.meta || !item.meta.attributes) continue
 
       for (const attributeKey of Object.keys(item.meta.attributes)) {
