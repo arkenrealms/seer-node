@@ -53,6 +53,8 @@ function initEventHandler(app) {
       })
 
       socket.on('RC_SaveUserClaimRequest', async function(req) {
+        log('RC_SaveUserClaimRequest', req)
+        
         if (!socket.authed) {
           emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,

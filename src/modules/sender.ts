@@ -93,12 +93,13 @@ export async function getAllSenderEvents(app, retry = false) {
     
         const finalizeRes = await (await fetch(`${app.sender.coordinatorEndpoint}/claim/finalize/${e.args.requestId}`, requestOptions)).json() // ?${rand}
 
-        if (finalizeRes.status === 1) {
-          await app.db.saveUser(user)
+        await app.db.saveUser(user)
 
+        if (finalizeRes.status === 1) {
           await app.live.emitAll('PlayerAction', { key: 'reward-claim', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} claimed rewards` })
         } else {
           log('Error finalizing claim', e, finalizeRes)
+          await app.live.emitAll('PlayerAction', { key: 'reward-claim', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} claimed (finalization failed)` })
         }
       } catch (ex) {
         log(ex)
