@@ -2,6 +2,7 @@ import * as ethers from 'ethers'
 import { getHighestId, toShort, log } from '@rune-backend-sdk/util'
 import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
+import { ItemRarity, RuneNames } from '@rune-backend-sdk/data/items'
 
 export async function getAllMarketEvents(app, retry = false) {
   if (app.config.trades.updating) return
@@ -124,10 +125,14 @@ export async function getAllMarketEvents(app, retry = false) {
 
             const item = app.db.loadItem(specificTrade.item.id)
 
-            await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
+            const sellerUser = await app.db.loadUser(seller)
+
+            await app.db.saveUserTrade(sellerUser, specificTrade)
             await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
             await app.db.saveItemTrade(item, specificTrade)
             await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller })
+
+            await app.live.emitAll('PlayerAction', { key: 'market-update', createdAt: new Date().getTime() / 1000, address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: tokenId.toString(), message: `${sellerUser.username} updated ${decodedItem.name} in Market` })
             
             log('Update', specificTrade)
           }
@@ -151,10 +156,14 @@ export async function getAllMarketEvents(app, retry = false) {
 
             const item = app.db.loadItem(specificTrade.item.id)
 
-            await app.db.saveUserTrade(await app.db.loadUser(seller), specificTrade)
+            const sellerUser = await app.db.loadUser(seller)
+
+            await app.db.saveUserTrade(sellerUser, specificTrade)
             await app.db.saveTokenTrade(app.db.loadToken(specificTrade.tokenId), specificTrade)
             await app.db.saveItemTrade(item, specificTrade)
             await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller })
+
+            await app.live.emitAll('PlayerAction', { key: 'market-delist', createdAt: new Date().getTime() / 1000, address: seller, username: sellerUser.username, itemName: decodedItem.name, tokenId: tokenId.toString(), message: `${sellerUser.username} delisted ${decodedItem.name} in Market` })
             
             log('Delist', specificTrade)
           }
@@ -189,6 +198,10 @@ export async function getAllMarketEvents(app, retry = false) {
             app.db.oracle.inflow.marketFees.tokens.week.rxs += toShort(price) * 0.05
             
             await app.live.emitAll('PlayerAction', { key: 'market-buy', createdAt: new Date().getTime() / 1000, address: seller, username: buyerUser.username, username2: sellerUser.username, itemName: decodedItem.name, tokenId: specificTrade.tokenId, tradeId: specificTrade.id, message: `${buyerUser.username || `${buyer.slice(0, 7)}...`} bought ${sellerUser.username || `${seller.slice(0, 7)}...`}'s ${decodedItem.name} in Market` })
+
+            if (decodedItem.rarity.id === ItemRarity.Mythic.id) {
+              await app.notices.add('market-buy', { key: 'market-buy', createdAt: new Date().getTime() / 1000, address: seller, username: buyerUser.username, username2: sellerUser.username, itemName: decodedItem.name, tokenId: specificTrade.tokenId, tradeId: specificTrade.id, message: `${buyerUser.username || `${buyer.slice(0, 7)}...`} bought ${sellerUser.username || `${seller.slice(0, 7)}...`}'s ${decodedItem.name} in Market` })
+            }
 
             log('Buy', specificTrade)
           }

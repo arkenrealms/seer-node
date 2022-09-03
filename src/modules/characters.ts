@@ -21,6 +21,7 @@ export async function getAllCharacterEvents(app, retry = false) {
       if (e.name === 'Transfer') {
         const { from, to: userAddress, tokenId } = e.args
 
+        const fromUser = await app.db.loadUser(from)
         const user = await app.db.loadUser(userAddress)
 
         if (!user.characters.length) {
@@ -45,11 +46,11 @@ export async function getAllCharacterEvents(app, retry = false) {
           // log('8888', logInfo, e)
           app.db.oracle.inflow.characterFees.tokens.week.rxs += app.config.characterMintCost
 
-          await app.live.emitAll('PlayerAction', { key: 'character-create', createdAt: new Date().getTime() / 1000, address: userAddress, username: user.username, message: `${user.username || `${from.slice(0, 7)}...`} created a new character` })
+          await app.live.emitAll('PlayerAction', { key: 'character-create', createdAt: new Date().getTime() / 1000, address: userAddress, username: user.username, message: `${user.username || `${userAddress.slice(0, 7)}...`} created a new character` })
         } else {
           await app.db.saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
 
-          await app.live.emitAll('PlayerAction', { key: 'character-transfer', createdAt: new Date().getTime() / 1000, address: userAddress, username: user.username, message: `${user.username || `${from.slice(0, 7)}...`} transferred a character` })
+          await app.live.emitAll('PlayerAction', { key: 'character-transfer', createdAt: new Date().getTime() / 1000, address: userAddress, username: user.username, message: `${fromUser.username || `${from.slice(0, 7)}...`} transferred a character to ${user.username || `${userAddress.slice(0, 7)}...`}` })
         }
 
         await app.db.saveCharacterOwner(app.db.loadCharacter(characterData.id), characterData)

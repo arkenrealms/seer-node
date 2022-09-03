@@ -227,6 +227,21 @@ function disconnectClient(client) {
   cleanupClient(client)
 }
 
+
+async function getCharacter(app, address) {
+  const equipment = await app.barracks.getPlayerEquipment(app, address)
+  const meta = await app.barracks.getMetaFromEquipment(app, equipment)
+
+  if (address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
+    meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
+  }
+
+  return {
+    equipment,
+    meta
+  }
+}
+
 const runes = ['el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'amn', 'sol', 'shael', 'dol', 'hel', 'io', 'lum', 'ko', 'fal', 'lem',  'pul', 'um', 'mal', 'ist', 'gul', 'vex', 'ohm', 'lo', 'sur', 'ber', 'jah', 'cham', 'zod']
 
 export async function connectRealm(app, realm) {
@@ -568,10 +583,7 @@ export async function connectRealm(app, realm) {
         //   meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
         // }
   
-        character = {
-          equipment,
-          meta
-        }
+        character = await getCharacter(app, req.data.address)
 
         CharacterCache[req.data.address] = character
       }
@@ -730,6 +742,11 @@ export async function connectRealm(app, realm) {
 
         app.db.setUserActive(user)
 
+        if (player.killStreak >= 5) {
+          await app.live.emitAll('PlayerAction', { key: 'evolution1-killstreak', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} got a ${player.killstreak} killstreak in Evolution` })
+          await app.notices.add('evolution1-killstreak', { key: 'evolution1-killstreak', address: user.address, username: user.username, message: `${user.username} got a ${player.killstreak} killstreak in Evolution` })
+        }
+
         for (const pickup of player.pickups) {
           if (pickup.type === 'rune') {
             // TODO: change to authoritative
@@ -853,6 +870,20 @@ export async function connectRealm(app, realm) {
 
           // if (!user) continue // He wasn't valid
           if (user.username) { // Make sure cant earn without a character
+            if (req.data.round.winners[0].address === player.address) {
+              let character = CharacterCache[player.address]
+
+              if (!character) {
+                character = await getCharacter(app, player.address)
+
+                CharacterCache[player.address] = character
+              }
+
+              const WinRewardsIncrease = character.meta[1050] || 0
+              const WinRewardsDecrease = character.meta[1060] || 0
+              rewardWinnerMap[index] *= (1 + (WinRewardsIncrease - WinRewardsDecrease) / 100)
+            }
+
             if (!user.rewards.runes['zod']) {
               user.rewards.runes['zod'] = 0
             }

@@ -56,9 +56,10 @@ export async function getAllItemEvents(app, retry = false) {
 
             if (decodedItem.rarity.id === ItemRarity.Mythic.id) {
               await app.live.emitAll('PlayerAction', { key: 'item-craft', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted a mythic ${decodedItem.name}` })
-              await app.notices.add('mythic-crafted', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted a mythic ${decodedItem.name}` })
+              await app.notices.add('item-craft', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted a mythic ${decodedItem.name}` })
             } else if (decodedItem.rarity.id === ItemRarity.Epic.id) {
               await app.live.emitAll('PlayerAction', { key: 'item-craft', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted an epic ${decodedItem.name}` })
+              await app.notices.add('item-craft', { key: 'item-craft', address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted an epic ${decodedItem.name}` })
             } else if (decodedItem.rarity.id === ItemRarity.Rare.id) {
               await app.live.emitAll('PlayerAction', { key: 'item-craft', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: user.username, message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted a rare ${decodedItem.name}` })
             } else if (decodedItem.rarity.id === ItemRarity.Magical.id) {
