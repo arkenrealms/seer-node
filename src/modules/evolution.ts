@@ -572,12 +572,9 @@ export async function connectRealm(app, realm) {
       let character = CharacterCache[req.data.address]
 
       if (!character) {
-        const equipment = await app.barracks.getPlayerEquipment(app, req.data.address)
-        const meta = await app.barracks.getMetaFromEquipment(app, equipment)
-  
-        if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
-          meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
-        }
+        // if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
+        //   meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
+        // }
   
         // if (req.data.address === '0x6f756AFaC862A2486f4c1C96b46E00A98a70bEA2') {
         //   meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
@@ -879,9 +876,12 @@ export async function connectRealm(app, realm) {
                 CharacterCache[player.address] = character
               }
 
-              const WinRewardsIncrease = character.meta[1050] || 0
-              const WinRewardsDecrease = character.meta[1060] || 0
+              const WinRewardsIncrease = character.meta[1150] || 0
+              const WinRewardsDecrease = character.meta[1160] || 0
+
+              console.log('bbbb', rewardWinnerMap[index])
               rewardWinnerMap[index] *= (1 + (WinRewardsIncrease - WinRewardsDecrease) / 100)
+              console.log('cccc', rewardWinnerMap[index])
             }
 
             if (!user.rewards.runes['zod']) {

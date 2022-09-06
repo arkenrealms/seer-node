@@ -72,7 +72,7 @@ export async function getAllItemEvents(app, retry = false) {
 
             const fromUser = await app.db.loadUser(from)
 
-            if (!['0xcfA857d6EC2F59b050D7296FbcA8a91D061451f3', '0x5fE24631136D570D12920C9Fa0FEcaDA84E47673', '0x85C07b6a475Ee19218D0ef9C278C7e58715Af842'].includes(from)) {
+            if (!['0xcfA857d6EC2F59b050D7296FbcA8a91D061451f3', '0x5fE24631136D570D12920C9Fa0FEcaDA84E47673', '0x85C07b6a475Ee19218D0ef9C278C7e58715Af842', '0xa9b9195b19963f2d72a7f56bad3705ba536cdb66'].includes(from)) {
               await app.live.emitAll('PlayerAction', { key: 'item-transfer', createdAt: new Date().getTime() / 1000, address: token.owner, itemName: decodedItem.name, tokenId: itemData.tokenId, username: fromUser.username, username2: user.username, message: `${fromUser.username || `${from.slice(0, 7)}...`} transfered ${decodedItem.name} to ${user.username || `${userAddress.slice(0, 7)}...`}` })
             }
           }
