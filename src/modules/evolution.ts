@@ -880,7 +880,14 @@ export async function connectRealm(app, realm) {
               const WinRewardsDecrease = character.meta[1160] || 0
 
               console.log('bbbb', rewardWinnerMap[index])
-              rewardWinnerMap[index] *= (1 + (WinRewardsIncrease - WinRewardsDecrease) / 100)
+              const rewardMultiplier = (1 + (WinRewardsIncrease - WinRewardsDecrease) / 100)
+
+              if (rewardMultiplier > 1 || rewardMultiplier < 0) {
+                log('Error with reward multiplier.. bad things happened: ', rewardMultiplier, rewardMultiplier, WinRewardsDecrease)
+                process.exit(5)
+              }
+
+              rewardWinnerMap[index] *= rewardMultiplier
               console.log('cccc', rewardWinnerMap[index])
             }
 
