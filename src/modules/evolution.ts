@@ -738,7 +738,7 @@ export async function connectRealm(app, realm) {
           CharacterCache[winner.address] = character
         }
 
-        if (character.meta[1173] > 0) {
+        if (character?.meta?.[1173] > 0) {
           const portion = 0.05
 
           for (const kill of winner.log.kills) {
@@ -893,8 +893,8 @@ export async function connectRealm(app, realm) {
             // if (req.data.round.winners[0].address === player.address) {
             const character = CharacterCache[player.address]
 
-            const WinRewardsIncrease = character.meta[1150] || 0
-            const WinRewardsDecrease = character.meta[1160] || 0
+            const WinRewardsIncrease = character?.meta?.[1150] || 0
+            const WinRewardsDecrease = character?.meta?.[1160] || 0
 
             console.log('bbbb', rewardWinnerMap[index])
             const rewardMultiplier = (1 + (WinRewardsIncrease - WinRewardsDecrease) / 100)
