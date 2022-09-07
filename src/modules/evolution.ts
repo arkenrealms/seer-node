@@ -727,6 +727,29 @@ export async function connectRealm(app, realm) {
 
       const winners = req.data.round.winners.slice(0, 10)
 
+      const rewardTweaks = {}
+
+      for (const winner of winners) {
+        let character = CharacterCache[winner.address]
+
+        if (!character) {
+          character = await getCharacter(app, winner.address)
+
+          CharacterCache[winner.address] = character
+        }
+
+        if (character.meta[1173] > 0) {
+          const portion = 0.05
+
+          for (const kill of winner.log.kills) {
+            const target = req.data.round.players.filter(p => p.hash === kill)
+
+            rewardTweaks[target.address] -= portion
+            rewardTweaks[winner.address] += portion
+          }
+        }
+      }
+
       for (const player of req.data.round.players) {
         const user = await app.db.loadUser(player.address)
         const now = new Date().getTime() / 1000
@@ -867,29 +890,25 @@ export async function connectRealm(app, realm) {
 
           // if (!user) continue // He wasn't valid
           if (user.username) { // Make sure cant earn without a character
-            if (req.data.round.winners[0].address === player.address) {
-              let character = CharacterCache[player.address]
+            // if (req.data.round.winners[0].address === player.address) {
+            const character = CharacterCache[player.address]
 
-              if (!character) {
-                character = await getCharacter(app, player.address)
+            const WinRewardsIncrease = character.meta[1150] || 0
+            const WinRewardsDecrease = character.meta[1160] || 0
 
-                CharacterCache[player.address] = character
-              }
+            console.log('bbbb', rewardWinnerMap[index])
+            const rewardMultiplier = (1 + (WinRewardsIncrease - WinRewardsDecrease) / 100)
 
-              const WinRewardsIncrease = character.meta[1150] || 0
-              const WinRewardsDecrease = character.meta[1160] || 0
-
-              console.log('bbbb', rewardWinnerMap[index])
-              const rewardMultiplier = (1 + (WinRewardsIncrease - WinRewardsDecrease) / 100)
-
-              if (rewardMultiplier > 2 || rewardMultiplier < 0) {
-                log('Error with reward multiplier.. bad things happened: ', rewardMultiplier, rewardMultiplier, WinRewardsDecrease)
-                process.exit(5)
-              }
-
-              rewardWinnerMap[index] *= rewardMultiplier
-              console.log('cccc', rewardWinnerMap[index])
+            if (rewardMultiplier > 2 || rewardMultiplier < 0) {
+              log('Error with reward multiplier.. bad things happened: ', rewardMultiplier, rewardMultiplier, WinRewardsDecrease)
+              process.exit(5)
             }
+
+            rewardWinnerMap[index] *= rewardMultiplier
+            console.log('cccc', rewardWinnerMap[index])
+            // }
+
+            
 
             if (!user.rewards.runes['zod']) {
               user.rewards.runes['zod'] = 0
