@@ -156,6 +156,12 @@ export async function getMetaFromEquipment(app, equipment) {
     log(e)
   }
 
+  for (const index in totalMeta) {
+    if (totalMeta[index] === undefined || totalMeta[index] === null || Number.isNaN(totalMeta[index])) {
+      delete totalMeta[index]
+    }
+  }
+
   return totalMeta
 }
 
