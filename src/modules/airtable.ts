@@ -101,6 +101,7 @@ async function getItem(app, key) {
   item.name = record.get('name')
   item.icon = `/images/items/${pad(item.id, 5)}.png`
   item.image = record.get('image')?.[0]?.url
+  item.imageHigh = record.get('imageHigh')?.[0]?.url
   item.value = '0',
   item.type = type?.id
   item.subType = subType?.id
@@ -123,6 +124,7 @@ async function getItem(app, key) {
   item.isUpgradable = !!record.get('isUpgradable')
   item.isPublishable = !!record.get('isPublishable')
   item.isRuneword = !!record.get('isRuneword')
+  item.isSkinnable = !!record.get('isSkinnable')
   item.createdDate = record.get('createdDate') || 0
   item.hotness = record.get('hotness') || 0
   item.numPerfectionRolls = record.get('numPerfectionRolls')
@@ -332,18 +334,18 @@ async function getItemAttribute(app, key) {
     uuid: key,
     id: record.get('id'),
     name: record.get('name'),
+    displayName: record.get('displayName'),
+    listOrder: record.get('listOrder'),
     isEnabled: !!record.get('isEnabled'),
     game: record.get('game') ? (await app.airtable.database('Game').find(record.get('game'))).get('id') : undefined,
     link: record.get('link'),
-    paramType1: record.get('paramType1'),
-    paramType2: record.get('paramType2'),
-    paramType3: record.get('paramType3'),
-    paramValue1: record.get('paramValue1'),
-    paramValue2: record.get('paramValue2'),
-    paramValue3: record.get('paramValue3'),
+    isImplemented: !!record.get('isImplemented'),
+    paramTypes: record.get('paramTypes'),
+    paramValues: record.get('paramValues'),
     nature: record.get('nature'),
     influences: record.get('influences'),
     description: record.get('description') || '',
+    explanation: record.get('explanation') || '',
   }
 
   return app.airtable.cache.getItemAttribute[key]
@@ -406,7 +408,7 @@ async function getItems(app) {
 
     await app.airtable.database('Item').select({
       maxRecords: 1000,
-      view: "Enabled Only"
+      view: "All Data"
     }).eachPage(async function page(records, fetchNextPage) {
       // log('Fetched items', records)
 
@@ -933,13 +935,13 @@ async function getItemAttributes(app) {
         log('Fetched attribute', attribute)
       }
 
-      app.db.saveItemAttributes(attributes)
-
       // To fetch the next page of records, call `fetchNextPage`.
       // If there are more records, `page` will get called again.
       // If there are no more records, `done` will get called.
       fetchNextPage()
     })
+
+    app.db.saveItemAttributes(attributes)
   } catch(e) {
     log('Error', e)
   }
@@ -3217,7 +3219,7 @@ export async function monitorAirtable(app) {
     // await getGameInfos(app)
     // await getRunes(app)
     // await getSkills(app)
-    // await getItems(app)
+    await getItems(app)
     // await getItemRecipes(app)
     // await getItemAttributes(app)
     // await getItemMaterials(app)
@@ -3257,7 +3259,7 @@ export async function monitorAirtable(app) {
     // await getLores(app)
     // await getNpcs(app)
     // await getActs(app)
-    await getEras(app)
+    // await getEras(app)
     // await getTimeGates(app)
     // await getEnergies(app)
     // await getAchievements(app)

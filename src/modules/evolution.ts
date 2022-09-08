@@ -236,6 +236,25 @@ async function getCharacter(app, address) {
     meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
   }
 
+  let error
+  if (meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] > 100) error = `Problem with EvolutionMovementSpeedIncrease: ${address} ${meta[ItemAttributes.EvolutionMovementSpeedIncrease.id]}`
+  if (meta[1102] > 100) error = `Problem with DeathPenaltyAvoid: ${address} ${meta[1102]}`
+  if (meta[1104] > 100) error = `Problem with EnergyDecayDecrease: ${address} ${meta[1104]}`
+  if (meta[1105] > 100) error = `Problem with EnergyDecayIncrease: ${address} ${meta[1105]}`
+  if (meta[1150] > 100) error = `Problem with WinRewardsIncrease: ${address} ${meta[1150]}`
+  if (meta[1160] > 100) error = `Problem with WinRewardsDecrease: ${address} ${meta[1160]}`
+  if (meta[1222] > 100) error = `Problem with IncreaseMovementSpeedOnKill: ${address} ${meta[1222]}`
+  if (meta[1223] > 100) error = `Problem with EvolveMovementBurst: ${address} ${meta[1223]}`
+  if (meta[1164] > 100) error = `Problem with DoublePickupChance: ${address} ${meta[1164]}`
+  if (meta[1219] > 100) error = `Problem with IncreaseHealthOnKill: ${address} ${meta[1219]}`
+  if (meta[1117] > 100) error = `Problem with SpriteFuelIncrease: ${address} ${meta[1117]}`
+  if (meta[1118] > 100) error = `Problem with SpriteFuelDecrease: ${address} ${meta[1118]}`
+  
+  if (error) {
+    log('Error with character gear:', error)
+    process.exit(6)  
+  }
+
   return {
     equipment,
     meta
