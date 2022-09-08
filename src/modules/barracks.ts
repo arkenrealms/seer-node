@@ -157,7 +157,7 @@ export async function getMetaFromEquipment(app, equipment) {
   }
 
   for (const index in totalMeta) {
-    if (totalMeta[index] === undefined || totalMeta[index] === null || Number.isNaN(totalMeta[index])) {
+    if (totalMeta[index] === undefined || totalMeta[index] === null || Number.isNaN(totalMeta[index]) || !Number.isFinite(totalMeta[index])) {
       delete totalMeta[index]
     }
   }
