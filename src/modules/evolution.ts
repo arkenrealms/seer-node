@@ -232,9 +232,9 @@ async function getCharacter(app, address) {
   const equipment = await app.barracks.getPlayerEquipment(app, address)
   const meta = await app.barracks.getMetaFromEquipment(app, equipment)
 
-  if (address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
-    meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
-  }
+  // if (address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
+  //   meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
+  // }
 
   let error
   if (meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] > 100) error = `Problem with EvolutionMovementSpeedIncrease: ${address} ${meta[ItemAttributes.EvolutionMovementSpeedIncrease.id]}`
