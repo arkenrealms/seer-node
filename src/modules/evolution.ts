@@ -782,8 +782,8 @@ export async function connectRealm(app, realm) {
         app.db.setUserActive(user)
 
         if (player.killStreak >= 5) {
-          await app.live.emitAll('PlayerAction', { key: 'evolution1-killstreak', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} got a ${player.killstreak} killstreak in Evolution` })
-          await app.notices.add('evolution1-killstreak', { key: 'evolution1-killstreak', address: user.address, username: user.username, message: `${user.username} got a ${player.killstreak} killstreak in Evolution` })
+          await app.live.emitAll('PlayerAction', { key: 'evolution1-killstreak', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} got a ${player.killStreak} killstreak in Evolution` })
+          await app.notices.add('evolution1-killstreak', { key: 'evolution1-killstreak', address: user.address, username: user.username, message: `${user.username} got a ${player.killStreak} killstreak in Evolution` })
         }
 
         for (const pickup of player.pickups) {
