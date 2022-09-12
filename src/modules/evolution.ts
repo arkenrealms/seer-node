@@ -1392,10 +1392,10 @@ export async function monitorEvolutionRealms(app) {
   await connectRealms(app)
   await updateRealms(app)
 
-  setInterval(function() {
-    log('Clearing character cache...')
-    CharacterCache = {}
-  }, 10 * 60 * 1000)
-
   setTimeout(() => monitorEvolutionRealms(app), 30 * 1000)
 }
+
+setInterval(function() {
+  log('Clearing character cache...')
+  CharacterCache = {}
+}, 10 * 60 * 1000)

@@ -341,9 +341,10 @@ export async function monitorBarracksEvents(app) {
   app.contracts.barracks.on('ActionSwap', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
-
-  // Clear equipment cache every 10 mins
-  setInterval(function() {
-    EquipmentCache = {}
-  }, 10 * 60 * 1000)
 }
+
+// Clear equipment cache every 10 mins
+setInterval(function() {
+  log('Clearing equipment cache...')
+  EquipmentCache = {}
+}, 10 * 60 * 1000)
