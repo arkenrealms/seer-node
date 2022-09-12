@@ -26,6 +26,46 @@ function initEventHandler(app) {
 
       socket.on('disconnect', function() {
       })
+
+
+      socket.on('SiteQuestRequest', async function (req) {
+        log('SiteQuestRequest', req)
+
+        try {
+          
+        } catch(e) {
+          socket.emit('SiteQuestResponse', {
+            id: req.id,
+            data: { status: 0, message: 'Invalid signature' }
+          })
+        }
+      })
+
+      socket.on('DetachSkinRequest', async function (req) {
+        log('DetachSkinRequest', req)
+
+        try {
+          
+        } catch(e) {
+          socket.emit('DetachSkinResponse', {
+            id: req.id,
+            data: { status: 0, message: 'Invalid signature' }
+          })
+        }
+      })
+
+      socket.on('AttachSkinRequest', async function (req) {
+        log('AttachSkinRequest', req)
+
+        try {
+          
+        } catch(e) {
+          socket.emit('AttachSkinResponse', {
+            id: req.id,
+            data: { status: 0, message: 'Invalid signature' }
+          })
+        }
+      })
     } catch(e) {
       log('Error', e)
     }
