@@ -39,8 +39,14 @@ async function determineFiles(app) {
       log('Skinning ' + itemSlug)
 
       const comparer = (rarity, length) => {
-        return (filename, index) => {
+        return (oldFilename, index) => {
           console.log(`${rarity} ${index}/${length}`)
+
+          const filename = `${rarity}-${index}.png`
+
+          if (oldFilename !== filename && oldFilename.indexOf(rarity) !== 0) {
+            jetpack.rename(path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${oldFilename}`), filename)
+          }
 
           if (checkPixelSimilarity) {
             const image = PNG.sync.read(fs.readFileSync(path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${filename}`)))
@@ -54,7 +60,7 @@ async function determineFiles(app) {
     
               if (difference < (width * height) * 0.01) {
                 console.log(`Pretty close match: /images/skins/${itemSlug}/${rarity}/${filename} / ${img2.filename}`)
-                return false
+                return
               }
             }
   
@@ -68,12 +74,12 @@ async function determineFiles(app) {
 
           if (imageCache[cacheKey]) {
             log(`Image existed: /images/skins/${itemSlug}/${rarity}/${filename}`)
-            return false
+            return
           }
   
           imageCache[cacheKey] = true
   
-          return true
+          return `/images/skins/${itemSlug}/${rarity}/${filename}`
         }
       }
 
@@ -82,10 +88,10 @@ async function determineFiles(app) {
       let epic = (await jetpack.listAsync(path.resolve(`./db/images/skins/${itemSlug}/epic`))).filter(s => s.indexOf('png') > 0)
       let mythic = (await jetpack.listAsync(path.resolve(`./db/images/skins/${itemSlug}/mythic`))).filter(s => s.indexOf('png') > 0)
       
-      magical = magical.filter(comparer('magical', magical.length)).map(s => `/images/skins/${itemSlug}/magical/${s}`)
-      rare = rare.filter(comparer('rare', rare.length)).map(s => `/images/skins/${itemSlug}/rare/${s}`)
-      epic = epic.filter(comparer('epic', epic.length)).map(s => `/images/skins/${itemSlug}/epic/${s}`)
-      mythic = mythic.filter(comparer('mythic', mythic.length)).map(s => `/images/skins/${itemSlug}/mythic/${s}`)
+      magical = magical.map(comparer('magical', magical.length)).filter(s => !!s)
+      rare = rare.map(comparer('rare', rare.length)).filter(s => !!s)
+      epic = epic.map(comparer('epic', epic.length)).filter(s => !!s)
+      mythic = mythic.map(comparer('mythic', mythic.length)).filter(s => !!s)
 
       log(`Skinned ${mythic.length} Mythic`)
       log(`Skinned ${epic.length} Epic`)
