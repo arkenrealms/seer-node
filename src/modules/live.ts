@@ -106,17 +106,26 @@ function initEventHandler(app) {
           }
 
           let skin
+          let rarity = item.rarity.name
 
-          if (['Legendary', 'Unique', 'Mythic'].includes(item.rarity.name) && app.db.skins[item.id].mythic.length > 0) {
+          if (item.name === 'Guiding Light') {
+            if (rarity === 'Rare') {
+              rarity = 'Mythic'
+            } else if (rarity === 'Magical') {
+              rarity = 'Rare'
+            }
+          }
+
+          if (['Legendary', 'Unique', 'Mythic'].includes(rarity) && app.db.skins[item.id].mythic.length > 0) {
             skin = app.db.skins[item.id].mythic[random(0, app.db.skins[item.id].mythic.length-1)]
             app.db.skins[item.id].mythic = app.db.skins[item.id].mythic.filter(s => s !== skin)
-          } else if (['Legendary', 'Unique', 'Mythic', 'Epic'].includes(item.rarity.name) && app.db.skins[item.id].epic.length > 0) {
+          } else if (['Legendary', 'Unique', 'Mythic', 'Epic'].includes(rarity) && app.db.skins[item.id].epic.length > 0) {
             skin = app.db.skins[item.id].epic[random(0, app.db.skins[item.id].epic.length-1)]
             app.db.skins[item.id].epic = app.db.skins[item.id].epic.filter(s => s !== skin)
-          } else if (['Legendary', 'Unique', 'Mythic', 'Epic', 'Rare'].includes(item.rarity.name) && app.db.skins[item.id].rare.length > 0) {
+          } else if (['Legendary', 'Unique', 'Mythic', 'Epic', 'Rare'].includes(rarity) && app.db.skins[item.id].rare.length > 0) {
             skin = app.db.skins[item.id].rare[random(0, app.db.skins[item.id].rare.length-1)]
             app.db.skins[item.id].rare = app.db.skins[item.id].rare.filter(s => s !== skin)
-          } else if (['Legendary', 'Unique', 'Mythic', 'Epic', 'Rare', 'Magical'].includes(item.rarity.name) && app.db.skins[item.id].magical.length > 0) {
+          } else if (['Legendary', 'Unique', 'Mythic', 'Epic', 'Rare', 'Magical'].includes(rarity) && app.db.skins[item.id].magical.length > 0) {
             skin = app.db.skins[item.id].magical[random(0, app.db.skins[item.id].magical.length-1)]
             app.db.skins[item.id].magical = app.db.skins[item.id].magical.filter(s => s !== skin)
           }

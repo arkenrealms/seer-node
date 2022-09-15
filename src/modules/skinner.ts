@@ -23,6 +23,7 @@ function base64_encode(file) {
 
 const imageCache = {}
 const images = []
+const checkPixelSimilarity = false
 
 async function determineFiles(app) {
   log('[skinner] Determining files')
@@ -33,7 +34,7 @@ async function determineFiles(app) {
     for (const itemSlug of itemSlugs) {
       const item = itemData.runeword.find(r => r.name.replace(' ', '-').replace("'", '').toLowerCase() === itemSlug)
 
-      if (app.db.skins[item.id]) continue
+      // if (app.db.skins[item.id]) continue
 
       log('Skinning ' + itemSlug)
 
@@ -41,27 +42,30 @@ async function determineFiles(app) {
         return (filename, index) => {
           console.log(`${rarity} ${index}/${length}`)
 
-          const cacheKey = base64_encode(path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${filename}`))
-          const image = PNG.sync.read(fs.readFileSync(path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${filename}`)))
-          const {width, height} = image
-          const diff = new PNG({width, height})
-  
-          for (const img2 of images) {
-            if (img2.filename === filename) continue
-  
-            const difference = pixelmatch(image.data, img2.image.data, diff.data, width, height, { threshold: 0.1 })
-  
-            if (difference < (width * height) * 0.01) {
-              console.log(`Pretty close match: /images/skins/${itemSlug}/${rarity}/${filename} / ${img2.filename}`)
-              return false
+          if (checkPixelSimilarity) {
+            const image = PNG.sync.read(fs.readFileSync(path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${filename}`)))
+            const {width, height} = image
+            const diff = new PNG({width, height})
+    
+            for (const img2 of images) {
+              if (img2.filename === filename) continue
+    
+              const difference = pixelmatch(image.data, img2.image.data, diff.data, width, height, { threshold: 0.1 })
+    
+              if (difference < (width * height) * 0.01) {
+                console.log(`Pretty close match: /images/skins/${itemSlug}/${rarity}/${filename} / ${img2.filename}`)
+                return false
+              }
             }
+  
+            images.push({
+              filename,
+              image
+            })
           }
   
-          images.push({
-            filename,
-            image
-          })
-  
+          const cacheKey = base64_encode(path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${filename}`))
+
           if (imageCache[cacheKey]) {
             log(`Image existed: /images/skins/${itemSlug}/${rarity}/${filename}`)
             return false
