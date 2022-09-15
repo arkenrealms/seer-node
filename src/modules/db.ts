@@ -26,6 +26,7 @@ export function initDb(app) {
 
 
   app.db = {
+    queuedSaves: [],
     app: jetpack.read(path.resolve('./db/app.json'), 'json') || {
       config: {
         characterMintCost: 0.1,
@@ -33,7 +34,7 @@ export function initDb(app) {
       }
     },
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
-    oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json'),
+    oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json') || {},
     patrons: jetpack.read(path.resolve('./db/patrons.json'), 'json') || [],
     oprah: jetpack.read(path.resolve('./db/oprah.json'), 'json') || {},
     farms: jetpack.read(path.resolve('./db/farms.json'), 'json') || {},
@@ -44,6 +45,9 @@ export function initDb(app) {
     classes: jetpack.read(path.resolve('./db/classes.json'), 'json') || [],
     guilds: jetpack.read(path.resolve('./db/guilds.json'), 'json') || [],
     stats: jetpack.read(path.resolve('./db/stats.json'), 'json') || {},
+    skins: jetpack.read(path.resolve('./db/skins.json'), 'json') || {},
+    tokenSkins: jetpack.read(path.resolve('./db/tokenSkins.json'), 'json') || {},
+    userSkins: jetpack.read(path.resolve('./db/userSkins.json'), 'json') || {},
     historical: jetpack.read(path.resolve('./db/historical.json'), 'json') || {},
     barracksEvents: jetpack.read(path.resolve('./db/barracks/events.json'), 'json') || [],
     blacksmithEvents: jetpack.read(path.resolve('./db/blacksmith/events.json'), 'json') || [],
@@ -125,6 +129,21 @@ export function initDb(app) {
   app.db.saveOracle = async () => {
     log('Saving: oracle')
     jetpack.write(path.resolve('./db/oracle.json'), beautify(app.db.oracle, null, 2, 100), { atomic: true })
+  }
+
+  app.db.saveTokenSkins = async () => {
+    log('Saving: token skins')
+    await jetpack.writeAsync(path.resolve('./db/tokenSkins.json'), beautify(app.db.tokenSkins, null, 2, 100), { atomic: true })
+  }
+
+  app.db.saveUserSkins = async () => {
+    log('Saving: user skins')
+    await jetpack.writeAsync(path.resolve('./db/userSkins.json'), beautify(app.db.userSkins, null, 2, 100), { atomic: true })
+  }
+
+  app.db.saveSkins = async () => {
+    log('Saving: skins')
+    await jetpack.writeAsync(path.resolve('./db/skins.json'), beautify(app.db.skins, null, 2, 100), { atomic: true })
   }
 
   app.db.saveEvolution = async () => {
@@ -477,16 +496,16 @@ export function initDb(app) {
   app.db.saveToken = async (token) => {
     app.db.updateTokenMeta(token)
 
-    jetpack.write(path.resolve(`./db/tokens/${token.id}/overview.json`), beautify({
+    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/overview.json`), beautify({
       ...token,
       transfers: undefined,
       trades: undefined,
       meta: undefined
     }, null, 2), { atomic: true })
 
-    jetpack.write(path.resolve(`./db/tokens/${token.id}/transfers.json`), beautify(token.transfers, null, 2), { atomic: true })
-    jetpack.write(path.resolve(`./db/tokens/${token.id}/trades.json`), beautify(token.trades, null, 2), { atomic: true })
-    jetpack.write(path.resolve(`./db/tokens/${token.id}/meta.json`), beautify(token.meta, null, 2), { atomic: true })
+    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/transfers.json`), beautify(token.transfers, null, 2), { atomic: true })
+    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/trades.json`), beautify(token.trades, null, 2), { atomic: true })
+    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/meta.json`), beautify(token.meta, null, 2), { atomic: true })
   }
 
   app.db.saveTokenTrade = async (token, trade) => {
@@ -673,6 +692,8 @@ export function initDb(app) {
 
       for (const realmKey of Object.keys(target)) {
         const realm = target[realmKey]
+
+        if (!realm) continue
         // log(realm)
         // Calculate totals
 
@@ -1720,5 +1741,15 @@ export function initDb(app) {
     }
   }
 
+  app.db.queueSave = (cb) => {
+    app.db.queuedSaves.push(cb)
+  }
 
+  app.db.processSave = async () => {
+    if (app.db.queuedSaves.length === 0) return
+
+    const queuedSave = app.db.queuedSaves.splice(0, 1)[0]
+
+    await queuedSave()
+  }
 }

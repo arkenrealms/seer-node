@@ -38,7 +38,33 @@ async function slowSaves(app) {
   setTimeout(() => slowSaves(app), 5 * 60 * 1000)
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+let isSaverRunning = false
+
+async function processQueuedSaves(app) {
+  if (isSaverRunning) return
+
+  isSaverRunning = true
+
+  while(1) {
+    try {
+      await app.db.processSave()
+    } catch(e) {
+      console.log('Process queued save error', e)
+    }
+
+    await sleep(0.1 * 1000)
+  }
+}
+
 export async function monitorSaves(app) {
-  setTimeout(() => fastSaves(app), 0)
-  setTimeout(() => slowSaves(app), 2 * 60 * 1000)
+  setTimeout(function() {
+    setTimeout(() => fastSaves(app), 0)
+    setTimeout(() => slowSaves(app), 2 * 60 * 1000)
+  }, 3 * 60 * 1000)
+
+  setTimeout(() => processQueuedSaves(app), 1 * 1000)
 }

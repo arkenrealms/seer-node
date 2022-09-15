@@ -99,7 +99,7 @@ async function getItem(app, key) {
   item.uuid = record.id
   item.id = record.get('id')
   item.name = record.get('name')
-  item.icon = `/images/items/${pad(item.id, 5)}.png`
+  item.icon = record.get('image')?.[0]?.url || `/images/items/${pad(item.id, 5)}.png`
   item.image = record.get('image')?.[0]?.url
   item.imageHigh = record.get('imageHigh')?.[0]?.url
   item.value = '0',
@@ -321,6 +321,21 @@ async function getItemSpecificType(app, key) {
   }
 
   return app.airtable.cache.getItemSpecificType[key]
+}
+
+async function getItemParam(app, key) {
+  console.log(9999, key)
+  if (!app.airtable.cache.getItemParam) app.airtable.cache.getItemParam = {}
+  if (app.airtable.cache.getItemParam[key]) return app.airtable.cache.getItemParam[key]
+
+  const record = await app.airtable.database('ItemParam').find(key)
+
+  app.airtable.cache.getItemParam[key] = {
+    uuid: key,
+    name: record.get('name'),
+  }
+
+  return app.airtable.cache.getItemParam[key]
 }
 
 async function getItemAttribute(app, key) {
@@ -554,20 +569,19 @@ function processItemAttributes(record, specs) {
       40: ItemRarityNameById
     }
 
-
-    if (spec.param1) {
+    if (spec.params[0]) {
       const param = {} as any
 
-      param.spec = spec.param1
+      param.spec = spec.params[0].name
+
+      if (param.spec.indexOf('%') !== -1) {
+        param.spec = param.spec.replace(/%/gi, '')
+        param.isPercent = true
+      }
 
       if (param.spec.indexOf('-') > 0) {
         const rawLeft = param.spec.split('-')[0]
         const rawRight = param.spec.split('-')[1]
-
-        if (param.spec.indexOf('%') !== -1) {
-          param.spec = param.spec.replace('%', '')
-          param.isPercent = true
-        }
   
         param.min = attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](rawLeft) : parseFloat(rawLeft)
         param.max = attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](rawRight) : parseFloat(rawRight)
@@ -616,10 +630,10 @@ function processItemAttributes(record, specs) {
       // attribute.map = attribute.param1?.map
     }
 
-    if (spec.param2) {
+    if (spec.params[1]) {
       const param = {} as any
 
-      param.spec = spec.param2
+      param.spec = spec.params[1].name
 
       if (param.spec.indexOf('-') > 0) {
         const rawLeft = param.spec.split('-')[0]
@@ -702,7 +716,7 @@ function processItemAttributes(record, specs) {
       }
     }
 
-    const isBuff = !!attribute.nature?.includes('Buff')
+    const isBuff = !!attribute.nature?.includes('Buff') || !!attribute.nature?.includes('Mechanic')
     const isDebuff = !!attribute.nature?.includes('Debuff')
 
     attributes.push(attribute)
@@ -740,44 +754,44 @@ async function getItemBranches(app, record) {
   }
 
   branches[Games.Raid.id] = processItemAttributes(record, [
-    { attr: (await Promise.all((record.get('a1Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a1Param1Raid'), param2: record.get('a1Param2Raid') },
-    { attr: (await Promise.all((record.get('a2Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a2Param1Raid'), param2: record.get('a2Param2Raid') },
-    { attr: (await Promise.all((record.get('a3Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a3Param1Raid'), param2: record.get('a3Param2Raid') },
-    { attr: (await Promise.all((record.get('a4Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a4Param1Raid'), param2: record.get('a4Param2Raid') },
-    { attr: (await Promise.all((record.get('a5Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a5Param1Raid'), param2: record.get('a5Param2Raid') },
-    { attr: (await Promise.all((record.get('a6Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a6Param1Raid'), param2: record.get('a6Param2Raid') },
-    { attr: (await Promise.all((record.get('a7Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a7Param1Raid'), param2: record.get('a7Param2Raid') },
-    { attr: (await Promise.all((record.get('a8Raid') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a8Param1Raid'), param2: record.get('a8Param2Raid') },
+    { attr: (await Promise.all((record.get('a1Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a1RaidParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a2Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a2RaidParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a3Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a3RaidParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a4Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a4RaidParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a5Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a5RaidParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a6Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a6RaidParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a7Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a7RaidParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a8Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a8RaidParams') || []).map((key) => getItemParam(app, key)))},
   ])
 
   branches[Games.Evolution.id] = processItemAttributes(record, [
-    { attr: (await Promise.all((record.get('a1Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a1Param1Evolution'), param2: record.get('a1Param2Evolution') },
-    { attr: (await Promise.all((record.get('a2Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a2Param1Evolution'), param2: record.get('a2Param2Evolution') },
-    { attr: (await Promise.all((record.get('a3Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a3Param1Evolution'), param2: record.get('a3Param2Evolution') },
-    { attr: (await Promise.all((record.get('a4Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a4Param1Evolution'), param2: record.get('a4Param2Evolution') },
-    { attr: (await Promise.all((record.get('a5Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a5Param1Evolution'), param2: record.get('a5Param2Evolution') },
-    { attr: (await Promise.all((record.get('a6Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a6Param1Evolution'), param2: record.get('a6Param2Evolution') },
-    { attr: (await Promise.all((record.get('a7Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a7Param1Evolution'), param2: record.get('a7Param2Evolution') },
-    { attr: (await Promise.all((record.get('a8Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a8Param1Evolution'), param2: record.get('a8Param2Evolution') },
-    { attr: (await Promise.all((record.get('a9Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a9Param1Evolution'), param2: record.get('a9Param2Evolution') },
-    { attr: (await Promise.all((record.get('a10Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a10Param1Evolution'), param2: record.get('a10Param2Evolution') },
-    { attr: (await Promise.all((record.get('a11Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a11Param1Evolution'), param2: record.get('a11Param2Evolution') },
-    { attr: (await Promise.all((record.get('a12Evolution') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a12Param1Evolution'), param2: record.get('a12Param2Evolution') },
+    { attr: (await Promise.all((record.get('a1Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a1EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a2Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a2EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a3Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a3EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a4Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a4EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a5Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a5EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a6Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a6EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a7Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a7EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a8Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a8EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a9Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a9EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a10Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a10EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a11Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a11EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a12Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a12EvolutionParams') || []).map((key) => getItemParam(app, key)))},
   ])
 
   branches[Games.Infinite.id] = processItemAttributes(record, [
-    { attr: (await Promise.all((record.get('a1Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a1Param1Infinite'), param2: record.get('a1Param2Infinite') },
-    { attr: (await Promise.all((record.get('a2Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a2Param1Infinite'), param2: record.get('a2Param2Infinite') },
-    { attr: (await Promise.all((record.get('a3Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a3Param1Infinite'), param2: record.get('a3Param2Infinite') },
-    { attr: (await Promise.all((record.get('a4Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a4Param1Infinite'), param2: record.get('a4Param2Infinite') },
-    { attr: (await Promise.all((record.get('a5Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a5Param1Infinite'), param2: record.get('a5Param2Infinite') },
-    { attr: (await Promise.all((record.get('a6Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a6Param1Infinite'), param2: record.get('a6Param2Infinite') },
-    { attr: (await Promise.all((record.get('a7Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a7Param1Infinite'), param2: record.get('a7Param2Infinite') },
-    { attr: (await Promise.all((record.get('a8Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a8Param1Infinite'), param2: record.get('a8Param2Infinite') },
-    { attr: (await Promise.all((record.get('a9Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a9Param1Infinite'), param2: record.get('a9Param2Infinite') },
-    { attr: (await Promise.all((record.get('a10Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a10Param1Infinite'), param2: record.get('a10Param2Infinite') },
-    { attr: (await Promise.all((record.get('a11Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a11Param1Infinite'), param2: record.get('a11Param2Infinite') },
-    { attr: (await Promise.all((record.get('a12Infinite') || []).map((key) => getItemAttribute(app, key))))[0], param1: record.get('a12Param1Infinite'), param2: record.get('a12Param2Infinite') },
+    { attr: (await Promise.all((record.get('a1Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a1InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a2Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a2InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a3Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a3InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a4Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a4InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a5Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a5InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a6Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a6InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a7Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a7InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a8Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a8InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a9Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a9InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a10Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a10InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a11Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a11InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    { attr: (await Promise.all((record.get('a12Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a12InfiniteParams') || []).map((key) => getItemParam(app, key)))},
   ])
 
   return branches

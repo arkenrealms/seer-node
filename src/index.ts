@@ -23,6 +23,7 @@ import { engageDelaran } from './modules/delaran'
 import { monitorOracle } from './modules/oracle'
 import { initCubeBridge } from './modules/cube'
 import { initNotices } from './modules/notices'
+import { initSkinner } from './modules/skinner'
 import { initLive } from './modules/live'
 import { generateAccounts } from './modules/account-generator'
 import { migrateTokens } from './migrate'
@@ -99,6 +100,47 @@ async function init() {
         {
           name: 'monitorAirtable',
           instance: monitorAirtable,
+          async: false,
+          timeout: 5 * 1000
+        },
+      ]
+    }
+
+    if (process.env.RUNE_ENV === 'skinner') {
+      app.moduleConfig = [
+        {
+          name: 'initConfig',
+          instance: initConfig,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initDb',
+          instance: initDb,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initWeb3',
+          instance: initWeb3,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'monitorSaves',
+          instance: monitorSaves,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initLive',
+          instance: initLive,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initSkinner',
+          instance: initSkinner,
           async: false,
           timeout: 5 * 1000
         },

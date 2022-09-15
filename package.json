@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "RUNE_ENV=local CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "airtable": "RUNE_ENV=airtable CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "skinner": "RUNE_ENV=skinner CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "build": "NODE_ENV=production tsc",
     "start": "RUNE_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js",
     "forever": "forever start forever-config.json",
@@ -74,6 +75,7 @@
     "ipfs-http-client": "^50.1.2",
     "js-md5": "^0.7.3",
     "json-beautify": "^1.1.1",
+    "pixelmatch": "^5.3.0",
     "rune-backend-sdk": "^1.2.54",
     "shortid": "^2.2.16",
     "sqlite3": "^5.0.2",
