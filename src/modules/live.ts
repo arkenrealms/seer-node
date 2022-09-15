@@ -1,6 +1,6 @@
 import fs from 'fs'
 import express from 'express'
-import { getHighestId, toShort, log, random } from '@rune-backend-sdk/util'
+import { getHighestId, toShort, log, random, sha256 } from '@rune-backend-sdk/util'
 import * as websocketUtil from '@rune-backend-sdk/util/websocket'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
@@ -8,12 +8,37 @@ import shortId from 'shortid'
 
 const path = require('path')
 
+const sockets = []
+const clients = {}
+const users = {}
+
 function initEventHandler(app) {
   const { emitDirect, emitAll, io } = app.live
 
   log('Live event handler')
 
   io.on('connection', function(socket) {
+    const ip = socket.handshake.headers['x-forwarded-for']?.split(',')[0] || socket.conn.remoteAddress?.split(":")[3]
+    // socket.request.connection.remoteAddress ::ffff:127.0.0.1
+    // socket.conn.remoteAddress ::ffff:127.0.0.1
+    // socket.conn.transport.socket._socket.remoteAddress ::ffff:127.0.0.1
+    let hash = ip ? sha256(ip.slice(ip.length/2)) : ''
+    hash = ip ? hash.slice(hash.length - 10, hash.length - 1) : ''
+
+    sockets.push(socket.id)
+
+    const client = {
+      socket,
+      hash
+    }
+
+    const user = {
+      client,
+      address: undefined
+    }
+
+    clients[socket.id] = client
+
     try {
       socket.onAny(function(eventName, res) {
         // log('onAny', eventName, res)
@@ -28,6 +53,9 @@ function initEventHandler(app) {
       })
 
       socket.on('disconnect', function() {
+        sockets.splice(sockets.findIndex(socket.id), 1)
+
+        delete clients[socket.id]
       })
 
 
@@ -256,11 +284,29 @@ function initEventHandler(app) {
         }
       })
 
+      socket.on('RS_ConnectResponse', async function (res) {
+        log('RS_ConnectResponse', res)
+
+        try {
+          if (res.data.address) {
+            user.address = res.data.address
+  
+            users[user.address] = user
+  
+            if (user.address === '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B') {
+              socket.emit('PlayerAction', { key: 'admin', createdAt: new Date().getTime() / 1000, count: sockets.length, message: `Total Connections: ${sockets.length}` })
+            }
+          }
+        } catch(e) {
+          log('RS_ConnectResponse error')
+        }
+      })
+
       socket.emit('RS_ConnectRequest', {
         id: shortId()
       })
     } catch(e) {
-      log('Error', e)
+      log('Live connection error', e)
     }
   })
 }
