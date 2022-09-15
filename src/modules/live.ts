@@ -53,7 +53,7 @@ function initEventHandler(app) {
       })
 
       socket.on('disconnect', function() {
-        sockets.splice(sockets.findIndex(socket.id), 1)
+        sockets.splice(sockets.findIndex(s => s === socket.id), 1)
 
         delete clients[socket.id]
       })
@@ -294,7 +294,7 @@ function initEventHandler(app) {
             users[user.address] = user
   
             if (user.address === '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B') {
-              socket.emit('PlayerAction', { key: 'admin', createdAt: new Date().getTime() / 1000, count: sockets.length, message: `Total Connections: ${sockets.length}` })
+              socket.emit('PlayerAction', { key: 'admin', createdAt: new Date().getTime() / 1000, count: sockets.length, message: `${sockets.length} players online` })
             }
           }
 
