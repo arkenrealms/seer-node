@@ -284,12 +284,12 @@ function initEventHandler(app) {
         }
       })
 
-      socket.on('RS_ConnectResponse', async function (res) {
-        log('RS_ConnectResponse', res)
+      socket.on('CS_ConnectRequest', async function (req) {
+        log('CS_ConnectRequest', req)
 
         try {
-          if (res.data.address) {
-            user.address = res.data.address
+          if (req.data.address) {
+            user.address = req.data.address
   
             users[user.address] = user
   
@@ -297,13 +297,18 @@ function initEventHandler(app) {
               socket.emit('PlayerAction', { key: 'admin', createdAt: new Date().getTime() / 1000, count: sockets.length, message: `Total Connections: ${sockets.length}` })
             }
           }
-        } catch(e) {
-          log('RS_ConnectResponse error')
-        }
-      })
 
-      socket.emit('RS_ConnectRequest', {
-        id: shortId()
+          socket.emit('CS_ConnectResponse', {
+            id: req.id,
+            data: { status: 1 }
+          })
+        } catch(e) {
+          log('CS_ConnectRequest error')
+          socket.emit('CS_ConnectResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
       })
     } catch(e) {
       log('Live connection error', e)
