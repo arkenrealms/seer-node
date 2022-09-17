@@ -7,8 +7,8 @@ import md5 from 'js-md5'
 import { log, removeDupes } from '@rune-backend-sdk/util'
 import { getClientSocket } from '@rune-backend-sdk/util/websocket'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
-import { getUsername } from '../util/getUsername'
-import { ItemAttributes } from 'rune-backend-sdk/build/data/items'
+import getUsername from '@rune-backend-sdk/util/api/getOldUsername'
+import { ItemAttributes } from '@rune-backend-sdk/data/items'
 
 const shortId = require('shortid')
 

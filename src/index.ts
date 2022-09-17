@@ -54,6 +54,14 @@ async function init() {
 
     app.flags = {}
 
+    app.admins = {
+      '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B': {
+        permissions: {
+          distribute: {}
+        }
+      }
+    }
+
     app.games = {
       raid: {
         currentSeason: 0,

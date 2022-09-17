@@ -10,8 +10,12 @@ import Account from '@rune-backend-sdk/models/account'
 import Model from '@rune-backend-sdk/models/base'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 import { userInfo } from 'os'
-import { getUsername } from '../util/getUsername'
+import getUsername from '@rune-backend-sdk/util/api/getOldUsername'
 // import { now } from 'rune-backend-sdk/build/util/time'
+
+const cache = {
+  users: {}
+}
 
 export function initDb(app) {
   const Knex = require('knex')
@@ -545,6 +549,8 @@ export function initDb(app) {
   }
 
   app.db.loadUser = async (address) => {
+    if (cache.users[address]) return cache.users[address]
+
     const exists = jetpack.exists(path.resolve(`./db/users/${address}/overview.json`))
 
     let baseUser = {
@@ -639,7 +645,9 @@ export function initDb(app) {
       profile.name = profile.meta.username
     }
 
-    return {...baseUser, ...profile.meta}
+    cache.users[address] = {...baseUser, ...profile.meta}
+
+    return cache.users[address]
   }
   
   app.db.saveUser = async (user) => {

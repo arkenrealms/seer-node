@@ -4,6 +4,7 @@ import { getHighestId, toShort, log, random, sha256 } from '@rune-backend-sdk/ut
 import * as websocketUtil from '@rune-backend-sdk/util/websocket'
 import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
+import getAddressByUsername from '@rune-backend-sdk/util/api/getAddressByOldUsername'
 import shortId from 'shortid'
 
 const path = require('path')
@@ -319,6 +320,67 @@ function initEventHandler(app) {
           })
         }
       })
+
+      socket.on('CS_DistributeTokensRequest', async function (req) {
+        log('CS_DistributeTokensRequest', req)
+
+        try {
+          const { usernames, amounts, reason } = req.data
+
+          if (!await isValidRequest(app.web3, req) || app.admins[req.signature.address]?.permissions.distribute) {
+            socket.emit('CS_DistributeTokensResponse', {
+              id: req.id,
+              data: { status: 0, message: 'Invalid user' }
+            })
+            return
+          }
+
+          const admin = await app.db.loadUser(req.signature.address)
+
+          const amounts2 = amounts.split(',')
+          const usernames2 = usernames.split(',')
+
+          for (const index in usernames2) {
+            const username = usernames2[index]
+            const address = username.trim().startsWith('0x') ? username.trim() : await getAddressByUsername(username.trim())
+            
+            const user = await app.db.loadUser(address)
+
+            for (const index2 in amounts2) {
+              const token = amounts2[index2].split('=')[0].toLowerCase()
+              const amount = parseFloat(amounts2[index2].split('=')[1])
+
+              const tokens = ['rune', 'usd', 'rxs', 'el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'amn', 'sol', 'shael', 'dol', 'hel', 'io', 'lum', 'ko', 'fal', 'lem', 'pul', 'um', 'mal', 'ist', 'gul', 'vex', 'ohm', 'lo', 'sur', 'ber', 'jah', 'cham', 'zod']
+
+              if (!tokens.includes(token))
+                continue
+
+              if (!user.rewards.runes[token])
+                user.rewards.runes[token] = 0
+
+              user.rewards.runes[token] += amount
+            }
+
+            await app.db.saveUser(user)
+          }
+
+          await app.live.emitAll('PlayerAction', { key: 'admin', createdAt: new Date().getTime() / 1000, address: req.signature.address, message: `${admin.username} distributed ${amounts} to ${usernames} for ${reason}` })
+
+          socket.emit('CS_DistributeTokensResponse', {
+            id: req.id,
+            data: { status: 1 }
+          })
+        } catch(e) {
+          log('CS_DistributeTokensRequest error')
+          socket.emit('CS_DistributeTokensResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
+      })
+
+
+    
     } catch(e) {
       log('Live connection error', e)
     }
