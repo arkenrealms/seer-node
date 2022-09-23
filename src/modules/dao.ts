@@ -95,12 +95,11 @@ export async function monitorDao(app) {
           }
 
           for (const vote of proposal.voteList) {
+            if (vote.vp < 1000) continue
+
             const user = await app.db.loadUser(vote.voter)
 
-            if (!user.username) {
-              vote.rewarded = 0
-              continue
-            }
+            if (!user?.username) continue
 
             vote.username = user.username
             vote.rewarded = parseFloat(toFixed(proposal.rewardPool / proposal.validVoters, 2))
