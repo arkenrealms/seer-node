@@ -64,59 +64,62 @@ export async function monitorDao(app) {
 
       const res2 = await response2.json()
 
-      proposal.voteList = res2.data.votes
+      if (!proposal.isProcessed) {
+        proposal.voteList = res2.data.votes
 
-      if (proposal.state === 'closed' && !proposal.isProcessed) {
-        proposal.isProcessed = true
+        if (proposal.state === 'closed') {
+          proposal.isProcessed = true
 
-        if (!proposal.rewardToken) {
-          proposal.rewardToken = rewardRunes[random(0, rewardRunes.length-1)]
-        }
-  
-        proposal.rewardPool = 0
+          if (!proposal.rewardToken) {
+            proposal.rewardToken = rewardRunes[random(0, rewardRunes.length-1)]
+          }
+    
+          proposal.rewardPool = 0
 
-        for (const vote of proposal.voteList) {
-          proposal.rewardPool += vote.vp / 1000000
-        }
-
-        proposal.rewardPool = Math.round(proposal.rewardPool)
-
-        proposal.validVoters = 0
-
-        for (const vote of proposal.voteList) {
-          if (vote.vp < 1000) continue
-
-          const user = await app.db.loadUser(vote.voter)
-
-          if (!user?.username) continue
-
-          proposal.validVoters += 1
-        }
-
-        for (const vote of proposal.voteList) {
-          const user = await app.db.loadUser(vote.voter)
-
-          if (!user) {
-            vote.rewarded = 0
-            continue
+          for (const vote of proposal.voteList) {
+            proposal.rewardPool += vote.vp / 1000000
           }
 
-          vote.username = user.username
-          vote.rewarded = parseFloat(toFixed(proposal.rewardPool / proposal.validVoters, 2))
-          
-          user.daoVotes.push(proposal.id)
-          user.points += 10
+          proposal.rewardPool = Math.round(proposal.rewardPool)
 
-          if (!user.rewards.runes[proposal.rewardToken]) {
-            user.rewards.runes[proposal.rewardToken] = 0
+          proposal.validVoters = 0
+
+          for (const vote of proposal.voteList) {
+            if (vote.vp < 1000) continue
+
+            const user = await app.db.loadUser(vote.voter)
+
+            if (!user?.username) continue
+
+            proposal.validVoters += 1
           }
 
-          user.rewards.runes[proposal.rewardToken] += vote.rewarded
+          for (const vote of proposal.voteList) {
+            const user = await app.db.loadUser(vote.voter)
 
-          await app.db.saveUser(user)
+            if (!user.username) {
+              vote.rewarded = 0
+              continue
+            }
+
+            vote.username = user.username
+            vote.rewarded = parseFloat(toFixed(proposal.rewardPool / proposal.validVoters, 2))
+            
+            if (!user.daoVotes.includes(proposal.id)) user.daoVotes.push(proposal.id)
+
+            user.points += 10
+
+            if (!user.rewards.runes[proposal.rewardToken]) {
+              user.rewards.runes[proposal.rewardToken] = 0
+            }
+
+            user.rewards.runes[proposal.rewardToken] += vote.rewarded
+
+            await app.db.saveUser(user)
+          }
+
+          app.db.oracle.outflow.daoVoting.tokens.week[proposal.rewardToken.toLowerCase()] += proposal.rewardPool
         }
-
-        app.db.oracle.outflow.daoVoting.tokens.week[proposal.rewardToken.toLowerCase()] += proposal.rewardPool
       }
     }
 
