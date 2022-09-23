@@ -343,5 +343,15 @@ export async function monitorOracle(app) {
     }
   }
 
+  if (!app.db.oracle.outflow.daoVoting) {
+    app.db.oracle.outflow.daoVoting = {
+      tokens: {
+        week: {...defaultTokens},
+        month: {...defaultTokens},
+        year: {...defaultTokens},
+      }
+    }
+  }
+
   setTimeout(() => runOracle(app), 20 * 1000)
 }
