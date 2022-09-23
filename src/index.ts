@@ -332,6 +332,12 @@ async function init() {
           timeout: 0 * 1000
         },
         {
+          name: 'monitorDao',
+          instance: monitorDao,
+          async: false,
+          timeout: 2 * 1000
+        },
+        {
           name: 'monitorItemEvents',
           instance: monitorItemEvents,
           async: false,
