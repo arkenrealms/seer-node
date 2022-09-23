@@ -3,7 +3,7 @@ import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
 import { log, random } from '@rune-backend-sdk/util'
-import { toFixed } from 'rune-backend-sdk/src/util/math'
+import { toFixed } from '@rune-backend-sdk/util/math'
 
 const rewardRunes = ['el', 'tir', 'zod', 'nef', 'sol', 'ist', 'gul', 'fal', 'um', 'ort']
 
