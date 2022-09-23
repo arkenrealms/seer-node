@@ -95,13 +95,14 @@ export async function monitorDao(app) {
           }
 
           for (const vote of proposal.voteList) {
-            if (vote.vp < 1000) continue
-
             const user = await app.db.loadUser(vote.voter)
 
             if (!user?.username) continue
 
             vote.username = user.username
+
+            if (vote.vp < 1000) continue
+
             vote.rewarded = parseFloat(toFixed(proposal.rewardPool / proposal.validVoters, 2))
             
             if (!user.daoVotes.includes(proposal.id)) user.daoVotes.push(proposal.id)
