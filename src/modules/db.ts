@@ -38,7 +38,7 @@ export function initDb(app) {
       }
     },
     dao: {
-      proposals: []
+      proposals: jetpack.read(path.resolve('./db/dao/proposals.json'), 'json') || []
     },
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
     oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json') || {},
