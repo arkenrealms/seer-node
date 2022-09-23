@@ -13,6 +13,38 @@ const sockets = []
 const clients = {}
 const users = {}
 
+const items = {
+  zavox: {
+    name: 'Zavox\'s Fortune',
+    rarity: 'Normal',
+  },
+  guardian: {
+    name: 'Guardian Egg',
+    rarity: 'Magical',
+  },
+  cube: {
+    name: `Early Access Founder's Cube`,
+    rarity: 'Unique',
+  },
+  trinket: {
+    name: 'Trinket',
+    rarity: 'Magical',
+  }
+}
+
+const features = {
+  'expert-mode': 10000
+}
+
+
+async function getUserStakedTokens(address) {
+  const staked = 0
+
+
+
+  return staked
+}
+
 function initEventHandler(app) {
   const { emitDirect, emitAll, io } = app.live
 
@@ -327,7 +359,7 @@ function initEventHandler(app) {
         try {
           const { usernames, amounts, reason } = req.data
 
-          if (!await isValidRequest(app.web3, req) || app.admins[req.signature.address]?.permissions.distribute) {
+          if (!await isValidRequest(app.web3, req) || !app.admins[req.signature.address]?.permissions.distributeReward) {
             socket.emit('CS_DistributeTokensResponse', {
               id: req.id,
               data: { status: 0, message: 'Invalid user' }
@@ -352,8 +384,19 @@ function initEventHandler(app) {
 
               const tokens = ['rune', 'usd', 'rxs', 'el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'amn', 'sol', 'shael', 'dol', 'hel', 'io', 'lum', 'ko', 'fal', 'lem', 'pul', 'um', 'mal', 'ist', 'gul', 'vex', 'ohm', 'lo', 'sur', 'ber', 'jah', 'cham', 'zod']
 
-              if (!tokens.includes(token))
+              if (!tokens.includes(token)) {
+                const item = items[token]
+
+                if (!item) continue
+
+                user.rewards.items[shortId()] = {
+                  name: item.name,
+                  rarity: item.rarity,
+                  quantity: parseInt(amount + '')
+                }
+
                 continue
+              }
 
               if (!user.rewards.runes[token])
                 user.rewards.runes[token] = 0
@@ -364,7 +407,7 @@ function initEventHandler(app) {
             await app.db.saveUser(user)
           }
 
-          await app.live.emitAll('PlayerAction', { key: 'admin', createdAt: new Date().getTime() / 1000, address: req.signature.address, message: `${admin.username} distributed ${amounts} to ${usernames} for ${reason}` })
+          await app.live.emitAll('PlayerAction', { key: 'admin', createdAt: new Date().getTime() / 1000, address: req.signature.address, message: `${admin.username} distributed ${amounts} to ${usernames} (${reason})` })
 
           socket.emit('CS_DistributeTokensResponse', {
             id: req.id,
@@ -379,13 +422,163 @@ function initEventHandler(app) {
         }
       })
 
+      socket.on('CS_AddAchievementRequest', async function (req) {
+        log('CS_AddAchievementRequest', req)
 
+        try {
+          const { usernames, achievements, reason } = req.data
+
+          if (!await isValidRequest(app.web3, req) || !app.admins[req.signature.address]?.permissions.distributeAchievement) {
+            socket.emit('CS_AddAchievementResponse', {
+              id: req.id,
+              data: { status: 0, message: 'Invalid user' }
+            })
+            return
+          }
+
+          const admin = await app.db.loadUser(req.signature.address)
+
+          const achievements2 = achievements.split(',')
+          const usernames2 = usernames.split(',')
+
+          for (const index in usernames2) {
+            const username = usernames2[index]
+            const address = username.trim().startsWith('0x') ? username.trim() : await getAddressByUsername(username.trim())
+            
+            const user = await app.db.loadUser(address)
+
+            for (const index2 in achievements2) {
+              const achievement = achievements2[index2].split('=')[0].toUpperCase()
+              const amount = parseFloat(achievements2[index2].split('=')[1])
+
+              app.db.addUserAchievement(user, achievement, amount)
+            }
+
+            await app.db.saveUser(user)
+          }
+
+          await app.live.emitAll('PlayerAction', { key: 'admin', createdAt: new Date().getTime() / 1000, address: req.signature.address, message: `${admin.username} added ${achievements} to ${usernames} (${reason})` })
+
+          socket.emit('CS_AddAchievementResponse', {
+            id: req.id,
+            data: { status: 1 }
+          })
+        } catch(e) {
+          log('CS_AddAchievementRequest error')
+          socket.emit('CS_AddAchievementResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
+      })
     
+      socket.on('CS_UnlockPremiumFeatureRequest', async function (req) {
+        log('CS_UnlockPremiumFeatureRequest', req)
+
+        try {
+          const { address } = req.data
+
+          const staked = await getUserStakedTokens(address)
+          const user = await app.db.loadUser(address)
+
+          if (staked < (user.locked + user.unlocked)) { // reset
+            user.premium.locked = 0
+            user.premium.unlocked = staked
+            user.premium.features = []
+          } else {
+            user.premium.unlocked = staked - user.premium.locked
+          }
+
+          if (user.premium.features.includes(req.data.key)) {
+            user.premium.features = user.premium.features.filter(f => f !== req.data.key)
+            user.premium.locked -= features[req.data.key]
+            user.premium.unlocked += features[req.data.key]
+          }
+
+          await app.db.saveUser(user)
+
+          socket.emit('CS_UnlockPremiumFeatureResponse', {
+            id: req.id,
+            data: { status: 1 }
+          })
+        } catch(e) {
+          log('CS_UnlockPremiumFeatureRequest error')
+          socket.emit('CS_UnlockPremiumFeatureResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
+      })
+
+      socket.on('CS_LockPremiumFeatureRequest', async function (req) {
+        log('CS_LockPremiumFeatureRequest', req)
+
+        try {
+          const { address } = req.data
+
+          const staked = await getUserStakedTokens(address)
+          const user = await app.db.loadUser(address)
+
+          if (staked < (user.locked + user.unlocked)) { // reset
+            user.premium.locked = 0
+            user.premium.unlocked = staked
+            user.premium.features = []
+          } else {
+            user.premium.unlocked = staked - user.premium.locked
+          }
+
+          if (!user.premium.features.includes(req.data.key)) {
+            user.premium.features.push(req.data.key)
+            user.premium.locked += features[req.data.key]
+            user.premium.unlocked -= features[req.data.key]
+          }
+
+          await app.db.saveUser(user)
+
+          socket.emit('CS_LockPremiumFeatureResponse', {
+            id: req.id,
+            data: { status: 1 }
+          })
+        } catch(e) {
+          log('CS_LockPremiumFeatureRequest error')
+          socket.emit('CS_LockPremiumFeatureResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
+      })
+    
+      socket.on('CS_GetUserUnlocksRequest', async function (req) {
+        log('CS_GetUserUnlocksRequest', req)
+
+        try {
+          const { address } = req.data
+
+          const { locked, unlocked, features } = app.db.premium.users[address] || {
+            locked: 0,
+            unlocked: 0,
+            features: []
+          }
+
+          socket.emit('CS_GetUserUnlocksResponse', {
+            id: req.id,
+            data: { status: 1, locked, unlocked, features }
+          })
+        } catch(e) {
+          log('CS_GetUserUnlocksRequest error')
+          socket.emit('CS_GetUserUnlocksResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
+      })
     } catch(e) {
       log('Live connection error', e)
     }
   })
 }
+
+const isLocalTest = process.env.LOCAL_TEST === 'true'
 
 export async function initLive(app) {
   try {
@@ -395,7 +588,7 @@ export async function initLive(app) {
 
     app.live.server = express()
 
-    const isHttps = true // process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
+    const isHttps = isLocalTest ? false : true // process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
 
     if (isHttps) {
       app.live.https = require('https').createServer({

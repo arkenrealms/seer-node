@@ -763,8 +763,13 @@ export async function connectRealm(app, realm) {
         //   for (const kill of winner.log.kills) {
         //     const target = req.data.round.players.filter(p => p.hash === kill)
 
-        //     rewardTweaks[target.address] -= portion
-        //     rewardTweaks[winner.address] += portion
+        //     if (target?.address) {
+        //       if (!rewardTweaks[target.address]) rewardTweaks[target.address] = 0
+        //       if (!rewardTweaks[winner.address]) rewardTweaks[winner.address] = 0
+
+        //       rewardTweaks[target.address] -= portion
+        //       rewardTweaks[winner.address] += portion
+        //     }
         //   }
         // }
       }
@@ -932,8 +937,6 @@ export async function connectRealm(app, realm) {
             rewardWinnerMap[index] *= rewardMultiplier
             console.log('cccc', rewardWinnerMap[index])
             // }
-
-            
 
             if (!user.rewards.runes['zod']) {
               user.rewards.runes['zod'] = 0

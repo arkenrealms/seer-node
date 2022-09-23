@@ -11,7 +11,7 @@ import Account from '@rune-backend-sdk/models/account'
 import Model from '@rune-backend-sdk/models/base'
 import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 import { userInfo } from 'os'
-import { getUsername } from '../util/getUsername'
+import getUsername from '@rune-backend-sdk/util/api/getOldUsername'
 
 const PNG = require('pngjs').PNG;
 const pixelmatch = require('pixelmatch');
@@ -34,7 +34,7 @@ async function determineFiles(app) {
     for (const itemSlug of itemSlugs) {
       const item = itemData.runeword.find(r => r.name.replace(' ', '-').replace("'", '').toLowerCase() === itemSlug)
 
-      // if (app.db.skins[item.id]) continue
+      if (app.db.skins[item.id]) continue
 
       log('Skinning ' + itemSlug)
 
@@ -42,10 +42,14 @@ async function determineFiles(app) {
         return (oldFilename, index) => {
           console.log(`${rarity} ${index}/${length}`)
 
-          const filename = `${rarity}-${index}.png`
+          let filename = `${rarity}-${index}.png`
 
-          if (oldFilename !== filename && oldFilename.indexOf(rarity) !== 0) {
-            jetpack.rename(path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${oldFilename}`), filename)
+          if (oldFilename !== filename) {
+            const newFilename = path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${oldFilename}`)
+
+            if (jetpack.inspect(path.resolve(`./db/images/skins/${itemSlug}/${rarity}/${filename}`))) filename = `${rarity}-${index+10000}.png`
+
+            jetpack.rename(newFilename, filename)
           }
 
           if (checkPixelSimilarity) {

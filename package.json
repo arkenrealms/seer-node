@@ -3,9 +3,10 @@
   "version": "2.0.0",
   "main": "build/src/index.js",
   "scripts": {
-    "dev": "RUNE_ENV=local CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "local": "RUNE_ENV=local CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "airtable": "RUNE_ENV=airtable CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "skinner": "RUNE_ENV=skinner CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "dao": "RUNE_ENV=dao CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "build": "NODE_ENV=production tsc",
     "start": "RUNE_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js",
     "forever": "forever start forever-config.json",

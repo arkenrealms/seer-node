@@ -37,6 +37,9 @@ export function initDb(app) {
         profileRegisterCost: 0
       }
     },
+    dao: {
+      proposals: []
+    },
     trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
     oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json') || {},
     patrons: jetpack.read(path.resolve('./db/patrons.json'), 'json') || [],
@@ -50,6 +53,7 @@ export function initDb(app) {
     guilds: jetpack.read(path.resolve('./db/guilds.json'), 'json') || [],
     stats: jetpack.read(path.resolve('./db/stats.json'), 'json') || {},
     skins: jetpack.read(path.resolve('./db/skins.json'), 'json') || {},
+    premium: jetpack.read(path.resolve('./db/premium.json'), 'json') || { users: {} },
     tokenSkins: jetpack.read(path.resolve('./db/tokenSkins.json'), 'json') || {},
     userSkins: jetpack.read(path.resolve('./db/userSkins.json'), 'json') || {},
     historical: jetpack.read(path.resolve('./db/historical.json'), 'json') || {},
@@ -148,6 +152,11 @@ export function initDb(app) {
   app.db.saveSkins = async () => {
     log('Saving: skins')
     await jetpack.writeAsync(path.resolve('./db/skins.json'), beautify(app.db.skins, null, 2, 100), { atomic: true })
+  }
+
+  app.db.savePremium = async () => {
+    log('Saving: premium')
+    await jetpack.writeAsync(path.resolve('./db/premium.json'), beautify(app.db.premium, null, 2, 100), { atomic: true })
   }
 
   app.db.saveEvolution = async () => {
@@ -549,105 +558,116 @@ export function initDb(app) {
   }
 
   app.db.loadUser = async (address) => {
-    if (cache.users[address]) return cache.users[address]
+    try {
+      if (cache.users[address]) return cache.users[address]
+      if (process.env.RUNE_ENV !== 'production') return
 
-    const exists = jetpack.exists(path.resolve(`./db/users/${address}/overview.json`))
+      const exists = jetpack.exists(path.resolve(`./db/users/${address}/overview.json`))
 
-    let baseUser = {
-      address,
-      lastGamePlayed: 0,
-      inventoryItemCount: 0,
-      equippedItemCount: 0,
-      marketTradeListedCount: 0,
-      marketTradeSoldCount: 0,
-      transferredOutCount: 0,
-      holdings: {},
-      points: 0,
-      username: undefined,
-      guildId: undefined,
-      joinedGuildAt: undefined,
-      isGuildMembershipActive: false,
-      guildMembershipTokenId: null,
-      rewardHistory: [],
-      rewards: {
-        runes: {},
-        items: {}
-      },
-      lifetimeRewards: {
-        runes: {},
-        items: {}
-      },
-      achievements: [],
-      characters: [],
-      evolution: {},
-      inventory: {
-        items: []
-      },
-      market: {
-        trades: []
-      }
-    }
-      
-    if (exists) {
-      baseUser = {
-        ...baseUser,
-        ...read(`./db/users/${address}/overview.json`, {}),
-        achievements: read(`./db/users/${address}/achievements.json`, []),
-        characters: read(`./db/users/${address}/characters.json`, []),
-        evolution: read(`./db/users/${address}/evolution.json`, {}),
+      let baseUser = {
+        address,
+        lastGamePlayed: 0,
+        inventoryItemCount: 0,
+        equippedItemCount: 0,
+        marketTradeListedCount: 0,
+        marketTradeSoldCount: 0,
+        transferredOutCount: 0,
+        holdings: {},
+        points: 0,
+        daoVotes: [],
+        username: undefined,
+        guildId: undefined,
+        joinedGuildAt: undefined,
+        isGuildMembershipActive: false,
+        guildMembershipTokenId: null,
+        rewardHistory: [],
+        premium: {
+          locked: 0,
+          unlocked: 0,
+          features: []
+        },
+        rewards: {
+          runes: {},
+          items: {}
+        },
+        lifetimeRewards: {
+          runes: {},
+          items: {}
+        },
+        achievements: [],
+        characters: [],
+        evolution: {},
         inventory: {
-          items: [],
-          ...(read(`./db/users/${address}/inventory.json`, {}))
+          items: []
         },
         market: {
-          trades: [],
-          ...(read(`./db/users/${address}/market.json`, {}))
+          trades: []
         }
       }
-    } else {
-      log('User didnt exist on filesystem: ', address)
+        
+      if (exists) {
+        baseUser = {
+          ...baseUser,
+          ...read(`./db/users/${address}/overview.json`, {}),
+          achievements: read(`./db/users/${address}/achievements.json`, []),
+          characters: read(`./db/users/${address}/characters.json`, []),
+          evolution: read(`./db/users/${address}/evolution.json`, {}),
+          inventory: {
+            items: [],
+            ...(read(`./db/users/${address}/inventory.json`, {}))
+          },
+          market: {
+            trades: [],
+            ...(read(`./db/users/${address}/market.json`, {}))
+          }
+        }
+      } else {
+        log('User didnt exist on filesystem: ', address)
+      }
+
+      let profile = await Profile.query(knex).where({ address }).first()
+
+      if (!profile) {
+        log('User didnt exist in database: ', address)
+
+        const account = await Account.query(knex).upsertGraph({
+          email: address + '@rune.farm',
+          firstName: 'Raider',
+          lastName: address,
+          password: '',
+          avatar: '',
+          meta: {}
+        }, {
+          relate: true
+        })
+
+        await Profile.query(knex).upsertGraph({
+          name: baseUser.username || baseUser.address,
+          account,
+          address,
+          avatar: null,
+          role: 'user', // [developer, user]
+          value: '',
+          // ownedProducts: [1, 2, 3, 4, 5],
+          meta: baseUser
+        } as any, {
+          relate: true
+        })
+
+        profile = await Profile.query(knex).where({ address }).first()
+      }
+
+      if (!profile.meta.name || typeof profile.meta.username !== 'string') { // Must have been migrated
+        profile.meta.username = await getUsername(profile.address)
+        profile.name = profile.meta.username
+      }
+
+      cache.users[address] = {...baseUser, ...profile.meta}
+
+      return cache.users[address]
+    } catch (e) {
+      log('Couldnt load user', e)
     }
-
-    let profile = await Profile.query(knex).where({ address }).first()
-
-    if (!profile) {
-      log('User didnt exist in database: ', address)
-
-      const account = await Account.query(knex).upsertGraph({
-        email: address + '@rune.farm',
-        firstName: 'Raider',
-        lastName: address,
-        password: '',
-        avatar: '',
-        meta: {}
-      }, {
-        relate: true
-      })
-
-      await Profile.query(knex).upsertGraph({
-        name: baseUser.username || baseUser.address,
-        account,
-        address,
-        avatar: null,
-        role: 'user', // [developer, user]
-        value: '',
-        // ownedProducts: [1, 2, 3, 4, 5],
-        meta: baseUser
-      } as any, {
-        relate: true
-      })
-
-      profile = await Profile.query(knex).where({ address }).first()
-    }
-
-    if (!profile.meta.name || typeof profile.meta.username !== 'string') { // Must have been migrated
-      profile.meta.username = await getUsername(profile.address)
-      profile.name = profile.meta.username
-    }
-
-    cache.users[address] = {...baseUser, ...profile.meta}
-
-    return cache.users[address]
   }
   
   app.db.saveUser = async (user) => {
@@ -1102,8 +1122,11 @@ export function initDb(app) {
     return !!achievement
   }
 
-  app.db.addUserAchievement = (user, achievementKey) => {
+  app.db.addUserAchievement = (user, achievementKey, amount = 1) => {
     const id = achievementData.find(i => i.key === achievementKey).id
+
+    if (!id) return
+
     const achievement = user.achievements.find(i => i === id)
 
     if (!achievement) {

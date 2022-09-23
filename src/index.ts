@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv'
+import fetch from 'node-fetch'
 import { log, isDebug } from '@rune-backend-sdk/util'
 import { subProcesses, catchExceptions } from '@rune-backend-sdk/util/process'
 import { initConfig } from './modules/config'
@@ -16,6 +17,7 @@ import { monitorCharacterEvents, getAllCharacterEvents } from './modules/charact
 import { monitorGeneralStats } from './modules/stats'
 import { monitorCraftingStats } from './modules/crafting'
 import { monitorMeta } from './modules/meta'
+import { monitorDao } from './modules/dao'
 import { monitorCoordinator } from './modules/coordinator'
 import { monitorAirtable } from './modules/airtable'
 import { monitorSenderEvents } from './modules/sender'
@@ -54,13 +56,28 @@ async function init() {
 
     app.flags = {}
 
-    app.admins = {
-      '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B': {
-        permissions: {
-          distribute: {}
-        }
-      }
-    }
+    app.admins = await (await fetch('https://raw.githubusercontent.com/RuneMetaverse/data/main/admins.json')).json()
+    
+    // {
+    //   '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B': {
+    //     permissions: {
+    //       distribute: {},
+    //       achievement: {}
+    //     }
+    //   },
+    //   '0xb1b1c99b365d39040334641a008e61e6e43968d3': {
+    //     permissions: {
+    //       distribute: {},
+    //       achievement: {}
+    //     }
+    //   },
+    //   '0x150F24A67d5541ee1F8aBce2b69046e25d64619c': {
+    //     permissions: {
+    //       distribute: {},
+    //       achievement: {}
+    //     }
+    //   }
+    // }
 
     app.games = {
       raid: {
@@ -155,6 +172,41 @@ async function init() {
       ]
     }
 
+    if (process.env.RUNE_ENV === 'dao') {
+      app.moduleConfig = [
+        {
+          name: 'initConfig',
+          instance: initConfig,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initDb',
+          instance: initDb,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'initWeb3',
+          instance: initWeb3,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'monitorSaves',
+          instance: monitorSaves,
+          async: false,
+          timeout: 0
+        },
+        {
+          name: 'monitorDao',
+          instance: monitorDao,
+          async: false,
+          timeout: 2 * 1000
+        },
+      ]
+    }
+
       // LOCAL
       // {
       //   name: 'generateAccounts',
@@ -225,7 +277,6 @@ async function init() {
           async: false,
           timeout: 0
         },
-
         {
           name: 'monitorSenderEvents',
           instance: monitorSenderEvents,
