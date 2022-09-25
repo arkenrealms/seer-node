@@ -99,6 +99,7 @@ async function getItem(app, key) {
   item.uuid = record.id
   item.id = record.get('id')
   item.name = record.get('name')
+  item.link = record.get('link')
   item.icon = record.get('image')?.[0]?.url || `/images/items/${pad(item.id, 5)}.png`
   item.image = record.get('image')?.[0]?.url
   item.imageHigh = record.get('imageHigh')?.[0]?.url

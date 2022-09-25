@@ -379,8 +379,10 @@ function initEventHandler(app) {
             const user = await app.db.loadUser(address)
 
             for (const index2 in amounts2) {
-              const token = amounts2[index2].split('=')[0].toLowerCase()
-              const amount = parseFloat(amounts2[index2].split('=')[1])
+              if (amounts2[index2].split('=').length !== 2) continue
+
+              const token = amounts2[index2].split('=')[0].toLowerCase().trim()
+              const amount = parseFloat(amounts2[index2].split('=')[1].trim())
 
               const tokens = ['rune', 'usd', 'rxs', 'el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'amn', 'sol', 'shael', 'dol', 'hel', 'io', 'lum', 'ko', 'fal', 'lem', 'pul', 'um', 'mal', 'ist', 'gul', 'vex', 'ohm', 'lo', 'sur', 'ber', 'jah', 'cham', 'zod']
 
