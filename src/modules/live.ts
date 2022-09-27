@@ -326,6 +326,56 @@ function initEventHandler(app) {
         }
       })
 
+      socket.on('CS_SaveNoteRequest', async function (req) {
+        log('CS_SaveNoteRequest', req)
+
+        try {
+          if (!await isValidRequest(app.web3, req)) {
+            socket.emit('CS_SaveNoteResponse', {
+              id: req.id,
+              data: { status: 0, message: 'Invalid signature' }
+            })
+            return
+          }
+
+          const tokenId = req.data.tokenId
+          const note = req.data.note
+          const address = req.signature.address
+
+          const userNotes = await app.db.loadUserNotes(address)
+
+          userNotes[tokenId] = note
+          
+          app.db.queueSave(() => app.db.saveUserNotes(address, userNotes))
+
+          socket.emit('CS_SaveNoteResponse', {
+            id: req?.id,
+            data: { status: 1 }
+          })
+        } catch(e) {
+          socket.emit('CS_SaveNoteResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
+      })
+
+      socket.on('CS_GetUserNotesRequest', async function (req) {
+        log('CS_GetUserNotesRequest', req)
+
+        try {
+          socket.emit('CS_GetUserNotesResponse', {
+            id: req.id,
+            data: { status: 1, data: await app.db.loadUserNotes(req.data.address) || {} }
+          })
+        } catch(e) {
+          socket.emit('CS_GetUserNotesResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
+      })
+
       socket.on('CS_ConnectRequest', async function (req) {
         log('CS_ConnectRequest', req)
 

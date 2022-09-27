@@ -557,6 +557,14 @@ export function initDb(app) {
     }
   }
 
+  app.db.loadUserNotes = async (address) => {
+    return read(`./db/users/${address}/notes.json`, {})
+  }
+
+  app.db.saveUserNotes = async (address, notes) => {
+    jetpack.write(path.resolve(`./db/users/${address}/notes.json`), JSON.stringify(notes), { atomic: true })
+  }
+
   app.db.loadUser = async (address) => {
     try {
       if (cache.users[address]) return cache.users[address]
@@ -782,7 +790,7 @@ export function initDb(app) {
 
         log(`Saved evolution leaderboard ${realm.key} for season ${app.games.evolution.currentSeason}`)
 
-        jetpack.write(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), beautify(realm.leaderboard, null, 2), { atomic: true })
+        jetpack.write(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), JSON.stringify(realm.leaderboard), { atomic: true })
       }
     } catch(e) {
       log('Error', e)
