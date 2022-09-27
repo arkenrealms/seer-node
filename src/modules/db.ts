@@ -558,7 +558,7 @@ export function initDb(app) {
   }
 
   app.db.loadUserNotes = async (address) => {
-    return read(`./db/users/${address}/notes.json`, {})
+    return read(`./db/users/${address}/notes.json`, {}) || {}
   }
 
   app.db.saveUserNotes = async (address, notes) => {
