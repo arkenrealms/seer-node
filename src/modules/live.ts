@@ -98,6 +98,7 @@ function initEventHandler(app) {
         try {
           
         } catch(e) {
+          log('Error: ', e)
           socket.emit('CS_SiteQuestResponse', {
             id: req?.id,
             data: { status: 0, message: 'Invalid signature' }
@@ -180,6 +181,7 @@ function initEventHandler(app) {
             data: { status: 1 }
           })
         } catch(e) {
+          log('Error: ', e)
           socket.emit('CS_ClaimSkinResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
@@ -233,6 +235,7 @@ function initEventHandler(app) {
             data: { status: 1 }
           })
         } catch(e) {
+          log('Error: ', e)
           socket.emit('CS_DetachSkinResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
@@ -287,6 +290,7 @@ function initEventHandler(app) {
             data: { status: 1 }
           })
         } catch(e) {
+          log('Error: ', e)
           socket.emit('CS_AttachSkinResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
@@ -303,6 +307,7 @@ function initEventHandler(app) {
             data: { status: 1, data: app.db.userSkins?.[req.data.address] || {} }
           })
         } catch(e) {
+          log('Error: ', e)
           socket.emit('CS_GetUserSkinsResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
@@ -353,6 +358,7 @@ function initEventHandler(app) {
             data: { status: 1 }
           })
         } catch(e) {
+          log('Error: ', e)
           socket.emit('CS_SaveNoteResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
@@ -369,6 +375,7 @@ function initEventHandler(app) {
             data: { status: 1, data: await app.db.loadUserNotes(req.data.address) || {} }
           })
         } catch(e) {
+          log('Error: ', e)
           socket.emit('CS_GetUserNotesResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
@@ -395,7 +402,7 @@ function initEventHandler(app) {
             data: { status: 1 }
           })
         } catch(e) {
-          log('CS_ConnectRequest error')
+          log('Error: ', e)
           socket.emit('CS_ConnectResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
