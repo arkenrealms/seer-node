@@ -9,7 +9,7 @@ import { achievementData } from '@rune-backend-sdk/data/achievements'
 import Profile from '@rune-backend-sdk/models/profile'
 import Account from '@rune-backend-sdk/models/account'
 import Model from '@rune-backend-sdk/models/base'
-import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
+import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 import { userInfo } from 'os'
 import getUsername from '@rune-backend-sdk/util/api/getOldUsername'
 

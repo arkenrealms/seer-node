@@ -8,7 +8,6 @@ import { log, removeDupes } from '@rune-backend-sdk/util'
 import { getClientSocket } from '@rune-backend-sdk/util/websocket'
 import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
 import getUsername from '@rune-backend-sdk/util/api/getOldUsername'
-import { ItemAttributes } from '@rune-backend-sdk/data/items'
 
 const shortId = require('shortid')
 
@@ -233,11 +232,11 @@ async function getCharacter(app, address) {
   const meta = await app.barracks.getMetaFromEquipment(app, equipment)
 
   // if (address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
-  //   meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
+  //   meta[1030] = 100
   // }
 
   let error
-  if (meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] > 100) error = `Problem with EvolutionMovementSpeedIncrease: ${address} ${meta[ItemAttributes.EvolutionMovementSpeedIncrease.id]}`
+  if (meta[1030] > 100) error = `Problem with EvolutionMovementSpeedIncrease: ${address} ${meta[1030]}`
   if (meta[1102] > 100) error = `Problem with DeathPenaltyAvoid: ${address} ${meta[1102]}`
   if (meta[1104] > 100) error = `Problem with EnergyDecayDecrease: ${address} ${meta[1104]}`
   if (meta[1105] > 100) error = `Problem with EnergyDecayIncrease: ${address} ${meta[1105]}`
@@ -592,11 +591,11 @@ export async function connectRealm(app, realm) {
 
       if (!character) {
         // if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
-        //   meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
+        //   meta[1030] = 100
         // }
   
         // if (req.data.address === '0x6f756AFaC862A2486f4c1C96b46E00A98a70bEA2') {
-        //   meta[ItemAttributes.EvolutionMovementSpeedIncrease.id] = 100
+        //   meta[1030] = 100
         // }
   
         character = await getCharacter(app, req.data.address)
@@ -799,8 +798,8 @@ export async function connectRealm(app, realm) {
               throw new Error('Big problem with item reward amount')
             }
 
-            if (pickup.quantity > app.db.evolution.config.rewardItemAmountMax) {
-              log(pickup.quantity, app.db.evolution.config.rewardItemAmountMax)
+            if (pickup.quantity > req.data.round.players.length * app.db.evolution.config.rewardItemAmountMax) {
+              log(pickup.quantity, req.data.round.players.length, app.db.evolution.config.rewardItemAmountMax)
               throw new Error('Big problem with item reward amount 2')
             }
 

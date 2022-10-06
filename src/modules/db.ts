@@ -8,7 +8,7 @@ import { achievementData } from '@rune-backend-sdk/data/achievements'
 import Profile from '@rune-backend-sdk/models/profile'
 import Account from '@rune-backend-sdk/models/account'
 import Model from '@rune-backend-sdk/models/base'
-import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
+import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
 import { userInfo } from 'os'
 import getUsername from '@rune-backend-sdk/util/api/getOldUsername'
 // import { now } from 'rune-backend-sdk/build/util/time'
@@ -562,6 +562,7 @@ export function initDb(app) {
   }
 
   app.db.saveUserNotes = async (address, notes) => {
+    log('Saving user notes: ' + address)
     jetpack.write(path.resolve(`./db/users/${address}/notes.json`), JSON.stringify(notes), { atomic: true })
   }
 

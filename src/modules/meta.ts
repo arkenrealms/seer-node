@@ -5,7 +5,8 @@ import beautify from 'json-beautify'
 import { log } from '@rune-backend-sdk/util'
 import { achievementData } from '@rune-backend-sdk/data/achievements'
 import { ItemsMainCategoriesType } from '@rune-backend-sdk/data/items.type'
-import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, ItemAttributes, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
+import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
+import ItemAttributes from '@rune-backend-sdk/data/generated/itemAttributes.json'
 
 export async function monitorMeta(app) {
   try {

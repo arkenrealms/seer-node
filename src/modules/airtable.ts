@@ -129,6 +129,10 @@ async function getItem(app, key) {
   item.createdDate = record.get('createdDate') || 0
   item.hotness = record.get('hotness') || 0
   item.numPerfectionRolls = record.get('numPerfectionRolls')
+  item.lore1 = record.get('lore1')
+  item.lore2 = record.get('lore2')
+  item.lore3 = record.get('lore3')
+  item.lore4 = record.get('lore4')
   item.attributes = []
   item.details = {
     Type: type?.name || '',
@@ -346,7 +350,7 @@ async function getItemAttribute(app, key) {
 
   const record = await app.airtable.database('ItemAttribute').find(key)
 
-  app.airtable.cache.getItemAttribute[key] = {
+  const attribute: any = {
     uuid: key,
     id: record.get('id'),
     name: record.get('name'),
@@ -363,6 +367,43 @@ async function getItemAttribute(app, key) {
     description: record.get('description') || '',
     explanation: record.get('explanation') || '',
   }
+
+  if (attribute.paramTypes) {
+    if (attribute.paramTypes[0] && attribute.paramValues?.[0]) {
+      const isPercent = attribute.paramValues[0].indexOf('%') !== -1
+      const spec = attribute.paramValues[0].replace('%', '')
+      attribute.param1 = {
+        spec,
+        isPercent,
+        min: spec.split('-')[0],
+        max: spec.split('-')[1]
+      }
+    }
+  
+    if (attribute.paramTypes[1] && attribute.paramValues?.[1]) {
+      const isPercent = attribute.paramValues[1].indexOf('%') !== -1
+      const spec = attribute.paramValues[1].replace('%', '')
+      attribute.param2 = {
+        spec,
+        isPercent,
+        min: spec.split('-')[0],
+        max: spec.split('-')[1]
+      }
+    }
+  
+    if (attribute.paramTypes[2] && attribute.paramValues?.[2]) {
+      const isPercent = attribute.paramValues[2].indexOf('%') !== -1
+      const spec = attribute.paramValues[2].replace('%', '')
+      attribute.param3 = {
+        spec,
+        isPercent,
+        min: spec.split('-')[0],
+        max: spec.split('-')[1]
+      }
+    }
+  }
+
+  app.airtable.cache.getItemAttribute[key] = attribute
 
   return app.airtable.cache.getItemAttribute[key]
 }
@@ -933,7 +974,7 @@ async function getItemAttributes(app) {
     const attributes = []
 
     await app.airtable.database('ItemAttribute').select({
-      maxRecords: 200,
+      maxRecords: 20000,
       view: "Grid view"
     }).eachPage(async function page(records, fetchNextPage) {
       log('Fetched attributes', records)
@@ -3234,9 +3275,9 @@ export async function monitorAirtable(app) {
     // await getGameInfos(app)
     // await getRunes(app)
     // await getSkills(app)
-    await getItems(app)
+    // await getItems(app)
     // await getItemRecipes(app)
-    // await getItemAttributes(app)
+    await getItemAttributes(app)
     // await getItemMaterials(app)
     // await getItemAttributeParams(app)
     // await getItemParams(app)

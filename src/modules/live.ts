@@ -690,6 +690,11 @@ export async function initLive(app) {
       websocketUtil.emitDirect(socket, ...props)
     }
 
+    app.live.emitAddress = async function(address, ...props) {
+      if (!users[address]) return
+      websocketUtil.emitDirect(users[address], ...props)
+    }
+
     app.live.emitAll = async function(...props) {
       websocketUtil.emitAll(app.live.io, ...props)
     }
