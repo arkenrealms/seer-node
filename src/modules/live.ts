@@ -430,7 +430,7 @@ function initEventHandler(app) {
           const hashes1 = user1.evolution?.hashes || []
           const hashes2 = user2.evolution?.hashes || []
 
-          const networkMatches = hashes1.filter(hash => hashes2.includes(hash));
+          const networkMatches = hashes1.filter(hash => hashes2.includes(hash))
 
           socket.emit('CS_CompareUsersResponse', {
             id: req.id,
