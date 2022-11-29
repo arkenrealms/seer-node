@@ -410,6 +410,38 @@ function initEventHandler(app) {
         }
       })
 
+      socket.on('CS_CompareUsersRequest', async function (req) {
+        log('CS_CompareUsersRequest', req)
+
+        try {
+          const { address1, address2 } = req.data
+
+          if (!await isValidRequest(app.web3, req) || !app.admins[req.signature.address]?.permissions.evolution) {
+            socket.emit('CS_CompareUsersResponse', {
+              id: req.id,
+              data: { status: 0, message: 'Invalid user' }
+            })
+            return
+          }
+          
+          const user1 = await app.db.loadUser(address1)
+          const user2 = await app.db.loadUser(address2)
+
+          const networkMatches = user1.evolution.hashes.filter(element => user2.evolution.hashes.includes(element));
+
+          socket.emit('CS_CompareUsersResponse', {
+            id: req.id,
+            data: { status: 1, networkMatchCount: networkMatches.length }
+          })
+        } catch(e) {
+          log('CS_CompareUsersRequest error')
+          socket.emit('CS_CompareUsersResponse', {
+            id: req?.id,
+            data: { status: 0, message: 'Error' }
+          })
+        }
+      })
+    
       socket.on('CS_DistributeTokensRequest', async function (req) {
         log('CS_DistributeTokensRequest', req)
 
