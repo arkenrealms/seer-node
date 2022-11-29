@@ -427,14 +427,17 @@ function initEventHandler(app) {
           const user1 = await app.db.loadUser(address1)
           const user2 = await app.db.loadUser(address2)
 
-          const networkMatches = user1.evolution.hashes.filter(element => user2.evolution.hashes.includes(element));
+          const hashes1 = user1.evolution?.hashes || []
+          const hashes2 = user2.evolution?.hashes || []
+
+          const networkMatches = hashes1.filter(hash => hashes2.includes(hash));
 
           socket.emit('CS_CompareUsersResponse', {
             id: req.id,
             data: { status: 1, networkMatchCount: networkMatches.length }
           })
         } catch(e) {
-          log('CS_CompareUsersRequest error')
+          log('CS_CompareUsersRequest error', e)
           socket.emit('CS_CompareUsersResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
@@ -505,7 +508,7 @@ function initEventHandler(app) {
             data: { status: 1 }
           })
         } catch(e) {
-          log('CS_DistributeTokensRequest error')
+          log('CS_DistributeTokensRequest error', e)
           socket.emit('CS_DistributeTokensResponse', {
             id: req?.id,
             data: { status: 0, message: 'Error' }
