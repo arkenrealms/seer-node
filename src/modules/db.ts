@@ -674,12 +674,12 @@ export function initDb(app) {
         profile.name = profile.meta.username
       }
 
+      cache.users[address] = {...baseUser, ...profile.meta}
+
       // Override admin permissions based on DAO repo
       if (app.admins[address]?.permissions) {
-        baseUser.permissions.admin = app.admins[address]?.permissions
+        cache.users[address].permissions.admin = app.admins[address]?.permissions
       }
-
-      cache.users[address] = {...baseUser, ...profile.meta}
 
       return cache.users[address]
     } catch (e) {
