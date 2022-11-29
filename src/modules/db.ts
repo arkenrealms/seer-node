@@ -576,7 +576,7 @@ export function initDb(app) {
       let baseUser = {
         address,
         permissions: {
-          admin: app.admins[address]?.permissions || {}
+          admin: {}
         },
         lastGamePlayed: 0,
         inventoryItemCount: 0,
@@ -672,6 +672,11 @@ export function initDb(app) {
       if (!profile.meta.name || typeof profile.meta.username !== 'string') { // Must have been migrated
         profile.meta.username = await getUsername(profile.address)
         profile.name = profile.meta.username
+      }
+
+      // Override admin permissions based on DAO repo
+      if (app.admins[address]?.permissions) {
+        baseUser.permissions.admin = app.admins[address]?.permissions
       }
 
       cache.users[address] = {...baseUser, ...profile.meta}
