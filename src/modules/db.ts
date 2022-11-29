@@ -576,7 +576,7 @@ export function initDb(app) {
       let baseUser = {
         address,
         permissions: {
-          admin: app.admins[address] || {}
+          admin: app.admins[address]?.permissions || {}
         },
         lastGamePlayed: 0,
         inventoryItemCount: 0,
