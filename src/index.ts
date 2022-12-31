@@ -180,7 +180,7 @@ async function init() {
         realms: {}
       },
       evolution: {
-        currentSeason: 4,
+        currentSeason: 5,
         realms: {}
       },
       infinite: {
