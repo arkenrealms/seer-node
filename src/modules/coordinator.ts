@@ -13,7 +13,7 @@ export async function monitorCoordinator(app) {
 
     const data = await response.json()
 
-    jetpack.write(path.resolve(`./db/affiliate/refers.json`), beautify(data, null, 2), { atomic: true })
+    jetpack.write(path.resolve(`./db/affiliate/refers.json`), beautify(data, null, 2), { atomic: true, jsonIndent: 0 })
   } catch(e) {
     log('Error', e)
   }

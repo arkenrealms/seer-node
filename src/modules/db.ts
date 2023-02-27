@@ -131,92 +131,92 @@ export function initDb(app) {
     log('Saving: config')
     app.config.updatedDate = (new Date().getTime()).toString()
     app.config.updatedTimestamp = new Date().getTime()
-    jetpack.write(path.resolve('./db/config.json'), app.config, { atomic: true })
+    jetpack.write(path.resolve('./db/config.json'), app.config, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveOracle = async () => {
     log('Saving: oracle')
-    jetpack.write(path.resolve('./db/oracle.json'), app.db.oracle, { atomic: true })
+    jetpack.write(path.resolve('./db/oracle.json'), app.db.oracle, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveTokenSkins = async () => {
     log('Saving: token skins')
-    await jetpack.writeAsync(path.resolve('./db/tokenSkins.json'), app.db.tokenSkins, { atomic: true })
+    await jetpack.writeAsync(path.resolve('./db/tokenSkins.json'), app.db.tokenSkins, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveUserSkins = async () => {
     log('Saving: user skins')
-    await jetpack.writeAsync(path.resolve('./db/userSkins.json'), app.db.userSkins, { atomic: true })
+    await jetpack.writeAsync(path.resolve('./db/userSkins.json'), app.db.userSkins, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveSkins = async () => {
     log('Saving: skins')
-    await jetpack.writeAsync(path.resolve('./db/skins.json'), app.db.skins, { atomic: true })
+    await jetpack.writeAsync(path.resolve('./db/skins.json'), app.db.skins, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.savePremium = async () => {
     log('Saving: premium')
-    await jetpack.writeAsync(path.resolve('./db/premium.json'), app.db.premium, { atomic: true })
+    await jetpack.writeAsync(path.resolve('./db/premium.json'), app.db.premium, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveEvolution = async () => {
     log('Saving: evolution')
-    jetpack.write(path.resolve('./db/evolution/config.json'), app.db.evolution.config, { atomic: true })
+    jetpack.write(path.resolve('./db/evolution/config.json'), app.db.evolution.config, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveTrades = async () => {
     log('Saving: trades')
-    jetpack.write(path.resolve('./db/trades.json'), app.db.trades, { atomic: true }) // removeDupes(
+    jetpack.write(path.resolve('./db/trades.json'), app.db.trades, { atomic: true, jsonIndent: 0 }) // removeDupes(
   }
 
   app.db.saveTradesEvents = async () => {
     log('Saving: tradesEvents')
-    jetpack.write(path.resolve('./db/trades/events.json'), app.db.tradesEvents, { atomic: true })
+    jetpack.write(path.resolve('./db/trades/events.json'), app.db.tradesEvents, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveBarracksEvents = async () => {
     log('Saving: barracksEvents')
-    jetpack.write(path.resolve('./db/barracks/events.json'), app.db.barracksEvents, { atomic: true })
+    jetpack.write(path.resolve('./db/barracks/events.json'), app.db.barracksEvents, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveCharactersEvents = async () => {
     log('Saving: charactersEvent')
-    jetpack.write(path.resolve('./db/characters/events.json'), app.db.charactersEvents, { atomic: true })
+    jetpack.write(path.resolve('./db/characters/events.json'), app.db.charactersEvents, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveItemsEvents = async () => {
     log('Saving: itemsEvents')
-    jetpack.write(path.resolve('./db/items/events.json'), app.db.itemsEvents, { atomic: true })
+    jetpack.write(path.resolve('./db/items/events.json'), app.db.itemsEvents, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveFarms = async () => {
     log('Saving: farms')
-    jetpack.write(path.resolve('./db/farms.json'), app.db.farms, { atomic: true })
+    jetpack.write(path.resolve('./db/farms.json'), app.db.farms, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveGuilds = async () => {
     log('Saving: guilds')
-    jetpack.write(path.resolve('./db/guilds.json'), app.db.guilds, { atomic: true })
+    jetpack.write(path.resolve('./db/guilds.json'), app.db.guilds, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveRunes = async () => {
     log('Saving: runes')
-    jetpack.write(path.resolve('./db/runes.json'), app.db.runes, { atomic: true })
+    jetpack.write(path.resolve('./db/runes.json'), app.db.runes, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveStats = async () => {
     log('Saving: stats')
-    jetpack.write(path.resolve('./db/stats.json'), app.db.stats, { atomic: true })
+    jetpack.write(path.resolve('./db/stats.json'), app.db.stats, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveHistorical = async () => {
     log('Saving: historical')
-    jetpack.write(path.resolve('./db/historical.json'), app.db.historical, { atomic: true })
+    jetpack.write(path.resolve('./db/historical.json'), app.db.historical, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveApp = async () => {
     log('Saving: app')
-    jetpack.write(path.resolve('./db/app.json'), app, { atomic: true })
+    jetpack.write(path.resolve('./db/app.json'), app, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveActiveUsers = async () => {
@@ -233,7 +233,7 @@ export function initDb(app) {
       }
     })
 
-    jetpack.write(path.resolve('./db/activeUsers.json'), app.db.activeUsers, { atomic: true })
+    jetpack.write(path.resolve('./db/activeUsers.json'), app.db.activeUsers, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.setUserActive = (user) => {
@@ -333,7 +333,7 @@ export function initDb(app) {
       leaderboard.mostItemsTransferred.address = user.address
     }
 
-    jetpack.write(path.resolve(`./db/leaderboard.json`), leaderboard, { atomic: true })
+    jetpack.write(path.resolve(`./db/leaderboard.json`), leaderboard, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.loadCharacter = (characterId) => {
@@ -350,9 +350,9 @@ export function initDb(app) {
       ...character,
       owners: undefined,
       ownersCount: character.owners.length,
-    }, { atomic: true })
+    }, { atomic: true, jsonIndent: 0 })
 
-    jetpack.write(path.resolve(`./db/characters/${character.id}/owners.json`), character.owners, { atomic: true })
+    jetpack.write(path.resolve(`./db/characters/${character.id}/owners.json`), character.owners, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveCharacterOwner = async (character, characterData) => {
@@ -389,11 +389,11 @@ export function initDb(app) {
       marketTradesPerfectCount: item.market.filter(i => i.item.perfection === 1).length,
       marketTradesListedCount: item.market.filter(i => i.status === 'listed').length,
       marketTradesSoldCount: item.market.filter(i => i.status === 'sold').length
-    }, { atomic: true })
+    }, { atomic: true, jsonIndent: 0 })
 
-    jetpack.write(path.resolve(`./db/items/${item.id}/owners.json`), item.owners, { atomic: true })
-    jetpack.write(path.resolve(`./db/items/${item.id}/market.json`), item.market, { atomic: true })
-    jetpack.write(path.resolve(`./db/items/${item.id}/tokens.json`), item.tokens, { atomic: true })
+    jetpack.write(path.resolve(`./db/items/${item.id}/owners.json`), item.owners, { atomic: true, jsonIndent: 0 })
+    jetpack.write(path.resolve(`./db/items/${item.id}/market.json`), item.market, { atomic: true, jsonIndent: 0 })
+    jetpack.write(path.resolve(`./db/items/${item.id}/tokens.json`), item.tokens, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveItemOwner = async (item, itemData) => {
@@ -514,11 +514,11 @@ export function initDb(app) {
       transfers: undefined,
       trades: undefined,
       meta: undefined
-    }, { atomic: true })
+    }, { atomic: true, jsonIndent: 0 })
 
-    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/transfers.json`), token.transfers, { atomic: true })
-    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/trades.json`), token.trades, { atomic: true })
-    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/meta.json`), token.meta, { atomic: true })
+    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/transfers.json`), token.transfers, { atomic: true, jsonIndent: 0 })
+    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/trades.json`), token.trades, { atomic: true, jsonIndent: 0 })
+    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/meta.json`), token.meta, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveTokenTrade = async (token, trade) => {
@@ -563,7 +563,7 @@ export function initDb(app) {
 
   app.db.saveUserNotes = async (address, notes) => {
     log('Saving user notes: ' + address)
-    jetpack.write(path.resolve(`./db/users/${address}/notes.json`), JSON.stringify(notes), { atomic: true })
+    jetpack.write(path.resolve(`./db/users/${address}/notes.json`), JSON.stringify(notes), { atomic: true, jsonIndent: 0 })
   }
 
   app.db.loadUser = async (address) => {
@@ -802,7 +802,7 @@ export function initDb(app) {
 
         log(`Saved evolution leaderboard ${realm.key} for season ${app.games.evolution.currentSeason}`)
 
-        jetpack.write(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), JSON.stringify(realm.leaderboard), { atomic: true })
+        jetpack.write(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), JSON.stringify(realm.leaderboard), { atomic: true, jsonIndent: 0 })
       }
     } catch(e) {
       log('Error', e)
@@ -935,10 +935,10 @@ export function initDb(app) {
       memberCount: guild.members.length,
       activeMemberCount: guild.memberDetails.filter(m => m.achievementCount > 0).length,
       members: undefined,
-    }, { atomic: true })
+    }, { atomic: true, jsonIndent: 0 })
     
-    jetpack.write(path.resolve(`./db/guilds/${guild.id}/members.json`), guild.members, { atomic: true })
-    jetpack.write(path.resolve(`./db/guilds/${guild.id}/memberDetails.json`), guild.memberDetails, { atomic: true })
+    jetpack.write(path.resolve(`./db/guilds/${guild.id}/members.json`), guild.members, { atomic: true, jsonIndent: 0 })
+    jetpack.write(path.resolve(`./db/guilds/${guild.id}/memberDetails.json`), guild.memberDetails, { atomic: true, jsonIndent: 0 })
 
     let g = app.db.guilds.find(g2 => g2.id === guild.id)
 
@@ -1183,7 +1183,7 @@ export function initDb(app) {
   }
 
   app.db.saveBanList = () => {
-    jetpack.write(path.resolve('./db/evolution/banList.json'), app.db.evolution.banList, { atomic: true })
+    jetpack.write(path.resolve('./db/evolution/banList.json'), app.db.evolution.banList, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.addModList = (game, target) => {
@@ -1195,12 +1195,12 @@ export function initDb(app) {
   }
 
   app.db.saveModList = () => {
-    jetpack.write(path.resolve('./db/evolution/modList.json'), app.db.evolution.modList, { atomic: true })
+    jetpack.write(path.resolve('./db/evolution/modList.json'), app.db.evolution.modList, { atomic: true, jsonIndent: 0 })
   }
 
   app.db.saveSkills = async (skills) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skills.json`), skills)
+      await jetpack.writeAsync(path.resolve(`./db/skills.json`), skills, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save skills', e)
     }
@@ -1208,7 +1208,7 @@ export function initDb(app) {
 
   app.db.saveItems = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/items.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/items.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save items', e)
     }
@@ -1216,7 +1216,7 @@ export function initDb(app) {
 
   app.db.saveItemRecipes = async (recipes) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemRecipes.json`), recipes)
+      await jetpack.writeAsync(path.resolve(`./db/itemRecipes.json`), recipes, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save recipes', e)
     }
@@ -1224,7 +1224,7 @@ export function initDb(app) {
 
   app.db.saveItemAttributes = async (attributes) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemAttributes.json`), attributes)
+      await jetpack.writeAsync(path.resolve(`./db/itemAttributes.json`), attributes, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save attributes', e)
     }
@@ -1232,7 +1232,7 @@ export function initDb(app) {
 
   app.db.saveGames = async (games) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/games.json`), games)
+      await jetpack.writeAsync(path.resolve(`./db/games.json`), games, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save games', e)
     }
@@ -1274,7 +1274,7 @@ export function initDb(app) {
     }
 
     try {
-      await jetpack.writeAsync(path.resolve(`./db/patrons.json`), app.db.patrons)
+      await jetpack.writeAsync(path.resolve(`./db/patrons.json`), app.db.patrons, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save games', e)
     }
@@ -1282,7 +1282,7 @@ export function initDb(app) {
 
   app.db.saveAreas = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/areas.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/areas.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1290,7 +1290,7 @@ export function initDb(app) {
 
   app.db.saveBiomes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1298,7 +1298,7 @@ export function initDb(app) {
 
   app.db.saveNpcs = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1306,7 +1306,7 @@ export function initDb(app) {
 
   app.db.saveActs = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/acts.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/acts.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1314,7 +1314,7 @@ export function initDb(app) {
 
   app.db.saveTimeGates = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1322,7 +1322,7 @@ export function initDb(app) {
 
   app.db.saveEnergies = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/energies.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/energies.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1330,7 +1330,7 @@ export function initDb(app) {
 
   app.db.savePlanets = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/planets.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/planets.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1338,7 +1338,7 @@ export function initDb(app) {
 
   app.db.saveSolarSystems = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1346,7 +1346,7 @@ export function initDb(app) {
 
   app.db.saveCharacterRaces = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterRaces.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterRaces.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1354,7 +1354,7 @@ export function initDb(app) {
 
   app.db.saveCharacterGenders = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterGenders.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterGenders.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1362,7 +1362,7 @@ export function initDb(app) {
 
   app.db.saveCharacterFactions = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterFactions.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterFactions.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1370,7 +1370,7 @@ export function initDb(app) {
 
   app.db.saveCharacterClasses = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterClasses.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterClasses.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1378,7 +1378,7 @@ export function initDb(app) {
 
   app.db.saveCharacterTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterTypes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterTypes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1386,7 +1386,7 @@ export function initDb(app) {
 
   app.db.saveCharacterAttributes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterAttributes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterAttributes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1394,7 +1394,7 @@ export function initDb(app) {
 
   app.db.saveCharacterTitles = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterTitles.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterTitles.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1402,7 +1402,7 @@ export function initDb(app) {
 
   app.db.saveCharacterNameChoices = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterNameChoices.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterNameChoices.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1410,7 +1410,7 @@ export function initDb(app) {
 
   app.db.saveGameInfos = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/gameInfo.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/gameInfo.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1418,7 +1418,7 @@ export function initDb(app) {
 
   app.db.saveBiomes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1426,7 +1426,7 @@ export function initDb(app) {
 
   app.db.saveBiomeFeatures = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1434,7 +1434,7 @@ export function initDb(app) {
 
   app.db.saveAchievements = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1442,7 +1442,7 @@ export function initDb(app) {
 
   app.db.saveLores = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/lores.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/lores.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1450,7 +1450,7 @@ export function initDb(app) {
 
   app.db.saveGames = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/games.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/games.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1458,7 +1458,7 @@ export function initDb(app) {
 
   app.db.saveGameInfos = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/gameInfos.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/gameInfos.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1466,7 +1466,7 @@ export function initDb(app) {
 
   app.db.saveItemMaterials = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemMaterials.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemMaterials.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1474,7 +1474,7 @@ export function initDb(app) {
 
   app.db.saveItemAttributeParams = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemAttributeParams.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemAttributeParams.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1482,7 +1482,7 @@ export function initDb(app) {
 
   app.db.saveItemParams = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemParams.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemParams.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1490,7 +1490,7 @@ export function initDb(app) {
 
   app.db.saveItemSpecificTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemSpecificTypes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemSpecificTypes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1498,7 +1498,7 @@ export function initDb(app) {
 
   app.db.saveItemSubTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemSubTypes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemSubTypes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1506,7 +1506,7 @@ export function initDb(app) {
 
   app.db.saveItemTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemTypes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemTypes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1514,7 +1514,7 @@ export function initDb(app) {
 
   app.db.saveItemAffixes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemAffixes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemAffixes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1522,7 +1522,7 @@ export function initDb(app) {
 
   app.db.saveItemSlots = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemSlots.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemSlots.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1530,7 +1530,7 @@ export function initDb(app) {
 
   app.db.saveItemRarities = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemRarities.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemRarities.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1538,7 +1538,7 @@ export function initDb(app) {
 
   app.db.saveItemSets = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemSets.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemSets.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1546,7 +1546,7 @@ export function initDb(app) {
 
   app.db.saveItemTransmuteRules = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemTransmuteRules.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/itemTransmuteRules.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1554,7 +1554,7 @@ export function initDb(app) {
 
   app.db.saveSkillClassifications = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillClassifications.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/skillClassifications.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1562,7 +1562,7 @@ export function initDb(app) {
 
   app.db.saveSkillMods = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillMods.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/skillMods.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1570,7 +1570,7 @@ export function initDb(app) {
 
   app.db.saveSkillConditions = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillConditions.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/skillConditions.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1578,7 +1578,7 @@ export function initDb(app) {
 
   app.db.saveSkillConditionParams = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillConditionParams.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/skillConditionParams.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1586,7 +1586,7 @@ export function initDb(app) {
 
   app.db.saveSkillStatusEffects = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillStatusEffects.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/skillStatusEffects.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1594,7 +1594,7 @@ export function initDb(app) {
 
   app.db.saveSkillTreeNodes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillTreeNodes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/skillTreeNodes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1602,7 +1602,7 @@ export function initDb(app) {
 
   app.db.saveCharacterGuilds = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterGuilds.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterGuilds.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1610,7 +1610,7 @@ export function initDb(app) {
 
   app.db.saveCharacterRaces = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterRaces.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterRaces.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1618,7 +1618,7 @@ export function initDb(app) {
 
   app.db.saveCharacterGenders = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterGenders.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterGenders.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1626,7 +1626,7 @@ export function initDb(app) {
 
   app.db.saveCharacterFactions = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterFactions.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterFactions.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1634,7 +1634,7 @@ export function initDb(app) {
 
   app.db.saveCharacterClasses = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterClasses.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterClasses.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1642,7 +1642,7 @@ export function initDb(app) {
 
   app.db.saveCharacters = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characters.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characters.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1650,7 +1650,7 @@ export function initDb(app) {
 
   app.db.saveCharacterTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterTypes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterTypes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1658,7 +1658,7 @@ export function initDb(app) {
 
   app.db.saveCharacterAttributes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterAttributes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterAttributes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1666,7 +1666,7 @@ export function initDb(app) {
 
   app.db.saveCharacterStats = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterStats.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterStats.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1674,7 +1674,7 @@ export function initDb(app) {
 
   app.db.saveCharacterTitles = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterTitles.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterTitles.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1682,7 +1682,7 @@ export function initDb(app) {
 
   app.db.saveCharacterNameChoices = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterNameChoices.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/characterNameChoices.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1690,7 +1690,7 @@ export function initDb(app) {
 
   app.db.saveAreas = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/areas.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/areas.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1698,7 +1698,7 @@ export function initDb(app) {
 
   app.db.saveAreaNameChoices = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/areaNameChoices.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/areaNameChoices.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1706,7 +1706,7 @@ export function initDb(app) {
 
   app.db.saveLores = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/lores.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/lores.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1714,7 +1714,7 @@ export function initDb(app) {
 
   app.db.saveNpcs = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1722,7 +1722,7 @@ export function initDb(app) {
 
   app.db.saveActs = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/acts.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/acts.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1730,7 +1730,7 @@ export function initDb(app) {
 
   app.db.saveEras = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/eras.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/eras.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1738,7 +1738,7 @@ export function initDb(app) {
 
   app.db.saveTimeGates = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1746,7 +1746,7 @@ export function initDb(app) {
 
   app.db.saveEnergies = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/energies.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/energies.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1754,7 +1754,7 @@ export function initDb(app) {
 
   app.db.saveAchievements = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1762,7 +1762,7 @@ export function initDb(app) {
 
   app.db.saveBiomes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1770,7 +1770,7 @@ export function initDb(app) {
 
   app.db.saveBiomeFeatures = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1778,7 +1778,7 @@ export function initDb(app) {
 
   app.db.saveSolarSystems = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }
@@ -1786,7 +1786,7 @@ export function initDb(app) {
 
   app.db.savePlanets = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/planets.json`), items)
+      await jetpack.writeAsync(path.resolve(`./db/planets.json`), items, { jsonIndent: 0 })
     } catch(e) {
       log('Couldnt save', e)
     }

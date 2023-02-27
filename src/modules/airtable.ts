@@ -65,7 +65,7 @@ const db = jetpack.read(path.resolve('./db/airtable.json'), 'json') || {
 
 
 function saveDb() {
-  jetpack.write(path.resolve('./db/airtable.json'), db, { atomic: true })
+  jetpack.write(path.resolve('./db/airtable.json'), db, { atomic: true, jsonIndent: 0 })
 }
 
 setInterval(function() {

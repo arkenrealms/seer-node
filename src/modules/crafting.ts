@@ -60,7 +60,7 @@ export async function monitorCraftingStats(app) {
         competition4: []
       }
 
-      jetpack.write(path.resolve('../db/crafting/leaderboard.json'), beautify(data, null, 2), { atomic: true })
+      jetpack.write(path.resolve('../db/crafting/leaderboard.json'), beautify(data, null, 2), { atomic: true, jsonIndent: 0 })
     }
   } catch(e) {
     log('Error', e)

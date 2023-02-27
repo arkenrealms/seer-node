@@ -20,7 +20,7 @@ async function add(type, data) {
     createdAt: now
   })
 
-  jetpack.write(path.resolve(`./db/notices.json`), JSON.stringify(notices), { atomic: true })
+  jetpack.write(path.resolve(`./db/notices.json`), JSON.stringify(notices), { atomic: true, jsonIndent: 0 })
 }
 
 export async function initNotices(app) {

@@ -11,28 +11,28 @@ import ItemAttributes from '@rune-backend-sdk/data/generated/itemAttributes.json
 export async function monitorMeta(app) {
   try {
     log('Saving achievement data')
-    jetpack.write(path.resolve('./db/achievements.json'), JSON.stringify(achievementData), { atomic: true })
+    jetpack.write(path.resolve('./db/achievements.json'), JSON.stringify(achievementData), { atomic: true, jsonIndent: 0 })
   
     log('Saving item data')
-    jetpack.write(path.resolve('./db/items.json'), JSON.stringify(itemData.runeword), { atomic: true })
+    jetpack.write(path.resolve('./db/items.json'), JSON.stringify(itemData.runeword), { atomic: true, jsonIndent: 0 })
   
     log('Saving item attribute data')
-    jetpack.write(path.resolve('./db/itemAttributes.json'), JSON.stringify(ItemAttributes), { atomic: true })
+    jetpack.write(path.resolve('./db/itemAttributes.json'), JSON.stringify(ItemAttributes), { atomic: true, jsonIndent: 0 })
   
     // log('Saving skill data')
-    // jetpack.write(path.resolve('./db/skills.json'), JSON.stringify(SkillNames), { atomic: true })
+    // jetpack.write(path.resolve('./db/skills.json'), JSON.stringify(SkillNames), { atomic: true, jsonIndent: 0 })
   
     log('Saving class data')
-    jetpack.write(path.resolve('./db/classes.json'), JSON.stringify(ClassNames), { atomic: true })
+    jetpack.write(path.resolve('./db/classes.json'), JSON.stringify(ClassNames), { atomic: true, jsonIndent: 0 })
   
     log('Saving item rarity data')
-    jetpack.write(path.resolve('./db/itemRarity.json'), JSON.stringify(ItemRarity), { atomic: true })
+    jetpack.write(path.resolve('./db/itemRarity.json'), JSON.stringify(ItemRarity), { atomic: true, jsonIndent: 0 })
   
     log('Saving item type data')
-    jetpack.write(path.resolve('./db/itemTypes.json'), JSON.stringify(ItemTypeToText), { atomic: true })
+    jetpack.write(path.resolve('./db/itemTypes.json'), JSON.stringify(ItemTypeToText), { atomic: true, jsonIndent: 0 })
   
     log('Saving item slot data')
-    jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText), { atomic: true })
+    jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText), { atomic: true, jsonIndent: 0 })
   
     log('Saving item meta')
 
@@ -379,7 +379,7 @@ export async function monitorMeta(app) {
 
       // log('Saving item meta', itemJson.id)
 
-      jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), JSON.stringify(itemJson), { atomic: true })
+      jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), JSON.stringify(itemJson), { atomic: true, jsonIndent: 0 })
 
       // const ipfs = ipfsClient.create({
       //   host: 'ipfs.rune.game',

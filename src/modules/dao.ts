@@ -123,7 +123,7 @@ export async function monitorDao(app) {
       }
     }
 
-    jetpack.write(path.resolve(`./db/dao/proposals.json`), beautify(app.db.dao.proposals, null, 2), { atomic: true })
+    jetpack.write(path.resolve(`./db/dao/proposals.json`), beautify(app.db.dao.proposals, null, 2), { atomic: true, jsonIndent: 0 })
   } catch(e) {
     log('Error', e)
   }

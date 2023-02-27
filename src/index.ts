@@ -229,9 +229,7 @@ async function init() {
           timeout: 5 * 1000
         },
       ]
-    }
-
-    if (process.env.RUNE_ENV === 'skinner') {
+    } else if (process.env.RUNE_ENV === 'skinner') {
       app.moduleConfig = [
         {
           name: 'initConfig',
@@ -270,9 +268,7 @@ async function init() {
           timeout: 5 * 1000
         },
       ]
-    }
-
-    if (process.env.RUNE_ENV === 'dao') {
+    } else if (process.env.RUNE_ENV === 'dao') {
       app.moduleConfig = [
         {
           name: 'initConfig',
@@ -305,47 +301,64 @@ async function init() {
           timeout: 2 * 1000
         },
       ]
-    }
-
-      // LOCAL
-      // {
-      //   name: 'generateAccounts',
-      //   instance: generateAccounts,
-      //   async: false,
-      //   timeout: 5 * 1000
-      // },
-      // {
-      //   name: 'monitorAirtable',
-      //   instance: monitorAirtable,
-      //   async: false,
-      //   timeout: 30 * 1000
-      // },
-      // {
-      //   name: 'userLoadAndSave',
-      //   instance: tests.userLoadAndSave,
-      //   async: false,
-      //   timeout: 10 * 1000
-      // },
-      // {
-      //   name: 'runTest',
-      //   instance: runTest,
-      //   async: false,
-      //   timeout: 1 * 1000
-      // },
-      // {
-      //   name: 'convertRewards',
-      //   instance: tests.convertRewards,
-      //   async: true,
-      //   timeout: 0
-      // },
-      // {
-      //   name: 'migrateTokens',
-      //   instance: migrateTokens,
-      //   async: true,
-      //   timeout: 0
-      // },
-
-    if (process.env.RUNE_ENV === 'production') {
+    } else if (process.env.RUNE_ENV === 'local') {
+        app.moduleConfig = [
+          {
+            name: 'initConfig',
+            instance: initConfig,
+            async: false,
+            timeout: 0
+          },
+          {
+            name: 'initDb',
+            instance: initDb,
+            async: false,
+            timeout: 0
+          },
+          {
+            name: 'initWeb3',
+            instance: initWeb3,
+            async: false,
+            timeout: 0
+          },
+          {
+            name: 'generateAccounts',
+            instance: generateAccounts,
+            async: false,
+            timeout: 5 * 1000
+          },
+          // {
+          //   name: 'monitorAirtable',
+          //   instance: monitorAirtable,
+          //   async: false,
+          //   timeout: 30 * 1000
+          // },
+          // {
+          //   name: 'userLoadAndSave',
+          //   instance: tests.userLoadAndSave,
+          //   async: false,
+          //   timeout: 10 * 1000
+          // },
+          // {
+          //   name: 'runTest',
+          //   instance: runTest,
+          //   async: false,
+          //   timeout: 1 * 1000
+          // },
+          // {
+          //   name: 'convertRewards',
+          //   instance: tests.convertRewards,
+          //   async: true,
+          //   timeout: 0
+          // },
+          // {
+          //   name: 'migrateTokens',
+          //   instance: migrateTokens,
+          //   async: true,
+          //   timeout: 0
+          // },
+        ]
+      } else if (process.env.RUNE_ENV === 'production') {
       app.moduleConfig = [
         {
           name: 'initConfig',
