@@ -181,7 +181,7 @@ async function init() {
         realms: {}
       },
       evolution: {
-        currentSeason: 5,
+        currentSeason: 6,
         isSeasonActive: true,
         realms: {}
       },
