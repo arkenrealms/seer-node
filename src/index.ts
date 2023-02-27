@@ -177,22 +177,27 @@ async function init() {
     app.games = {
       raid: {
         currentSeason: 0,
+        isSeasonActive: true,
         realms: {}
       },
       evolution: {
         currentSeason: 5,
+        isSeasonActive: true,
         realms: {}
       },
       infinite: {
         currentSeason: 0,
+        isSeasonActive: false,
         realms: {}
       },
       guardians: {
         currentSeason: 0,
+        isSeasonActive: false,
         realms: {}
       },
       sanctuary: {
         currentSeason: 0,
+        isSeasonActive: false,
         realms: {}
       }
     }

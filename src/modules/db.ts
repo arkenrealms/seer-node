@@ -727,6 +727,9 @@ export function initDb(app) {
   }
 
   app.db.saveEvolutionLeaderboards = async () => {
+    if (!app.games.evolution.isSeasonActive)
+      return
+      
     log('Saving evolution leaderboard')
 
     try {
