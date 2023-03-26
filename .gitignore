@@ -1,5 +1,6 @@
 rune.db
 rune.db.*
+*.prisma
 
 build
 secrets.json

@@ -1,368 +1,516 @@
-import * as ethers from 'ethers'
-import beautify from 'json-beautify'
-import jetpack from 'fs-jetpack'
-import path from 'path'
-import { log, removeDupes } from '@rune-backend-sdk/util'
-import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
-import { achievementData } from '@rune-backend-sdk/data/achievements'
-import Profile from '@rune-backend-sdk/models/profile'
-import Account from '@rune-backend-sdk/models/account'
-import Model from '@rune-backend-sdk/models/base'
-import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
-import { userInfo } from 'os'
-import getUsername from '@rune-backend-sdk/util/api/getOldUsername'
+import * as ethers from "ethers";
+import {PrismaClient} from "@prisma/client";
+import jetpack from "fs-jetpack";
+import path from "path";
+import {log, removeDupes} from "@rune-backend-sdk/util";
+import {decodeItem} from "@rune-backend-sdk/util/item-decoder";
+import {achievementData} from "@rune-backend-sdk/data/achievements";
+import Profile from "@rune-backend-sdk/models/profile";
+import Account from "@rune-backend-sdk/models/account";
+import Model from "@rune-backend-sdk/models/base";
+import {
+  itemData,
+  ItemTypeToText,
+  ItemSlotToText,
+  RuneNames,
+  ItemAttributesById,
+  SkillNames,
+  ClassNames,
+  ItemRarity,
+} from "@rune-backend-sdk/data/items";
+import {userInfo} from "os";
+import getUsername from "@rune-backend-sdk/util/api/getOldUsername";
 // import { now } from 'rune-backend-sdk/build/util/time'
 
 const cache = {
-  users: {}
-}
+  users: {},
+};
 
 export function initDb(app) {
-  const Knex = require('knex')
-  const knexfile = require('../knexfile')
-  const knex = Knex(knexfile)
-  
-  knex.on('query', (query): any => {
-    // console.log(query)
-  })
-  
-  Model.knex(knex)
+  // TODO: remove knex
+  const Knex = require("knex");
+  const knexfile = require("../knexfile");
+  const knex = Knex(knexfile);
 
+  knex.on("query", (query): any => {
+    // console.log(query)
+  });
+
+  Model.knex(knex);
+
+  const client = new PrismaClient();
 
   app.db = {
+    client,
     queuedSaves: [],
-    app: jetpack.read(path.resolve('./db/app.json'), 'json') || {
+    app: jetpack.read(path.resolve("./db/app.json"), "json") || {
       config: {
         characterMintCost: 0.1,
-        profileRegisterCost: 0
-      }
+        profileRegisterCost: 0,
+      },
     },
     dao: {
-      proposals: jetpack.read(path.resolve('./db/dao/proposals.json'), 'json') || []
+      proposals:
+        jetpack.read(path.resolve("./db/dao/proposals.json"), "json") || [],
     },
-    trades: removeDupes(jetpack.read(path.resolve('./db/trades.json'), 'json') || []),
-    oracle: jetpack.read(path.resolve('./db/oracle.json'), 'json') || {},
-    patrons: jetpack.read(path.resolve('./db/patrons.json'), 'json') || [],
-    oprah: jetpack.read(path.resolve('./db/oprah.json'), 'json') || {},
-    farms: jetpack.read(path.resolve('./db/farms.json'), 'json') || {},
-    runes: jetpack.read(path.resolve('./db/runes.json'), 'json') || {},
-    items: jetpack.read(path.resolve('./db/items.json'), 'json') || {},
-    recipes: jetpack.read(path.resolve('./db/recipes.json'), 'json') || {},
-    skills: jetpack.read(path.resolve('./db/skills.json'), 'json') || {},
-    classes: jetpack.read(path.resolve('./db/classes.json'), 'json') || [],
-    guilds: jetpack.read(path.resolve('./db/guilds.json'), 'json') || [],
-    stats: jetpack.read(path.resolve('./db/stats.json'), 'json') || {},
-    skins: jetpack.read(path.resolve('./db/skins.json'), 'json') || {},
-    premium: jetpack.read(path.resolve('./db/premium.json'), 'json') || { users: {} },
-    tokenSkins: jetpack.read(path.resolve('./db/tokenSkins.json'), 'json') || {},
-    userSkins: jetpack.read(path.resolve('./db/userSkins.json'), 'json') || {},
-    historical: jetpack.read(path.resolve('./db/historical.json'), 'json') || {},
-    barracksEvents: jetpack.read(path.resolve('./db/barracks/events.json'), 'json') || [],
-    blacksmithEvents: jetpack.read(path.resolve('./db/blacksmith/events.json'), 'json') || [],
-    raidEvents: jetpack.read(path.resolve('./db/raid/events.json'), 'json') || [],
-    guildsEvents: jetpack.read(path.resolve('./db/guilds/events.json'), 'json') || [],
-    itemsEvents: jetpack.read(path.resolve('./db/items/events.json'), 'json') || [],
-    charactersEvents: jetpack.read(path.resolve('./db/characters/events.json'), 'json') || [],
-    usersEvents: jetpack.read(path.resolve('./db/users/events.json'), 'json') || [],
-    tradesEvents: jetpack.read(path.resolve('./db/trades/events.json'), 'json') || [],
+    trades: removeDupes(
+      jetpack.read(path.resolve("./db/trades.json"), "json") || []
+    ),
+    oracle: jetpack.read(path.resolve("./db/oracle.json"), "json") || {},
+    patrons: jetpack.read(path.resolve("./db/patrons.json"), "json") || [],
+    oprah: jetpack.read(path.resolve("./db/oprah.json"), "json") || {},
+    farms: jetpack.read(path.resolve("./db/farms.json"), "json") || {},
+    runes: jetpack.read(path.resolve("./db/runes.json"), "json") || {},
+    items: jetpack.read(path.resolve("./db/items.json"), "json") || {},
+    recipes: jetpack.read(path.resolve("./db/recipes.json"), "json") || {},
+    skills: jetpack.read(path.resolve("./db/skills.json"), "json") || {},
+    classes: jetpack.read(path.resolve("./db/classes.json"), "json") || [],
+    guilds: jetpack.read(path.resolve("./db/guilds.json"), "json") || [],
+    stats: jetpack.read(path.resolve("./db/stats.json"), "json") || {},
+    skins: jetpack.read(path.resolve("./db/skins.json"), "json") || {},
+    premium: jetpack.read(path.resolve("./db/premium.json"), "json") || {
+      users: {},
+    },
+    tokenSkins:
+      jetpack.read(path.resolve("./db/tokenSkins.json"), "json") || {},
+    userSkins: jetpack.read(path.resolve("./db/userSkins.json"), "json") || {},
+    historical:
+      jetpack.read(path.resolve("./db/historical.json"), "json") || {},
+    barracksEvents:
+      jetpack.read(path.resolve("./db/barracks/events.json"), "json") || [],
+    blacksmithEvents:
+      jetpack.read(path.resolve("./db/blacksmith/events.json"), "json") || [],
+    raidEvents:
+      jetpack.read(path.resolve("./db/raid/events.json"), "json") || [],
+    guildsEvents:
+      jetpack.read(path.resolve("./db/guilds/events.json"), "json") || [],
+    itemsEvents:
+      jetpack.read(path.resolve("./db/items/events.json"), "json") || [],
+    charactersEvents:
+      jetpack.read(path.resolve("./db/characters/events.json"), "json") || [],
+    usersEvents:
+      jetpack.read(path.resolve("./db/users/events.json"), "json") || [],
+    tradesEvents:
+      jetpack.read(path.resolve("./db/trades/events.json"), "json") || [],
     // evolutionLeaderboardHistory: jetpack.read(path.resolve('./db/evolution/leaderboardHistory.json'), 'json'),
     // evolutionRewardHistory: jetpack.read(path.resolve('./db/evolution/rewardHistory.json'), 'json'),
     evolution: {
       playerCount: 0,
-      banList: jetpack.read(path.resolve('./db/evolution/banList.json'), 'json') || [],
-      modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7'],
-      config: jetpack.read(path.resolve('./db/evolution/config.json'), 'json') || {
-        "rewardItemAmountPerLegitPlayer": 0.0015,
-        "rewardItemAmountMax": 0.03,
-        "rewardWinnerAmountPerLegitPlayer": 0.015,
-        "rewardWinnerAmountMax": 0.3,
-        "rewardItemAmount": 0.02,
-        "rewardWinnerAmount": 0.05
+      banList:
+        jetpack.read(path.resolve("./db/evolution/banList.json"), "json") || [],
+      modList: ["0xDfA8f768d82D719DC68E12B199090bDc3691fFc7"],
+      config: jetpack.read(
+        path.resolve("./db/evolution/config.json"),
+        "json"
+      ) || {
+        rewardItemAmountPerLegitPlayer: 0.0015,
+        rewardItemAmountMax: 0.03,
+        rewardWinnerAmountPerLegitPlayer: 0.015,
+        rewardWinnerAmountMax: 0.3,
+        rewardItemAmount: 0.02,
+        rewardWinnerAmount: 0.05,
       },
-      realms: jetpack.read(path.resolve('./db/evolution/realms.json'), 'json') || [],
-      servers: jetpack.read(path.resolve('./db/evolution/servers.json'), 'json') || [],
-      historical: jetpack.read(path.resolve('./db/evolution/historical.json'), 'json') || []
+      realms:
+        jetpack.read(path.resolve("./db/evolution/realms.json"), "json") || [],
+      servers:
+        jetpack.read(path.resolve("./db/evolution/servers.json"), "json") || [],
+      historical:
+        jetpack.read(path.resolve("./db/evolution/historical.json"), "json") ||
+        [],
     },
     infinite: {
-      banList: jetpack.read(path.resolve('./db/infinite/banList.json'), 'json') || [],
-      modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7'],
-      config: jetpack.read(path.resolve('./db/infinite/config.json'), 'json') || {
-        "something": 0.0015
+      banList:
+        jetpack.read(path.resolve("./db/infinite/banList.json"), "json") || [],
+      modList: ["0xDfA8f768d82D719DC68E12B199090bDc3691fFc7"],
+      config: jetpack.read(
+        path.resolve("./db/infinite/config.json"),
+        "json"
+      ) || {
+        something: 0.0015,
       },
-      realms: jetpack.read(path.resolve('./db/infinite/realms.json'), 'json') || [],
-      servers: jetpack.read(path.resolve('./db/infinite/servers.json'), 'json') || [],
-      historical: jetpack.read(path.resolve('./db/infinite/historical.json'), 'json') || []
+      realms:
+        jetpack.read(path.resolve("./db/infinite/realms.json"), "json") || [],
+      servers:
+        jetpack.read(path.resolve("./db/infinite/servers.json"), "json") || [],
+      historical:
+        jetpack.read(path.resolve("./db/infinite/historical.json"), "json") ||
+        [],
     },
     sanctuary: {
-      banList: jetpack.read(path.resolve('./db/sanctuary/banList.json'), 'json') || [],
-      modList: []
+      banList:
+        jetpack.read(path.resolve("./db/sanctuary/banList.json"), "json") || [],
+      modList: [],
     },
     guardians: {
-      banList: jetpack.read(path.resolve('./db/guardians/banList.json'), 'json') || [],
-      modList: []
+      banList:
+        jetpack.read(path.resolve("./db/guardians/banList.json"), "json") || [],
+      modList: [],
     },
     raid: {
-      banList: jetpack.read(path.resolve('./db/raid/banList.json'), 'json') || [],
-      modList: ['0xDfA8f768d82D719DC68E12B199090bDc3691fFc7']
+      banList:
+        jetpack.read(path.resolve("./db/raid/banList.json"), "json") || [],
+      modList: ["0xDfA8f768d82D719DC68E12B199090bDc3691fFc7"],
     },
-    activeUsers: jetpack.read(path.resolve('./db/activeUsers.json'), 'json') || []
-  }
+    activeUsers:
+      jetpack.read(path.resolve("./db/activeUsers.json"), "json") || [],
+  };
 
-  if (process.env.RUNE_ENV === 'local') {
+  if (process.env.RUNE_ENV === "local") {
     app.db.evolution.realms = [
       {
-        "key": "local1",
-        "name": "Local",
-        "roundId": app.db.evolution.realms?.[0]?.roundId || 1,
-        "regionId": 1,
-        "playerCount": 0,
-        "speculatorCount": 0,
-        "version": "1.0.0",
-        "endpoint": "localhost:3006",
-        "games": [],
-        "status": "online",
-        "rewardItemAmount": 0,
-        "rewardWinnerAmount": 0
-      }
-    ]
+        key: "local1",
+        name: "Local",
+        roundId: app.db.evolution.realms?.[0]?.roundId || 1,
+        regionId: 1,
+        playerCount: 0,
+        speculatorCount: 0,
+        version: "1.0.0",
+        endpoint: "localhost:3006",
+        games: [],
+        status: "online",
+        rewardItemAmount: 0,
+        rewardWinnerAmount: 0,
+      },
+    ];
   }
 
   app.db.saveConfig = async () => {
-    log('Saving: config')
-    app.config.updatedDate = (new Date().getTime()).toString()
-    app.config.updatedTimestamp = new Date().getTime()
-    jetpack.write(path.resolve('./db/config.json'), app.config, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: config");
+    app.config.updatedDate = new Date().getTime().toString();
+    app.config.updatedTimestamp = new Date().getTime();
+    jetpack.write(path.resolve("./db/config.json"), app.config, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveOracle = async () => {
-    log('Saving: oracle')
-    jetpack.write(path.resolve('./db/oracle.json'), app.db.oracle, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: oracle");
+    jetpack.write(path.resolve("./db/oracle.json"), app.db.oracle, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveTokenSkins = async () => {
-    log('Saving: token skins')
-    await jetpack.writeAsync(path.resolve('./db/tokenSkins.json'), app.db.tokenSkins, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: token skins");
+    await jetpack.writeAsync(
+      path.resolve("./db/tokenSkins.json"),
+      app.db.tokenSkins,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveUserSkins = async () => {
-    log('Saving: user skins')
-    await jetpack.writeAsync(path.resolve('./db/userSkins.json'), app.db.userSkins, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: user skins");
+    await jetpack.writeAsync(
+      path.resolve("./db/userSkins.json"),
+      app.db.userSkins,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveSkins = async () => {
-    log('Saving: skins')
-    await jetpack.writeAsync(path.resolve('./db/skins.json'), app.db.skins, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: skins");
+    await jetpack.writeAsync(path.resolve("./db/skins.json"), app.db.skins, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.savePremium = async () => {
-    log('Saving: premium')
-    await jetpack.writeAsync(path.resolve('./db/premium.json'), app.db.premium, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: premium");
+    await jetpack.writeAsync(
+      path.resolve("./db/premium.json"),
+      app.db.premium,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveEvolution = async () => {
-    log('Saving: evolution')
-    jetpack.write(path.resolve('./db/evolution/config.json'), app.db.evolution.config, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: evolution");
+    jetpack.write(
+      path.resolve("./db/evolution/config.json"),
+      app.db.evolution.config,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveTrades = async () => {
-    log('Saving: trades')
-    jetpack.write(path.resolve('./db/trades.json'), app.db.trades, { atomic: true, jsonIndent: 0 }) // removeDupes(
-  }
+    log("Saving: trades");
+    jetpack.write(path.resolve("./db/trades.json"), app.db.trades, {
+      atomic: true,
+      jsonIndent: 0,
+    }); // removeDupes(
+  };
 
   app.db.saveTradesEvents = async () => {
-    log('Saving: tradesEvents')
-    jetpack.write(path.resolve('./db/trades/events.json'), app.db.tradesEvents, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: tradesEvents");
+    jetpack.write(
+      path.resolve("./db/trades/events.json"),
+      app.db.tradesEvents,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveBarracksEvents = async () => {
-    log('Saving: barracksEvents')
-    jetpack.write(path.resolve('./db/barracks/events.json'), app.db.barracksEvents, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: barracksEvents");
+    jetpack.write(
+      path.resolve("./db/barracks/events.json"),
+      app.db.barracksEvents,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveCharactersEvents = async () => {
-    log('Saving: charactersEvent')
-    jetpack.write(path.resolve('./db/characters/events.json'), app.db.charactersEvents, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: charactersEvent");
+    jetpack.write(
+      path.resolve("./db/characters/events.json"),
+      app.db.charactersEvents,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveItemsEvents = async () => {
-    log('Saving: itemsEvents')
-    jetpack.write(path.resolve('./db/items/events.json'), app.db.itemsEvents, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: itemsEvents");
+    jetpack.write(path.resolve("./db/items/events.json"), app.db.itemsEvents, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveFarms = async () => {
-    log('Saving: farms')
-    jetpack.write(path.resolve('./db/farms.json'), app.db.farms, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: farms");
+    jetpack.write(path.resolve("./db/farms.json"), app.db.farms, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveGuilds = async () => {
-    log('Saving: guilds')
-    jetpack.write(path.resolve('./db/guilds.json'), app.db.guilds, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: guilds");
+    jetpack.write(path.resolve("./db/guilds.json"), app.db.guilds, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveRunes = async () => {
-    log('Saving: runes')
-    jetpack.write(path.resolve('./db/runes.json'), app.db.runes, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: runes");
+    jetpack.write(path.resolve("./db/runes.json"), app.db.runes, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveStats = async () => {
-    log('Saving: stats')
-    jetpack.write(path.resolve('./db/stats.json'), app.db.stats, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: stats");
+    jetpack.write(path.resolve("./db/stats.json"), app.db.stats, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveHistorical = async () => {
-    log('Saving: historical')
-    jetpack.write(path.resolve('./db/historical.json'), app.db.historical, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: historical");
+    jetpack.write(path.resolve("./db/historical.json"), app.db.historical, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveApp = async () => {
-    log('Saving: app')
-    jetpack.write(path.resolve('./db/app.json'), app, { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving: app");
+    jetpack.write(path.resolve("./db/app.json"), app, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.saveActiveUsers = async () => {
-    const now = new Date().getTime() / 1000
-    app.db.activeUsers = app.db.activeUsers.filter(u => {
-      if (u.updated > now - (10 * 60)) {
-        return true
+    const now = new Date().getTime() / 1000;
+    app.db.activeUsers = app.db.activeUsers.filter((u) => {
+      if (u.updated > now - 10 * 60) {
+        return true;
       } else {
         if (u.username) {
-          app.live.emitAll('PlayerAction', { key: 'player-inactive', createdAt: new Date().getTime() / 1000, address: u.address, username: u.username, message: `${u.username} is now inactive` })
+          app.live.emitAll("PlayerAction", {
+            key: "player-inactive",
+            createdAt: new Date().getTime() / 1000,
+            address: u.address,
+            username: u.username,
+            message: `${u.username} is now inactive`,
+          });
         }
 
-        return false
+        return false;
       }
-    })
+    });
 
-    jetpack.write(path.resolve('./db/activeUsers.json'), app.db.activeUsers, { atomic: true, jsonIndent: 0 })
-  }
+    jetpack.write(path.resolve("./db/activeUsers.json"), app.db.activeUsers, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.setUserActive = (user) => {
-    const activeUser = app.db.activeUsers.find(u => u.address === user.address)
-    
-    const now = new Date().getTime() / 1000
+    const activeUser = app.db.activeUsers.find(
+      (u) => u.address === user.address
+    );
 
-    user.lastActive = now
-  
+    const now = new Date().getTime() / 1000;
+
+    user.lastActive = now;
+
     if (activeUser) {
-      activeUser.updated = now
+      activeUser.updated = now;
     } else {
-      app.live.emitAll('PlayerAction', { key: 'player-active', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} is now active` })
+      app.live.emitAll("PlayerAction", {
+        key: "player-active",
+        createdAt: new Date().getTime() / 1000,
+        address: user.address,
+        username: user.username,
+        message: `${user.username} is now active`,
+      });
 
       app.db.activeUsers.push({
         username: user.username,
         address: user.address,
-        updated: now
-      })
+        updated: now,
+      });
     }
 
-    app.db.saveActiveUsers()
-  }
+    app.db.saveActiveUsers();
+  };
 
   app.db.updateLeaderboardByUser = async (user) => {
     const leaderboard = {
       mostInventoryItems: {
         value: 0,
-        address: null
+        address: null,
       },
       mostMarketItemsListed: {
         value: 0,
-        address: null
+        address: null,
       },
       mostMarketItemsSold: {
         value: 0,
-        address: null
+        address: null,
       },
       mostItemsTransferred: {
         value: 0,
-        address: null
+        address: null,
       },
       mostItemsCrafted: {
         value: 0,
-        address: null
+        address: null,
       },
       mostCharactersCreated: {
         value: 0,
-        address: null
+        address: null,
       },
       mostItemsCraftedByItemId: {
         1: {
           value: 0,
-          address: null
-        }
+          address: null,
+        },
       },
       mostPerfectItemsAttained: {
         value: 0,
-        address: null
+        address: null,
       },
       mostPerfectItemsCrafted: {
         value: 0,
-        address: null
+        address: null,
       },
       highestAveragePefectionScore: {
         value: 0,
-        address: null
+        address: null,
       },
       top10Crafters: {
         since: 1622310971556,
-        list: []
+        list: [],
       },
       top10CraftersByItemId: {
         since: 1622310971556,
-        list: []
+        list: [],
       },
-      ...(jetpack.read(path.resolve(`./db/leaderboard.json`), 'json') || {})
-    }
+      ...(jetpack.read(path.resolve(`./db/leaderboard.json`), "json") || {}),
+    };
 
     if (user.inventoryItemCount > leaderboard.mostInventoryItems.value) {
-      leaderboard.mostInventoryItems.value = user.inventoryItemCount
-      leaderboard.mostInventoryItems.address = user.address
+      leaderboard.mostInventoryItems.value = user.inventoryItemCount;
+      leaderboard.mostInventoryItems.address = user.address;
     }
 
     if (user.marketTradeListedCount > leaderboard.mostMarketItemsListed.value) {
-      leaderboard.mostMarketItemsListed.value = user.marketTradeListedCount
-      leaderboard.mostMarketItemsListed.address = user.address
+      leaderboard.mostMarketItemsListed.value = user.marketTradeListedCount;
+      leaderboard.mostMarketItemsListed.address = user.address;
     }
 
     if (user.marketTradeSoldCount > leaderboard.mostMarketItemsSold.value) {
-      leaderboard.mostMarketItemsSold.value = user.marketTradeSoldCount
-      leaderboard.mostMarketItemsSold.address = user.address
+      leaderboard.mostMarketItemsSold.value = user.marketTradeSoldCount;
+      leaderboard.mostMarketItemsSold.address = user.address;
     }
 
-    if (user.transferredOutCount > leaderboard.mostItemsTransferred.value && user.address !== '0x85C07b6a475Ee19218D0ef9C278C7e58715Af842') {
-      leaderboard.mostItemsTransferred.value = user.transferredOutCount
-      leaderboard.mostItemsTransferred.address = user.address
+    if (
+      user.transferredOutCount > leaderboard.mostItemsTransferred.value &&
+      user.address !== "0x85C07b6a475Ee19218D0ef9C278C7e58715Af842"
+    ) {
+      leaderboard.mostItemsTransferred.value = user.transferredOutCount;
+      leaderboard.mostItemsTransferred.address = user.address;
     }
 
-    jetpack.write(path.resolve(`./db/leaderboard.json`), leaderboard, { atomic: true, jsonIndent: 0 })
-  }
+    jetpack.write(path.resolve(`./db/leaderboard.json`), leaderboard, {
+      atomic: true,
+      jsonIndent: 0,
+    });
+  };
 
   app.db.loadCharacter = (characterId) => {
     return {
       id: characterId,
       ownersCount: 0,
-      ...(jetpack.read(path.resolve(`./db/characters/${characterId}/overview.json`), 'json') || {}),
-      owners: (jetpack.read(path.resolve(`./db/characters/${characterId}/owners.json`), 'json') || []),
-    }
-  }
+      ...(jetpack.read(
+        path.resolve(`./db/characters/${characterId}/overview.json`),
+        "json"
+      ) || {}),
+      owners:
+        jetpack.read(
+          path.resolve(`./db/characters/${characterId}/owners.json`),
+          "json"
+        ) || [],
+    };
+  };
 
   app.db.saveCharacter = async (character) => {
-    jetpack.write(path.resolve(`./db/characters/${character.id}/overview.json`), {
-      ...character,
-      owners: undefined,
-      ownersCount: character.owners.length,
-    }, { atomic: true, jsonIndent: 0 })
+    jetpack.write(
+      path.resolve(`./db/characters/${character.id}/overview.json`),
+      {
+        ...character,
+        owners: undefined,
+        ownersCount: character.owners.length,
+      },
+      {atomic: true, jsonIndent: 0}
+    );
 
-    jetpack.write(path.resolve(`./db/characters/${character.id}/owners.json`), character.owners, { atomic: true, jsonIndent: 0 })
-  }
+    jetpack.write(
+      path.resolve(`./db/characters/${character.id}/owners.json`),
+      character.owners,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveCharacterOwner = async (character, characterData) => {
-    if (!character.owners.find(o => o === characterData.owner)) {
-      character.owners.push(characterData.owner)
-      character.owners = character.owners.filter(o => o != characterData.from)
+    if (!character.owners.find((o) => o === characterData.owner)) {
+      character.owners.push(characterData.owner);
+      character.owners = character.owners.filter(
+        (o) => o != characterData.from
+      );
     }
-    
-    await app.db.saveCharacter(character)
-  }
+
+    await app.db.saveCharacter(character);
+  };
 
   app.db.loadItem = (itemId) => {
     return {
@@ -371,75 +519,117 @@ export function initDb(app) {
       ownersCount: 0,
       marketTradesListedCount: 0,
       marketTradesSoldCount: 0,
-      ...(jetpack.read(path.resolve(`./db/items/${itemId}/overview.json`), 'json') || {}),
-      owners: (jetpack.read(path.resolve(`./db/items/${itemId}/owners.json`), 'json') || []),
-      market: (jetpack.read(path.resolve(`./db/items/${itemId}/market.json`), 'json') || []),
-      tokens: (jetpack.read(path.resolve(`./db/items/${itemId}/tokens.json`), 'json') || [])
-    }
-  }
+      ...(jetpack.read(
+        path.resolve(`./db/items/${itemId}/overview.json`),
+        "json"
+      ) || {}),
+      owners:
+        jetpack.read(
+          path.resolve(`./db/items/${itemId}/owners.json`),
+          "json"
+        ) || [],
+      market:
+        jetpack.read(
+          path.resolve(`./db/items/${itemId}/market.json`),
+          "json"
+        ) || [],
+      tokens:
+        jetpack.read(
+          path.resolve(`./db/items/${itemId}/tokens.json`),
+          "json"
+        ) || [],
+    };
+  };
 
   app.db.saveItem = async (item) => {
-    jetpack.write(path.resolve(`./db/items/${item.id}/overview.json`), {
-      ...item,
-      owners: undefined,
-      market: undefined,
-      tokens: undefined,
-      perfectCount: 0, //item.tokens.filter(i => i.item.perfection === 1).length,
-      ownersCount: item.owners.length,
-      marketTradesPerfectCount: item.market.filter(i => i.item.perfection === 1).length,
-      marketTradesListedCount: item.market.filter(i => i.status === 'listed').length,
-      marketTradesSoldCount: item.market.filter(i => i.status === 'sold').length
-    }, { atomic: true, jsonIndent: 0 })
+    jetpack.write(
+      path.resolve(`./db/items/${item.id}/overview.json`),
+      {
+        ...item,
+        owners: undefined,
+        market: undefined,
+        tokens: undefined,
+        perfectCount: 0, //item.tokens.filter(i => i.item.perfection === 1).length,
+        ownersCount: item.owners.length,
+        marketTradesPerfectCount: item.market.filter(
+          (i) => i.item.perfection === 1
+        ).length,
+        marketTradesListedCount: item.market.filter(
+          (i) => i.status === "listed"
+        ).length,
+        marketTradesSoldCount: item.market.filter((i) => i.status === "sold")
+          .length,
+      },
+      {atomic: true, jsonIndent: 0}
+    );
 
-    jetpack.write(path.resolve(`./db/items/${item.id}/owners.json`), item.owners, { atomic: true, jsonIndent: 0 })
-    jetpack.write(path.resolve(`./db/items/${item.id}/market.json`), item.market, { atomic: true, jsonIndent: 0 })
-    jetpack.write(path.resolve(`./db/items/${item.id}/tokens.json`), item.tokens, { atomic: true, jsonIndent: 0 })
-  }
+    jetpack.write(
+      path.resolve(`./db/items/${item.id}/owners.json`),
+      item.owners,
+      {atomic: true, jsonIndent: 0}
+    );
+    jetpack.write(
+      path.resolve(`./db/items/${item.id}/market.json`),
+      item.market,
+      {atomic: true, jsonIndent: 0}
+    );
+    jetpack.write(
+      path.resolve(`./db/items/${item.id}/tokens.json`),
+      item.tokens,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveItemOwner = async (item, itemData) => {
-    if (!item.owners.find(o => o === itemData.owner)) {
-      item.owners.push(itemData.owner)
-      item.owners = item.owners.filter(o => o != itemData.from)
+    if (!item.owners.find((o) => o === itemData.owner)) {
+      item.owners.push(itemData.owner);
+      item.owners = item.owners.filter((o) => o != itemData.from);
     }
 
-    if (!app.db.stats.items[item.id]) app.db.stats.items[item.id] = {}
+    if (!app.db.stats.items[item.id]) app.db.stats.items[item.id] = {};
 
     if (!item.tokens.includes(itemData.tokenId)) {
-      item.tokens.push(itemData.tokenId)
+      item.tokens.push(itemData.tokenId);
     }
 
-    app.db.stats.items[item.id].total = (await app.contracts.items.itemCount(item.id)).toNumber()
-    app.db.stats.items[item.id].burned = 0 //(await items.itemBurnCount(item.id)).toNumber()
-    
+    app.db.stats.items[item.id].total = (
+      await app.contracts.items.itemCount(item.id)
+    ).toNumber();
+    app.db.stats.items[item.id].burned = 0; //(await items.itemBurnCount(item.id)).toNumber()
 
-    await app.db.saveItem(item)
-  }
+    await app.db.saveItem(item);
+  };
 
   app.db.saveItemTrade = async (item, trade) => {
-    const found = item.market.find(i => i.seller === trade.seller && i.buyer === trade.buyer && i.tokenId === trade.tokenId)
+    const found = item.market.find(
+      (i) =>
+        i.seller === trade.seller &&
+        i.buyer === trade.buyer &&
+        i.tokenId === trade.tokenId
+    );
 
     if (found) {
       for (const key of Object.keys(trade)) {
-        found[key] = trade[key]
+        found[key] = trade[key];
       }
     } else {
-      item.market.push(trade)
+      item.market.push(trade);
     }
 
-    await app.db.saveItem(item)
-  }
+    await app.db.saveItem(item);
+  };
 
   app.db.saveItemToken = async (item, token) => {
     // Temp fix
     for (let i = 0; i < item.tokens.length; i++) {
-      if (typeof item.tokens[i] === 'string') {
-        item.tokens[i] = { id: item.tokens[i], owner: null }
+      if (typeof item.tokens[i] === "string") {
+        item.tokens[i] = {id: item.tokens[i], owner: null};
       }
     }
 
-    if (item.tokens.find(i => i.id === token)) return
+    if (item.tokens.find((i) => i.id === token)) return;
 
-    item.tokens.push(token)
+    item.tokens.push(token);
     // const found = item.tokens.find(i => i.id === token.id)
 
     // if (found) {
@@ -450,8 +640,8 @@ export function initDb(app) {
     //   item.tokens.push(token)
     // }
 
-    await app.db.saveItem(item)
-  }
+    await app.db.saveItem(item);
+  };
 
   app.db.loadToken = (tokenId) => {
     return {
@@ -459,124 +649,170 @@ export function initDb(app) {
       ownersCount: 0,
       marketTradesListedCount: 0,
       marketTradesSoldCount: 0,
-      ...(jetpack.read(path.resolve(`./db/tokens/${tokenId}/overview.json`), 'json') || {}),
-      transfers: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/transfers.json`), 'json') || []),
-      trades: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/trades.json`), 'json') || []),
-      meta: (jetpack.read(path.resolve(`./db/tokens/${tokenId}/meta.json`), 'json') || {})
-    }
-  }
+      ...(jetpack.read(
+        path.resolve(`./db/tokens/${tokenId}/overview.json`),
+        "json"
+      ) || {}),
+      transfers:
+        jetpack.read(
+          path.resolve(`./db/tokens/${tokenId}/transfers.json`),
+          "json"
+        ) || [],
+      trades:
+        jetpack.read(
+          path.resolve(`./db/tokens/${tokenId}/trades.json`),
+          "json"
+        ) || [],
+      meta:
+        jetpack.read(
+          path.resolve(`./db/tokens/${tokenId}/meta.json`),
+          "json"
+        ) || {},
+    };
+  };
 
   app.db.updateTokenMeta = async (token) => {
     try {
-      const item = JSON.parse(JSON.stringify(decodeItem(token.id)))
+      const item = JSON.parse(JSON.stringify(decodeItem(token.id)));
 
-      item.icon = item.icon.replace('undefined', 'https://rune.game/')
+      item.icon = item.icon.replace("undefined", "https://rune.game/");
 
       if (item.recipe) {
-        item.recipe.requirement = item.recipe.requirement.map(r => ({...r, symbol: RuneNames[r.id]}))
+        item.recipe.requirement = item.recipe.requirement.map((r) => ({
+          ...r,
+          symbol: RuneNames[r.id],
+        }));
       }
 
-      item.branches[1].attributes.map(a => ({
+      item.branches[1].attributes.map((a) => ({
         ...a,
-        description: ItemAttributesById[a.id].description
-      }))
+        description: ItemAttributesById[a.id].description,
+      }));
 
       token.meta = {
-        "description": Array.isArray(item.branches[1].description) ? item.branches[1].description[0] : item.branches[1].description,
-        "home_url": "https://rune.game",
-        "external_url": "https://rune.game/token/" + token.id,
-        "image_url": item.icon,
-        "language": "en-US",
+        description: Array.isArray(item.branches[1].description)
+          ? item.branches[1].description[0]
+          : item.branches[1].description,
+        home_url: "https://rune.game",
+        external_url: "https://rune.game/token/" + token.id,
+        image_url: item.icon,
+        language: "en-US",
         ...item,
-        "type": ItemTypeToText[item.type],
-        "slots": item.slots.map(s => ItemSlotToText[s])
-      }
+        type: ItemTypeToText[item.type],
+        slots: item.slots.map((s) => ItemSlotToText[s]),
+      };
 
-      delete token.meta.category
-      delete token.meta.value
-      delete token.meta.hotness
-      delete token.meta.createdDate
+      delete token.meta.category;
+      delete token.meta.value;
+      delete token.meta.hotness;
+      delete token.meta.createdDate;
 
-      token.meta.attributes = token.meta.attributes.map(a => ({
+      token.meta.attributes = token.meta.attributes.map((a) => ({
         ...a,
-        trait_type: a.description.replace('{value}% ', '').replace(': {value}', '').replace('{value} ', '')
-      }))
-    } catch(e) {
-      
-    }
-  }
+        trait_type: a.description
+          .replace("{value}% ", "")
+          .replace(": {value}", "")
+          .replace("{value} ", ""),
+      }));
+    } catch (e) {}
+  };
 
   app.db.saveToken = async (token) => {
-    app.db.updateTokenMeta(token)
+    app.db.updateTokenMeta(token);
 
-    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/overview.json`), {
-      ...token,
-      transfers: undefined,
-      trades: undefined,
-      meta: undefined
-    }, { atomic: true, jsonIndent: 0 })
+    await jetpack.writeAsync(
+      path.resolve(`./db/tokens/${token.id}/overview.json`),
+      {
+        ...token,
+        transfers: undefined,
+        trades: undefined,
+        meta: undefined,
+      },
+      {atomic: true, jsonIndent: 0}
+    );
 
-    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/transfers.json`), token.transfers, { atomic: true, jsonIndent: 0 })
-    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/trades.json`), token.trades, { atomic: true, jsonIndent: 0 })
-    await jetpack.writeAsync(path.resolve(`./db/tokens/${token.id}/meta.json`), token.meta, { atomic: true, jsonIndent: 0 })
-  }
+    await jetpack.writeAsync(
+      path.resolve(`./db/tokens/${token.id}/transfers.json`),
+      token.transfers,
+      {atomic: true, jsonIndent: 0}
+    );
+    await jetpack.writeAsync(
+      path.resolve(`./db/tokens/${token.id}/trades.json`),
+      token.trades,
+      {atomic: true, jsonIndent: 0}
+    );
+    await jetpack.writeAsync(
+      path.resolve(`./db/tokens/${token.id}/meta.json`),
+      token.meta,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveTokenTrade = async (token, trade) => {
-    const found = token.trades.find(i => i.seller === trade.seller && i.buyer === trade.buyer && i.tokenId === trade.tokenId)
+    const found = token.trades.find(
+      (i) =>
+        i.seller === trade.seller &&
+        i.buyer === trade.buyer &&
+        i.tokenId === trade.tokenId
+    );
 
     if (found) {
       for (const key of Object.keys(trade)) {
-        found[key] = trade[key]
+        found[key] = trade[key];
       }
     } else {
-      token.trades.push(trade)
+      token.trades.push(trade);
     }
 
-    await app.db.saveToken(token)
-  }
+    await app.db.saveToken(token);
+  };
 
   app.db.saveTokenTransfer = async (token, itemData) => {
-    const found = token.transfers.find(i => i.owner === itemData.owner && i.tokenId === itemData.tokenId)
+    const found = token.transfers.find(
+      (i) => i.owner === itemData.owner && i.tokenId === itemData.tokenId
+    );
 
     if (found) {
       for (const key of Object.keys(itemData)) {
-        found[key] = itemData[key]
+        found[key] = itemData[key];
       }
     } else {
-      token.transfers.push(itemData)
+      token.transfers.push(itemData);
     }
 
-    await app.db.saveToken(token)
-  }
+    await app.db.saveToken(token);
+  };
 
   function read(filePath, defaultValue) {
     try {
-      return jetpack.read(path.resolve(filePath), 'json')
+      return jetpack.read(path.resolve(filePath), "json");
     } catch (e) {
-      return defaultValue
+      return defaultValue;
     }
   }
 
   app.db.loadUserNotes = async (address) => {
-    return read(`./db/users/${address}/notes.json`, {}) || {}
-  }
+    return read(`./db/users/${address}/notes.json`, {}) || {};
+  };
 
   app.db.saveUserNotes = async (address, notes) => {
-    log('Saving user notes: ' + address)
-    jetpack.write(path.resolve(`./db/users/${address}/notes.json`), JSON.stringify(notes), { atomic: true, jsonIndent: 0 })
-  }
+    log("Saving user notes: " + address);
+    jetpack.write(
+      path.resolve(`./db/users/${address}/notes.json`),
+      JSON.stringify(notes),
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.loadUser = async (address) => {
     try {
-      if (cache.users[address]) return cache.users[address]
-      if (process.env.RUNE_ENV !== 'production') return
-
-      const exists = jetpack.exists(path.resolve(`./db/users/${address}/overview.json`))
+      if (cache.users[address]) return cache.users[address];
+      if (process.env.RUNE_ENV !== "production") return;
 
       let baseUser = {
         address,
         permissions: {
-          admin: {}
+          admin: {},
         },
         lastGamePlayed: 0,
         inventoryItemCount: 0,
@@ -596,103 +832,117 @@ export function initDb(app) {
         premium: {
           locked: 0,
           unlocked: 0,
-          features: []
+          features: [],
         },
         rewards: {
           runes: {},
-          items: {}
+          items: {},
         },
         lifetimeRewards: {
           runes: {},
-          items: {}
+          items: {},
         },
         achievements: [],
         characters: [],
         evolution: {},
         inventory: {
-          items: []
+          items: [],
         },
         market: {
-          trades: []
-        }
-      }
-        
-      if (exists) {
-        baseUser = {
-          ...baseUser,
-          ...read(`./db/users/${address}/overview.json`, {}),
-          achievements: read(`./db/users/${address}/achievements.json`, []),
-          characters: read(`./db/users/${address}/characters.json`, []),
-          evolution: read(`./db/users/${address}/evolution.json`, {}),
-          inventory: {
-            items: [],
-            ...(read(`./db/users/${address}/inventory.json`, {}))
-          },
-          market: {
-            trades: [],
-            ...(read(`./db/users/${address}/market.json`, {}))
-          }
-        }
-      } else {
-        log('User didnt exist on filesystem: ', address)
-      }
+          trades: [],
+        },
+      };
 
-      let profile = await Profile.query(knex).where({ address }).first()
+      log("Loading user", address);
+
+      let profile = await Profile.query(knex).where({address}).first();
 
       if (!profile) {
-        log('User didnt exist in database: ', address)
+        log("User didnt exist in database: ", address);
 
-        const account = await Account.query(knex).upsertGraph({
-          email: address + '@rune.farm',
-          firstName: 'Raider',
-          lastName: address,
-          password: '',
-          avatar: '',
-          meta: {}
-        }, {
-          relate: true
-        })
+        const exists = jetpack.exists(
+          path.resolve(`./db/users/${address}/overview.json`)
+        );
 
-        await Profile.query(knex).upsertGraph({
-          name: baseUser.username || baseUser.address,
-          account,
-          address,
-          avatar: null,
-          role: 'user', // [developer, user]
-          value: '',
-          // ownedProducts: [1, 2, 3, 4, 5],
-          meta: baseUser
-        } as any, {
-          relate: true
-        })
+        if (exists) {
+          baseUser = {
+            ...baseUser,
+            ...read(`./db/users/${address}/overview.json`, {}),
+            achievements: read(`./db/users/${address}/achievements.json`, []),
+            characters: read(`./db/users/${address}/characters.json`, []),
+            evolution: read(`./db/users/${address}/evolution.json`, {}),
+            inventory: {
+              items: [],
+              ...read(`./db/users/${address}/inventory.json`, {}),
+            },
+            market: {
+              trades: [],
+              ...read(`./db/users/${address}/market.json`, {}),
+            },
+          };
+        } else {
+          log("User didnt exist on filesystem: ", address);
+        }
 
-        profile = await Profile.query(knex).where({ address }).first()
+        const account = await Account.query(knex).upsertGraph(
+          {
+            email: address + "@rune.farm",
+            firstName: "Raider",
+            lastName: address,
+            password: "",
+            avatar: "",
+            meta: {},
+          },
+          {
+            relate: true,
+          }
+        );
+
+        await Profile.query(knex).upsertGraph(
+          {
+            name: baseUser.username || baseUser.address,
+            account,
+            address,
+            avatar: null,
+            role: "user", // [developer, user]
+            value: "",
+            // ownedProducts: [1, 2, 3, 4, 5],
+            meta: baseUser,
+          } as any,
+          {
+            relate: true,
+          }
+        );
+
+        profile = await Profile.query(knex).where({address}).first();
       }
 
-      if (!profile.meta.name || typeof profile.meta.username !== 'string') { // Must have been migrated
-        profile.meta.username = await getUsername(profile.address)
-        profile.name = profile.meta.username
+      if (!profile.meta.name || typeof profile.meta.username !== "string") {
+        // Must have been migrated
+        profile.meta.username = await getUsername(profile.address);
+        profile.name = profile.meta.username;
       }
 
-      cache.users[address] = {...baseUser, ...profile.meta}
+      cache.users[address] = {...baseUser, ...profile.meta};
 
       // Override admin permissions based on DAO repo
       if (app.admins[address]?.permissions) {
-        cache.users[address].permissions.admin = app.admins[address]?.permissions
+        cache.users[address].permissions.admin =
+          app.admins[address]?.permissions;
       }
 
-      return cache.users[address]
+      return cache.users[address];
     } catch (e) {
-      log('Couldnt load user', e)
+      log("Couldnt load user", e);
     }
-  }
-  
+  };
+
   app.db.saveUser = async (user) => {
     try {
-      // log('Save user', user.address, user)
+      log("Save user", user.address, user.username);
 
       // await app.db.updateGuildByUser(user)
-      app.db.updatePointsByUser(user)
+      app.db.updatePointsByUser(user);
 
       // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/overview.json`), beautify({
       //   ...user,
@@ -709,7 +959,7 @@ export function initDb(app) {
       // }, null, 2))
 
       // // await app.db.updateLeaderboardByUser(user)
-      await app.db.updateAchievementsByUser(user)
+      await app.db.updateAchievementsByUser(user);
 
       // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/evolution.json`), beautify(user.evolution, null, 2))
       // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/achievements.json`), beautify(user.achievements, null, 2))
@@ -717,31 +967,33 @@ export function initDb(app) {
       // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/inventory.json`), beautify(user.inventory, null, 2))
       // await jetpack.writeAsync(path.resolve(`./db/users/${user.address}/market.json`), beautify(user.market, null, 2))
 
+      await Profile.query(knex)
+        .where({address: user.address})
+        .update({
+          meta: user,
+        } as any);
 
-      await Profile.query(knex).where({ address: user.address }).update({
-        meta: user
-      } as any)
-    } catch(e) {
-      log('Couldnt save user', user.address, e)
+      log("User saved", user.address);
+    } catch (e) {
+      log("Couldnt save user", user.address, e);
     }
-  }
+  };
 
   app.db.saveEvolutionLeaderboards = async () => {
-    if (!app.games.evolution.isSeasonActive)
-      return
-      
-    log('Saving evolution leaderboard')
+    if (!app.games.evolution.isSeasonActive) return;
+
+    log("Saving evolution leaderboard");
 
     try {
       const target = {
         ...app.games.evolution.realms,
-        global: app.games.evolution.global
-      }
+        global: app.games.evolution.global,
+      };
 
       for (const realmKey of Object.keys(target)) {
-        const realm = target[realmKey]
+        const realm = target[realmKey];
 
-        if (!realm) continue
+        if (!realm) continue;
         // log(realm)
         // Calculate totals
 
@@ -751,20 +1003,39 @@ export function initDb(app) {
         //                 user.evolution.servers[server.key].averageLatency = rounds >= 5 ? average(latency) : 0
         //                 user.evolution.servers[server.key].timeSpent = parseFloat((rounds * 5 / 60).toFixed(1))
 
-        if (!realm.leaderboard.raw.names) realm.leaderboard.raw.names = {}
+        if (!realm.leaderboard.raw.names) realm.leaderboard.raw.names = {};
 
-        for (const statKey of ['monetary', 'kills', 'deaths', 'powerups', 'evolves', 'points', 'rewards', 'pickups', 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency']) {
+        for (const statKey of [
+          "monetary",
+          "kills",
+          "deaths",
+          "powerups",
+          "evolves",
+          "points",
+          "rewards",
+          "pickups",
+          "orbs",
+          "revenges",
+          "rounds",
+          "wins",
+          "timeSpent",
+          "winRatio",
+          "killDeathRatio",
+          "roundPointRatio",
+          "averageLatency",
+        ]) {
           // log(statKey)
 
-          let results = []
+          let results = [];
 
-          if (!realm.leaderboard.raw[statKey]) realm.leaderboard.raw[statKey] = {}
+          if (!realm.leaderboard.raw[statKey])
+            realm.leaderboard.raw[statKey] = {};
 
           for (const address of Object.keys(realm.leaderboard.raw[statKey])) {
             if (!realm.leaderboard.names[address]) {
-              log('No username set for address: ', address)
+              log("No username set for address: ", address);
               // realm.leaderboard.raw.names[address] = await app.db.loadUser(address).username
-              continue
+              continue;
             }
 
             // log(address)
@@ -772,23 +1043,28 @@ export function initDb(app) {
             results.push({
               name: realm.leaderboard.names[address],
               address: address,
-              count: realm.leaderboard.raw[statKey][address]
-            })
+              count: realm.leaderboard.raw[statKey][address],
+            });
           }
 
-          results = results.filter(a => !!a.count).sort((a, b) => b.count - a.count)
+          results = results
+            .filter((a) => !!a.count)
+            .sort((a, b) => b.count - a.count);
 
-          if (!realm.leaderboard[statKey]) realm.leaderboard[statKey] = [{name: statKey, count: 1000, data: []}]
+          if (!realm.leaderboard[statKey])
+            realm.leaderboard[statKey] = [
+              {name: statKey, count: 1000, data: []},
+            ];
 
-          realm.leaderboard[statKey][0].data = []
+          realm.leaderboard[statKey][0].data = [];
 
           for (const result of results) {
             // log(result)
             realm.leaderboard[statKey][0].data.push({
               name: result.name,
               address: result.address,
-              count: result.count
-            })
+              count: result.count,
+            });
           }
         }
         // realm.leaderboard.raw.rounds[user.address] = 0
@@ -800,1007 +1076,1375 @@ export function initDb(app) {
         // realm.leaderboard.raw.rewards[user.address] = 0
         // realm.leaderboard.raw.pickups[user.address] = 0
 
-        log(`Saved evolution leaderboard ${realm.key} for season ${app.games.evolution.currentSeason}`)
+        log(
+          `Saved evolution leaderboard ${realm.key} for season ${app.games.evolution.currentSeason}`
+        );
 
-        jetpack.write(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), JSON.stringify(realm.leaderboard), { atomic: true, jsonIndent: 0 })
+        jetpack.write(
+          path.resolve(
+            `./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`
+          ),
+          JSON.stringify(realm.leaderboard),
+          {atomic: true, jsonIndent: 0}
+        );
       }
-    } catch(e) {
-      log('Error', e)
+    } catch (e) {
+      log("Error", e);
     }
-  }
+  };
 
   app.db.saveLeaderboard = async () => {
-    log('Saving leaderboards')
+    log("Saving leaderboards");
 
-    await app.db.saveEvolutionLeaderboards()
-  }
+    await app.db.saveEvolutionLeaderboards();
+  };
 
   const guildInfoMap = {
     1: {
       name: "The First Ones",
       description: `Formed after the discovery of a cache of hidden texts in an abandoned, secret Horadric meeting place. This group of scholars was brought together by Bin Zy.`,
-      icon: 'https://rune.game/images/teams/the-first-ones.png',
-      backgroundColor: '#fff',
+      icon: "https://rune.game/images/teams/the-first-ones.png",
+      backgroundColor: "#fff",
       discord: {
-        role: '862170863827025950',
-        channel: '862153263804448769'
-      }
+        role: "862170863827025950",
+        channel: "862153263804448769",
+      },
     },
     2: {
       name: "The Archivists",
       description: `The Archivists are an order based in Westmarch. These brave souls wade into battle wielding tome and quill, armored not in ensorcelled plate or links of chain, but in the knowledge of generations past. These archivists fight not only for the future of humanity, but for mankind's past as well. The members of their honored fraternity are many, and their numbers grow every day.`,
-      icon: 'https://rune.game/images/teams/the-first-ones.png',
-      backgroundColor: '#fff',
+      icon: "https://rune.game/images/teams/the-first-ones.png",
+      backgroundColor: "#fff",
       discord: {
-        role: '862171000446779394',
-        channel: '862153353264627732'
-      }
+        role: "862171000446779394",
+        channel: "862153353264627732",
+      },
     },
     3: {
       name: "Knights of Westmarch",
       description: `Pure at heart, during the Darkening of Tristrum, the knights closely followed the teachings of the Zakaram. The knights have since become a largely secular order, more focused on defending Westmarch from physical rather than spiritual harm. They are led by a knight commander.`,
-      icon: 'https://rune.game/images/teams/knights-of-westmarch.png',
-      backgroundColor: '#fff',
+      icon: "https://rune.game/images/teams/knights-of-westmarch.png",
+      backgroundColor: "#fff",
       discord: {
-        role: '862171051450040320',
-        channel: '862153403030700062'
-      }
+        role: "862171051450040320",
+        channel: "862153403030700062",
+      },
     },
     4: {
       name: "The Protectors",
       description: `After the destruction of the Worldstone, these survivors banded together to find and protect the Worldstone shards from falling into the hands of evil.`,
-      icon: 'https://rune.game/images/teams/the-protectors.png',
-      backgroundColor: '#fff',
+      icon: "https://rune.game/images/teams/the-protectors.png",
+      backgroundColor: "#fff",
       discord: {
-        role: '',
-        channel: ''
-      }
+        role: "",
+        channel: "",
+      },
     },
     5: {
       name: "The Destroyers",
       description: `After the destruction of the Worldstone, these dark souls serve Hell in the destruction of all living things.`,
-      icon: 'https://rune.game/images/teams/the-destroyers.png',
-      backgroundColor: '#fff',
+      icon: "https://rune.game/images/teams/the-destroyers.png",
+      backgroundColor: "#fff",
       discord: {
-        role: '',
-        channel: ''
-      }
+        role: "",
+        channel: "",
+      },
     },
     6: {
       id: 6,
-      name: 'Drocos Legion',
+      name: "Drocos Legion",
       description:
-        'Dragon riders and defenders, this elite group seeks to defend the few remaining dragons from the onslaught of humanoids.',
-      icon: 'https://rune.game/images/teams/drocos-legion.png',
-      backgroundColor: '#fff',
+        "Dragon riders and defenders, this elite group seeks to defend the few remaining dragons from the onslaught of humanoids.",
+      icon: "https://rune.game/images/teams/drocos-legion.png",
+      backgroundColor: "#fff",
       discord: {
-        role: '',
-        channel: ''
-      }
+        role: "",
+        channel: "",
+      },
     },
     7: {
       id: 7,
-      name: 'Heden Saf',
+      name: "Heden Saf",
       description:
-        'A group of clerics and miracle-workers dedicated to the Cull: the eradication of all non-energy users in Haerra.',
-      icon: 'https://rune.game/images/teams/heden-saf.png',
-      backgroundColor: '#fff',
+        "A group of clerics and miracle-workers dedicated to the Cull: the eradication of all non-energy users in Haerra.",
+      icon: "https://rune.game/images/teams/heden-saf.png",
+      backgroundColor: "#fff",
       discord: {
-        role: '',
-        channel: ''
-      }
+        role: "",
+        channel: "",
+      },
     },
     8: {
       id: 8,
-      name: 'Radiant Viziers',
+      name: "Radiant Viziers",
       description:
-        'The Radiant Viziers are a group of expert fighters dedicated to Relia, with bastions of influence all over Haerra.',
-      icon: 'https://rune.game/images/teams/radiant-viziers.png',
-      backgroundColor: '#fff',
+        "The Radiant Viziers are a group of expert fighters dedicated to Relia, with bastions of influence all over Haerra.",
+      icon: "https://rune.game/images/teams/radiant-viziers.png",
+      backgroundColor: "#fff",
       discord: {
-        role: '',
-        channel: ''
-      }
-    }
-  }
+        role: "",
+        channel: "",
+      },
+    },
+  };
 
   app.db.loadGuild = (id) => {
-    log('Loading guild', id)
+    log("Loading guild", id);
     return {
       id,
       memberCount: 0,
       activeMemberCount: 0,
       points: 0,
       ...guildInfoMap[id],
-      ...(jetpack.read(path.resolve(`./db/guilds/${id}/overview.json`), 'json') || {}),
-      members: (jetpack.read(path.resolve(`./db/guilds/${id}/members.json`), 'json') || []),
-      memberDetails: (jetpack.read(path.resolve(`./db/guilds/${id}/memberDetails.json`), 'json') || []),
-    }
-  }
+      ...(jetpack.read(
+        path.resolve(`./db/guilds/${id}/overview.json`),
+        "json"
+      ) || {}),
+      members:
+        jetpack.read(path.resolve(`./db/guilds/${id}/members.json`), "json") ||
+        [],
+      memberDetails:
+        jetpack.read(
+          path.resolve(`./db/guilds/${id}/memberDetails.json`),
+          "json"
+        ) || [],
+    };
+  };
 
   app.db.addGuildMember = (guild, user) => {
     if (!guild.members.includes(user.address)) {
-      guild.members.push(user.address)
+      guild.members.push(user.address);
 
-      app.live.emitAll('PlayerAction', { key: 'guild-join', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, guildName: guild.name, message: `${user.username} joined ${guild.name} guild` })
+      app.live.emitAll("PlayerAction", {
+        key: "guild-join",
+        createdAt: new Date().getTime() / 1000,
+        address: user.address,
+        username: user.username,
+        guildName: guild.name,
+        message: `${user.username} joined ${guild.name} guild`,
+      });
     }
-  }
+  };
 
   app.db.saveGuild = async (guild) => {
-    log('Saving guild', guild.name)
-    await app.db.updateAchievementsByGuild(guild)
+    log("Saving guild", guild.name);
+    await app.db.updateAchievementsByGuild(guild);
 
-    jetpack.write(path.resolve(`./db/guilds/${guild.id}/overview.json`), {
-      ...guild,
-      memberCount: guild.members.length,
-      activeMemberCount: guild.memberDetails.filter(m => m.achievementCount > 0).length,
-      members: undefined,
-    }, { atomic: true, jsonIndent: 0 })
-    
-    jetpack.write(path.resolve(`./db/guilds/${guild.id}/members.json`), guild.members, { atomic: true, jsonIndent: 0 })
-    jetpack.write(path.resolve(`./db/guilds/${guild.id}/memberDetails.json`), guild.memberDetails, { atomic: true, jsonIndent: 0 })
+    jetpack.write(
+      path.resolve(`./db/guilds/${guild.id}/overview.json`),
+      {
+        ...guild,
+        memberCount: guild.members.length,
+        activeMemberCount: guild.memberDetails.filter(
+          (m) => m.achievementCount > 0
+        ).length,
+        members: undefined,
+      },
+      {atomic: true, jsonIndent: 0}
+    );
 
-    let g = app.db.guilds.find(g2 => g2.id === guild.id)
+    jetpack.write(
+      path.resolve(`./db/guilds/${guild.id}/members.json`),
+      guild.members,
+      {atomic: true, jsonIndent: 0}
+    );
+    jetpack.write(
+      path.resolve(`./db/guilds/${guild.id}/memberDetails.json`),
+      guild.memberDetails,
+      {atomic: true, jsonIndent: 0}
+    );
+
+    let g = app.db.guilds.find((g2) => g2.id === guild.id);
 
     if (!g) {
-      g = {}
+      g = {};
 
-      app.db.guilds.push(g)
+      app.db.guilds.push(g);
     }
 
-    g.id = guild.id
-    g.memberCount = guild.memberCount
-    g.activeMemberCount = guild.activeMemberCount
-
-  }
+    g.id = guild.id;
+    g.memberCount = guild.memberCount;
+    g.activeMemberCount = guild.activeMemberCount;
+  };
 
   app.db.updateAchievementsByGuild = async (guild) => {
-    let points = 0
+    let points = 0;
 
     for (const member of guild.members) {
-      const user = await app.db.loadUser(member)
+      const user = await app.db.loadUser(member);
 
-      if (!user?.points || user.points === null) continue
+      if (!user?.points || user.points === null) continue;
 
-      points += user.points
+      points += user.points;
     }
 
-    guild.points = points
-  }
+    guild.points = points;
+  };
 
   app.db.updateAchievementsByUser = async (user) => {
-    if (!app.db.hasUserAchievement(user, 'CRAFT_1') && user.craftedItemCount >= 1) {
-      app.db.addUserAchievement(user, 'CRAFT_1')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'CRAFT_1', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_1').name}` })
+    if (
+      !app.db.hasUserAchievement(user, "CRAFT_1") &&
+      user.craftedItemCount >= 1
+    ) {
+      app.db.addUserAchievement(user, "CRAFT_1");
+      await app.live.emitAll("PlayerAction", {
+        key: "achievement",
+        createdAt: new Date().getTime() / 1000,
+        address: user.address,
+        username: user.username,
+        achievement: "CRAFT_1",
+        message: `${user.username} achieved ${
+          achievementData.find((i) => i.key === "CRAFT_1").name
+        }`,
+      });
     }
-    if (!app.db.hasUserAchievement(user, 'CRAFT_10') && user.craftedItemCount >= 10) {
-      app.db.addUserAchievement(user, 'CRAFT_10')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'CRAFT_10', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_10').name}` })
+    if (
+      !app.db.hasUserAchievement(user, "CRAFT_10") &&
+      user.craftedItemCount >= 10
+    ) {
+      app.db.addUserAchievement(user, "CRAFT_10");
+      await app.live.emitAll("PlayerAction", {
+        key: "achievement",
+        createdAt: new Date().getTime() / 1000,
+        address: user.address,
+        username: user.username,
+        achievement: "CRAFT_10",
+        message: `${user.username} achieved ${
+          achievementData.find((i) => i.key === "CRAFT_10").name
+        }`,
+      });
     }
-    if (!app.db.hasUserAchievement(user, 'CRAFT_100') && user.craftedItemCount >= 100) {
-      app.db.addUserAchievement(user, 'CRAFT_100')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'CRAFT_100', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_100').name}` })
+    if (
+      !app.db.hasUserAchievement(user, "CRAFT_100") &&
+      user.craftedItemCount >= 100
+    ) {
+      app.db.addUserAchievement(user, "CRAFT_100");
+      await app.live.emitAll("PlayerAction", {
+        key: "achievement",
+        createdAt: new Date().getTime() / 1000,
+        address: user.address,
+        username: user.username,
+        achievement: "CRAFT_100",
+        message: `${user.username} achieved ${
+          achievementData.find((i) => i.key === "CRAFT_100").name
+        }`,
+      });
     }
-    if (!app.db.hasUserAchievement(user, 'CRAFT_1000') && user.craftedItemCount >= 1000) {
-      app.db.addUserAchievement(user, 'CRAFT_1000')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'CRAFT_1000', message: `${user.username} achieved ${achievementData.find(i => i.key === 'CRAFT_1000').name}` })
-      await app.notices.add('achievement', { key: 'achievement', address: user.address, achievement: 'CRAFT_1000', message: `${user.username} has crafted over 1000 times!` })
+    if (
+      !app.db.hasUserAchievement(user, "CRAFT_1000") &&
+      user.craftedItemCount >= 1000
+    ) {
+      app.db.addUserAchievement(user, "CRAFT_1000");
+      await app.live.emitAll("PlayerAction", {
+        key: "achievement",
+        createdAt: new Date().getTime() / 1000,
+        address: user.address,
+        username: user.username,
+        achievement: "CRAFT_1000",
+        message: `${user.username} achieved ${
+          achievementData.find((i) => i.key === "CRAFT_1000").name
+        }`,
+      });
+      await app.notices.add("achievement", {
+        key: "achievement",
+        address: user.address,
+        achievement: "CRAFT_1000",
+        message: `${user.username} has crafted over 1000 times!`,
+      });
     }
-    if (!app.db.hasUserAchievement(user, 'ACQUIRED_RUNE') && user.holdings?.rune >= 1) {
-      app.db.addUserAchievement(user, 'ACQUIRED_RUNE')
-      await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'ACQUIRED_RUNE', message: `${user.username} achieved ${achievementData.find(i => i.key === 'ACQUIRED_RUNE').name}` })
+    if (
+      !app.db.hasUserAchievement(user, "ACQUIRED_RUNE") &&
+      user.holdings?.rune >= 1
+    ) {
+      app.db.addUserAchievement(user, "ACQUIRED_RUNE");
+      await app.live.emitAll("PlayerAction", {
+        key: "achievement",
+        createdAt: new Date().getTime() / 1000,
+        address: user.address,
+        username: user.username,
+        achievement: "ACQUIRED_RUNE",
+        message: `${user.username} achieved ${
+          achievementData.find((i) => i.key === "ACQUIRED_RUNE").name
+        }`,
+      });
     }
-    if (!app.db.hasUserAchievement(user, 'BATTLE_RUNE_EVO')) {
+    if (!app.db.hasUserAchievement(user, "BATTLE_RUNE_EVO")) {
       if (user.evolution?.overall?.rounds > 0) {
-        app.db.addUserAchievement(user, 'BATTLE_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'BATTLE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'BATTLE_RUNE_EVO').name}` })
+        app.db.addUserAchievement(user, "BATTLE_RUNE_EVO");
+        await app.live.emitAll("PlayerAction", {
+          key: "achievement",
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          achievement: "BATTLE_RUNE_EVO",
+          message: `${user.username} achieved ${
+            achievementData.find((i) => i.key === "BATTLE_RUNE_EVO").name
+          }`,
+        });
       }
     }
-    if (!app.db.hasUserAchievement(user, 'MEGA_RUNE_EVO')) {
+    if (!app.db.hasUserAchievement(user, "MEGA_RUNE_EVO")) {
       if (user.evolution?.overall?.wins > 0) {
-        app.db.addUserAchievement(user, 'MEGA_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'MEGA_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'MEGA_RUNE_EVO').name}` })
+        app.db.addUserAchievement(user, "MEGA_RUNE_EVO");
+        await app.live.emitAll("PlayerAction", {
+          key: "achievement",
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          achievement: "MEGA_RUNE_EVO",
+          message: `${user.username} achieved ${
+            achievementData.find((i) => i.key === "MEGA_RUNE_EVO").name
+          }`,
+        });
       }
     }
-    if (!app.db.hasUserAchievement(user, 'DOMINATE_RUNE_EVO')) {
+    if (!app.db.hasUserAchievement(user, "DOMINATE_RUNE_EVO")) {
       if (user.evolution?.overall?.winStreak > 25) {
-        app.db.addUserAchievement(user, 'DOMINATE_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', { key: 'achievement', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, achievement: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}` })
-        await app.notices.add('achievement', { key: 'achievement', address: user.address, achievement: 'DOMINATE_RUNE_EVO', message: `${user.username} achieved ${achievementData.find(i => i.key === 'DOMINATE_RUNE_EVO').name}!` })
+        app.db.addUserAchievement(user, "DOMINATE_RUNE_EVO");
+        await app.live.emitAll("PlayerAction", {
+          key: "achievement",
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          achievement: "DOMINATE_RUNE_EVO",
+          message: `${user.username} achieved ${
+            achievementData.find((i) => i.key === "DOMINATE_RUNE_EVO").name
+          }`,
+        });
+        await app.notices.add("achievement", {
+          key: "achievement",
+          address: user.address,
+          achievement: "DOMINATE_RUNE_EVO",
+          message: `${user.username} achieved ${
+            achievementData.find((i) => i.key === "DOMINATE_RUNE_EVO").name
+          }!`,
+        });
       }
     }
-  }
+  };
 
   app.db.updatePointsByUser = (user) => {
-    const achievements = user.achievements.map(a => achievementData.find(b => b.id === a))
+    const achievements = user.achievements.map((a) =>
+      achievementData.find((b) => b.id === a)
+    );
 
-    user.points = 0
+    user.points = 0;
 
-    for(const achievement of achievements) {
-      user.points += achievement.points
+    for (const achievement of achievements) {
+      user.points += achievement.points;
     }
-  }
+  };
 
   app.db.updateGuildByUser = async (user) => {
     if (user.joinedGuildAt === undefined) {
-      const abi = [{
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "_userAddress",
-            "type": "address"
-          }
-        ],
-        "name": "getUserProfile",
-        "outputs": [
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      }]
+      const abi = [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_userAddress",
+              type: "address",
+            },
+          ],
+          name: "getUserProfile",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ];
 
-      const bscProvider = new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/')
-      const contract = new ethers.Contract('0x2C51b570B11dA6c0852aADD059402E390a936B39', abi, bscProvider)
+      const bscProvider = new ethers.providers.JsonRpcProvider(
+        "https://bsc-dataseed.binance.org/"
+      );
+      const contract = new ethers.Contract(
+        "0x2C51b570B11dA6c0852aADD059402E390a936B39",
+        abi,
+        bscProvider
+      );
 
       try {
-        const result = await contract.getUserProfile(user.address)
-        user.guildId = ethers.BigNumber.from(result[2]).toNumber()
-        user.joinedGuildAt = new Date().getTime()
+        const result = await contract.getUserProfile(user.address);
+        user.guildId = ethers.BigNumber.from(result[2]).toNumber();
+        user.joinedGuildAt = new Date().getTime();
 
-        const guild = app.db.loadGuild(user.guildId)
+        const guild = app.db.loadGuild(user.guildId);
 
-        app.db.addGuildMember(guild, user)
+        app.db.addGuildMember(guild, user);
 
-        await app.db.saveGuild(guild)
+        await app.db.saveGuild(guild);
       } catch (e) {
-        log('Getting guild error', e)
+        log("Getting guild error", e);
       }
     }
-  }
-
+  };
 
   app.db.saveUserItem = async (user, item) => {
-    const savedItem = user.inventory.items.find(i => i.tokenId === item.tokenId)
+    const savedItem = user.inventory.items.find(
+      (i) => i.tokenId === item.tokenId
+    );
 
     if (savedItem) {
       for (const key of Object.keys(item)) {
-        savedItem[key] = item[key]
+        savedItem[key] = item[key];
       }
     } else {
-      user.inventory.items.push(item)
+      user.inventory.items.push(item);
     }
 
-    await app.db.saveUser(user)
-  }
+    await app.db.saveUser(user);
+  };
 
   app.db.saveUserCharacter = async (user, character) => {
     // Wipe char list for old format (no block number)
-    if (!user.characters.filter(i => i.blockNumber && i.blockNumber > 0).length) {
-      user.characters = []
+    if (
+      !user.characters.filter((i) => i.blockNumber && i.blockNumber > 0).length
+    ) {
+      user.characters = [];
     }
 
-    const savedItem = user.characters.find(i => i.tokenId === character.tokenId && i.blockNumber === character.blockNumber)
+    const savedItem = user.characters.find(
+      (i) =>
+        i.tokenId === character.tokenId &&
+        i.blockNumber === character.blockNumber
+    );
 
     if (savedItem) {
       // for (const key of Object.keys(character)) {
       //   savedItem[key] = character[key]
       // }
     } else {
-      user.characters.push(character)
+      user.characters.push(character);
     }
 
-    await app.db.saveUser(user)
-  }
+    await app.db.saveUser(user);
+  };
 
   app.db.saveUserTrade = async (user, trade) => {
-    const marketTrade = user.market.trades.find(i => i.tokenId === trade.tokenId)
+    const marketTrade = user.market.trades.find(
+      (i) => i.tokenId === trade.tokenId
+    );
 
     if (marketTrade) {
       for (const key of Object.keys(trade)) {
-        marketTrade[key] = trade[key]
+        marketTrade[key] = trade[key];
       }
     } else {
-      user.market.trades.push(trade)
+      user.market.trades.push(trade);
     }
 
-    await app.db.saveUser(user)
-  }
+    await app.db.saveUser(user);
+  };
 
   app.db.hasUserAchievement = (user, achievementKey) => {
-    const id = achievementData.find(i => i.key === achievementKey).id
-    const achievement = user.achievements.find(i => i === id)
+    const id = achievementData.find((i) => i.key === achievementKey).id;
+    const achievement = user.achievements.find((i) => i === id);
 
-    return !!achievement
-  }
+    return !!achievement;
+  };
 
   app.db.addUserAchievement = (user, achievementKey, amount = 1) => {
-    const id = achievementData.find(i => i.key === achievementKey).id
+    const id = achievementData.find((i) => i.key === achievementKey).id;
 
-    if (!id) return
+    if (!id) return;
 
-    const achievement = user.achievements.find(i => i === id)
+    const achievement = user.achievements.find((i) => i === id);
 
     if (!achievement) {
-      user.achievements.push(id)
+      user.achievements.push(id);
     }
 
     // saveUser(user)
-  }
+  };
 
   app.db.findPrice = (symbol, timestamp) => {
     for (let i = 1; i < app.db.historical.price[symbol].length; i++) {
       if (app.db.historical.price[symbol][i][0] > timestamp * 1000) {
-        return app.db.historical.price[symbol][i][1]
+        return app.db.historical.price[symbol][i][1];
       }
     }
 
-    return app.db.stats.prices[symbol]
-  }
+    return app.db.stats.prices[symbol];
+  };
 
   app.db.addBanList = (game, target) => {
-    if (!app.db[game].banList) app.db[game].banList = []
+    if (!app.db[game].banList) app.db[game].banList = [];
 
     // if (!app.db[game].banList.includes(target)) {
-      app.db[game].banList.push(target)
+    app.db[game].banList.push(target);
     // }
-  }
+  };
 
   app.db.removeBanList = (game, target) => {
-    if (!app.db[game].banList) app.db[game].banList = []
+    if (!app.db[game].banList) app.db[game].banList = [];
 
     // if (app.db[game].banList.includes(target)) {
-      app.db[game].banList = app.db[game].banList.filter(t => t.address !== target)
+    app.db[game].banList = app.db[game].banList.filter(
+      (t) => t.address !== target
+    );
     // }
-  }
+  };
 
   app.db.saveBanList = () => {
-    jetpack.write(path.resolve('./db/evolution/banList.json'), app.db.evolution.banList, { atomic: true, jsonIndent: 0 })
-  }
+    jetpack.write(
+      path.resolve("./db/evolution/banList.json"),
+      app.db.evolution.banList,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.addModList = (game, target) => {
-    if (!app.db[game].modList) app.db[game].modList = []
+    if (!app.db[game].modList) app.db[game].modList = [];
 
     if (!app.db[game].modList.includes(target)) {
-      app.db[game].modList.push(target)
+      app.db[game].modList.push(target);
     }
-  }
+  };
 
   app.db.saveModList = () => {
-    jetpack.write(path.resolve('./db/evolution/modList.json'), app.db.evolution.modList, { atomic: true, jsonIndent: 0 })
-  }
+    jetpack.write(
+      path.resolve("./db/evolution/modList.json"),
+      app.db.evolution.modList,
+      {atomic: true, jsonIndent: 0}
+    );
+  };
 
   app.db.saveSkills = async (skills) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skills.json`), skills, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save skills', e)
+      await jetpack.writeAsync(path.resolve(`./db/skills.json`), skills, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save skills", e);
     }
-  }
+  };
 
   app.db.saveItems = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/items.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save items', e)
+      await jetpack.writeAsync(path.resolve(`./db/items.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save items", e);
     }
-  }
+  };
 
   app.db.saveItemRecipes = async (recipes) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemRecipes.json`), recipes, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save recipes', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemRecipes.json`), recipes, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save recipes", e);
     }
-  }
+  };
 
   app.db.saveItemAttributes = async (attributes) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemAttributes.json`), attributes, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save attributes', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/itemAttributes.json`),
+        attributes,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save attributes", e);
     }
-  }
+  };
 
   app.db.saveGames = async (games) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/games.json`), games, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save games', e)
+      await jetpack.writeAsync(path.resolve(`./db/games.json`), games, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save games", e);
     }
-  }
+  };
 
   app.db.saveCubeTransfer = async (from, to) => {
-    const fromUser = await app.db.loadUser(from)
+    const fromUser = await app.db.loadUser(from);
 
-    fromUser.isCubeHolder = false
+    fromUser.isCubeHolder = false;
 
-    await app.db.saveUser(fromUser)
+    await app.db.saveUser(fromUser);
 
+    const toUser = await app.db.loadUser(from);
 
-    const toUser = await app.db.loadUser(from)
+    toUser.isCubeHolder = true;
 
-    toUser.isCubeHolder = true
-
-    await app.db.saveUser(toUser)
+    await app.db.saveUser(toUser);
 
     // app.db.patrons = app.db.patrons.filter(h => h.address.toLowerCase() !== from.toLowerCase())
 
-    const oldPatron = app.db.patrons.find(holder => holder.address.toLowerCase() === from.toLowerCase())
+    const oldPatron = app.db.patrons.find(
+      (holder) => holder.address.toLowerCase() === from.toLowerCase()
+    );
 
     if (oldPatron) {
-      oldPatron.isCubeHolder = false
+      oldPatron.isCubeHolder = false;
     }
 
-    const newPatron = app.db.patrons.find(holder => holder.address.toLowerCase() === to.toLowerCase())
+    const newPatron = app.db.patrons.find(
+      (holder) => holder.address.toLowerCase() === to.toLowerCase()
+    );
 
     if (newPatron) {
-      newPatron.isCubeHolder = true
+      newPatron.isCubeHolder = true;
     } else {
       app.db.patrons.push({
         address: to,
         name: toUser.username,
         isCubeHolder: true,
-        rank: 1
-      })
+        rank: 1,
+      });
     }
 
     try {
-      await jetpack.writeAsync(path.resolve(`./db/patrons.json`), app.db.patrons, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save games', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/patrons.json`),
+        app.db.patrons,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save games", e);
     }
-  }
+  };
 
   app.db.saveAreas = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/areas.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/areas.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveBiomes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveNpcs = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveActs = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/acts.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/acts.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveTimeGates = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveEnergies = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/energies.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/energies.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.savePlanets = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/planets.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/planets.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveSolarSystems = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterRaces = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterRaces.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterRaces.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterGenders = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterGenders.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterGenders.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterFactions = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterFactions.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterFactions.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterClasses = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterClasses.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterClasses.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterTypes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterTypes.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterAttributes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterAttributes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterAttributes.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterTitles = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterTitles.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterTitles.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterNameChoices = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterNameChoices.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterNameChoices.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveGameInfos = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/gameInfo.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/gameInfo.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveBiomes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveBiomeFeatures = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveAchievements = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveLores = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/lores.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/lores.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveGames = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/games.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/games.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveGameInfos = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/gameInfos.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/gameInfos.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemMaterials = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemMaterials.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemMaterials.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemAttributeParams = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemAttributeParams.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/itemAttributeParams.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemParams = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemParams.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemParams.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemSpecificTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemSpecificTypes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/itemSpecificTypes.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemSubTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemSubTypes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemSubTypes.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemTypes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemTypes.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemAffixes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemAffixes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemAffixes.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemSlots = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemSlots.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemSlots.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemRarities = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemRarities.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemRarities.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemSets = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemSets.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/itemSets.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveItemTransmuteRules = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/itemTransmuteRules.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/itemTransmuteRules.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveSkillClassifications = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillClassifications.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/skillClassifications.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveSkillMods = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillMods.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/skillMods.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveSkillConditions = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillConditions.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/skillConditions.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveSkillConditionParams = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillConditionParams.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/skillConditionParams.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveSkillStatusEffects = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillStatusEffects.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/skillStatusEffects.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveSkillTreeNodes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/skillTreeNodes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/skillTreeNodes.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterGuilds = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterGuilds.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterGuilds.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterRaces = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterRaces.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterRaces.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterGenders = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterGenders.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterGenders.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterFactions = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterFactions.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterFactions.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterClasses = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterClasses.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterClasses.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacters = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characters.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/characters.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterTypes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterTypes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterTypes.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterAttributes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterAttributes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterAttributes.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterStats = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterStats.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterStats.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterTitles = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterTitles.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterTitles.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveCharacterNameChoices = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/characterNameChoices.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/characterNameChoices.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveAreas = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/areas.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/areas.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveAreaNameChoices = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/areaNameChoices.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(
+        path.resolve(`./db/areaNameChoices.json`),
+        items,
+        {jsonIndent: 0}
+      );
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveLores = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/lores.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/lores.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveNpcs = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/npcs.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveActs = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/acts.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/acts.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveEras = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/eras.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/eras.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveTimeGates = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/timeGates.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveEnergies = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/energies.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/energies.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveAchievements = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/achievements.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveBiomes = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/biomes.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveBiomeFeatures = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/biomeFeatures.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.saveSolarSystems = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/solarSystems.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.savePlanets = async (items) => {
     try {
-      await jetpack.writeAsync(path.resolve(`./db/planets.json`), items, { jsonIndent: 0 })
-    } catch(e) {
-      log('Couldnt save', e)
+      await jetpack.writeAsync(path.resolve(`./db/planets.json`), items, {
+        jsonIndent: 0,
+      });
+    } catch (e) {
+      log("Couldnt save", e);
     }
-  }
+  };
 
   app.db.queueSave = (cb) => {
-    app.db.queuedSaves.push(cb)
-  }
+    app.db.queuedSaves.push(cb);
+  };
 
   app.db.processSave = async () => {
-    if (app.db.queuedSaves.length === 0) return
+    if (app.db.queuedSaves.length === 0) return;
 
-    const queuedSave = app.db.queuedSaves.splice(0, 1)[0]
+    const queuedSave = app.db.queuedSaves.splice(0, 1)[0];
 
-    await queuedSave()
-  }
+    await queuedSave();
+  };
+
+  log("Started DB");
 }

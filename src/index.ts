@@ -26,9 +26,14 @@ import { monitorOracle } from './modules/oracle'
 import { initCubeBridge } from './modules/cube'
 import { initNotices } from './modules/notices'
 import { initSkinner } from './modules/skinner'
+import { initApi } from './modules/api'
 import { initLive } from './modules/live'
+import { initPolls } from './modules/polls'
+import { initReferrals } from './modules/referrals'
+import { initPaymentRequests } from './modules/payment-requests'
 import { generateAccounts } from './modules/account-generator'
-import { migrateTokens } from './migrate'
+import { migrateTokens } from './modules/migrate-tokens'
+import { convertPaymentRequests } from './modules/payment-request-converter'
 // import { runTest } from './modules/tests/test-a'
 import * as tests from './tests'
 
@@ -40,10 +45,6 @@ process.env.REACT_APP_PUBLIC_URL = "https://rune.game/"
 
 if (isDebug) {
   log('Running DB in DEBUG mode')
-}
-
-type App = {
-  test: object
 }
 
 async function init() {
@@ -316,17 +317,53 @@ async function init() {
             timeout: 0
           },
           {
+            name: 'initApi',
+            instance: initApi,
+            async: false,
+            timeout: 0
+          },
+          {
             name: 'initWeb3',
             instance: initWeb3,
             async: false,
             timeout: 0
           },
           {
-            name: 'generateAccounts',
-            instance: generateAccounts,
+            name: 'initLive',
+            instance: initLive,
             async: false,
-            timeout: 5 * 1000
+            timeout: 1 * 1000
           },
+          {
+            name: 'initPaymentRequests',
+            instance: initPaymentRequests,
+            async: false,
+            timeout: 1 * 1000
+          },
+          {
+            name: 'initPolls',
+            instance: initPolls,
+            async: false,
+            timeout: 1 * 1000
+          },
+          {
+            name: 'initReferrals',
+            instance: initReferrals,
+            async: false,
+            timeout: 1 * 1000
+          },
+          // {
+          //   name: 'convertPaymentRequests',
+          //   instance: convertPaymentRequests,
+          //   async: false,
+          //   timeout: 5 * 1000
+          // },
+          // {
+          //   name: 'generateAccounts',
+          //   instance: generateAccounts,
+          //   async: false,
+          //   timeout: 5 * 1000
+          // },
           // {
           //   name: 'monitorAirtable',
           //   instance: monitorAirtable,
@@ -373,6 +410,12 @@ async function init() {
           timeout: 0
         },
         {
+          name: 'initApi',
+          instance: initApi,
+          async: false,
+          timeout: 0
+        },
+        {
           name: 'initWeb3',
           instance: initWeb3,
           async: false,
@@ -388,7 +431,25 @@ async function init() {
           name: 'initLive',
           instance: initLive,
           async: false,
-          timeout: 0
+          timeout: 1 * 1000
+        },
+        {
+          name: 'initPaymentRequests',
+          instance: initPaymentRequests,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'initPolls',
+          instance: initPolls,
+          async: false,
+          timeout: 1 * 1000
+        },
+        {
+          name: 'initReferrals',
+          instance: initReferrals,
+          async: false,
+          timeout: 1 * 1000
         },
         {
           name: 'monitorSenderEvents',
