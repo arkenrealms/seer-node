@@ -1,5 +1,5 @@
 {
-  "name": "rune-databaser",
+  "name": "@runemetaverse/databaser",
   "version": "2.0.0",
   "main": "build/src/index.js",
   "scripts": {

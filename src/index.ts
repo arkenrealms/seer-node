@@ -1,159 +1,166 @@
-import * as dotenv from 'dotenv'
-import fetch from 'node-fetch'
-import { log, isDebug } from '@rune-backend-sdk/util'
-import { subProcesses, catchExceptions } from '@rune-backend-sdk/util/process'
-import { initConfig } from './modules/config'
-import { initDb } from './modules/db'
-import { initWeb3 } from './modules/web3'
-import { convertRewards } from './modules/reward-converter'
-import { monitorEvolutionRealms } from './modules/evolution'
-import { migrateTrades } from './modules/trades'
-import { monitorGuildMemberDetails } from './modules/guild'
-import { monitorSaves } from './modules/save'
-import { monitorItemEvents, getAllItemEvents } from './modules/items'
-import { monitorBarracksEvents, getAllBarracksEvents } from './modules/barracks'
-import { monitorMarketEvents, getAllMarketEvents } from './modules/market'
-import { monitorCharacterEvents, getAllCharacterEvents } from './modules/characters'
-import { monitorGeneralStats } from './modules/stats'
-import { monitorCraftingStats } from './modules/crafting'
-import { monitorMeta } from './modules/meta'
-import { monitorDao } from './modules/dao'
-import { monitorCoordinator } from './modules/coordinator'
-import { monitorAirtable } from './modules/airtable'
-import { monitorSenderEvents } from './modules/sender'
-import { engageDelaran } from './modules/delaran'
-import { monitorOracle } from './modules/oracle'
-import { initCubeBridge } from './modules/cube'
-import { initNotices } from './modules/notices'
-import { initSkinner } from './modules/skinner'
-import { initApi } from './modules/api'
-import { initLive } from './modules/live'
-import { initPolls } from './modules/polls'
-import { initReferrals } from './modules/referrals'
-import { initPaymentRequests } from './modules/payment-requests'
-import { generateAccounts } from './modules/account-generator'
-import { migrateTokens } from './modules/migrate-tokens'
-import { convertPaymentRequests } from './modules/payment-request-converter'
+import * as dotenv from "dotenv";
+import fetch from "node-fetch";
+import {log, isDebug} from "@rune-backend-sdk/util";
+import {subProcesses, catchExceptions} from "@rune-backend-sdk/util/process";
+import {initConfig} from "./modules/config";
+import {initDb} from "./modules/db";
+import {initWeb3} from "./modules/web3";
+import {convertRewards} from "./modules/reward-converter";
+import {monitorEvolutionRealms} from "./modules/evolution";
+import {migrateTrades} from "./modules/trades";
+import {monitorGuildMemberDetails} from "./modules/guild";
+import {monitorSaves} from "./modules/save";
+import {monitorItemEvents, getAllItemEvents} from "./modules/items";
+import {monitorBarracksEvents, getAllBarracksEvents} from "./modules/barracks";
+import {monitorMarketEvents, getAllMarketEvents} from "./modules/market";
+import {
+  monitorCharacterEvents,
+  getAllCharacterEvents,
+} from "./modules/characters";
+import {monitorGeneralStats} from "./modules/stats";
+import {monitorCraftingStats} from "./modules/crafting";
+import {monitorMeta} from "./modules/meta";
+import {monitorDao} from "./modules/dao";
+import {monitorCoordinator} from "./modules/coordinator";
+import {monitorAirtable} from "./modules/airtable";
+import {monitorSenderEvents} from "./modules/sender";
+import {engageDelaran} from "./modules/delaran";
+import {monitorOracle} from "./modules/oracle";
+import {initCubeBridge} from "./modules/cube";
+import {initNotices} from "./modules/notices";
+import {initSkinner} from "./modules/skinner";
+import {initApi} from "./modules/api";
+import {initLive} from "./modules/live";
+import {initPolls} from "./modules/polls";
+import {initReferrals} from "./modules/referrals";
+import {initPaymentRequests} from "./modules/payment-requests";
+import {generateAccounts} from "./modules/account-generator";
+import {migrateTokens} from "./modules/migrate-tokens";
+import {convertPaymentRequests} from "./modules/payment-request-converter";
 // import { runTest } from './modules/tests/test-a'
-import * as tests from './tests'
+import * as tests from "./tests";
 
-dotenv.config()
+dotenv.config();
 
 // console.log('env', process.env)
 
-process.env.REACT_APP_PUBLIC_URL = "https://rune.game/"
+process.env.REACT_APP_PUBLIC_URL = "https://rune.game/";
 
 if (isDebug) {
-  log('Running DB in DEBUG mode')
+  log("Running DB in DEBUG mode");
 }
 
 async function init() {
-  catchExceptions(true)
+  catchExceptions(true);
 
   try {
-    const app: any = {}
+    const app: any = {};
 
-    app.subProcesses = subProcesses
+    app.subProcesses = subProcesses;
 
-    app.flags = {}
+    app.flags = {};
 
     try {
-      app.admins = await (await fetch('https://raw.githubusercontent.com/RuneMetaverse/data/main/admins.json')).json()
+      app.admins = await (
+        await fetch(
+          "https://raw.githubusercontent.com/RuneMetaverse/data/main/admins.json"
+        )
+      ).json();
     } catch (e) {
       app.admins = {
         "0xa987f487639920A3c2eFe58C8FBDedB96253ed9B": {
-          "name": "RuneMetaverse",
-          "permissions": {
-            "distributeReward": {},
-            "distributeAchievement": {},
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "RuneMetaverse",
+          permissions: {
+            distributeReward: {},
+            distributeAchievement: {},
+            evolution: {},
+            infinite: {},
+          },
         },
         "0xb1b1c99b365d39040334641a008e61e6e43968d3": {
-          "name": "Riccardo",
-          "permissions": {
-            "distributeReward": {},
-            "distributeAchievement": {},
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Riccardo",
+          permissions: {
+            distributeReward: {},
+            distributeAchievement: {},
+            evolution: {},
+            infinite: {},
+          },
         },
         "0x150F24A67d5541ee1F8aBce2b69046e25d64619c": {
-          "name": "Maiev",
-          "permissions": {
-            "distributeReward": {},
-            "distributeAchievement": {},
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Maiev",
+          permissions: {
+            distributeReward: {},
+            distributeAchievement: {},
+            evolution: {},
+            infinite: {},
+          },
         },
         "0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb": {
-          "name": "Testman",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Testman",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
         },
         "0x545612032BeaDED7E9f5F5Ab611aF6428026E53E": {
-          "name": "Kevin",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Kevin",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
         },
         "0x37470038C615Def104e1bee33c710bD16a09FdEf": {
-          "name": "Maiev2",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Maiev2",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
         },
         "0xfE27380E57e5336eB8FFc017371F2147A3268fbE": {
-          "name": "Lazy",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Lazy",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
         },
         "0x3551691499D740790C4511CDBD1D64b2f146f6Bd": {
-          "name": "Panda",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Panda",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
         },
         "0xe563983d6f46266Ad939c16bD59E5535Ab6E774D": {
-          "name": "Discomonk",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Discomonk",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
         },
         "0x62c79c01c33a3761fe2d2aD6f8df324225b8073b": {
-          "name": "Binzy",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "Binzy",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
         },
         "0x82b644E1B2164F5B81B3e7F7518DdE8E515A419d": {
-          "name": "RuneGiveaways",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
+          name: "RuneGiveaways",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
         },
         "0xeb3fCb993dDe8a2Cd081FbE36238E4d64C286AC0": {
-          "name": "Ekkeharta",
-          "permissions": {
-            "evolution": {},
-            "infinite": {}
-          }
-        }
-      }
+          name: "Ekkeharta",
+          permissions: {
+            evolution: {},
+            infinite: {},
+          },
+        },
+      };
     }
-    
+
     // {
     //   '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B': {
     //     permissions: {
@@ -179,434 +186,430 @@ async function init() {
       raid: {
         currentSeason: 0,
         isSeasonActive: true,
-        realms: {}
+        realms: {},
       },
       evolution: {
         currentSeason: 6,
         isSeasonActive: true,
-        realms: {}
+        realms: {},
       },
       infinite: {
         currentSeason: 0,
         isSeasonActive: false,
-        realms: {}
+        realms: {},
       },
       guardians: {
         currentSeason: 0,
         isSeasonActive: false,
-        realms: {}
+        realms: {},
       },
       sanctuary: {
         currentSeason: 0,
         isSeasonActive: false,
-        realms: {}
-      }
-    }
+        realms: {},
+      },
+    };
 
-    if (process.env.RUNE_ENV === 'airtable') {
+    if (process.env.RUNE_ENV === "airtable") {
       app.moduleConfig = [
         {
-          name: 'initConfig',
+          name: "initConfig",
           instance: initConfig,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initDb',
+          name: "initDb",
           instance: initDb,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initWeb3',
+          name: "initWeb3",
           instance: initWeb3,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'monitorAirtable',
+          name: "monitorAirtable",
           instance: monitorAirtable,
           async: false,
-          timeout: 5 * 1000
+          timeout: 5 * 1000,
         },
-      ]
-    } else if (process.env.RUNE_ENV === 'skinner') {
+      ];
+    } else if (process.env.RUNE_ENV === "skinner") {
       app.moduleConfig = [
         {
-          name: 'initConfig',
+          name: "initConfig",
           instance: initConfig,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initDb',
+          name: "initDb",
           instance: initDb,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initWeb3',
+          name: "initWeb3",
           instance: initWeb3,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'monitorSaves',
+          name: "monitorSaves",
           instance: monitorSaves,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initLive',
+          name: "initLive",
           instance: initLive,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initSkinner',
+          name: "initSkinner",
           instance: initSkinner,
           async: false,
-          timeout: 5 * 1000
+          timeout: 5 * 1000,
         },
-      ]
-    } else if (process.env.RUNE_ENV === 'dao') {
+      ];
+    } else if (process.env.RUNE_ENV === "dao") {
       app.moduleConfig = [
         {
-          name: 'initConfig',
+          name: "initConfig",
           instance: initConfig,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initDb',
+          name: "initDb",
           instance: initDb,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initWeb3',
+          name: "initWeb3",
           instance: initWeb3,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'monitorSaves',
+          name: "monitorSaves",
           instance: monitorSaves,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'monitorDao',
+          name: "monitorDao",
           instance: monitorDao,
           async: false,
-          timeout: 2 * 1000
+          timeout: 2 * 1000,
         },
-      ]
-    } else if (process.env.RUNE_ENV === 'local') {
-        app.moduleConfig = [
-          {
-            name: 'initConfig',
-            instance: initConfig,
-            async: false,
-            timeout: 0
-          },
-          {
-            name: 'initDb',
-            instance: initDb,
-            async: false,
-            timeout: 0
-          },
-          {
-            name: 'initApi',
-            instance: initApi,
-            async: false,
-            timeout: 0
-          },
-          {
-            name: 'initWeb3',
-            instance: initWeb3,
-            async: false,
-            timeout: 0
-          },
-          {
-            name: 'initLive',
-            instance: initLive,
-            async: false,
-            timeout: 1 * 1000
-          },
-          {
-            name: 'initPaymentRequests',
-            instance: initPaymentRequests,
-            async: false,
-            timeout: 1 * 1000
-          },
-          {
-            name: 'initPolls',
-            instance: initPolls,
-            async: false,
-            timeout: 1 * 1000
-          },
-          {
-            name: 'initReferrals',
-            instance: initReferrals,
-            async: false,
-            timeout: 1 * 1000
-          },
-          // {
-          //   name: 'convertPaymentRequests',
-          //   instance: convertPaymentRequests,
-          //   async: false,
-          //   timeout: 5 * 1000
-          // },
-          // {
-          //   name: 'generateAccounts',
-          //   instance: generateAccounts,
-          //   async: false,
-          //   timeout: 5 * 1000
-          // },
-          // {
-          //   name: 'monitorAirtable',
-          //   instance: monitorAirtable,
-          //   async: false,
-          //   timeout: 30 * 1000
-          // },
-          // {
-          //   name: 'userLoadAndSave',
-          //   instance: tests.userLoadAndSave,
-          //   async: false,
-          //   timeout: 10 * 1000
-          // },
-          // {
-          //   name: 'runTest',
-          //   instance: runTest,
-          //   async: false,
-          //   timeout: 1 * 1000
-          // },
-          // {
-          //   name: 'convertRewards',
-          //   instance: tests.convertRewards,
-          //   async: true,
-          //   timeout: 0
-          // },
-          // {
-          //   name: 'migrateTokens',
-          //   instance: migrateTokens,
-          //   async: true,
-          //   timeout: 0
-          // },
-        ]
-      } else if (process.env.RUNE_ENV === 'production') {
+      ];
+    } else if (process.env.RUNE_ENV === "local") {
       app.moduleConfig = [
         {
-          name: 'initConfig',
+          name: "initConfig",
           instance: initConfig,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initDb',
+          name: "initDb",
           instance: initDb,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initApi',
+          name: "initApi",
           instance: initApi,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initWeb3',
+          name: "initWeb3",
           instance: initWeb3,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'initNotices',
-          instance: initNotices,
-          async: false,
-          timeout: 0
-        },
-        {
-          name: 'initLive',
+          name: "initLive",
           instance: initLive,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'initPaymentRequests',
+          name: "initPaymentRequests",
           instance: initPaymentRequests,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'initPolls',
+          name: "initPolls",
           instance: initPolls,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'initReferrals',
+          name: "initReferrals",
           instance: initReferrals,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
+        },
+        // {
+        //   name: 'convertPaymentRequests',
+        //   instance: convertPaymentRequests,
+        //   async: false,
+        //   timeout: 5 * 1000
+        // },
+        // {
+        //   name: 'generateAccounts',
+        //   instance: generateAccounts,
+        //   async: false,
+        //   timeout: 5 * 1000
+        // },
+        // {
+        //   name: 'monitorAirtable',
+        //   instance: monitorAirtable,
+        //   async: false,
+        //   timeout: 30 * 1000
+        // },
+        // {
+        //   name: 'userLoadAndSave',
+        //   instance: tests.userLoadAndSave,
+        //   async: false,
+        //   timeout: 10 * 1000
+        // },
+        // {
+        //   name: 'runTest',
+        //   instance: runTest,
+        //   async: false,
+        //   timeout: 1 * 1000
+        // },
+        // {
+        //   name: 'convertRewards',
+        //   instance: tests.convertRewards,
+        //   async: true,
+        //   timeout: 0
+        // },
+        // {
+        //   name: 'migrateTokens',
+        //   instance: migrateTokens,
+        //   async: true,
+        //   timeout: 0
+        // },
+      ];
+    } else if (process.env.RUNE_ENV === "production") {
+      app.moduleConfig = [
+        {
+          name: "initConfig",
+          instance: initConfig,
+          async: false,
+          timeout: 0,
         },
         {
-          name: 'monitorSenderEvents',
+          name: "initDb",
+          instance: initDb,
+          async: false,
+          timeout: 0,
+        },
+        {
+          name: "initApi",
+          instance: initApi,
+          async: false,
+          timeout: 0,
+        },
+        {
+          name: "initWeb3",
+          instance: initWeb3,
+          async: false,
+          timeout: 0,
+        },
+        {
+          name: "initNotices",
+          instance: initNotices,
+          async: false,
+          timeout: 0,
+        },
+        {
+          name: "initLive",
+          instance: initLive,
+          async: false,
+          timeout: 1 * 1000,
+        },
+        {
+          name: "initPaymentRequests",
+          instance: initPaymentRequests,
+          async: false,
+          timeout: 1 * 1000,
+        },
+        {
+          name: "initPolls",
+          instance: initPolls,
+          async: false,
+          timeout: 1 * 1000,
+        },
+        {
+          name: "initReferrals",
+          instance: initReferrals,
+          async: false,
+          timeout: 1 * 1000,
+        },
+        {
+          name: "monitorSenderEvents",
           instance: monitorSenderEvents,
           async: false,
-          timeout: 5 * 1000
+          timeout: 5 * 1000,
         },
         {
-          name: 'initCubeBridge',
+          name: "initCubeBridge",
           instance: initCubeBridge,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'monitorEvolutionRealms',
+          name: "monitorEvolutionRealms",
           instance: monitorEvolutionRealms,
           async: false,
-          timeout: 0
+          timeout: 0,
         },
         {
-          name: 'getAllItemEvents',
+          name: "getAllItemEvents",
           instance: getAllItemEvents,
           async: false,
-          timeout: 1 * 60 * 1000
+          timeout: 1 * 60 * 1000,
         },
         {
-          name: 'getAllBarracksEvents',
+          name: "getAllBarracksEvents",
           instance: getAllBarracksEvents,
           async: false,
-          timeout: 1 * 60 * 1000
+          timeout: 1 * 60 * 1000,
         },
         {
-          name: 'getAllCharacterEvents',
+          name: "getAllCharacterEvents",
           instance: getAllCharacterEvents,
           async: false,
-          timeout: 1 * 60 * 1000
+          timeout: 1 * 60 * 1000,
         },
         {
-          name: 'monitorGuildMemberDetails',
+          name: "monitorGuildMemberDetails",
           instance: monitorGuildMemberDetails,
           async: false,
-          timeout: 1 * 60 * 1000
+          timeout: 1 * 60 * 1000,
         },
         {
-          name: 'monitorSaves',
+          name: "monitorSaves",
           instance: monitorSaves,
           async: false,
-          timeout: 3 * 60 * 1000
+          timeout: 3 * 60 * 1000,
         },
         {
-          name: 'monitorOracle',
+          name: "monitorOracle",
           instance: monitorOracle,
           async: false,
-          timeout: 0 * 1000
+          timeout: 0 * 1000,
         },
         {
-          name: 'monitorDao',
+          name: "monitorDao",
           instance: monitorDao,
           async: false,
-          timeout: 2 * 1000
+          timeout: 2 * 1000,
         },
         {
-          name: 'monitorItemEvents',
+          name: "monitorItemEvents",
           instance: monitorItemEvents,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'monitorBarracksEvents',
+          name: "monitorBarracksEvents",
           instance: monitorBarracksEvents,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'monitorMarketEvents',
+          name: "monitorMarketEvents",
           instance: monitorMarketEvents,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'monitorCharacterEvents',
+          name: "monitorCharacterEvents",
           instance: monitorCharacterEvents,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'monitorGeneralStats',
+          name: "monitorGeneralStats",
           instance: monitorGeneralStats,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'monitorCraftingStats',
+          name: "monitorCraftingStats",
           instance: monitorCraftingStats,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'monitorMeta',
+          name: "monitorMeta",
           instance: monitorMeta,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'monitorCoordinator',
+          name: "monitorCoordinator",
           instance: monitorCoordinator,
           async: false,
-          timeout: 1 * 1000
+          timeout: 1 * 1000,
         },
         {
-          name: 'engageDelaran',
+          name: "engageDelaran",
           instance: engageDelaran,
           async: false,
-          timeout: 30 * 1000
+          timeout: 30 * 1000,
         },
-      ]
+      ];
     }
 
-    app.modules = {}
-    
+    app.modules = {};
+
     for (const module of app.moduleConfig) {
-      app.modules[module.name] = module.instance
+      app.modules[module.name] = module.instance;
 
       if (module.timeout) {
         setTimeout(async () => {
           if (module.async) {
-            await module.instance(app)
+            await module.instance(app);
           } else {
-            module.instance(app)
+            module.instance(app);
           }
-        }, module.timeout)
+        }, module.timeout);
       } else {
         if (module.async) {
-          await module.instance(app)
+          await module.instance(app);
         } else {
-          module.instance(app)
+          module.instance(app);
         }
       }
     }
-  
-    if (app.flags.testMigrateTrades)
-      tests.migrateTrades(app)
 
-    if (app.flags.testUpdateUserAchievements)
-      tests.updateUserAchievements(app)
+    if (app.flags.testMigrateTrades) tests.migrateTrades(app);
 
-    if (app.flags.testSaveToken)
-      tests.saveToken(app)
+    if (app.flags.testUpdateUserAchievements) tests.updateUserAchievements(app);
 
-    if (app.flags.testMonitorMarketEvents)
-      tests.monitorMarketEvents(app)
-  } catch(e) {
-    log('Error', e)
+    if (app.flags.testSaveToken) tests.saveToken(app);
+
+    if (app.flags.testMonitorMarketEvents) tests.monitorMarketEvents(app);
+  } catch (e) {
+    log("Error", e);
   }
 }
 
-init()
+init();
 
 // Force restart after an hour
 // setTimeout(() => {
