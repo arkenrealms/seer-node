@@ -1,8 +1,8 @@
 import fs from 'fs'
 import express from 'express'
-import { getHighestId, toShort, log } from '@rune-backend-sdk/util'
-import * as websocketUtil from '@rune-backend-sdk/util/websocket'
-import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
+import { getHighestId, toShort, log } from '@runemetaverse/backend-sdk/build/util'
+import * as websocketUtil from '@runemetaverse/backend-sdk/build/util/websocket'
+import { decodeItem } from '@runemetaverse/backend-sdk/build/util/item-decoder'
 
 const path = require('path')
 
@@ -11,56 +11,56 @@ function initEventHandler(app) {
 
   log('Cube event handler')
 
-  io.on('connection', function(socket) {
+  io.on('connection', function (socket) {
     try {
       // Use by GS to tell DB it's connected
-      socket.on('RC_AuthRequest', function(req) {
+      socket.on('RC_AuthRequest', function (req) {
         if (req.data !== 'myverysexykey') {
           log('Invalid databaser creds:', req)
           emitDirect(socket, 'RC_AuthResponse', {
             id: req.id,
-            data: { status: 0 }
+            data: { status: 0 },
           })
           return
         }
 
         socket.authed = true
-  
+
         emitDirect(socket, 'RC_AuthResponse', {
           id: req.id,
-          data: { status: 1 }
+          data: { status: 1 },
         })
       })
-  
-      socket.on('RC_GetUserRequest', async function(req) {
+
+      socket.on('RC_GetUserRequest', async function (req) {
         if (!socket.authed) {
           emitDirect(socket, 'RC_GetUserResponse', {
             id: req.id,
             data: {
-              status: 0
-            }
+              status: 0,
+            },
           })
           return
         }
-        
+
         emitDirect(socket, 'RC_GetUserResponse', {
           id: req.id,
           data: {
             status: 1,
-            user: await app.db.loadUser(req.data.address)
-          }
+            user: await app.db.loadUser(req.data.address),
+          },
         })
       })
 
-      socket.on('RC_SaveUserClaimRequest', async function(req) {
+      socket.on('RC_SaveUserClaimRequest', async function (req) {
         log('RC_SaveUserClaimRequest', req)
-        
+
         if (!socket.authed) {
           emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
             data: {
-              status: 0
-            }
+              status: 0,
+            },
           })
           return
         }
@@ -75,7 +75,7 @@ function initEventHandler(app) {
               id: req.data.id,
               rune: rune.key,
               value: rune.value,
-              timestamp: new Date().getTime()
+              timestamp: new Date().getTime(),
             })
 
             user.rewards.runes[rune.key] -= rune.value
@@ -90,25 +90,25 @@ function initEventHandler(app) {
               id: req.data.id,
               item: JSON.parse(JSON.stringify(user.rewards.items[item.key])),
               quantity: item.quantity,
-              timestamp: new Date().getTime()
+              timestamp: new Date().getTime(),
             })
 
             delete user.rewards.items[item.key]
           }
 
           if (!user.claimRequests) user.claimRequests = []
-  
-          let claimRequest = user.claimRequests.find(c => c.requestId === req.data.requestId)
-  
+
+          let claimRequest = user.claimRequests.find((c) => c.requestId === req.data.requestId)
+
           if (!claimRequest) {
             claimRequest = {
               id: req.data.id,
               requestId: req.data.requestId,
-              timestamp: new Date().getTime()
+              timestamp: new Date().getTime(),
             }
-  
+
             user.claimRequests.push(claimRequest)
-  
+
             claimRequest.status = 'processing'
           }
 
@@ -117,8 +117,8 @@ function initEventHandler(app) {
           emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
             data: {
-              status: 1
-            }
+              status: 1,
+            },
           })
         } catch (e) {
           log('Error', e)
@@ -126,19 +126,19 @@ function initEventHandler(app) {
           emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
             data: {
-              status: 0
-            }
+              status: 0,
+            },
           })
         }
       })
-      
-      socket.on('RC_EvolutionRealmListRequest', function(req) {
+
+      socket.on('RC_EvolutionRealmListRequest', function (req) {
         if (!socket.authed) {
           emitDirect(socket, 'RC_EvolutionRealmListResponse', {
             id: req.id,
             data: {
-              status: 0
-            }
+              status: 0,
+            },
           })
           return
         }
@@ -147,26 +147,26 @@ function initEventHandler(app) {
           id: req.id,
           data: {
             status: 1,
-            list: app.db.evolution.servers
-          }
+            list: app.db.evolution.servers,
+          },
         })
       })
-  
-      socket.on('RC_SaveTradeRequest', async function(req) {
+
+      socket.on('RC_SaveTradeRequest', async function (req) {
         log('RC_SaveTradeRequest', req)
-        
+
         if (!socket.authed) {
           emitDirect(socket, 'RC_SaveTradeResponse', {
             id: req.id,
             data: {
-              status: 0
-            }
+              status: 0,
+            },
           })
           return
         }
 
         const trade = req.data.trade
-        
+
         trade.id = getHighestId(app.db.trades) + 1
 
         const decodedItem = decodeItem(trade.tokenId.toString())
@@ -185,32 +185,30 @@ function initEventHandler(app) {
         await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
         await app.db.saveItemTrade(item, trade)
         await app.db.saveItemToken(item, { id: trade.tokenId, owner: trade.seller })
-        
 
         emitDirect(socket, 'RC_SaveTradeResponse', {
           id: req.id,
           data: {
             status: 1,
-            tradeId: trade.id
-          }
+            tradeId: trade.id,
+          },
         })
       })
 
-      socket.onAny(function(eventName, res) {
+      socket.onAny(function (eventName, res) {
         // log('onAny', eventName, res)
         if (!res || !res.id) return
         // console.log(eventName, res)
         if (app.cubeBridge.ioCallbacks[res.id]) {
           log('Callback', eventName)
           app.cubeBridge.ioCallbacks[res.id](res.data)
-    
+
           delete app.cubeBridge.ioCallbacks[res.id]
         }
       })
 
-      socket.on('disconnect', function() {
-      })
-    } catch(e) {
+      socket.on('disconnect', function () {})
+    } catch (e) {
       log('Error', e)
     }
   })
@@ -227,11 +225,13 @@ export async function initCubeBridge(app) {
     const isHttps = false // process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
 
     if (isHttps) {
-      app.cubeBridge.https = require('https').createServer({
-        key: fs.readFileSync(path.resolve('./privkey.pem')),
-        cert: fs.readFileSync(path.resolve('./fullchain.pem'))
-      }, app.cubeBridge.server)
-    
+      app.cubeBridge.https = require('https').createServer(
+        {
+          key: fs.readFileSync(path.resolve('./privkey.pem')),
+          cert: fs.readFileSync(path.resolve('./fullchain.pem')),
+        },
+        app.cubeBridge.server
+      )
     } else {
       app.cubeBridge.http = require('http').Server(app.cubeBridge.server)
     }
@@ -246,19 +246,19 @@ export async function initCubeBridge(app) {
       serveClient: true,
       allowEIO3: false,
       cors: {
-        origin: "*"
-      }
+        origin: '*',
+      },
     })
 
     // Finalize
     if (isHttps) {
       const sslPort = process.env.CUBE_BRIDGE_PORT || 443
-      app.cubeBridge.https.listen(sslPort, function() {
+      app.cubeBridge.https.listen(sslPort, function () {
         log(`:: Backend ready and listening on *:${sslPort}`)
       })
     } else {
       const port = process.env.CUBE_BRIDGE_PORT || 7777
-      app.cubeBridge.http.listen(port, function() {
+      app.cubeBridge.http.listen(port, function () {
         log(`:: Backend ready and listening on *:${port}`)
       })
     }
@@ -267,7 +267,7 @@ export async function initCubeBridge(app) {
     app.cubeBridge.emitAll = websocketUtil.emitAll.bind(null, app.cubeBridge.io)
 
     initEventHandler(app)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }

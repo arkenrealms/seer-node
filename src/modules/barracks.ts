@@ -1,12 +1,12 @@
 import * as ethers from 'ethers'
 import BigNumber from 'bignumber.js'
-import { log } from '@rune-backend-sdk/util'
-import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
-import { decodeItem } from '@rune-backend-sdk/util/item-decoder'
-import { RuneId } from '@rune-backend-sdk/data/items'
-import { getHighestId, toShort } from '@rune-backend-sdk/util'
-import contractInfo from '@rune-backend-sdk/contractInfo'
-import { ItemSlot } from '@rune-backend-sdk/data/items'
+import { log } from '@runemetaverse/backend-sdk/build/util'
+import { iterateBlocks, getAddress } from '@runemetaverse/backend-sdk/build/util/web3'
+import { decodeItem } from '@runemetaverse/backend-sdk/build/util/item-decoder'
+import { RuneId } from '@runemetaverse/backend-sdk/build/data/items'
+import { getHighestId, toShort } from '@runemetaverse/backend-sdk/build/util'
+import contractInfo from '@runemetaverse/backend-sdk/build/contractInfo'
+import { ItemSlot } from '@runemetaverse/backend-sdk/build/data/items'
 
 export const AddressToRune: any = {}
 
@@ -68,7 +68,7 @@ export async function getPlayerEquipment(app, address) {
 
     const finger2 = await app.contracts.barracks.getEquippedItem(address, ItemSlot.Finger2)
     if (finger2?.toString() !== '0') ids.push([ItemSlot.Finger2, finger2.toString()])
-  } catch(e) {
+  } catch (e) {
     log(e)
   }
 
@@ -79,7 +79,7 @@ export async function getPlayerEquipment(app, address) {
 
 export async function getMetaFromEquipment(app, equipment) {
   const totalMeta = {}
-  
+
   try {
     for (const equip of equipment) {
       try {
@@ -91,14 +91,14 @@ export async function getMetaFromEquipment(app, equipment) {
 
         for (const attributeKey of Object.keys(item.meta.attributes)) {
           const value = item.meta.attributes[attributeKey]
-    
+
           // if (attributeKey === 'harvestYield') {
           //   totalMeta.harvestYield += value
-    
+
           //   totalMeta.totalYield += totalMeta.totalYield * (value / 100)
           // } else if (attributeKey === 'harvestBurn') {
           //   totalMeta.harvestBurn += value
-    
+
           //   totalMeta.totalYield -= totalMeta.totalYield * (value / 100)
           // } else if (attributeKey === 'harvestFeeToken') {
           //   totalMeta.harvestFeeToken = item.meta.harvestFeeToken
@@ -112,13 +112,13 @@ export async function getMetaFromEquipment(app, equipment) {
           //   totalMeta.harvestFees = item.meta.harvestFees
           // } else if (typeof value === 'number') {
           //   if (!totalMeta[attributeKey]) totalMeta[attributeKey] = 0
-    
+
           //   totalMeta[attributeKey] += value
-          // } else 
-          
+          // } else
+
           if (Array.isArray(value)) {
             if (!totalMeta[attributeKey]) totalMeta[attributeKey] = []
-    
+
             for (const kk of Object.keys(value)) {
               if (typeof value[kk] === 'number') {
                 totalMeta[attributeKey][kk] += value[kk]
@@ -128,11 +128,11 @@ export async function getMetaFromEquipment(app, equipment) {
             }
           } else if (value !== null && typeof value === 'object') {
             if (!totalMeta[attributeKey]) totalMeta[attributeKey] = {}
-    
+
             for (const kk of Object.keys(value)) {
               if (typeof value[kk] === 'number') {
                 if (!totalMeta[attributeKey][kk]) totalMeta[attributeKey][kk] = 0
-    
+
                 totalMeta[attributeKey][kk] += value[kk]
               } else {
                 totalMeta[attributeKey][kk] = value[kk]
@@ -157,7 +157,12 @@ export async function getMetaFromEquipment(app, equipment) {
   }
 
   for (const index in totalMeta) {
-    if (totalMeta[index] === undefined || totalMeta[index] === null || Number.isNaN(totalMeta[index]) || !Number.isFinite(totalMeta[index])) {
+    if (
+      totalMeta[index] === undefined ||
+      totalMeta[index] === null ||
+      Number.isNaN(totalMeta[index]) ||
+      !Number.isFinite(totalMeta[index])
+    ) {
       delete totalMeta[index]
     }
   }
@@ -178,7 +183,7 @@ export async function getAllBarracksEvents(app, retry = false) {
     // @ts-ignore
     async function processLog(logInfo, updateConfig = true) {
       const e = iface.parseLog(logInfo)
-      
+
       // log(e.name, e)
 
       if (e.name === 'Equip') {
@@ -188,15 +193,22 @@ export async function getAllBarracksEvents(app, retry = false) {
         const decodedItem = decodeItem(tokenId.toString())
 
         const item = {
-          status: "equipped",
+          status: 'equipped',
           tokenId: tokenId.toString(),
           updatedAt: new Date().getTime(),
-          id: decodedItem.id
+          id: decodedItem.id,
         }
         await app.db.saveUserItem(user, item)
-        
-        await app.live.emitAll('PlayerAction', { key: 'raid1-equipped', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, itemName: decodedItem.name, tokenId: tokenId.toString(), message: `${user.username} equipped ${decodedItem.name}` })
 
+        await app.live.emitAll('PlayerAction', {
+          key: 'raid1-equipped',
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          itemName: decodedItem.name,
+          tokenId: tokenId.toString(),
+          message: `${user.username} equipped ${decodedItem.name}`,
+        })
       }
 
       if (e.name === 'Unequip') {
@@ -206,17 +218,25 @@ export async function getAllBarracksEvents(app, retry = false) {
         const decodedItem = decodeItem(tokenId.toString())
 
         const item = {
-          status: "unequipped",
+          status: 'unequipped',
           tokenId: tokenId.toString(),
           itemId: itemId,
           updatedAt: new Date().getTime(),
-          id: decodedItem.id
+          id: decodedItem.id,
           // ...decodeItem(tokenId.toString())
         }
-        
+
         await app.db.saveUserItem(user, item)
-        
-        await app.live.emitAll('PlayerAction', { key: 'raid1-unequipped', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, itemName: decodedItem.name, tokenId: tokenId.toString(), message: `${user.username} unequipped ${decodedItem.name}` })
+
+        await app.live.emitAll('PlayerAction', {
+          key: 'raid1-unequipped',
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          itemName: decodedItem.name,
+          tokenId: tokenId.toString(),
+          message: `${user.username} unequipped ${decodedItem.name}`,
+        })
       }
 
       if (e.name === 'ActionBurn') {
@@ -224,7 +244,13 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', { key: 'raid1-burn', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} burned ${toShort(amount)} rune rewards` })
+        await app.live.emitAll('PlayerAction', {
+          key: 'raid1-burn',
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          message: `${user.username} burned ${toShort(amount)} rune rewards`,
+        })
       }
 
       if (e.name === 'ActionBonus') {
@@ -232,7 +258,13 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', { key: 'raid1-bonus', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} yielded ${toShort(amount)} extra rewards` })
+        await app.live.emitAll('PlayerAction', {
+          key: 'raid1-bonus',
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          message: `${user.username} yielded ${toShort(amount)} extra rewards`,
+        })
       }
 
       if (e.name === 'ActionHiddenPool') {
@@ -240,7 +272,13 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', { key: 'raid1-hidden-pool', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} sent ${toShort(amount)} rewards to the hidden pool` })
+        await app.live.emitAll('PlayerAction', {
+          key: 'raid1-hidden-pool',
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          message: `${user.username} sent ${toShort(amount)} rewards to the hidden pool`,
+        })
       }
 
       if (e.name === 'ActionFee') {
@@ -248,19 +286,24 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', { key: 'raid1-fee', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} paid ${toShort(amount)} ${AddressToRune[token]} in fees` })
+        await app.live.emitAll('PlayerAction', {
+          key: 'raid1-fee',
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          message: `${user.username} paid ${toShort(amount)} ${AddressToRune[token]} in fees`,
+        })
       }
 
-      const e2 = app.db.barracksEvents.find(t => t.transactionHash === logInfo.transactionHash)
+      const e2 = app.db.barracksEvents.find((t) => t.transactionHash === logInfo.transactionHash)
 
       if (!e2) {
         app.db.barracksEvents.push({
           // id: ++config.barracks.counter,
           ...logInfo,
-          ...e
+          ...e,
         })
       }
-    
 
       // if (updateConfig && logInfo.blockNumber > config.barracks.lastBlock) {
       //   config.barracks.lastBlock = logInfo.blockNumber
@@ -280,24 +323,33 @@ export async function getAllBarracksEvents(app, retry = false) {
         'ActionFee(address,address,uint256)',
         'ActionSwap(address,address,uint256)',
       ]
-      
+
       for (const event of events) {
-        await iterateBlocks(app, `Barracks Events: ${event}`, getAddress(app.contractInfo.barracks), app.config.barracks.lastBlock[event], blockNumber, app.contracts.barracks.filters[event](), processLog, async function (blockNumber2) {
-          app.config.barracks.lastBlock[event] = blockNumber2
-          // await app.db.saveConfig()
-        })
+        await iterateBlocks(
+          app,
+          `Barracks Events: ${event}`,
+          getAddress(app.contractInfo.barracks),
+          app.config.barracks.lastBlock[event],
+          blockNumber,
+          app.contracts.barracks.filters[event](),
+          processLog,
+          async function (blockNumber2) {
+            app.config.barracks.lastBlock[event] = blockNumber2
+            // await app.db.saveConfig()
+          }
+        )
       }
     } else {
       log('Error parsing block number', blockNumber)
     }
-    
+
     log('Finished')
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 
   app.config.barracks.updating = false
-  app.config.barracks.updatedDate = (new Date()).toString()
+  app.config.barracks.updatedDate = new Date().toString()
   app.config.barracks.updatedTimestamp = new Date().getTime()
 
   // await app.db.saveBarracksEvents()
@@ -311,9 +363,9 @@ export async function getAllBarracksEvents(app, retry = false) {
 export async function monitorBarracksEvents(app) {
   app.barracks = {
     getPlayerEquipment,
-    getMetaFromEquipment
+    getMetaFromEquipment,
   }
-  
+
   app.contracts.barracks.on('Equip', async () => {
     await app.modules.getAllBarracksEvents(app)
   })
@@ -344,7 +396,7 @@ export async function monitorBarracksEvents(app) {
 }
 
 // Clear equipment cache every 10 mins
-setInterval(function() {
+setInterval(function () {
   log('Clearing equipment cache...')
   EquipmentCache = {}
 }, 10 * 60 * 1000)

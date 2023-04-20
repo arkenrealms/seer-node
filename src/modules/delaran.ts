@@ -1,5 +1,5 @@
-import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
-import { getHighestId, toShort, log } from '@rune-backend-sdk/util'
+import { isValidRequest, getSignedRequest } from '@runemetaverse/backend-sdk/build/util/web3'
+import { getHighestId, toShort, log } from '@runemetaverse/backend-sdk/build/util'
 
 async function monitorPlayerConnections(app) {
   log('[delaran] Monitoring player connections')
@@ -7,7 +7,7 @@ async function monitorPlayerConnections(app) {
   try {
     let connectedPlayers = []
     let warnPlayers = []
-    
+
     for (const realm of app.db.evolution.realms) {
       if (app.games.evolution.realms[realm.key]?.games) {
         for (const game of app.games.evolution.realms[realm.key].games) {
@@ -21,7 +21,7 @@ async function monitorPlayerConnections(app) {
         }
       }
     }
-    
+
     for (const realm of app.db.infinite.realms) {
       if (app.games.infinite.realms[realm.key]?.games) {
         for (const game of app.games.infinite.realms[realm.key].games) {
@@ -30,7 +30,7 @@ async function monitorPlayerConnections(app) {
               warnPlayers.push(player)
             }
           }
-    
+
           connectedPlayers = [...connectedPlayers, ...game.connectedPlayers]
         }
       }
@@ -40,8 +40,12 @@ async function monitorPlayerConnections(app) {
 
     for (const player of warnPlayers) {
       const data = { target: player }
-      const signature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data)
-    
+      const signature = await getSignedRequest(
+        app.web3,
+        app.secrets.find((s) => s.id === 'evolution-signer'),
+        data
+      )
+
       app.realm.emitAll('CallRequest', { data: { method: 'RS_KickUser', signature, data } })
 
       const user = await app.db.loadUser(player)
@@ -57,7 +61,7 @@ async function monitorPlayerConnections(app) {
     if (warnPlayers.length > 0) {
       log(`[delaran] Warned players: ${warnPlayers.join(', ')}`)
     }
-  } catch(e) {
+  } catch (e) {
     log('Error in delaran', e)
   }
 

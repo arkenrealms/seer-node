@@ -1,11 +1,9 @@
 import fetch from 'node-fetch'
 import * as ethers from 'ethers'
-import { log, wait } from '@rune-backend-sdk/util'
-import { iterateBlocks, getAddress, getSignedRequest } from '@rune-backend-sdk/util/web3'
+import { log, wait } from '@runemetaverse/backend-sdk/build/util'
+import { iterateBlocks, getAddress, getSignedRequest } from '@runemetaverse/backend-sdk/build/util/web3'
 
-async function monitorBalances(app) {
-  
-}
+async function monitorBalances(app) {}
 
 export async function getAllSenderEvents(app, retry = false) {
   if (app.config.sender.updating) return
@@ -16,35 +14,37 @@ export async function getAllSenderEvents(app, retry = false) {
 
   try {
     const contractAddressToKey = {}
-  
+
     for (const contractKey of Object.keys(app.contractInfo)) {
       contractAddressToKey[app.contractInfo[contractKey][56]] = contractKey
     }
-  
+
     const rand = Math.floor(Math.random() * Math.floor(999999))
     const response = await fetch(`${app.sender.coordinatorEndpoint}/data/claimRequests.json?${rand}`) // ?${rand}
     const claimRequests = await response.json()
-  
+
     const iface = new ethers.utils.Interface(app.contractMetadata.RuneSenderV1.abi)
 
     // @ts-ignore
     async function processLog(log2, updateConfig = true) {
       try {
         const e = iface.parseLog(log2)
-        
+
         console.log(e.name, e)
         const user = await app.db.loadUser(e.args.to)
 
         if (!user.claimRequests) user.claimRequests = []
 
-        const coordinatorRequest = claimRequests.find(c => c.data?.requestId === e.args.requestId && c.status == 'completed')
+        const coordinatorRequest = claimRequests.find(
+          (c) => c.data?.requestId === e.args.requestId && c.status == 'completed'
+        )
 
-        let claimRequest = user.claimRequests.find(c => c.requestId === e.args.requestId)
+        let claimRequest = user.claimRequests.find((c) => c.requestId === e.args.requestId)
 
         if (!claimRequest) {
           claimRequest = {
             id: coordinatorRequest?.id,
-            requestId: e.args.requestId
+            requestId: e.args.requestId,
           }
 
           user.claimRequests.push(claimRequest)
@@ -54,14 +54,14 @@ export async function getAllSenderEvents(app, retry = false) {
 
         if (coordinatorRequest) {
           if (!user.rewardHistory) user.rewardHistory = []
-  
+
           for (const index in coordinatorRequest.tokenAddresses) {
             const rune = {
               key: contractAddressToKey[coordinatorRequest.tokenAddresses[index]],
-              value: coordinatorRequest.tokenAmounts[index]
+              value: coordinatorRequest.tokenAmounts[index],
             }
 
-            const rewardHistoryItem = user.rewardHistory.find(r => r.id === coordinatorRequest.id)
+            const rewardHistoryItem = user.rewardHistory.find((r) => r.id === coordinatorRequest.id)
             if (!rewardHistoryItem) {
               user.rewardHistory.push({
                 id: coordinatorRequest.id,
@@ -86,41 +86,65 @@ export async function getAllSenderEvents(app, retry = false) {
         const requestOptions = {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            signature: await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'coordinator-signer'), 'rune-databaser/sender')
+          body: JSON.stringify({
+            signature: await getSignedRequest(
+              app.web3,
+              app.secrets.find((s) => s.id === 'coordinator-signer'),
+              'rune-databaser/sender'
+            ),
           }),
         }
-    
-        const finalizeRes = await (await fetch(`${app.sender.coordinatorEndpoint}/claim/finalize/${e.args.requestId}`, requestOptions)).json() // ?${rand}
+
+        const finalizeRes = await (
+          await fetch(`${app.sender.coordinatorEndpoint}/claim/finalize/${e.args.requestId}`, requestOptions)
+        ).json() // ?${rand}
 
         await app.db.saveUser(user)
 
         if (finalizeRes.status === 1) {
-          await app.live.emitAll('PlayerAction', { key: 'reward-claim', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} claimed rewards` })
+          await app.live.emitAll('PlayerAction', {
+            key: 'reward-claim',
+            createdAt: new Date().getTime() / 1000,
+            address: user.address,
+            username: user.username,
+            message: `${user.username} claimed rewards`,
+          })
         } else {
           log('Error finalizing claim', e, finalizeRes)
-          await app.live.emitAll('PlayerAction', { key: 'reward-claim', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} claimed (finalization failed)` })
+          await app.live.emitAll('PlayerAction', {
+            key: 'reward-claim',
+            createdAt: new Date().getTime() / 1000,
+            address: user.address,
+            username: user.username,
+            message: `${user.username} claimed (finalization failed)`,
+          })
         }
       } catch (ex) {
         log(ex)
-        log("Error parsing log: ", log2)
+        log('Error parsing log: ', log2)
         await wait(1000)
       }
     }
 
     const blockNumber = await app.web3.eth.getBlockNumber()
 
-
     if (parseInt(blockNumber) > 10000) {
-      const events = [
-        'RewardsSent(address,uint256,string)'
-      ]
-      
+      const events = ['RewardsSent(address,uint256,string)']
+
       for (const event of events) {
-        await iterateBlocks(app, `Sender Events: ${event}`, getAddress(app.contractInfo.sender), app.config.sender.lastBlock[event] || 15000000, blockNumber, app.contracts.sender.filters[event](), processLog, async function (blockNumber2) {
-          app.config.sender.lastBlock[event] = blockNumber2
-          // await saveConfig()
-        })
+        await iterateBlocks(
+          app,
+          `Sender Events: ${event}`,
+          getAddress(app.contractInfo.sender),
+          app.config.sender.lastBlock[event] || 15000000,
+          blockNumber,
+          app.contracts.sender.filters[event](),
+          processLog,
+          async function (blockNumber2) {
+            app.config.sender.lastBlock[event] = blockNumber2
+            // await saveConfig()
+          }
+        )
       }
     } else {
       log('Error parsing block number', blockNumber)
@@ -129,13 +153,13 @@ export async function getAllSenderEvents(app, retry = false) {
     // console.log(JSON.stringify(newCoordinatorRequests, null, 2))
 
     log('Finished')
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
     await wait(1000)
   }
 
   app.config.sender.updating = false
-  app.config.sender.updatedDate = (new Date()).toString()
+  app.config.sender.updatedDate = new Date().toString()
   app.config.sender.updatedTimestamp = new Date().getTime()
 
   // await saveItemsEvents()

@@ -1,6 +1,5 @@
 // const doc = new GoogleSpreadsheet('1-lzY9Jj7poBFB5Od4FUmgv-vYxKjPPtV7Nnz_X4vFs0');
 
-
 // process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL = 'database@rune-database-333823.iam.gserviceaccount.com'
 // process.env.GOOGLE_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC+pZ7jToWHJwul\nBm7BEK137VZO3jQno3LV4l/J+fWAZUA7FTGFStYWzFdS2Xxi+HEQ6sVLiOUFK3RU\nZ2Gg0YKrgCkAy2vP1KaGFERQsnLUcnmu3ILpoqJhHUnQ98glCZd61OTCL7h+TQxU\nug2WM0s5Dp8Ce4I8CCAfSgR1WVFGWmaABCLp/bXXX2nqvyXO0fmtHXWnXIQ2oDMY\n4N2kkka4lnHZ7wnoEQ2zzYWSWW4rrb+G10O61X+EjPTT22FAXwRNniArIjPbRYIn\ny/ngAqh/C0a8l+n3iKFKlBBu1hQqv/0ipWH/aAyTdl3DA5FvrKs44JDzj+kx2hfd\nd58l6nITAgMBAAECggEABMatwCsPlvmy8HuZ8GCZv+yPDM3DR7pFXmIGnU7o8sJW\nmsRRUnIJWAE0L4FUUj8Vcg43oB36AtL6XezzGgN1qb89smU7j7WCRc9MgNW09mk3\nGYWGYBJbeAxdn4xoPrP1UAtKVH+74v93eh3pHjoDE0GwWRsSrFdVxVg7hrG/TVWw\n+IerzKotL5v/taiQpmXCyszvOKGH7VAGEY/FeP4F4FIAGdIID7tLmnb/QfbSGyzb\nJDKxZ/v4E4zFAfG+WHLIB99xtMem22zQJfliLvZbIbvgbhFNUyrN8r29cprAf7rF\nZcREoBFNqTlbw2rFVI6HUXA+Qj5bjwsTh8CExnpUDQKBgQD2kz5NhU9E9SDX34m/\nlOFenK9uclO/F2wGSq+wCBAS9etAre1XfbJngJVA92vuivfBc+kvY/6b/0j1ZdzV\nrO8bdeT4YKfYuZEudPMShM0s0qprvHzDTctExH1ODrZb4VfldCPUETCjJ2HRhA6U\n/2bFO+nMiCAY1lHIdtu8fXybxQKBgQDF7x2RJoYUgbL4LMsQRDf9LqtoE8iFRQyC\n1fYT8mWjApcrER1+5NFbQ64V1ZGSIZ0FeMy4u48uOxidvIO14REwfckSwiHZIbQv\ngXDM5jv9wFXPtGUnQ/rG9dSeTbGfNkOPh16XrOVO/Snv8R61fo/go9F4igFs0OVH\n6tL//3779wKBgBvqt9cXDM6F4l4OlQ330TxhCQu8Lfcos7ZSpmmLwCYlaak9B+4r\n8RL+3+cnHDU5zqs8cF5JN/55fM0r50DZ/4hgZLgqWVaUS/eyjgK+vmwgveLMyGNk\nX2s9w+IekE7+yHDWIWhVOeh/APgzt2LvN7eE/QeHMfsd6MyFiINiwcTxAoGBAKlQ\nky1AE//ktrB+uLHQeUh1rKBaE/SUjVA6MMb9Wh3oMGHhwSZ0G/aC3Z7F00F6yXQN\n0qnPn3o/iR4dTVm/DlI5t0/5irTPlO/yPQi5heXZqk4DlWfSSen6DgfglCmKZJ6Z\ngLwkZP99pmsfClLc0byqxZvkCbYIt6keYaIk734fAoGBAIVm/ZSn0tF5Qt9MIYpG\nw8B5h9SVlvNSShkXysYaT7W3Bws2QWXvpjd9PbJewYCvbMKvIJ9m+T1x0qSHBS00\nnC6g6mi5NLPfxST1GzGe1ng9Mkxmh6OXCWRT+YSuipb5d2bjB9rhNzfUBVV+15Kv\nHl6CnRKwNgK+mTgG61ysnrHk\n-----END PRIVATE KEY-----\n"
 
@@ -8,7 +7,7 @@
 //     const rows = await sheet.getRows();
 
 //     const itemRecipes = []
-  
+
 //     for (const row of rows) {
 //       if (row.name && row.isEnabled === 'TRUE') {
 //         const itemRecipe = {
@@ -101,54 +100,54 @@
 //       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
 //       private_key: process.env.GOOGLE_PRIVATE_KEY,
 //     });
-  
+
 //     await doc.loadInfo(); // loads document properties and worksheets
 //     console.log('Connected to: ' + doc.title);
-  
+
 //     let sheetsByName = {}
-  
+
 //     for (const sheet of doc.sheetsByIndex) {
 //       sheetsByName[sheet.title] = sheet
 //     }
-  
+
 //     // Regen Sheet: Item
 //     if (regenSheets.includes('Item')) {
 //       const sheet = sheetsByName['Item'];
 //       const rows = await sheet.getRows();
-    
+
 //       const itemRecipes = await getItemRecipes(sheetsByName['ItemRecipe'])
 //       const itemAttributes = await getItemAttributes(sheetsByName['ItemAttribute'])
-  
+
 //       for (const row of rows) {
 //         if (row.name && row.isEnabled === 'TRUE') {
 //           console.log(row.name)
-  
+
 //           const attributes = []
-  
+
 //           const details = {}
-  
+
 //           if (row.type) details["Type"] = row.type
 //           if (row.subType) details["Subtype"] = row.subType
 //           if (row.distribution) details["Distribution"] = row.distribution
 //           if (row.date) details["Date"] = row.date
 //           if (row.maxSupply) details["Max Supply"] = row.maxSupply
-  
+
 //           const gameMap = {
 //             1: 'Raid',
 //             2: 'Evolution',
 //             3: 'Infinite'
 //           }
-  
+
 //           const branches = {}
-  
+
 //           for (const gameId in gameMap) {
 //             const attributes = []
-  
+
 //             for (let i = 1; i <= 12; i++) {
 //               const attr = row[`a${i}${gameMap[gameId]}`]
 //               if (attr) {
 //                 const realAttribute = itemAttributes.find(a => a.name === attr && a.game === gameMap[gameId])
-  
+
 //                 if (!realAttribute) {
 //                   console.log(`Missing attribute: ${attr} (${gameMap[gameId]})`)
 //                   continue
@@ -166,29 +165,29 @@
 //                 })
 //               }
 //             }
-  
+
 //             branches[gameId] = {
 //               description: row.description,
 //               attributes
 //             }
 //           }
-  
+
 //           let recipe
 //           let itemRecipe
-  
+
 //           if (row.recipeId) {
 //             itemRecipe = itemRecipes.find(r => r.id === row.recipeId)
-  
+
 //             recipe = [itemRecipe.rune1, itemRecipe.rune2, itemRecipe.rune3, itemRecipe.rune4, itemRecipe.rune5].filter(r => !!r).map(r => ({
 //               id: r,
 //               quantity: 1
 //             }))
 //           }
-  
+
 //           if (recipe && row.isSecret !== 'TRUE' && row.isUltraSecret !== 'TRUE') {
 //             details["Rune Word"] = recipe.map(r => r.id).join(" ")
 //           }
-  
+
 //           const item = {
 //             "description": row.description,
 //             "home_url": "https://rune.game",
@@ -221,28 +220,25 @@
 //             "recipe": recipe,
 //             "branches": branches
 //           }
-  
+
 //           jetpack.write(path.resolve(`../rune-databaser/db/items/${item.id}/meta.json`), JSON.stringify(item, null, 2), { atomic: true })
 //         }
 //       }
 //     }
-  
-  
+
 //     // Regen Sheet: ItemAttribute
 //     if (regenSheets.includes('ItemAttribute')) {
 //       const ItemAttributes = await getItemAttributes(sheetsByName['ItemAttribute'])
-  
+
 //       jetpack.write(path.resolve(`../rune-databaser/db/itemAttributes.json`), JSON.stringify(ItemAttributes, null, 2), { atomic: true })
 //     }
-  
+
 //     // Regen Sheet: ItemRecipe
 //     if (regenSheets.includes('ItemRecipe')) {
 //       const ItemRecipes = await getItemRecipes(sheetsByName['ItemRecipe'])
-  
+
 //       jetpack.write(path.resolve(`../rune-databaser/db/ItemRecipes.json`), JSON.stringify(ItemRecipes, null, 2), { atomic: true })
 //     }
 //   }
 
-export function monitorAirtable(app) {
-
-}
+export function monitorAirtable(app) {}

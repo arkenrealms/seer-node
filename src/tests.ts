@@ -18,7 +18,7 @@ export function monitorMarketEvents(app) {
 }
 
 export async function userLoadAndSave(app) {
-  const user = await app.db.loadUser("0x2465176C461AfB316ebc773C61fAEe85A6515DAA")
+  const user = await app.db.loadUser('0x2465176C461AfB316ebc773C61fAEe85A6515DAA')
 
   user.inventoryItemCount = 2
 

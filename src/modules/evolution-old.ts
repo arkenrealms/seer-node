@@ -1,131 +1,128 @@
+// function sendLeaderReward(leaders) {
+//   log('Leader: ', leaders[0])
 
+//   if (leaders[0]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[0].address]) app.db.evolution.playerRewards[leaders[0].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[0].address].pending) app.db.evolution.playerRewards[leaders[0].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[0].address].pending.zod) app.db.evolution.playerRewards[leaders[0].address].pending.zod = 0
 
+//       app.db.evolution.playerRewards[leaders[0].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[0].address].pending.zod + app.config.rewardWinnerAmount * 1) * 1000) / 1000
 
-    // function sendLeaderReward(leaders) {
-    //   log('Leader: ', leaders[0])
+//       publishEvent('OnRoundWinner', leaders[0].name)
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[1]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[1].address]) app.db.evolution.playerRewards[leaders[1].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[1].address].pending) app.db.evolution.playerRewards[leaders[1].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[1].address].pending.zod) app.db.evolution.playerRewards[leaders[1].address].pending.zod = 0
 
-    //   if (leaders[0]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[0].address]) app.db.evolution.playerRewards[leaders[0].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[0].address].pending) app.db.evolution.playerRewards[leaders[0].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[0].address].pending.zod) app.db.evolution.playerRewards[leaders[0].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[0].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[0].address].pending.zod + app.config.rewardWinnerAmount * 1) * 1000) / 1000
+//       app.db.evolution.playerRewards[leaders[1].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[1].address].pending.zod + app.config.rewardWinnerAmount * 0.25) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[2]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[2].address]) app.db.evolution.playerRewards[leaders[2].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[2].address].pending) app.db.evolution.playerRewards[leaders[2].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[2].address].pending.zod) app.db.evolution.playerRewards[leaders[2].address].pending.zod = 0
 
-    //       publishEvent('OnRoundWinner', leaders[0].name)
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[1]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[1].address]) app.db.evolution.playerRewards[leaders[1].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[1].address].pending) app.db.evolution.playerRewards[leaders[1].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[1].address].pending.zod) app.db.evolution.playerRewards[leaders[1].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[1].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[1].address].pending.zod + app.config.rewardWinnerAmount * 0.25) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[2]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[2].address]) app.db.evolution.playerRewards[leaders[2].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[2].address].pending) app.db.evolution.playerRewards[leaders[2].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[2].address].pending.zod) app.db.evolution.playerRewards[leaders[2].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[2].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[2].address].pending.zod + app.config.rewardWinnerAmount * 0.15) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[3]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[3].address]) app.db.evolution.playerRewards[leaders[3].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[3].address].pending) app.db.evolution.playerRewards[leaders[3].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[3].address].pending.zod) app.db.evolution.playerRewards[leaders[3].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[3].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[3].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[4]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[4].address]) app.db.evolution.playerRewards[leaders[4].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[4].address].pending) app.db.evolution.playerRewards[leaders[4].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[4].address].pending.zod) app.db.evolution.playerRewards[leaders[4].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[4].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[4].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[5]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[5].address]) app.db.evolution.playerRewards[leaders[5].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[5].address].pending) app.db.evolution.playerRewards[leaders[5].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[5].address].pending.zod) app.db.evolution.playerRewards[leaders[5].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[5].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[5].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[6]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[6].address]) app.db.evolution.playerRewards[leaders[6].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[6].address].pending) app.db.evolution.playerRewards[leaders[6].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[6].address].pending.zod) app.db.evolution.playerRewards[leaders[6].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[6].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[6].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[7]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[7].address]) app.db.evolution.playerRewards[leaders[7].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[7].address].pending) app.db.evolution.playerRewards[leaders[7].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[7].address].pending.zod) app.db.evolution.playerRewards[leaders[7].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[7].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[7].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[8]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[8].address]) app.db.evolution.playerRewards[leaders[8].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[8].address].pending) app.db.evolution.playerRewards[leaders[8].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[8].address].pending.zod) app.db.evolution.playerRewards[leaders[8].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[8].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[8].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    //   if (leaders[9]?.address) {
-    //     try {
-    //       if (!app.db.evolution.playerRewards[leaders[9].address]) app.db.evolution.playerRewards[leaders[9].address] = {}
-    //       if (!app.db.evolution.playerRewards[leaders[9].address].pending) app.db.evolution.playerRewards[leaders[9].address].pending = {}
-    //       if (!app.db.evolution.playerRewards[leaders[9].address].pending.zod) app.db.evolution.playerRewards[leaders[9].address].pending.zod = 0
-        
-    //       app.db.evolution.playerRewards[leaders[9].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[9].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
-    //     } catch(e) {
-    //       log('Error', e)
-    //     }
-    //   }
-    // }
+//       app.db.evolution.playerRewards[leaders[2].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[2].address].pending.zod + app.config.rewardWinnerAmount * 0.15) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[3]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[3].address]) app.db.evolution.playerRewards[leaders[3].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[3].address].pending) app.db.evolution.playerRewards[leaders[3].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[3].address].pending.zod) app.db.evolution.playerRewards[leaders[3].address].pending.zod = 0
+
+//       app.db.evolution.playerRewards[leaders[3].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[3].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[4]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[4].address]) app.db.evolution.playerRewards[leaders[4].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[4].address].pending) app.db.evolution.playerRewards[leaders[4].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[4].address].pending.zod) app.db.evolution.playerRewards[leaders[4].address].pending.zod = 0
+
+//       app.db.evolution.playerRewards[leaders[4].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[4].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[5]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[5].address]) app.db.evolution.playerRewards[leaders[5].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[5].address].pending) app.db.evolution.playerRewards[leaders[5].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[5].address].pending.zod) app.db.evolution.playerRewards[leaders[5].address].pending.zod = 0
+
+//       app.db.evolution.playerRewards[leaders[5].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[5].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[6]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[6].address]) app.db.evolution.playerRewards[leaders[6].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[6].address].pending) app.db.evolution.playerRewards[leaders[6].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[6].address].pending.zod) app.db.evolution.playerRewards[leaders[6].address].pending.zod = 0
+
+//       app.db.evolution.playerRewards[leaders[6].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[6].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[7]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[7].address]) app.db.evolution.playerRewards[leaders[7].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[7].address].pending) app.db.evolution.playerRewards[leaders[7].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[7].address].pending.zod) app.db.evolution.playerRewards[leaders[7].address].pending.zod = 0
+
+//       app.db.evolution.playerRewards[leaders[7].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[7].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[8]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[8].address]) app.db.evolution.playerRewards[leaders[8].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[8].address].pending) app.db.evolution.playerRewards[leaders[8].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[8].address].pending.zod) app.db.evolution.playerRewards[leaders[8].address].pending.zod = 0
+
+//       app.db.evolution.playerRewards[leaders[8].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[8].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+//   if (leaders[9]?.address) {
+//     try {
+//       if (!app.db.evolution.playerRewards[leaders[9].address]) app.db.evolution.playerRewards[leaders[9].address] = {}
+//       if (!app.db.evolution.playerRewards[leaders[9].address].pending) app.db.evolution.playerRewards[leaders[9].address].pending = {}
+//       if (!app.db.evolution.playerRewards[leaders[9].address].pending.zod) app.db.evolution.playerRewards[leaders[9].address].pending.zod = 0
+
+//       app.db.evolution.playerRewards[leaders[9].address].pending.zod  = Math.round((app.db.evolution.playerRewards[leaders[9].address].pending.zod + app.config.rewardWinnerAmount * 0.05) * 1000) / 1000
+//     } catch(e) {
+//       log('Error', e)
+//     }
+//   }
+// }
 
 // import fetch from 'node-fetch'
 // import path from 'path'
 // import jetpack from 'fs-jetpack'
 // import beautify from 'json-beautify'
-// import { fancyTimeFormat } from '@rune-backend-sdk/util/time'
-// import { average, groupBySub } from '@rune-backend-sdk/util'
-// import { log } from '@rune-backend-sdk/util'
-// import { median } from '@rune-backend-sdk/util/math'
+// import { fancyTimeFormat } from '@runemetaverse/backend-sdk/build/util/time'
+// import { average, groupBySub } from '@runemetaverse/backend-sdk/build/util'
+// import { log } from '@runemetaverse/backend-sdk/build/util'
+// import { median } from '@runemetaverse/backend-sdk/build/util/math'
 
 // export async function monitorEvolutionStats(app) {
 
@@ -142,7 +139,7 @@
 //       try {
 //         const rand = Math.floor(Math.random() * Math.floor(999999))
 //         const response = await fetch(`http://${server.endpoint}/data/playerRewards.json?${rand}`)
-      
+
 //         const data = await response.json()
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/playerRewards.json`), beautify(data, null, 2), { atomic: true })
@@ -154,10 +151,8 @@
 //     log('Error', e)
 //   }
 
-  
 //   const playerRoundWinners = {}
 //   const playerRewardWinners = {}
-
 
 //   const leaderboards: any = {
 //     europe1: {},
@@ -188,7 +183,7 @@
 //         let leaderboardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), 'json') || []
 //         const rand = Math.floor(Math.random() * Math.floor(999999))
 //         const response = await fetch(`https://${server.endpoint}/data/leaderboardHistory.json?${rand}`)
-      
+
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboardHistoryLiveLatest.json`), beautify(leaderboardHistory, null, 2), { atomic: true })
 
 //         let data = await response.json()
@@ -207,7 +202,7 @@
 //             }
 //           }
 //         }
-        
+
 //         log('Starting from', lastIndex, server.key)
 
 //         if (lastIndex === 0 && leaderboardHistory.length > 0) {
@@ -228,18 +223,18 @@
 
 //             return p
 //           })
-      
+
 //           jetpack.write(path.resolve(`./db/evolution/${server.key}/leaderboardHistory.json`), beautify(leaderboardHistory, null, 2), { atomic: true })
-      
+
 //           playerRoundWinners[server.key] = leaderboardHistory
 
 //           const recentPlayerAddresses = []
-      
+
 //           for (let i = lastIndex; i < leaderboardHistory.length; i++) {
 //             for (let j = 0; j < leaderboardHistory[i].length; j++) {
 //               if (!leaderboardHistory[i][j].address) continue
 //               if (recentPlayerAddresses.includes(leaderboardHistory[i][j].address)) continue
-              
+
 //               recentPlayerAddresses.push(leaderboardHistory[i][j].address)
 //             }
 //           }
@@ -311,7 +306,7 @@
 
 //                     if (!user.evolution.hashes.includes(currentPlayer.hash)) user.evolution.hashes.push(currentPlayer.hash)
 
-//                     if (wasConnected) { 
+//                     if (wasConnected) {
 //                       latency.push(currentPlayer.latency)
 //                     }
 
@@ -349,7 +344,7 @@
 //                   if (winner.address === address) {
 //                     wins++
 //                     winStreak++
-        
+
 //                     if (winStreak > savedWinStreak) savedWinStreak = winStreak
 //                   } else {
 //                     winStreak = 0
@@ -394,7 +389,7 @@
 //               }
 
 //               user.evolution.lastUpdated = (new Date()).getTime()
-              
+
 //             if (address === '0x9aAe5CBe5C124e1BE62BD83eD07367d57F8998E0') {
 //               log(user)
 //             }
@@ -514,7 +509,7 @@
 //           })
 //         }
 //       }
-    
+
 //       await app.db.saveUser(user)
 //     }
 
@@ -638,7 +633,6 @@
 //     for (const server of app.db.evolution.servers) {
 //       if (server.status !== 'online') continue
 
-
 //       if (!playerRoundWinners[server.key]) continue
 //       try {
 //         const stats = {
@@ -699,7 +693,7 @@
 //         const rewardHistory = jetpack.read(path.resolve(`./db/evolution/${server.key}/rewardHistory.json`), 'json') || []
 //         const rand = Math.floor(Math.random() * Math.floor(999999))
 //         const response = await fetch(`https://${server.endpoint}/data/rewardHistory.json?${rand}`)
-      
+
 //         const dupChecker = {}
 //         let data = await response.json()
 //         let lastIndex = 0
@@ -770,7 +764,7 @@
 //       try {
 //         const rand = Math.floor(Math.random() * Math.floor(999999))
 //         const response = await fetch(`https://${server.endpoint}/data/rewards.json?${rand}`)
-          
+
 //         const data = await response.json()
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/rewards.json`), beautify(data, null, 2), { atomic: true })
@@ -793,7 +787,7 @@
 //       try {
 //         const rand = Math.floor(Math.random() * Math.floor(999999))
 //         const response = await fetch(`https://${server.endpoint}/data/banList.json?${rand}`)
-          
+
 //         const data = await response.json()
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/bans.json`), beautify(data, null, 2), { atomic: true })
@@ -818,9 +812,6 @@
 //     log('Error', e)
 //   }
 
-  
-
-
 //   // Update evolution player rewards
 //   try {
 //     log('Update evolution player rewards')
@@ -832,7 +823,7 @@
 //       try {
 //         const rand = Math.floor(Math.random() * Math.floor(999999))
 //         const response = await fetch(`https://${server.endpoint}/data/log.json?${rand}`)
-      
+
 //         const data = await response.json()
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/log.json`), beautify(data, null, 2), { atomic: true })
@@ -843,7 +834,6 @@
 //   } catch(e) {
 //     log('Error', e)
 //   }
-
 
 //   // Update evolution player rewards
 //   try {
@@ -856,7 +846,7 @@
 //       try {
 //         const rand = Math.floor(Math.random() * Math.floor(999999))
 //         const response = await fetch(`https://${server.endpoint}/data/playerReports.json?${rand}`)
-      
+
 //         const data = await response.json()
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/playerReports.json`), beautify(data, null, 2), { atomic: true })
@@ -896,7 +886,7 @@
 //                   powerups: 0
 //                 }
 //               }
-      
+
 //               roundsPlayed[player.address].kills += player.kills
 //               roundsPlayed[player.address].deaths += player.deaths
 //               roundsPlayed[player.address].points += player.points
@@ -908,7 +898,7 @@
 //             }
 //           }
 //         }
-        
+
 //         const groupedWinPlayers = groupBySub(playerRoundWinners[server.key].map((leaderboard) => {
 //           let winner = leaderboard[0]
 
@@ -935,11 +925,10 @@
 //           return address.slice(0, 6)
 //         }
 
-
 //         let evolutionEarningsDistributed = 0
 
 //         const groupedRewardPlayers = {}
-        
+
 //         for (const reward of playerRewardWinners[server.key]) {
 //           // if (reward.winner.lastUpdate) continue // skip old winners
 //           if (!groupedRewardPlayers[reward.winner.address]) groupedRewardPlayers[reward.winner.address] = { monetary: 0 }
@@ -970,7 +959,7 @@
 //             groupedRewardPlayers[win.winner.address].address = win.winner.address
 //             groupedRewardPlayers[win.winner.address].name = findUsername(win.winner.address)
 //             groupedRewardPlayers[win.winner.address].monetary += monetary
-      
+
 //             evolutionEarningsDistributed += monetary
 //           }
 //         }
@@ -981,14 +970,14 @@
 
 //             if (user?.evolution?.servers?.[server.key]) {
 //               user.evolution.servers[server.key].earnings = groupedRewardPlayers[address].monetary
-  
+
 //               let earnings = 0
 //               for (const s of Object.keys(user.evolution.servers)) {
 //                 if (Number.isFinite(user.evolution.servers[s].earnings)) earnings += user.evolution.servers[s].earnings
 //               }
-  
+
 //               user.evolution.overall.earnings = earnings
-    
+
 //               await app.db.saveUser(user)
 //             }
 //           }
@@ -1004,7 +993,7 @@
 //           const oldTime = (new Date(evolutionEarningsDistributed[historicalEarnings.length-1]?.[0] || 0)).getTime()
 //           const newTime = (new Date()).getTime()
 //           const diff = newTime - oldTime
-      
+
 //           if (diff / (1000 * 60 * 60 * 24) > 1) {
 //             historicalEarnings.push([newTime, evolutionEarningsDistributed])
 //           }
@@ -1174,7 +1163,7 @@
 //         try {
 //           const rand = Math.floor(Math.random() * Math.floor(999999))
 //           const response = await fetch(`https://${server.endpoint}/info?${rand}`)
-        
+
 //           let data = await response.json()
 
 //           server.playerCount = data.playerTotal
@@ -1244,7 +1233,7 @@
 //       try {
 //         const rand = Math.floor(Math.random() * Math.floor(999999))
 //         const response = await fetch(`https://${server.endpoint}/info?${rand}`)
-      
+
 //         const data = await response.json()
 
 //         jetpack.write(path.resolve(`./db/evolution/${server.key}/info.json`), beautify(data, null, 2), { atomic: true })
@@ -1258,6 +1247,5 @@
 
 //   setTimeout(() => monitorEvolutionStats2(app), 30 * 1000)
 // }
-
 
 export default 1

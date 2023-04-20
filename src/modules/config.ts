@@ -9,7 +9,7 @@ export function initConfig(app) {
     items: {},
     characters: {},
     test: {},
-    sender: {}
+    sender: {},
   }
 
   app.config.trades.updating = false

@@ -2,38 +2,53 @@ import path from 'path'
 import * as ethers from 'ethers'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { log } from '@rune-backend-sdk/util'
-import { achievementData } from '@rune-backend-sdk/data/achievements'
-import { ItemsMainCategoriesType } from '@rune-backend-sdk/data/items.type'
-import { itemData, ItemTypeToText, ItemSlotToText, RuneNames, ItemAttributesById, SkillNames, ClassNames, ItemRarity } from '@rune-backend-sdk/data/items'
-import ItemAttributes from '@rune-backend-sdk/data/generated/itemAttributes.json'
+import { log } from '@runemetaverse/backend-sdk/build/util'
+import { achievementData } from '@runemetaverse/backend-sdk/build/data/achievements'
+import { ItemsMainCategoriesType } from '@runemetaverse/backend-sdk/build/data/items.type'
+import {
+  itemData,
+  ItemTypeToText,
+  ItemSlotToText,
+  RuneNames,
+  ItemAttributesById,
+  SkillNames,
+  ClassNames,
+  ItemRarity,
+} from '@runemetaverse/backend-sdk/build/data/items'
+import ItemAttributes from '@runemetaverse/backend-sdk/build/data/generated/itemAttributes.json'
 
 export async function monitorMeta(app) {
   try {
     log('Saving achievement data')
-    jetpack.write(path.resolve('./db/achievements.json'), JSON.stringify(achievementData), { atomic: true, jsonIndent: 0 })
-  
+    jetpack.write(path.resolve('./db/achievements.json'), JSON.stringify(achievementData), {
+      atomic: true,
+      jsonIndent: 0,
+    })
+
     log('Saving item data')
     jetpack.write(path.resolve('./db/items.json'), JSON.stringify(itemData.runeword), { atomic: true, jsonIndent: 0 })
-  
+
     log('Saving item attribute data')
-    jetpack.write(path.resolve('./db/itemAttributes.json'), JSON.stringify(ItemAttributes), { atomic: true, jsonIndent: 0 })
-  
+    jetpack.write(path.resolve('./db/itemAttributes.json'), JSON.stringify(ItemAttributes), {
+      atomic: true,
+      jsonIndent: 0,
+    })
+
     // log('Saving skill data')
     // jetpack.write(path.resolve('./db/skills.json'), JSON.stringify(SkillNames), { atomic: true, jsonIndent: 0 })
-  
+
     log('Saving class data')
     jetpack.write(path.resolve('./db/classes.json'), JSON.stringify(ClassNames), { atomic: true, jsonIndent: 0 })
-  
+
     log('Saving item rarity data')
     jetpack.write(path.resolve('./db/itemRarity.json'), JSON.stringify(ItemRarity), { atomic: true, jsonIndent: 0 })
-  
+
     log('Saving item type data')
     jetpack.write(path.resolve('./db/itemTypes.json'), JSON.stringify(ItemTypeToText), { atomic: true, jsonIndent: 0 })
-  
+
     log('Saving item slot data')
     jetpack.write(path.resolve('./db/itemSlots.json'), JSON.stringify(ItemSlotToText), { atomic: true, jsonIndent: 0 })
-  
+
     log('Saving item meta')
 
     for (const _item of itemData[ItemsMainCategoriesType.OTHER]) {
@@ -41,22 +56,24 @@ export async function monitorMeta(app) {
       item.icon = item.icon.replace('undefined', 'https://rune.game/')
 
       if (item.recipe?.requirement) {
-        item.recipe.requirement = item.recipe.requirement.map(r => ({...r, id: RuneNames[r.id]}))
+        item.recipe.requirement = item.recipe.requirement.map((r) => ({ ...r, id: RuneNames[r.id] }))
       }
 
       if (!item.branches?.[1]?.attributes) continue
 
-      item.branches[1].attributes.map(a => ({...a, description: ItemAttributesById[a.id]?.description }))
+      item.branches[1].attributes.map((a) => ({ ...a, description: ItemAttributesById[a.id]?.description }))
 
       const itemJson = {
-        "description": Array.isArray(item.branches[1].description) ? item.branches[1].description[0] : item.branches[1].description,
-        "home_url": "https://rune.game",
-        "external_url": "https://rune.game/catalog/" + item.id,
-        "image_url": item.icon,
-        "language": "en-US",
+        description: Array.isArray(item.branches[1].description)
+          ? item.branches[1].description[0]
+          : item.branches[1].description,
+        home_url: 'https://rune.game',
+        external_url: 'https://rune.game/catalog/' + item.id,
+        image_url: item.icon,
+        language: 'en-US',
         ...item,
-        "type": ItemTypeToText[item.type],
-        "slots": item.slots?.map(s => ItemSlotToText[s]) || []
+        type: ItemTypeToText[item.type],
+        slots: item.slots?.map((s) => ItemSlotToText[s]) || [],
       } as any
       // const itemJson = {
       //   "id": 1,
@@ -360,7 +377,7 @@ export async function monitorMeta(app) {
       //     "harvestBurn": 0
       //   }
       // }
-      
+
       delete itemJson.category
       delete itemJson.value
       delete itemJson.hotness
@@ -379,7 +396,10 @@ export async function monitorMeta(app) {
 
       // log('Saving item meta', itemJson.id)
 
-      jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), JSON.stringify(itemJson), { atomic: true, jsonIndent: 0 })
+      jetpack.write(path.resolve('./db/items/' + itemJson.id + '/meta.json'), JSON.stringify(itemJson), {
+        atomic: true,
+        jsonIndent: 0,
+      })
 
       // const ipfs = ipfsClient.create({
       //   host: 'ipfs.rune.game',
@@ -391,13 +411,12 @@ export async function monitorMeta(app) {
       // await ipfs.files.add('/items/999999.json', Buffer.from(JSON.stringify(itemJson)))
 
       // const cid = await ipfs.add(
-      //   { path: '/items/999999.json', content: JSON.stringify(itemJson) }, 
+      //   { path: '/items/999999.json', content: JSON.stringify(itemJson) },
       //   // { wrapWithDirectory: true }
-      //   // cid: 'QmcZ774UPRJ3Qzuyg76ayc2AFM26ZfZQai8Ub5THKmwtbF', 
+      //   // cid: 'QmcZ774UPRJ3Qzuyg76ayc2AFM26ZfZQai8Ub5THKmwtbF',
       // )
 
       // log(cid)
-
     }
   } catch (e) {
     log('Error', e)

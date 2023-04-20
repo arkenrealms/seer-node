@@ -1,6 +1,6 @@
 import * as ethers from 'ethers'
-import { getHighestId, log, toShort } from '@rune-backend-sdk/util'
-import { iterateBlocks, getAddress } from '@rune-backend-sdk/util/web3'
+import { getHighestId, log, toShort } from '@runemetaverse/backend-sdk/build/util'
+import { iterateBlocks, getAddress } from '@runemetaverse/backend-sdk/build/util/web3'
 
 export async function getAllCharacterEvents(app, retry = false) {
   if (app.config.characters.updating) return
@@ -15,7 +15,7 @@ export async function getAllCharacterEvents(app, retry = false) {
     // @ts-ignore
     async function processLog(logInfo, updateConfig = true) {
       const e = iface.parseLog(logInfo)
-      
+
       // log(e.name, e)
 
       if (e.name === 'Transfer') {
@@ -31,12 +31,12 @@ export async function getAllCharacterEvents(app, retry = false) {
         const characterData = {
           owner: userAddress,
           from,
-          status: from === '0x0000000000000000000000000000000000000000' ? "created" : 'transferred_in',
+          status: from === '0x0000000000000000000000000000000000000000' ? 'created' : 'transferred_in',
           tokenId: tokenId.toString(),
           transferredAt: new Date().getTime(),
           blockNumber: logInfo.blockNumber,
           tx: logInfo.transactionHash,
-          id: await app.contracts.characters.getCharacterId(tokenId.toString())
+          id: await app.contracts.characters.getCharacterId(tokenId.toString()),
         }
 
         await app.db.saveUserCharacter(user, characterData)
@@ -46,26 +46,39 @@ export async function getAllCharacterEvents(app, retry = false) {
           // log('8888', logInfo, e)
           app.db.oracle.inflow.characterFees.tokens.week.rxs += app.config.characterMintCost
 
-          await app.live.emitAll('PlayerAction', { key: 'character-create', createdAt: new Date().getTime() / 1000, address: userAddress, username: user.username, message: `${user.username || `${userAddress.slice(0, 7)}...`} created a new character` })
+          await app.live.emitAll('PlayerAction', {
+            key: 'character-create',
+            createdAt: new Date().getTime() / 1000,
+            address: userAddress,
+            username: user.username,
+            message: `${user.username || `${userAddress.slice(0, 7)}...`} created a new character`,
+          })
         } else {
           await app.db.saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
 
-          await app.live.emitAll('PlayerAction', { key: 'character-transfer', createdAt: new Date().getTime() / 1000, address: userAddress, username: user.username, message: `${fromUser.username || `${from.slice(0, 7)}...`} transferred a character to ${user.username || `${userAddress.slice(0, 7)}...`}` })
+          await app.live.emitAll('PlayerAction', {
+            key: 'character-transfer',
+            createdAt: new Date().getTime() / 1000,
+            address: userAddress,
+            username: user.username,
+            message: `${fromUser.username || `${from.slice(0, 7)}...`} transferred a character to ${
+              user.username || `${userAddress.slice(0, 7)}...`
+            }`,
+          })
         }
 
         await app.db.saveCharacterOwner(app.db.loadCharacter(characterData.id), characterData)
       }
 
-      const e2 = app.db.charactersEvents.find(t => t.transactionHash === logInfo.transactionHash)
+      const e2 = app.db.charactersEvents.find((t) => t.transactionHash === logInfo.transactionHash)
 
       if (!e2) {
         app.db.charactersEvents.push({
           id: getHighestId(app.db.charactersEvents) + 1,
           ...logInfo,
-          ...e
+          ...e,
         })
       }
-    
 
       // if (updateConfig) {
       //   config.characters.lastBlock = logInfo.blockNumber
@@ -75,29 +88,35 @@ export async function getAllCharacterEvents(app, retry = false) {
 
     const blockNumber = await app.web3.eth.getBlockNumber()
 
-
     if (parseInt(blockNumber) > 10000) {
-      const events = [
-        'Transfer'
-      ]
-      
+      const events = ['Transfer']
+
       for (const event of events) {
-        await iterateBlocks(app, `Characters Events: ${event}`, getAddress(app.contractInfo.characters), app.config.characters.lastBlock[event], blockNumber, app.contracts.characters.filters[event](), processLog, async function (blockNumber2) {
-          app.config.characters.lastBlock[event] = blockNumber2
-          // await saveConfig()
-        })
+        await iterateBlocks(
+          app,
+          `Characters Events: ${event}`,
+          getAddress(app.contractInfo.characters),
+          app.config.characters.lastBlock[event],
+          blockNumber,
+          app.contracts.characters.filters[event](),
+          processLog,
+          async function (blockNumber2) {
+            app.config.characters.lastBlock[event] = blockNumber2
+            // await saveConfig()
+          }
+        )
       }
     } else {
       log('Error parsing block number', blockNumber)
     }
 
     log('Finished')
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 
   app.config.characters.updating = false
-  app.config.characters.updatedDate = (new Date()).toString()
+  app.config.characters.updatedDate = new Date().toString()
   app.config.characters.updatedTimestamp = new Date().getTime()
 
   // await saveCharactersEvents()

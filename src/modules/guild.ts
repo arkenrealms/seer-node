@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { log } from '@rune-backend-sdk/util'
+import { log } from '@runemetaverse/backend-sdk/build/util'
 
 export async function monitorGuildMemberDetails(app) {
   try {
@@ -26,16 +26,16 @@ export async function monitorGuildMemberDetails(app) {
         const user = await app.db.loadUser(member)
 
         if (!user.username) {
-          const usernameSearch = await ((await fetch(`https://rune-api.binzy.workers.dev/users/${user.address}`)).json())
-    
-          if (!!usernameSearch.message && usernameSearch.message === "No user exists" || !(usernameSearch.username)) {
+          const usernameSearch = await (await fetch(`https://rune-api.binzy.workers.dev/users/${user.address}`)).json()
+
+          if ((!!usernameSearch.message && usernameSearch.message === 'No user exists') || !usernameSearch.username) {
             continue
           } else {
             user.username = usernameSearch.username
           }
         }
 
-        const hasRegistered = (await app.contracts.profile.hasRegistered(user.address))
+        const hasRegistered = await app.contracts.profile.hasRegistered(user.address)
 
         if (!hasRegistered) continue
 
@@ -53,7 +53,7 @@ export async function monitorGuildMemberDetails(app) {
           points: user.points,
           achievementCount: user.achievements.length,
           isActive: user.isGuildMembershipActive,
-          characterId: await app.contracts.characters.getCharacterId(tokenId)
+          characterId: await app.contracts.characters.getCharacterId(tokenId),
         })
 
         // log(`Sync guild ${guild.id} member ${guild.memberDetails.length} / ${guild.memberCount}`)
@@ -63,7 +63,7 @@ export async function monitorGuildMemberDetails(app) {
 
       await app.db.saveGuild(guild)
     }
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 

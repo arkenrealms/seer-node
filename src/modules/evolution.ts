@@ -2,12 +2,12 @@ import fetch from 'node-fetch'
 import path from 'path'
 import jetpack, { find } from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { fancyTimeFormat } from '@rune-backend-sdk/util/time'
+import { fancyTimeFormat } from '@runemetaverse/backend-sdk/build/util/time'
 import md5 from 'js-md5'
-import { log, removeDupes } from '@rune-backend-sdk/util'
-import { getClientSocket } from '@rune-backend-sdk/util/websocket'
-import { isValidRequest, getSignedRequest } from '@rune-backend-sdk/util/web3'
-import getUsername from '@rune-backend-sdk/util/api/getOldUsername'
+import { log, removeDupes } from '@runemetaverse/backend-sdk/build/util'
+import { getClientSocket } from '@runemetaverse/backend-sdk/build/util/websocket'
+import { isValidRequest, getSignedRequest } from '@runemetaverse/backend-sdk/build/util/web3'
+import getUsername from '@runemetaverse/backend-sdk/build/util/api/getOldUsername'
 
 const shortId = require('shortid')
 
@@ -17,30 +17,37 @@ const ioCallbacks = {}
 async function rsCall(app, realm, name, data = undefined) {
   try {
     const id = shortId()
-    const signature = data !== undefined && data !== null ? await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), data) : null
-    
+    const signature =
+      data !== undefined && data !== null
+        ? await getSignedRequest(
+            app.web3,
+            app.secrets.find((s) => s.id === 'evolution-signer'),
+            data
+          )
+        : null
+
     return new Promise(async (resolve) => {
       ioCallbacks[id] = {}
-  
+
       ioCallbacks[id].resolve = resolve
-  
-      ioCallbacks[id].reqTimeout = setTimeout(function() {
+
+      ioCallbacks[id].reqTimeout = setTimeout(function () {
         log('Request timeout')
         resolve({ status: 0, message: 'Request timeout' })
-  
+
         delete ioCallbacks[id]
       }, 60 * 1000)
-  
+
       if (!realm.client.socket?.connected) {
         log('Not connected to realm server: ' + realm.key)
         return
       }
-  
+
       log('Emit Realm', realm.key, name, { id, data })
-  
+
       realm.client.socket.emit(name, { id, signature, data })
     })
-  } catch(e) {
+  } catch (e) {
     log(e)
   }
 }
@@ -56,7 +63,9 @@ function setRealmOffline(realm) {
 }
 
 async function setRealmConfig(app, realm) {
-  const configRes = await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', { config: { ...app.db.evolution.config, roundId: realm.roundId } }) as any
+  const configRes = (await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', {
+    config: { ...app.db.evolution.config, roundId: realm.roundId },
+  })) as any
 
   if (configRes.status !== 1) {
     setRealmOffline(realm)
@@ -68,13 +77,13 @@ async function updateRealm(app, realm) {
   try {
     realm.games = []
 
-    const infoRes = await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { config: { } }) as any // roundId: realm.roundId 
+    const infoRes = (await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { config: {} })) as any // roundId: realm.roundId
 
     if (!infoRes || infoRes.status !== 1) {
       setRealmOffline(realm)
       return
     }
-    
+
     log('infoRes', infoRes.data.games)
 
     const { data } = infoRes
@@ -83,7 +92,7 @@ async function updateRealm(app, realm) {
     realm.speculatorCount = data.speculatorCount
     realm.version = data.version
 
-    realm.games = data.games.map(game => ({
+    realm.games = data.games.map((game) => ({
       id: game.id,
       playerCount: game.playerCount,
       speculatorCount: game.speculatorCount,
@@ -94,15 +103,22 @@ async function updateRealm(app, realm) {
       connectedPlayers: game.connectedPlayers,
       roundId: game.round.id,
       roundStartedAt: game.round.startedAt,
-      timeLeft: ~~(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
-      timeLeftText: fancyTimeFormat(5 * 60 - (((new Date().getTime()) / 1000 - game.round.startedAt))),
-      endpoint: (function() { const url = new URL((process.env.RUNE_ENV === 'local' ? 'http://' : 'https://') + realm.endpoint); url.port = game.port; return url.toString(); })().replace('http://', '').replace('https://', '').replace('/', '')
+      timeLeft: ~~(5 * 60 - (new Date().getTime() / 1000 - game.round.startedAt)),
+      timeLeftText: fancyTimeFormat(5 * 60 - (new Date().getTime() / 1000 - game.round.startedAt)),
+      endpoint: (function () {
+        const url = new URL((process.env.RUNE_ENV === 'local' ? 'http://' : 'https://') + realm.endpoint)
+        url.port = game.port
+        return url.toString()
+      })()
+        .replace('http://', '')
+        .replace('https://', '')
+        .replace('/', ''),
     }))
 
     delete realm.timeLeftFancy
 
     realm.status = 'online'
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
 
     setRealmOffline(realm)
@@ -120,23 +136,26 @@ async function updateRealms(app) {
     let playerCount = 0
 
     for (const realm of app.db.evolution.realms) {
-      // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
+      // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue
       if (realm.status === 'inactive' || realm.updateMode === 'manual') continue
 
       await updateRealm(app, realm)
 
       const hist = jetpack.read(path.resolve(`./db/evolution/${realm.key}/historical.json`), 'json') || {}
-      
+
       if (!hist.playerCount) hist.playerCount = []
 
-      const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
-      const newTime = (new Date()).getTime()
+      const oldTime = new Date(hist.playerCount[hist.playerCount.length - 1]?.[0] || 0).getTime()
+      const newTime = new Date().getTime()
       const diff = newTime - oldTime
       if (diff / (1000 * 60 * 60 * 1) > 1) {
         hist.playerCount.push([newTime, realm.playerCount])
       }
 
-      jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), JSON.stringify(hist), { atomic: true, jsonIndent: 0 })
+      jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), JSON.stringify(hist), {
+        atomic: true,
+        jsonIndent: 0,
+      })
 
       playerCount += realm.playerCount
 
@@ -153,10 +172,23 @@ async function updateRealms(app) {
       server.playerCount = 0
     }
 
-    const evolutionServers = app.db.evolution.realms.filter(r => r.status !== 'inactive').map(r => r.games.length > 0 ? { ...(app.db.evolution.servers.find(e => e.key === r.key) || {}), ...r.games[0], key: r.key, name: r.name, status: r.status, regionId: r.regionId } : {})
+    const evolutionServers = app.db.evolution.realms
+      .filter((r) => r.status !== 'inactive')
+      .map((r) =>
+        r.games.length > 0
+          ? {
+              ...(app.db.evolution.servers.find((e) => e.key === r.key) || {}),
+              ...r.games[0],
+              key: r.key,
+              name: r.name,
+              status: r.status,
+              regionId: r.regionId,
+            }
+          : {}
+      )
 
     for (const evolutionServer of evolutionServers) {
-      const server = app.db.evolution.servers.find(s => s.key === evolutionServer.key)
+      const server = app.db.evolution.servers.find((s) => s.key === evolutionServer.key)
 
       if (!server) {
         if (evolutionServer.key) {
@@ -182,10 +214,16 @@ async function updateRealms(app) {
       server.endpoint = evolutionServer.endpoint
     }
 
-    jetpack.write(path.resolve('./db/evolution/realms.json'), JSON.stringify(app.db.evolution.realms), { atomic: true, jsonIndent: 0 })
+    jetpack.write(path.resolve('./db/evolution/realms.json'), JSON.stringify(app.db.evolution.realms), {
+      atomic: true,
+      jsonIndent: 0,
+    })
 
     // Update old servers file
-    jetpack.write(path.resolve('./db/evolution/servers.json'), JSON.stringify(app.db.evolution.servers), { atomic: true, jsonIndent: 0 })
+    jetpack.write(path.resolve('./db/evolution/servers.json'), JSON.stringify(app.db.evolution.servers), {
+      atomic: true,
+      jsonIndent: 0,
+    })
 
     log('Realm and server info generated')
 
@@ -194,15 +232,15 @@ async function updateRealms(app) {
 
     if (!hist.playerCount) hist.playerCount = []
 
-    const oldTime = (new Date(hist.playerCount[hist.playerCount.length-1]?.[0] || 0)).getTime()
-    const newTime = (new Date()).getTime()
+    const oldTime = new Date(hist.playerCount[hist.playerCount.length - 1]?.[0] || 0).getTime()
+    const newTime = new Date().getTime()
     const diff = newTime - oldTime
     if (diff / (1000 * 60 * 60 * 1) > 1) {
       hist.playerCount.push([newTime, playerCount])
     }
 
     jetpack.write(path.resolve(`./db/evolution/historical.json`), JSON.stringify(hist), { atomic: true, jsonIndent: 0 })
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -226,7 +264,6 @@ function disconnectClient(client) {
   cleanupClient(client)
 }
 
-
 async function getCharacter(app, address) {
   const equipment = await app.barracks.getPlayerEquipment(app, address)
   const meta = await app.barracks.getMetaFromEquipment(app, equipment)
@@ -248,19 +285,52 @@ async function getCharacter(app, address) {
   if (meta[1219] > 100) error = `Problem with IncreaseHealthOnKill: ${address} ${meta[1219]}`
   if (meta[1117] > 100) error = `Problem with SpriteFuelIncrease: ${address} ${meta[1117]}`
   if (meta[1118] > 100) error = `Problem with SpriteFuelDecrease: ${address} ${meta[1118]}`
-  
+
   if (error) {
     log('Error with character gear:', error)
-    process.exit(6)  
+    process.exit(6)
   }
 
   return {
     equipment,
-    meta
+    meta,
   }
 }
 
-const runes = ['el', 'eld', 'tir', 'nef', 'ith', 'tal', 'ral', 'ort', 'thul', 'amn', 'sol', 'shael', 'dol', 'hel', 'io', 'lum', 'ko', 'fal', 'lem',  'pul', 'um', 'mal', 'ist', 'gul', 'vex', 'ohm', 'lo', 'sur', 'ber', 'jah', 'cham', 'zod']
+const runes = [
+  'el',
+  'eld',
+  'tir',
+  'nef',
+  'ith',
+  'tal',
+  'ral',
+  'ort',
+  'thul',
+  'amn',
+  'sol',
+  'shael',
+  'dol',
+  'hel',
+  'io',
+  'lum',
+  'ko',
+  'fal',
+  'lem',
+  'pul',
+  'um',
+  'mal',
+  'ist',
+  'gul',
+  'vex',
+  'ohm',
+  'lo',
+  'sur',
+  'ber',
+  'jah',
+  'cham',
+  'zod',
+]
 
 export async function connectRealm(app, realm) {
   if (realm.status === 'inactive' || realm.ignore) return
@@ -282,7 +352,7 @@ export async function connectRealm(app, realm) {
 
       log('Connected: ' + realm.key)
 
-      const res = await rsCall(app, app.games.evolution.realms[realm.key], 'AuthRequest', 'myverysexykey') as any
+      const res = (await rsCall(app, app.games.evolution.realms[realm.key], 'AuthRequest', 'myverysexykey')) as any
 
       if (res.status === 1) {
         client.isAuthed = true
@@ -299,7 +369,7 @@ export async function connectRealm(app, realm) {
         try {
           clearTimeout(client.pingReplyTimeout)
 
-          client.pingReplyTimeout = setTimeout(function() {
+          client.pingReplyTimeout = setTimeout(function () {
             log(`Realm ${realm.key} didnt respond in time, disconnecting`)
             cleanupClient(client)
           }, 70 * 1000)
@@ -309,9 +379,9 @@ export async function connectRealm(app, realm) {
           clearTimeout(client.pingReplyTimeout)
 
           if (!client.isConnected) return
-          
+
           client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
-        } catch(e) {
+        } catch (e) {
           log(e)
         }
       }
@@ -320,7 +390,7 @@ export async function connectRealm(app, realm) {
       clearTimeout(client.pingReplyTimeout)
 
       client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
-    } catch(e) {
+    } catch (e) {
       log('Error', e)
       log(`Disconnecting ${realm.key} due to error`)
       cleanupClient(client)
@@ -351,7 +421,7 @@ export async function connectRealm(app, realm) {
 
   //     if (await isValidRequest(app.web3, req) && app.db.evolution.modList.includes(req.signature.address)) {
   //       app.db.addBanList('evolution', req.data.target)
-  
+
   //       app.db.saveBanList()
 
   //       app.realm.emitAll('BanUserRequest', {
@@ -360,7 +430,7 @@ export async function connectRealm(app, realm) {
   //           target: req.data.target
   //         }
   //       })
-        
+
   //       client.socket.emit('BanUserResponse', {
   //         id: req.id,
   //         data: { status: 1 }
@@ -373,7 +443,7 @@ export async function connectRealm(app, realm) {
   //     }
   //   } catch (e) {
   //     log('Error', e)
-      
+
   //     client.socket.emit('BanUserResponse', {
   //       id: req.id,
   //       data: { status: 0, message: e }
@@ -397,20 +467,20 @@ export async function connectRealm(app, realm) {
 
       app.realm.emitAll('UnbanUserRequest', {
         data: {
-          target: req.data.target
-        }
+          target: req.data.target,
+        },
       })
-      
+
       client.socket.emit('UnbanPlayerResponse', {
         id: req.id,
-        data: { status: 1 }
+        data: { status: 1 },
       })
     } catch (e) {
       log('Error', e)
-      
+
       client.socket.emit('UnbanPlayerResponse', {
         id: req.id,
-        data: { status: 0, message: e }
+        data: { status: 0, message: e },
       })
     }
   })
@@ -421,18 +491,26 @@ export async function connectRealm(app, realm) {
 
       const user = await app.db.loadUser(req.data.body.signature.address)
 
-      app.live.emitAll('PlayerAction', { key: 'moderator-action', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, method: req.data.params.method, realmKey: realm.key, message: `${user.username} called ${req.data.params.method}` })
+      app.live.emitAll('PlayerAction', {
+        key: 'moderator-action',
+        createdAt: new Date().getTime() / 1000,
+        address: user.address,
+        username: user.username,
+        method: req.data.params.method,
+        realmKey: realm.key,
+        message: `${user.username} called ${req.data.params.method}`,
+      })
 
       client.socket.emit('ModResponse', {
         id: req.id,
-        data: { status: 1 }
+        data: { status: 1 },
       })
     } catch (e) {
       log('Error', e)
-      
+
       client.socket.emit('ModResponse', {
         id: req.id,
-        data: { status: 0, message: e }
+        data: { status: 0, message: e },
       })
     }
   })
@@ -445,7 +523,7 @@ export async function connectRealm(app, realm) {
 
       user.isBanned = true
       user.bannedReason = req.data.reason
-      user.bannedUntil = req.data.until ? parseInt(req.data.until) : (new Date()).getTime() + (100 * 365 * 24 * 60 * 60) // 100 year ban by default
+      user.bannedUntil = req.data.until ? parseInt(req.data.until) : new Date().getTime() + 100 * 365 * 24 * 60 * 60 // 100 year ban by default
 
       await app.db.saveUser(user)
 
@@ -455,22 +533,22 @@ export async function connectRealm(app, realm) {
       app.realm.emitAll('BanUserRequest', {
         data: {
           target: req.data.target,
-          createdAt: (new Date()).getTime(),
+          createdAt: new Date().getTime(),
           bannedUntil: user.bannedUntil,
-          bannedReason: user.bannedReason
-        }
+          bannedReason: user.bannedReason,
+        },
       })
-      
+
       client.socket.emit('BanPlayerResponse', {
         id: req.id,
-        data: { status: 1 }
+        data: { status: 1 },
       })
     } catch (e) {
       log('Error', e)
-      
+
       client.socket.emit('BanPlayerResponse', {
         id: req.id,
-        data: { status: 0, message: e }
+        data: { status: 0, message: e },
       })
     }
   })
@@ -482,12 +560,11 @@ export async function connectRealm(app, realm) {
 
     if (currentPlayer.name.indexOf('Guest') !== -1 || currentPlayer.name.indexOf('Unknown') !== -1) return // No guest reports
 
-    if (!app.db.evolution.reportList[reportedPlayer.address])
-      app.db.evolution.reportList[reportedPlayer.address] = []
-    
+    if (!app.db.evolution.reportList[reportedPlayer.address]) app.db.evolution.reportList[reportedPlayer.address] = []
+
     if (!app.db.evolution.reportList[reportedPlayer.address].includes(currentPlayer.address))
       app.db.evolution.reportList[reportedPlayer.address].push(currentPlayer.address)
-    
+
     // if (app.db.evolution.reportList[reportedPlayer.address].length >= 6) {
     //   app.db.evolution.banList.push(reportedPlayer.address)
 
@@ -513,75 +590,75 @@ export async function connectRealm(app, realm) {
     // Relay the report to connected realm servers
   })
 
-// {
-//   id: 'vLgqLC_oa',
-//   signature: {
-//     address: '0xDfA8f768d82D719DC68E12B199090bDc3691fFc7',
-//     hash: '0xaa426a32a8f0dae65f160e52d3c0004582e796942894c199255298a05b5f40a473b4257e367e5c285a1eeaf9a8f69b14b8fc273377ab4c79e256962a3434978a1c',
-//     data: '96a190dbd01b86b08d6feafc6444481b'
-//   },
-//   data: {
-//     id: '7mrEmDnd6',
-//     data: {
-//       id: 1,
-//       startedAt: 1644133312,
-//       leaders: [Array],
-//       players: [Array]
-//     }
-//   }
-// }
-// {
-//   id: 2,
-//   startedAt: 1644135785,
-//   leaders: [],
-//   players: [
-//     {
-//       name: 'Sdadasd',
-//       id: 'ovEbbscHo3D7aWVBAAAD',
-//       avatar: 0,
-//       network: 'bsc',
-//       address: '0x191727d22f2693100acef8e48F8FeaEaa06d30b1',
-//       device: 'desktop',
-//       position: [Object],
-//       target: [Object],
-//       clientPosition: [Object],
-//       clientTarget: [Object],
-//       rotation: null,
-//       xp: 0,
-//       latency: 12627.5,
-//       kills: 0,
-//       deaths: 0,
-//       points: 0,
-//       evolves: 0,
-//       powerups: 0,
-//       rewards: 0,
-//       orbs: 0,
-//       rewardHistory: [],
-//       isMod: false,
-//       isBanned: false,
-//       isMasterClient: false,
-//       isDisconnected: true,
-//       isDead: true,
-//       isJoining: false,
-//       isSpectating: false,
-//       isStuck: false,
-//       isInvincible: false,
-//       isPhased: false,
-//       overrideSpeed: 0.5,
-//       overrideCameraSize: null,
-//       cameraSize: 3,
-//       speed: 0.5,
-//       joinedAt: 0,
-//       hash: '',
-//       lastReportedTime: 1644135787011,
-//       lastUpdate: 1644135787016,
-//       gameMode: 'Deathmatch',
-//       phasedUntil: 1644135814266,
-//       log: [Object],
-//       startedRoundAt: 1644135785
-//     }
-//   ]
-// }
+  // {
+  //   id: 'vLgqLC_oa',
+  //   signature: {
+  //     address: '0xDfA8f768d82D719DC68E12B199090bDc3691fFc7',
+  //     hash: '0xaa426a32a8f0dae65f160e52d3c0004582e796942894c199255298a05b5f40a473b4257e367e5c285a1eeaf9a8f69b14b8fc273377ab4c79e256962a3434978a1c',
+  //     data: '96a190dbd01b86b08d6feafc6444481b'
+  //   },
+  //   data: {
+  //     id: '7mrEmDnd6',
+  //     data: {
+  //       id: 1,
+  //       startedAt: 1644133312,
+  //       leaders: [Array],
+  //       players: [Array]
+  //     }
+  //   }
+  // }
+  // {
+  //   id: 2,
+  //   startedAt: 1644135785,
+  //   leaders: [],
+  //   players: [
+  //     {
+  //       name: 'Sdadasd',
+  //       id: 'ovEbbscHo3D7aWVBAAAD',
+  //       avatar: 0,
+  //       network: 'bsc',
+  //       address: '0x191727d22f2693100acef8e48F8FeaEaa06d30b1',
+  //       device: 'desktop',
+  //       position: [Object],
+  //       target: [Object],
+  //       clientPosition: [Object],
+  //       clientTarget: [Object],
+  //       rotation: null,
+  //       xp: 0,
+  //       latency: 12627.5,
+  //       kills: 0,
+  //       deaths: 0,
+  //       points: 0,
+  //       evolves: 0,
+  //       powerups: 0,
+  //       rewards: 0,
+  //       orbs: 0,
+  //       rewardHistory: [],
+  //       isMod: false,
+  //       isBanned: false,
+  //       isMasterClient: false,
+  //       isDisconnected: true,
+  //       isDead: true,
+  //       isJoining: false,
+  //       isSpectating: false,
+  //       isStuck: false,
+  //       isInvincible: false,
+  //       isPhased: false,
+  //       overrideSpeed: 0.5,
+  //       overrideCameraSize: null,
+  //       cameraSize: 3,
+  //       speed: 0.5,
+  //       joinedAt: 0,
+  //       hash: '',
+  //       lastReportedTime: 1644135787011,
+  //       lastUpdate: 1644135787016,
+  //       gameMode: 'Deathmatch',
+  //       phasedUntil: 1644135814266,
+  //       log: [Object],
+  //       startedRoundAt: 1644135785
+  //     }
+  //   ]
+  // }
 
   client.socket.on('GetCharacterRequest', async function (req) {
     log('GetCharacterRequest', req)
@@ -593,11 +670,11 @@ export async function connectRealm(app, realm) {
         // if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
         //   meta[1030] = 100
         // }
-  
+
         // if (req.data.address === '0x6f756AFaC862A2486f4c1C96b46E00A98a70bEA2') {
         //   meta[1030] = 100
         // }
-  
+
         character = await getCharacter(app, req.data.address)
 
         CharacterCache[req.data.address] = character
@@ -607,12 +684,12 @@ export async function connectRealm(app, realm) {
 
       client.socket.emit('GetCharacterResponse', {
         id: req.id,
-        data: { status: 1, character }
+        data: { status: 1, character },
       })
-    } catch(e) {
+    } catch (e) {
       client.socket.emit('GetCharacterResponse', {
         id: req.id,
-        data: { status: 0, message: 'Error' }
+        data: { status: 0, message: 'Error' },
       })
     }
   })
@@ -625,12 +702,12 @@ export async function connectRealm(app, realm) {
     try {
       log('SaveRoundRequest', realm.key, req)
 
-      if (!await isValidRequest(app.web3, req) && app.db.evolution.modList.includes(req.signature.address)) {
+      if (!(await isValidRequest(app.web3, req)) && app.db.evolution.modList.includes(req.signature.address)) {
         log('Round invalid')
 
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
-          data: { status: 0, message: 'Invalid signature' }
+          data: { status: 0, message: 'Invalid signature' },
         })
         return
       }
@@ -640,7 +717,7 @@ export async function connectRealm(app, realm) {
 
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
-          data: { status: 0, message: 'Error processing' }
+          data: { status: 0, message: 'Error processing' },
         })
         return
       }
@@ -652,7 +729,7 @@ export async function connectRealm(app, realm) {
 
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
-          data: { status: 1 }
+          data: { status: 1 },
         })
         return
       }
@@ -667,7 +744,13 @@ export async function connectRealm(app, realm) {
       for (const client of req.data.lastClients) {
         if (client.name.indexOf('Guest') !== -1 || client.name.indexOf('Unknown') !== -1) continue
 
-        if ((client.powerups > 100 && client.kills > 1) || (client.evolves > 20 && client.powerups > 200) || (client.rewards > 3 && client.powerups > 200) || (client.evolves > 100) || (client.points > 1000)) {
+        if (
+          (client.powerups > 100 && client.kills > 1) ||
+          (client.evolves > 20 && client.powerups > 200) ||
+          (client.rewards > 3 && client.powerups > 200) ||
+          client.evolves > 100 ||
+          client.points > 1000
+        ) {
           totalLegitPlayers += 1
         }
       }
@@ -677,7 +760,13 @@ export async function connectRealm(app, realm) {
       }
 
       if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountPerLegitPlayer * totalLegitPlayers) {
-        log(req.data.rewardWinnerAmount, app.db.evolution.config.rewardWinnerAmountPerLegitPlayer, totalLegitPlayers, req.data.lastClients.length, JSON.stringify(req.data.lastClients))
+        log(
+          req.data.rewardWinnerAmount,
+          app.db.evolution.config.rewardWinnerAmountPerLegitPlayer,
+          totalLegitPlayers,
+          req.data.lastClients.length,
+          JSON.stringify(req.data.lastClients)
+        )
         throw new Error('Big problem with reward amount 2')
       }
 
@@ -687,10 +776,10 @@ export async function connectRealm(app, realm) {
         const err = `Round id too low (realm.roundId = ${realm.roundId})`
 
         log(err)
-        
+
         client.socket.emit('SaveRoundResponse', {
           id: req.id,
-          data: { status: 0, message: err }
+          data: { status: 0, message: err },
         })
 
         await setRealmConfig(app, realm)
@@ -709,16 +798,16 @@ export async function connectRealm(app, realm) {
       // }
 
       const rewardWinnerMap = {
-        0: Math.round((req.data.rewardWinnerAmount * 1) * 1000) / 1000,
-        1: Math.round((req.data.rewardWinnerAmount * 0.25) * 1000) / 1000,
-        2: Math.round((req.data.rewardWinnerAmount * 0.15) * 1000) / 1000,
-        3: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        4: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        5: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        6: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        7: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        8: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
-        9: Math.round((req.data.rewardWinnerAmount * 0.05) * 1000) / 1000,
+        0: Math.round(req.data.rewardWinnerAmount * 1 * 1000) / 1000,
+        1: Math.round(req.data.rewardWinnerAmount * 0.25 * 1000) / 1000,
+        2: Math.round(req.data.rewardWinnerAmount * 0.15 * 1000) / 1000,
+        3: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        4: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        5: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        6: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        7: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        8: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        9: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
       }
 
       // const users = []
@@ -727,8 +816,8 @@ export async function connectRealm(app, realm) {
       // Iterate all players and save their log / stats
 
       const removeDupes2 = (list) => {
-        const seen = {};
-        return list.filter(function(item) {
+        const seen = {}
+        return list.filter(function (item) {
           // console.log(item)
           const k1 = item.address
           const exists = seen.hasOwnProperty(k1)
@@ -741,7 +830,7 @@ export async function connectRealm(app, realm) {
         })
       }
 
-      req.data.round.players = removeDupes2(req.data.round.players) // [...new Set(req.data.round.players.map(obj => obj.key)) ] // 
+      req.data.round.players = removeDupes2(req.data.round.players) // [...new Set(req.data.round.players.map(obj => obj.key)) ] //
 
       const winners = req.data.round.winners.slice(0, 10)
 
@@ -777,7 +866,7 @@ export async function connectRealm(app, realm) {
         const user = await app.db.loadUser(player.address)
         const now = new Date().getTime() / 1000
 
-        if (user.lastGamePlayed > now - (4 * 60)) continue // Make sure this player isn't in 2 games or somehow getting double rewards
+        if (user.lastGamePlayed > now - 4 * 60) continue // Make sure this player isn't in 2 games or somehow getting double rewards
 
         if (typeof user.username === 'object' || !user.username) user.username = await getUsername(user.address)
 
@@ -786,15 +875,34 @@ export async function connectRealm(app, realm) {
         app.db.setUserActive(user)
 
         if (player.killStreak >= 10) {
-          await app.live.emitAll('PlayerAction', { key: 'evolution1-killstreak', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, message: `${user.username} got a ${player.killStreak} killstreak in Evolution` })
-          await app.notices.add('evolution1-killstreak', { key: 'evolution1-killstreak', address: user.address, username: user.username, message: `${user.username} got a ${player.killStreak} killstreak in Evolution` })
+          await app.live.emitAll('PlayerAction', {
+            key: 'evolution1-killstreak',
+            createdAt: new Date().getTime() / 1000,
+            address: user.address,
+            username: user.username,
+            message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
+          })
+          await app.notices.add('evolution1-killstreak', {
+            key: 'evolution1-killstreak',
+            address: user.address,
+            username: user.username,
+            message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
+          })
         }
 
         for (const pickup of player.pickups) {
           if (pickup.type === 'rune') {
             // TODO: change to authoritative
-            if (pickup.quantity > req.data.round.players.length * app.db.evolution.config.rewardItemAmountPerLegitPlayer * 2) {
-              log(pickup.quantity, app.db.evolution.config.rewardItemAmountPerLegitPlayer, req.data.round.players.length, JSON.stringify(req.data.round.players))
+            if (
+              pickup.quantity >
+              req.data.round.players.length * app.db.evolution.config.rewardItemAmountPerLegitPlayer * 2
+            ) {
+              log(
+                pickup.quantity,
+                app.db.evolution.config.rewardItemAmountPerLegitPlayer,
+                req.data.round.players.length,
+                JSON.stringify(req.data.round.players)
+              )
               throw new Error('Big problem with item reward amount')
             }
 
@@ -828,13 +936,13 @@ export async function connectRealm(app, realm) {
             user.rewards.items[pickup.id] = {
               name: pickup.name,
               rarity: pickup.rarity,
-              quantity: pickup.quantity
+              quantity: pickup.quantity,
             }
 
             user.lifetimeRewards.items[pickup.id] = {
               name: pickup.name,
               rarity: pickup.rarity,
-              quantity: pickup.quantity
+              quantity: pickup.quantity,
             }
           }
 
@@ -846,11 +954,14 @@ export async function connectRealm(app, realm) {
         if (!user.evolution.hashes) user.evolution.hashes = []
         if (!user.evolution.hashes.includes(player.hash)) user.evolution.hashes.push(player.hash)
 
-        user.evolution.hashes = user.evolution.hashes.filter(function(item, pos) { return user.evolution.hashes.indexOf(item) === pos })
+        user.evolution.hashes = user.evolution.hashes.filter(function (item, pos) {
+          return user.evolution.hashes.indexOf(item) === pos
+        })
 
         // users.push(user)
 
-        if (!app.games.evolution.realms[realm.key].leaderboard.names) app.games.evolution.realms[realm.key].leaderboard.names = {}
+        if (!app.games.evolution.realms[realm.key].leaderboard.names)
+          app.games.evolution.realms[realm.key].leaderboard.names = {}
 
         app.games.evolution.realms[realm.key].leaderboard.names[user.address] = user.username
 
@@ -906,19 +1017,20 @@ export async function connectRealm(app, realm) {
         app.games.evolution.global.leaderboard.raw.rewards[user.address] += player.rewards
         app.games.evolution.global.leaderboard.raw.pickups[user.address] += player.pickups.length
 
-        if (winners.find(winner => winner.address === player.address)) {
-          const index = winners.findIndex(winner => winner.address === player.address)
+        if (winners.find((winner) => winner.address === player.address)) {
+          const index = winners.findIndex((winner) => winner.address === player.address)
           // const player = req.data.round.winners[index]
           // const user = users.find(u => u.address === player.address)
 
           // if (!user) continue // He wasn't valid
-          if (user.username) { // Make sure cant earn without a character
+          if (user.username) {
+            // Make sure cant earn without a character
             // if (req.data.round.winners[0].address === player.address) {
             let character = CharacterCache[player.address]
 
             if (!character) {
               character = await getCharacter(app, player.address)
-    
+
               CharacterCache[player.address] = character
             }
 
@@ -926,10 +1038,15 @@ export async function connectRealm(app, realm) {
             const WinRewardsDecrease = character?.meta?.[1160] || 0
 
             console.log('bbbb', rewardWinnerMap[index])
-            const rewardMultiplier = (1 + (WinRewardsIncrease - WinRewardsDecrease) / 100)
+            const rewardMultiplier = 1 + (WinRewardsIncrease - WinRewardsDecrease) / 100
 
             if (rewardMultiplier > 2 || rewardMultiplier < 0) {
-              log('Error with reward multiplier.. bad things happened: ', rewardMultiplier, rewardMultiplier, WinRewardsDecrease)
+              log(
+                'Error with reward multiplier.. bad things happened: ',
+                rewardMultiplier,
+                rewardMultiplier,
+                WinRewardsDecrease
+              )
               process.exit(5)
             }
 
@@ -959,15 +1076,34 @@ export async function connectRealm(app, realm) {
 
             app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 
-            await app.live.emitAll('PlayerAction', { key: 'evolution1-winner', createdAt: new Date().getTime() / 1000, address: user.address, username: user.username, realmKey: realm.key, placement: index+1, message: `${user.username} placed #${index+1} for ${rewardWinnerMap[index].toFixed(4)} ZOD in Evolution` })
+            await app.live.emitAll('PlayerAction', {
+              key: 'evolution1-winner',
+              createdAt: new Date().getTime() / 1000,
+              address: user.address,
+              username: user.username,
+              realmKey: realm.key,
+              placement: index + 1,
+              message: `${user.username} placed #${index + 1} for ${rewardWinnerMap[index].toFixed(
+                4
+              )} ZOD in Evolution`,
+            })
 
             if (rewardWinnerMap[index] > 0.1) {
-              await app.notices.add('evolution1-winner', { key: 'evolution1-winner', address: user.address, username: user.username, realmKey: realm.key, placement: index+1, message: `${user.username} won ${rewardWinnerMap[index].toFixed(4)} ZOD in Evolution` })
+              await app.notices.add('evolution1-winner', {
+                key: 'evolution1-winner',
+                address: user.address,
+                username: user.username,
+                realmKey: realm.key,
+                placement: index + 1,
+                message: `${user.username} won ${rewardWinnerMap[index].toFixed(4)} ZOD in Evolution`,
+              })
             }
 
             if (req.data.round.winners[0].address === player.address) {
-              if (!app.games.evolution.realms[realm.key].leaderboard.raw) app.games.evolution.realms[realm.key].leaderboard.raw = {}
-              if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins) app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0
+              if (!app.games.evolution.realms[realm.key].leaderboard.raw)
+                app.games.evolution.realms[realm.key].leaderboard.raw = {}
+              if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins)
+                app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0
 
               app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] += 1
 
@@ -983,24 +1119,24 @@ export async function connectRealm(app, realm) {
       }
 
       log('Round saved')
-      
+
       client.socket.emit('SaveRoundResponse', {
         id: req.id,
-        data: { status: 1 }
+        data: { status: 1 },
       })
     } catch (e) {
       log('Error', e)
 
       client.socket.emit('SaveRoundResponse', {
         id: req.id,
-        data: { status: 0, message: e }
+        data: { status: 0, message: e },
       })
 
       disconnectClient(client)
     }
   })
 
-  client.socket.onAny(function(eventName, res) {
+  client.socket.onAny(function (eventName, res) {
     // log('Event All', eventName, res)
     if (!res || !res.id) return
     // console.log(eventName, res)
@@ -1017,7 +1153,7 @@ export async function connectRealm(app, realm) {
 
   client.socket.connect()
 
-  client.connectTimeout = setTimeout(function() {
+  client.connectTimeout = setTimeout(function () {
     if (!client.isAuthed) {
       log(`Couldnt connect/authorize ${realm.key} on ${realm.endpoint}`)
       disconnectClient(client)
@@ -1051,12 +1187,15 @@ export async function connectRealms(app) {
 
       if (!app.games.evolution.global) {
         app.games.evolution.global = {
-          key: 'global'
+          key: 'global',
         }
       }
-  
+
       if (!app.games.evolution.global.leaderboard) {
-        app.games.evolution.global.leaderboard = jetpack.read(path.resolve(`./db/evolution/global/season${app.games.evolution.currentSeason}/leaderboard.json`), 'json') || {
+        app.games.evolution.global.leaderboard = jetpack.read(
+          path.resolve(`./db/evolution/global/season${app.games.evolution.currentSeason}/leaderboard.json`),
+          'json'
+        ) || {
           raw: {
             monetary: {},
             wins: {},
@@ -1067,7 +1206,7 @@ export async function connectRealms(app) {
             deaths: {},
             powerups: {},
             evolves: {},
-            pickups: {}
+            pickups: {},
           },
           names: {},
           [app.games.evolution.currentSeason]: {
@@ -1075,78 +1214,81 @@ export async function connectRealms(app) {
               {
                 name: 'Overall',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             monetary: [
               {
                 name: 'Earnings',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             wins: [
               {
                 name: 'Wins',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             rounds: [
               {
                 name: 'Rounds',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             rewards: [
               {
                 name: 'Rewards',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             points: [
               {
                 name: 'Points',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             kills: [
               {
                 name: 'Kills',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             deaths: [
               {
                 name: 'Deaths',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             powerups: [
               {
                 name: 'Powerups',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             evolves: [
               {
                 name: 'Evolves',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
-          }
+          },
         }
       }
 
       if (!app.games.evolution.realms[realm.key].leaderboard) {
-        app.games.evolution.realms[realm.key].leaderboard = jetpack.read(path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`), 'json') || {
+        app.games.evolution.realms[realm.key].leaderboard = jetpack.read(
+          path.resolve(`./db/evolution/${realm.key}/season${app.games.evolution.currentSeason}/leaderboard.json`),
+          'json'
+        ) || {
           raw: {
             monetary: {},
             wins: {},
@@ -1157,7 +1299,7 @@ export async function connectRealms(app) {
             deaths: {},
             powerups: {},
             evolves: {},
-            pickups: {}
+            pickups: {},
           },
           names: {},
           [app.games.evolution.currentSeason]: {
@@ -1165,73 +1307,73 @@ export async function connectRealms(app) {
               {
                 name: 'Overall',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             monetary: [
               {
                 name: 'Earnings',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             wins: [
               {
                 name: 'Wins',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             rounds: [
               {
                 name: 'Rounds',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             rewards: [
               {
                 name: 'Rewards',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             points: [
               {
                 name: 'Points',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             kills: [
               {
                 name: 'Kills',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             deaths: [
               {
                 name: 'Deaths',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             powerups: [
               {
                 name: 'Powerups',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
             evolves: [
               {
                 name: 'Evolves',
                 count: 1000,
-                data: []
-              }
+                data: [],
+              },
             ],
-          }
+          },
         }
       }
 
@@ -1244,7 +1386,7 @@ export async function connectRealms(app) {
           isConnected: false,
           socket: null,
           connectTimeout: null,
-          reqTimeout: null
+          reqTimeout: null,
         }
       }
 
@@ -1252,14 +1394,18 @@ export async function connectRealms(app) {
         realm.roundId = 1
       }
 
-      // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue 
-      if(realm.status === 'inactive' || realm.updateMode === 'manual') continue
+      // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue
+      if (realm.status === 'inactive' || realm.updateMode === 'manual') continue
 
-      if (!app.games.evolution.realms[realm.key].client.isConnected && !app.games.evolution.realms[realm.key].client.isConnecting && !app.games.evolution.realms[realm.key].client.isAuthed) {
+      if (
+        !app.games.evolution.realms[realm.key].client.isConnected &&
+        !app.games.evolution.realms[realm.key].client.isConnecting &&
+        !app.games.evolution.realms[realm.key].client.isAuthed
+      ) {
         await connectRealm(app, realm)
       }
     }
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1277,12 +1423,17 @@ export async function monitorEvolutionRealms(app) {
   if (!app.realm) {
     app.realm = {}
     app.realm.apiAddress = '0x4b64Ff29Ee3B68fF9de11eb1eFA577647f83151C'
-    app.realm.apiSignature = await getSignedRequest(app.web3, app.secrets.find(s => s.id === 'evolution-signer'), 'evolution')
+    app.realm.apiSignature = await getSignedRequest(
+      app.web3,
+      app.secrets.find((s) => s.id === 'evolution-signer'),
+      'evolution'
+    )
     app.realm.emitAll = emitAll.bind(null, app)
   }
 
   if (!app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued) {
-    app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued = app.db.evolution.config.rewardWinnerAmountPerLegitPlayer
+    app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued =
+      app.db.evolution.config.rewardWinnerAmountPerLegitPlayer
   }
 
   if (!app.db.evolution.config.rewardWinnerAmountMaxQueued) {
@@ -1291,31 +1442,31 @@ export async function monitorEvolutionRealms(app) {
 
   if (!app.db.evolution.config.itemRewards) {
     app.db.evolution.config.itemRewards = {
-      "runes": [
+      runes: [
         {
-          "type": "rune",
-          "symbol": "ith",
-          "quantity": 10000
+          type: 'rune',
+          symbol: 'ith',
+          quantity: 10000,
         },
         {
-          "type": "rune",
-          "symbol": "amn",
-          "quantity": 10000
+          type: 'rune',
+          symbol: 'amn',
+          quantity: 10000,
         },
         {
-          "type": "rune",
-          "symbol": "ort",
-          "quantity": 10000
+          type: 'rune',
+          symbol: 'ort',
+          quantity: 10000,
         },
         {
-          "type": "rune",
-          "symbol": "tal",
-          "quantity": 10000
+          type: 'rune',
+          symbol: 'tal',
+          quantity: 10000,
         },
         {
-          "type": "rune",
-          "symbol": "dol",
-          "quantity": 10000
+          type: 'rune',
+          symbol: 'dol',
+          quantity: 10000,
         },
         // {
         //   "type": "rune",
@@ -1383,7 +1534,7 @@ export async function monitorEvolutionRealms(app) {
         //   "quantity": 0
         // }
       ],
-      "items": []
+      items: [],
     }
   }
 
@@ -1397,7 +1548,7 @@ export async function monitorEvolutionRealms(app) {
   setTimeout(() => monitorEvolutionRealms(app), 30 * 1000)
 }
 
-setInterval(function() {
+setInterval(function () {
   log('Clearing character cache...')
   CharacterCache = {}
 }, 10 * 60 * 1000)

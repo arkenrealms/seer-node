@@ -1,8 +1,29 @@
 import Airtable from 'airtable'
 import jetpack from 'fs-jetpack'
 import path from 'path'
-import { log } from '@rune-backend-sdk/util'
-import { RuneNames, Games, ClassIdByName, ClassNames, SkillNames, ItemTypeIdByName, ItemTypeNames, ItemRarityNameById, RuneId, SkillIdByName, ConditionIdByName, StatIdByName, ModIdByName, TypeIdByName, ConditionNames, ConditionParamNames, EffectNames, StatNames, ModNames, TypeNames } from '@rune-backend-sdk/data/items'
+import { log } from '@runemetaverse/backend-sdk/build/util'
+import {
+  RuneNames,
+  Games,
+  ClassIdByName,
+  ClassNames,
+  SkillNames,
+  ItemTypeIdByName,
+  ItemTypeNames,
+  ItemRarityNameById,
+  RuneId,
+  SkillIdByName,
+  ConditionIdByName,
+  StatIdByName,
+  ModIdByName,
+  TypeIdByName,
+  ConditionNames,
+  ConditionParamNames,
+  EffectNames,
+  StatNames,
+  ModNames,
+  TypeNames,
+} from '@runemetaverse/backend-sdk/build/data/items'
 import Skills from '../../db/skills.json'
 
 const db = jetpack.read(path.resolve('./db/airtable.json'), 'json') || {
@@ -63,15 +84,16 @@ const db = jetpack.read(path.resolve('./db/airtable.json'), 'json') || {
   Planet: {},
 }
 
-
 function saveDb() {
-  jetpack.write(path.resolve('./db/airtable.json'), db, { atomic: true, jsonIndent: 0 })
+  jetpack.write(path.resolve('./db/airtable.json'), db, {
+    atomic: true,
+    jsonIndent: 0,
+  })
 }
 
-setInterval(function() {
+setInterval(function () {
   saveDb()
 }, 2 * 60 * 1000)
-
 
 function pad(n, width, z = '0') {
   const nn = n + ''
@@ -89,13 +111,15 @@ async function getItem(app, key) {
   const record = await app.airtable.database('Item').find(key)
 
   const recipe = (await Promise.all((record.get('recipe') || []).map((key) => getItemRecipe(app, key))))[0]
-  
+
   const item = {} as any
 
   const type = (await Promise.all((record.get('type') || []).map((key) => getItemType(app, key))))[0]
   const subType = (await Promise.all((record.get('subType') || []).map((key) => getItemSubType(app, key))))[0]
-  const specificType = (await Promise.all((record.get('specificType') || []).map((key) => getItemSpecificType(app, key))))[0]
-  
+  const specificType = (
+    await Promise.all((record.get('specificType') || []).map((key) => getItemSpecificType(app, key)))
+  )[0]
+
   item.uuid = record.id
   item.id = record.get('id')
   item.name = record.get('name')
@@ -103,8 +127,7 @@ async function getItem(app, key) {
   item.icon = record.get('image')?.[0]?.url || `/images/items/${pad(item.id, 5)}.png`
   item.image = record.get('image')?.[0]?.url
   item.imageHigh = record.get('imageHigh')?.[0]?.url
-  item.value = '0',
-  item.type = type?.id
+  ;(item.value = '0'), (item.type = type?.id)
   item.subType = subType?.id
   item.specificType = specificType?.id
   item.slots = type?.slots
@@ -137,23 +160,24 @@ async function getItem(app, key) {
   item.details = {
     Type: type?.name || '',
     Subtype: specificType?.name || '',
-    'Rune Word': recipe?.runes.map(r => r.name.replace(' Rune', '')).join(' ') || '',
+    'Rune Word': recipe?.runes.map((r) => r.name.replace(' Rune', '')).join(' ') || '',
     Distribution: record.get('distribution') || '',
     Date: record.get('date') || '',
     'Max Supply': record.get('maxSupply') || '',
   }
   item.recipe = {
-    requirement: recipe?.runes.map(r => ({
-      id: r.id - 1,
-      quantity: 1
-    })) || []
+    requirement:
+      recipe?.runes.map((r) => ({
+        id: r.id - 1,
+        quantity: 1,
+      })) || [],
   }
   item.description = (record.get('description') || '').replace(/\n$/g, '')
   item.shortDescription = (record.get('shortDescription') || '').replace(/\n$/g, '')
   item.visualDescription = (record.get('visualDescription') || '').replace(/\n$/g, '')
   item.branches = await getItemBranches(app, record)
 
-  item.skills = []// (await Promise.all((record.get('skills') || []).map(async (key) => (await app.airtable.database('Skill').find(key)).get('id'))))
+  item.skills = [] // (await Promise.all((record.get('skills') || []).map(async (key) => (await app.airtable.database('Skill').find(key)).get('id'))))
   item.materials = [] //(await Promise.all((record.get('materials') || []).map(async (key) => (await app.airtable.database('ItemMaterial').find(key)).get('id'))))
 
   if (item.isSecret || item.isUltraSecret) {
@@ -232,7 +256,7 @@ async function getItem(app, key) {
     for (const skillId of skillIds) {
       // log('Fetching skill ', skillId)
 
-      const record2 = skillCache[skillId] || await app.airtable.database('Skill').find(skillId)
+      const record2 = skillCache[skillId] || (await app.airtable.database('Skill').find(skillId))
 
       skillCache[skillId] = record2
 
@@ -248,7 +272,7 @@ async function getItem(app, key) {
     for (const materialId of materialIds) {
       // log('Fetching materials ', materialId)
 
-      const record2 = materialCache[materialId] || await app.airtable.database('ItemMaterial').find(materialId)
+      const record2 = materialCache[materialId] || (await app.airtable.database('ItemMaterial').find(materialId))
 
       materialCache[materialId] = record2
 
@@ -274,7 +298,7 @@ async function getItemType(app, key) {
     uuid: key,
     id: record.get('id'),
     name: record.get('name'),
-    slots: (await Promise.all((record.get('slots') || []).map((key) => getItemSlot(app, key)))).map(s => s.id)
+    slots: (await Promise.all((record.get('slots') || []).map((key) => getItemSlot(app, key)))).map((s) => s.id),
   }
 
   return app.airtable.cache.getItemType[key]
@@ -290,7 +314,7 @@ async function getItemSlot(app, key) {
   app.airtable.cache.getItemSlot[key] = {
     uuid: key,
     id: record.get('id'),
-    name: record.get('name')
+    name: record.get('name'),
   }
 
   return app.airtable.cache.getItemSlot[key]
@@ -306,7 +330,7 @@ async function getItemSubType(app, key) {
   app.airtable.cache.getItemSubType[key] = {
     uuid: key,
     id: record.get('id'),
-    name: record.get('name')
+    name: record.get('name'),
   }
 
   return app.airtable.cache.getItemSubType[key]
@@ -322,7 +346,7 @@ async function getItemSpecificType(app, key) {
   app.airtable.cache.getItemSpecificType[key] = {
     uuid: key,
     id: record.get('id'),
-    name: record.get('name')
+    name: record.get('name'),
   }
 
   return app.airtable.cache.getItemSpecificType[key]
@@ -376,10 +400,10 @@ async function getItemAttribute(app, key) {
         spec,
         isPercent,
         min: spec.split('-')[0],
-        max: spec.split('-')[1]
+        max: spec.split('-')[1],
       }
     }
-  
+
     if (attribute.paramTypes[1] && attribute.paramValues?.[1]) {
       const isPercent = attribute.paramValues[1].indexOf('%') !== -1
       const spec = attribute.paramValues[1].replace('%', '')
@@ -387,10 +411,10 @@ async function getItemAttribute(app, key) {
         spec,
         isPercent,
         min: spec.split('-')[0],
-        max: spec.split('-')[1]
+        max: spec.split('-')[1],
       }
     }
-  
+
     if (attribute.paramTypes[2] && attribute.paramValues?.[2]) {
       const isPercent = attribute.paramValues[2].indexOf('%') !== -1
       const spec = attribute.paramValues[2].replace('%', '')
@@ -398,7 +422,7 @@ async function getItemAttribute(app, key) {
         spec,
         isPercent,
         min: spec.split('-')[0],
-        max: spec.split('-')[1]
+        max: spec.split('-')[1],
       }
     }
   }
@@ -423,14 +447,14 @@ async function getItemRecipe(app, key) {
     (await Promise.all((record.get('rune3') || []).map((key) => getRune(app, key))))[0],
     (await Promise.all((record.get('rune4') || []).map((key) => getRune(app, key))))[0],
     (await Promise.all((record.get('rune5') || []).map((key) => getRune(app, key))))[0],
-  ].filter(r => !!r)
+  ].filter((r) => !!r)
 
   recipe.uuid = record.id
   recipe.id = record.get('id')
   recipe.name = record.get('name')
-  recipe.runes = runes.map(r => ({
+  recipe.runes = runes.map((r) => ({
     id: r.id,
-    quantity: 1
+    quantity: 1,
   }))
   recipe.description = record.get('description') || ''
   recipe.runes = runes
@@ -451,7 +475,7 @@ async function getRune(app, key) {
     uuid: res.id,
     id: res.get('id'),
     name: res.get('name'),
-    symbol: res.get('symbol')
+    symbol: res.get('symbol'),
   }
 
   return app.airtable.cache.getRune[key]
@@ -463,41 +487,43 @@ async function getItems(app) {
   try {
     const items = []
 
-    await app.airtable.database('Item').select({
-      maxRecords: 1000,
-      view: "All Data"
-    }).eachPage(async function page(records, fetchNextPage) {
-      // log('Fetched items', records)
+    await app.airtable
+      .database('Item')
+      .select({
+        maxRecords: 1000,
+        view: 'All Data',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        // log('Fetched items', records)
 
-      for (const record of records) {
-        try {
-          if (!record.get('name') || !record.get('isEnabled')) continue // if (!record.get('isPublished')) continue
-          
-          const item = await getItem(app, record.id)
+        for (const record of records) {
+          try {
+            if (!record.get('name') || !record.get('isEnabled')) continue // if (!record.get('isPublished')) continue
 
-          console.log(item)
+            const item = await getItem(app, record.id)
 
-          items.push(item)
+            console.log(item)
 
-          db.Item[record.id] = item
-          // if (item.id > 50) break // temp
-        } catch(e) {
-          console.log('Error', e)
+            items.push(item)
+
+            db.Item[record.id] = item
+            // if (item.id > 50) break // temp
+          } catch (e) {
+            console.log('Error', e)
+          }
         }
-      }
 
-      // To fetch the next page of records, call `fetchNextPage`.
-      // If there are more records, `page` will get called again.
-      // If there are no more records, `done` will get called.
-      fetchNextPage()
-    })
+        // To fetch the next page of records, call `fetchNextPage`.
+        // If there are more records, `page` will get called again.
+        // If there are no more records, `done` will get called.
+        fetchNextPage()
+      })
 
     app.db.saveItems(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
-
 
 async function getSkills(app) {
   log('Fetching airtable data: Skill')
@@ -507,58 +533,65 @@ async function getSkills(app) {
   try {
     const skills = []
 
-    app.airtable.database('Skill').select({
-      maxRecords: 200,
-      view: "Published Only"
-    }).eachPage(async function page(records, fetchNextPage) {
-      // log('Fetched skills', records)
-      
-      for (const record of records) {
-        // if (!record.get('isPublished')) continue
+    app.airtable
+      .database('Skill')
+      .select({
+        maxRecords: 200,
+        view: 'Published Only',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        // log('Fetched skills', records)
 
-        const skill = {} as any
+        for (const record of records) {
+          // if (!record.get('isPublished')) continue
 
-        skill.uuid = record.id
-        skill.name = record.get('name')
-        skill.id = record.get('id')
-        skill.description = record.get('description') || ''
-        skill.shortDescription = record.get('shortDescription') || ''
-        skill.games = (await Promise.all((record.get('games') || []).map((key) => db.Game[key] || app.airtable.database('Game').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        skill.type = record.get('type')
-        skill.icon = record.get('icon')?.[0]?.url
-        skill.items = []
+          const skill = {} as any
 
-        const itemIds = record.get('items')
+          skill.uuid = record.id
+          skill.name = record.get('name')
+          skill.id = record.get('id')
+          skill.description = record.get('description') || ''
+          skill.shortDescription = record.get('shortDescription') || ''
+          skill.games = (
+            await Promise.all(
+              (record.get('games') || []).map((key) => db.Game[key] || app.airtable.database('Game').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          skill.type = record.get('type')
+          skill.icon = record.get('icon')?.[0]?.url
+          skill.items = []
 
-        if (itemIds) {
-          for (const itemId of itemIds) {
-            // log('Fetching item ', itemId)
-  
-            const record2 = itemCache[itemId] || await app.airtable.database('Item').find(itemId)
+          const itemIds = record.get('items')
 
-            itemCache[itemId] = record2
-  
-            if (!record2) continue
-  
-            const item = {} as any
-  
-            skill.items.push(record2.get('id'))
+          if (itemIds) {
+            for (const itemId of itemIds) {
+              // log('Fetching item ', itemId)
+
+              const record2 = itemCache[itemId] || (await app.airtable.database('Item').find(itemId))
+
+              itemCache[itemId] = record2
+
+              if (!record2) continue
+
+              const item = {} as any
+
+              skill.items.push(record2.get('id'))
+            }
           }
+
+          skills.push(skill)
+
+          db.Skill[record.id] = skill
         }
 
-        skills.push(skill)
-
-        db.Skill[record.id] = skill
-      }
-
-      app.db.saveSkills(skills)
-    })
+        app.db.saveSkills(skills)
+      })
 
     // To fetch the next page of records, call `fetchNextPage`.
     // If there are more records, `page` will get called again.
     // If there are no more records, `done` will get called.
     // fetchNextPage()
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -574,7 +607,7 @@ function processItemAttributes(record, specs) {
       continue
     }
 
-    const attribute = {...spec.attr}
+    const attribute = { ...spec.attr }
 
     const mapParamToId = {
       tokenId: (key) => RuneId[key],
@@ -608,7 +641,7 @@ function processItemAttributes(record, specs) {
       3: RuneNames,
       21: ClassNames,
       39: SkillNames,
-      40: ItemRarityNameById
+      40: ItemRarityNameById,
     }
 
     if (spec.params[0]) {
@@ -624,25 +657,33 @@ function processItemAttributes(record, specs) {
       if (param.spec.indexOf('-') > 0) {
         const rawLeft = param.spec.split('-')[0]
         const rawRight = param.spec.split('-')[1]
-  
-        param.min = attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](rawLeft) : parseFloat(rawLeft)
-        param.max = attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](rawRight) : parseFloat(rawRight)
+
+        param.min =
+          attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](rawLeft) : parseFloat(rawLeft)
+        param.max =
+          attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](rawRight) : parseFloat(rawRight)
       } else {
-        param.min = attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](param.spec) : parseFloat(param.spec)
+        param.min =
+          attribute.paramType1 in mapParamToId ? mapParamToId[attribute.paramType1](param.spec) : parseFloat(param.spec)
         param.max = param.min
       }
 
-      const attr1min = attribute.paramValue1?.indexOf('-') > 0 ? parseFloat(attribute.paramValue1.split('-')[0]) : parseFloat(attribute.paramValue1)
-      const attr1max = attribute.paramValue1?.indexOf('-') > 0 ? parseFloat(attribute.paramValue1.split('-')[1]) : parseFloat(attribute.paramValue1)
-  
+      const attr1min =
+        attribute.paramValue1?.indexOf('-') > 0
+          ? parseFloat(attribute.paramValue1.split('-')[0])
+          : parseFloat(attribute.paramValue1)
+      const attr1max =
+        attribute.paramValue1?.indexOf('-') > 0
+          ? parseFloat(attribute.paramValue1.split('-')[1])
+          : parseFloat(attribute.paramValue1)
+
       if (param.min < attr1min)
         throw new Error(`Attribute ${spec.attr.name} min smaller than ${attr1min}: ` + JSON.stringify(param))
 
       if (param.max > attr1max)
         throw new Error(`Attribute ${spec.attr.name} max bigger than ${attr1max}: ` + JSON.stringify(param))
 
-      if (param.min === param.max)
-        param.value = param.min
+      if (param.min === param.max) param.value = param.min
 
       attribute.param1 = param
 
@@ -680,31 +721,39 @@ function processItemAttributes(record, specs) {
       if (param.spec.indexOf('-') > 0) {
         const rawLeft = param.spec.split('-')[0]
         const rawRight = param.spec.split('-')[1]
-  
-        param.min = attribute.paramType2 in mapParamToId ? mapParamToId[attribute.paramType2](rawLeft) : parseFloat(rawLeft)
-        param.max = attribute.paramType2 in mapParamToId ? mapParamToId[attribute.paramType2](rawRight) : parseFloat(rawRight)
+
+        param.min =
+          attribute.paramType2 in mapParamToId ? mapParamToId[attribute.paramType2](rawLeft) : parseFloat(rawLeft)
+        param.max =
+          attribute.paramType2 in mapParamToId ? mapParamToId[attribute.paramType2](rawRight) : parseFloat(rawRight)
       } else {
-        param.min = attribute.paramType2 in mapParamToId ? mapParamToId[attribute.paramType2](param.spec) : parseFloat(param.spec)
+        param.min =
+          attribute.paramType2 in mapParamToId ? mapParamToId[attribute.paramType2](param.spec) : parseFloat(param.spec)
         param.max = param.min
       }
 
-      const attr2min = attribute.paramValue2?.indexOf('-') > 0 ? parseFloat(attribute.paramValue2.split('-')[0]) : parseFloat(attribute.paramValue2)
-      const attr2max = attribute.paramValue2?.indexOf('-') > 0 ? parseFloat(attribute.paramValue2.split('-')[1]) : parseFloat(attribute.paramValue2)
-  
+      const attr2min =
+        attribute.paramValue2?.indexOf('-') > 0
+          ? parseFloat(attribute.paramValue2.split('-')[0])
+          : parseFloat(attribute.paramValue2)
+      const attr2max =
+        attribute.paramValue2?.indexOf('-') > 0
+          ? parseFloat(attribute.paramValue2.split('-')[1])
+          : parseFloat(attribute.paramValue2)
+
       if (param.min < attr2min)
         throw new Error(`Attribute ${spec.attr.name} min smaller than ${attr2min}: ` + JSON.stringify(param))
 
       if (param.max > attr2max)
         throw new Error(`Attribute ${spec.attr.name} max bigger than ${attr2max}: ` + JSON.stringify(param))
 
-      if (param.min === param.max)
-        param.value = param.min
+      if (param.min === param.max) param.value = param.min
 
       attribute.param2 = param
 
       if (attribute.paramType2 in mapParamIdToReadable) {
         attribute.param2.map = {}
-  
+
         for (let i = attribute.param2.min; i <= attribute.param2.max; i++) {
           if (!mapParamIdToReadable[attribute.paramType2]) {
             console.log(`Param type not found: ` + attribute.paramType2)
@@ -723,31 +772,39 @@ function processItemAttributes(record, specs) {
       if (param.spec.indexOf('-') > 0) {
         const rawLeft = param.spec.split('-')[0]
         const rawRight = param.spec.split('-')[1]
-  
-        param.min = attribute.paramType3 in mapParamToId ? mapParamToId[attribute.paramType3](rawLeft) : parseFloat(rawLeft)
-        param.max = attribute.paramType3 in mapParamToId ? mapParamToId[attribute.paramType3](rawRight) : parseFloat(rawRight)
+
+        param.min =
+          attribute.paramType3 in mapParamToId ? mapParamToId[attribute.paramType3](rawLeft) : parseFloat(rawLeft)
+        param.max =
+          attribute.paramType3 in mapParamToId ? mapParamToId[attribute.paramType3](rawRight) : parseFloat(rawRight)
       } else {
-        param.min = attribute.paramType3 in mapParamToId ? mapParamToId[attribute.paramType3](param.spec) : parseFloat(param.spec)
+        param.min =
+          attribute.paramType3 in mapParamToId ? mapParamToId[attribute.paramType3](param.spec) : parseFloat(param.spec)
         param.max = param.min
       }
 
-      const attr3min = attribute.paramValue3?.indexOf('-') > 0 ? parseFloat(attribute.paramValue3.split('-')[0]) : parseFloat(attribute.paramValue3)
-      const attr3max = attribute.paramValue3?.indexOf('-') > 0 ? parseFloat(attribute.paramValue3.split('-')[1]) : parseFloat(attribute.paramValue3)
-  
+      const attr3min =
+        attribute.paramValue3?.indexOf('-') > 0
+          ? parseFloat(attribute.paramValue3.split('-')[0])
+          : parseFloat(attribute.paramValue3)
+      const attr3max =
+        attribute.paramValue3?.indexOf('-') > 0
+          ? parseFloat(attribute.paramValue3.split('-')[1])
+          : parseFloat(attribute.paramValue3)
+
       if (param.min < attr3min)
         throw new Error(`Attribute ${spec.attr.name} min smaller than ${attr3min}: ` + JSON.stringify(param))
 
       if (param.max > attr3max)
         throw new Error(`Attribute ${spec.attr.name} max bigger than ${attr3max}: ` + JSON.stringify(param))
 
-      if (param.min === param.max)
-        param.value = param.min
+      if (param.min === param.max) param.value = param.min
 
       attribute.param3 = param
 
       if (attribute.paramType3 in mapParamIdToReadable) {
         attribute.param3.map = {}
-  
+
         for (let i = attribute.param3.min; i <= attribute.param3.max; i++) {
           if (!mapParamIdToReadable[attribute.paramType3]) {
             console.log(`Param type not found: ` + attribute.paramType3)
@@ -762,12 +819,20 @@ function processItemAttributes(record, specs) {
     const isDebuff = !!attribute.nature?.includes('Debuff')
 
     attributes.push(attribute)
-    perfection.push(attribute.param1?.min === attribute.param1?.max ? undefined : (isBuff && !record.get('isRandomRunePerfectionOmit') ? attribute.param1?.max : (isDebuff ? attribute.param1?.min : undefined)))
+    perfection.push(
+      attribute.param1?.min === attribute.param1?.max
+        ? undefined
+        : isBuff && !record.get('isRandomRunePerfectionOmit')
+        ? attribute.param1?.max
+        : isDebuff
+        ? attribute.param1?.min
+        : undefined
+    )
   }
 
   return {
     attributes,
-    perfection
+    perfection,
   }
 }
 
@@ -796,44 +861,140 @@ async function getItemBranches(app, record) {
   }
 
   branches[Games.Raid.id] = processItemAttributes(record, [
-    { attr: (await Promise.all((record.get('a1Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a1RaidParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a2Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a2RaidParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a3Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a3RaidParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a4Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a4RaidParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a5Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a5RaidParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a6Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a6RaidParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a7Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a7RaidParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a8Raid') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a8RaidParams') || []).map((key) => getItemParam(app, key)))},
+    {
+      attr: (await Promise.all((record.get('a1Raid') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a1RaidParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a2Raid') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a2RaidParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a3Raid') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a3RaidParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a4Raid') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a4RaidParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a5Raid') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a5RaidParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a6Raid') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a6RaidParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a7Raid') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a7RaidParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a8Raid') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a8RaidParams') || []).map((key) => getItemParam(app, key))),
+    },
   ])
 
   branches[Games.Evolution.id] = processItemAttributes(record, [
-    { attr: (await Promise.all((record.get('a1Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a1EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a2Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a2EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a3Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a3EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a4Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a4EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a5Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a5EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a6Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a6EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a7Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a7EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a8Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a8EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a9Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a9EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a10Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a10EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a11Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a11EvolutionParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a12Evolution') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a12EvolutionParams') || []).map((key) => getItemParam(app, key)))},
+    {
+      attr: (await Promise.all((record.get('a1Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a1EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a2Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a2EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a3Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a3EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a4Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a4EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a5Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a5EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a6Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a6EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a7Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a7EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a8Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a8EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a9Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a9EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a10Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a10EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a11Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a11EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a12Evolution') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a12EvolutionParams') || []).map((key) => getItemParam(app, key))),
+    },
   ])
 
   branches[Games.Infinite.id] = processItemAttributes(record, [
-    { attr: (await Promise.all((record.get('a1Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a1InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a2Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a2InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a3Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a3InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a4Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a4InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a5Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a5InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a6Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a6InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a7Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a7InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a8Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a8InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a9Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a9InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a10Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a10InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a11Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a11InfiniteParams') || []).map((key) => getItemParam(app, key)))},
-    { attr: (await Promise.all((record.get('a12Infinite') || []).map((key) => getItemAttribute(app, key))))[0], params: await Promise.all((record.get('a12InfiniteParams') || []).map((key) => getItemParam(app, key)))},
+    {
+      attr: (await Promise.all((record.get('a1Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a1InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a2Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a2InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a3Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a3InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a4Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a4InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a5Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a5InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a6Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a6InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a7Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a7InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a8Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a8InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a9Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a9InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a10Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a10InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a11Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a11InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
+    {
+      attr: (await Promise.all((record.get('a12Infinite') || []).map((key) => getItemAttribute(app, key))))[0],
+      params: await Promise.all((record.get('a12InfiniteParams') || []).map((key) => getItemParam(app, key))),
+    },
   ])
 
   return branches
@@ -850,20 +1011,23 @@ async function getItemRecipes(app) {
   try {
     const recipes = []
 
-    await app.airtable.database('ItemRecipe').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      log('Fetched recipes', records)
+    await app.airtable
+      .database('ItemRecipe')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        log('Fetched recipes', records)
 
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
-        // if (!record.get('isPublished')) continue
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
+          // if (!record.get('isPublished')) continue
 
-        const recipe = await getItemRecipe(app, record.id)
-  
+          const recipe = await getItemRecipe(app, record.id)
+
           // recipe.item = (await Promise.all((record.get('item') || []).map((key) => getItem(app, key))))[0]
-  
+
           // {
           //   id: 43,
           //   name: 'Thunderchild',
@@ -947,25 +1111,24 @@ async function getItemRecipes(app) {
           //   },
           // }
 
-        recipes.push(recipe)
+          recipes.push(recipe)
 
-        db.ItemRecipe[record.id] = recipe
+          db.ItemRecipe[record.id] = recipe
 
-        log('Fetched recipe', recipe)
-      }
+          log('Fetched recipe', recipe)
+        }
 
-      app.db.saveItemRecipes(recipes)
+        app.db.saveItemRecipes(recipes)
 
-      // To fetch the next page of records, call `fetchNextPage`.
-      // If there are more records, `page` will get called again.
-      // If there are no more records, `done` will get called.
-      fetchNextPage()
-    })
-  } catch(e) {
+        // To fetch the next page of records, call `fetchNextPage`.
+        // If there are more records, `page` will get called again.
+        // If there are no more records, `done` will get called.
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
-
 
 async function getItemAttributes(app) {
   log('Fetching airtable data: ItemAttribute')
@@ -973,32 +1136,35 @@ async function getItemAttributes(app) {
   try {
     const attributes = []
 
-    await app.airtable.database('ItemAttribute').select({
-      maxRecords: 20000,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      log('Fetched attributes', records)
+    await app.airtable
+      .database('ItemAttribute')
+      .select({
+        maxRecords: 20000,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        log('Fetched attributes', records)
 
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const attribute = await getItemAttribute(app, record.id)
+          const attribute = await getItemAttribute(app, record.id)
 
-        attributes.push(attribute)
+          attributes.push(attribute)
 
-        db.ItemAttribute[record.id] = attribute
+          db.ItemAttribute[record.id] = attribute
 
-        log('Fetched attribute', attribute)
-      }
+          log('Fetched attribute', attribute)
+        }
 
-      // To fetch the next page of records, call `fetchNextPage`.
-      // If there are more records, `page` will get called again.
-      // If there are no more records, `done` will get called.
-      fetchNextPage()
-    })
+        // To fetch the next page of records, call `fetchNextPage`.
+        // If there are more records, `page` will get called again.
+        // If there are no more records, `done` will get called.
+        fetchNextPage()
+      })
 
     app.db.saveItemAttributes(attributes)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1020,7 +1186,11 @@ async function getSolarSystem(app, key) {
     shortDescription: record.get('shortDescription') || '',
     description: record.get('description') || '',
     image: record.get('image')?.[0]?.url,
-    planets: (await Promise.all((record.get('planets') || []).map((key) => db.AreaType[key] || app.airtable.database('AreaType').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    planets: (
+      await Promise.all(
+        (record.get('planets') || []).map((key) => db.AreaType[key] || app.airtable.database('AreaType').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getSolarSystem[key]
@@ -1032,31 +1202,30 @@ async function getSolarSystems(app) {
   try {
     const items = []
 
-    await app.airtable.database('SolarSystem').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('SolarSystem')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getSolarSystem(app, record.id)
+          const item = await getSolarSystem(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.SolarSystem[record.id] = item
+          db.SolarSystem[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveSolarSystems(items)
+        app.db.saveSolarSystems(items)
 
-      fetchNextPage()
-    })
-    
-    
-    
-    
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1074,7 +1243,9 @@ async function getPlanet(app, key) {
     name: record.get('name'),
     isEnabled: !!record.get('isEnabled'),
     link: record.get('link'),
-    planet: record.get('planet') ? (await app.airtable.database('Planet').find(record.get('planet'))).get('id') : undefined,
+    planet: record.get('planet')
+      ? (await app.airtable.database('Planet').find(record.get('planet'))).get('id')
+      : undefined,
     shortDescription: record.get('shortDescription') || '',
     description: record.get('description') || '',
     image: record.get('image')?.[0]?.url,
@@ -1089,35 +1260,33 @@ async function getPlanets(app) {
   try {
     const items = []
 
-    await app.airtable.database('Planet').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('Planet')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getPlanet(app, record.id)
+          const item = await getPlanet(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.Planet[record.id] = item
+          db.Planet[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.savePlanets(items)
+        app.db.savePlanets(items)
 
-      fetchNextPage()
-    })
-    
-    
-    
-    
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
-
 
 async function getBiome(app, key) {
   if (!app.airtable.cache.getBiome) app.airtable.cache.getBiome = {}
@@ -1134,8 +1303,18 @@ async function getBiome(app, key) {
     shortDescription: record.get('shortDescription') || '',
     description: record.get('description') || '',
     image: record.get('image')?.[0]?.url,
-    features: (await Promise.all((record.get('features') || []).map((key) => db.BiomeFeature[key] || app.airtable.database('BiomeFeature').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    areas: (await Promise.all((record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    features: (
+      await Promise.all(
+        (record.get('features') || []).map(
+          (key) => db.BiomeFeature[key] || app.airtable.database('BiomeFeature').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    areas: (
+      await Promise.all(
+        (record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getBiome[key]
@@ -1147,35 +1326,33 @@ async function getBiomes(app) {
   try {
     const items = []
 
-    await app.airtable.database('Biome').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('Biome')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = await getBiome(app, record.id)
+          const item = await getBiome(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.Biome[record.id] = item
+          db.Biome[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveBiomes(items)
+        app.db.saveBiomes(items)
 
-      fetchNextPage()
-    })
-    
-    
-    
-    
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
-
 
 async function getBiomeFeature(app, key) {
   if (!app.airtable.cache.getBiomeFeature) app.airtable.cache.getBiomeFeature = {}
@@ -1188,8 +1365,12 @@ async function getBiomeFeature(app, key) {
     uuid: key,
     id: record.get('id'),
     name: record.get('name'),
-    images: record.get('image')?.map(i => i.url) || [],
-    biomes: (await Promise.all((record.get('biomes') || []).map((key) => db.Biome[key] || app.airtable.database('Biome').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    images: record.get('image')?.map((i) => i.url) || [],
+    biomes: (
+      await Promise.all(
+        (record.get('biomes') || []).map((key) => db.Biome[key] || app.airtable.database('Biome').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getBiomeFeature[key]
@@ -1201,31 +1382,30 @@ async function getBiomeFeatures(app) {
   try {
     const items = []
 
-    await app.airtable.database('BiomeFeature').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('BiomeFeature')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = await getBiomeFeature(app, record.id)
+          const item = await getBiomeFeature(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.BiomeFeature[record.id] = item
+          db.BiomeFeature[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveBiomeFeatures(items)
+        app.db.saveBiomeFeatures(items)
 
-      fetchNextPage()
-    })
-    
-    
-    
-    
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1252,15 +1432,57 @@ async function getArea(app, key) {
     lore2: record.get('lore2'),
     lore3: record.get('lore3'),
     lore4: record.get('lore4'),
-    types: (await Promise.all((record.get('types') || []).map((key) => db.AreaType[key] || app.airtable.database('AreaType').find(key)))).map(item => item.get ? item.get('id') : item?.id),
-    npcs: (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item?.id),
-    guilds: (await Promise.all((record.get('guilds') || []).map((key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)))).map(item => item.get ? item.get('id') : item?.id),
-    factions: (await Promise.all((record.get('factions') || []).map((key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)))).map(item => item.get ? item.get('id') : item?.id),
-    characters: (await Promise.all((record.get('characters') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key)))).map(item => item.get ? item.get('id') : item?.id),
-    characterTypes: (await Promise.all((record.get('characterTypes') || []).map((key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)))).map(item => item.get ? item.get('id') : item?.id),
-    timeGates: (await Promise.all((record.get('timeGates') || []).map((key) => db.TimeGate[key] || app.airtable.database('TimeGate').find(key)))).map(item => item.get ? item.get('id') : item?.id),
-    itemMaterials: (await Promise.all((record.get('itemMaterials') || []).map((key) => db.ItemMaterial[key] || app.airtable.database('ItemMaterial').find(key)))).map(item => item.get ? item.get('id') : item?.id),
-    biomes: (await Promise.all((record.get('biomes') || []).map((key) => db.Biome[key] || app.airtable.database('Biome').find(key)))).map(item => item.get ? item.get('id') : item?.id),
+    types: (
+      await Promise.all(
+        (record.get('types') || []).map((key) => db.AreaType[key] || app.airtable.database('AreaType').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
+    npcs: (
+      await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
+    guilds: (
+      await Promise.all(
+        (record.get('guilds') || []).map(
+          (key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
+    factions: (
+      await Promise.all(
+        (record.get('factions') || []).map(
+          (key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
+    characters: (
+      await Promise.all(
+        (record.get('characters') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
+    characterTypes: (
+      await Promise.all(
+        (record.get('characterTypes') || []).map(
+          (key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
+    timeGates: (
+      await Promise.all(
+        (record.get('timeGates') || []).map((key) => db.TimeGate[key] || app.airtable.database('TimeGate').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
+    itemMaterials: (
+      await Promise.all(
+        (record.get('itemMaterials') || []).map(
+          (key) => db.ItemMaterial[key] || app.airtable.database('ItemMaterial').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
+    biomes: (
+      await Promise.all(
+        (record.get('biomes') || []).map((key) => db.Biome[key] || app.airtable.database('Biome').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
   }
 
   return app.airtable.cache.getArea[key]
@@ -1272,31 +1494,30 @@ async function getAreas(app) {
   try {
     const items = []
 
-    await app.airtable.database('Area').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('Area')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getArea(app, record.id)
+          const item = await getArea(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.Area[record.id] = item
+          db.Area[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveAreas(items)
+        app.db.saveAreas(items)
 
-      fetchNextPage()
-    })
-    
-    
-    
-    
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1323,31 +1544,30 @@ async function getAreaTypes(app) {
   try {
     const items = []
 
-    await app.airtable.database('AreaType').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('AreaType')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = await getAreaType(app, record.id)
+          const item = await getAreaType(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.AreaType[record.id] = item
+          db.AreaType[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveAreaTypes(items)
+        app.db.saveAreaTypes(items)
 
-      fetchNextPage()
-    })
-    
-    
-    
-    
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1366,7 +1586,13 @@ async function getAreaNameChoice(app, key) {
     isFirst: record.get('isFirst'),
     isLast: record.get('isLast'),
     weight: record.get('weight'),
-    characterTypes:  (await Promise.all((record.get('characterTypes') || []).map((key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    characterTypes: (
+      await Promise.all(
+        (record.get('characterTypes') || []).map(
+          (key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getAreaNameChoice[key]
@@ -1378,27 +1604,30 @@ async function getAreaNameChoices(app) {
   try {
     const items = []
 
-    await app.airtable.database('AreaNameChoice').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('AreaNameChoice')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = await getAreaNameChoice(app, record.id)
+          const item = await getAreaNameChoice(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.AreaNameChoice[record.id] = item
+          db.AreaNameChoice[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveAreaNameChoices(items)
+        app.db.saveAreaNameChoices(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1423,13 +1652,45 @@ async function getCharacterFaction(app, key) {
     lore2: record.get('lore2'),
     lore3: record.get('lore3'),
     lore4: record.get('lore4'),
-    npcs: (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    areas: (await Promise.all((record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    activeFactionConflict: (await Promise.all((record.get('activeFactionConflict') || []).map((key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    passiveFactionConflict: (await Promise.all((record.get('passiveFactionConflict') || []).map((key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    activeGuildConflict: (await Promise.all((record.get('activeGuildConflict') || []).map((key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    areaConflict: (await Promise.all((record.get('areaConflict') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    characters: (await Promise.all((record.get('characters') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    npcs: (
+      await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    areas: (
+      await Promise.all(
+        (record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    activeFactionConflict: (
+      await Promise.all(
+        (record.get('activeFactionConflict') || []).map(
+          (key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    passiveFactionConflict: (
+      await Promise.all(
+        (record.get('passiveFactionConflict') || []).map(
+          (key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    activeGuildConflict: (
+      await Promise.all(
+        (record.get('activeGuildConflict') || []).map(
+          (key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    areaConflict: (
+      await Promise.all(
+        (record.get('areaConflict') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    characters: (
+      await Promise.all(
+        (record.get('characters') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getCharacterFaction[key]
@@ -1441,37 +1702,39 @@ async function getCharacterFactions(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterFaction').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('CharacterFaction')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getCharacterFaction(app, record.id)
+          const item = await getCharacterFaction(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.CharacterFaction[record.id] = item
+          db.CharacterFaction[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveCharacterFactions(items)
+        app.db.saveCharacterFactions(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
-
 
 async function getCharacterGuild(app, key) {
   if (!app.airtable.cache.getCharacterGuild) app.airtable.cache.getCharacterGuild = {}
 
   if (app.airtable.cache.getCharacterGuild[key]) return app.airtable.cache.getCharacterGuild[key]
-console.log(key)
+  console.log(key)
   const record = await app.airtable.database('CharacterGuild').find(key)
 
   app.airtable.cache.getCharacterGuild[key] = {
@@ -1488,13 +1751,49 @@ console.log(key)
     lore3: record.get('lore3'),
     lore4: record.get('lore4'),
     types: record.get('types'),
-    classRequired: (await Promise.all((record.get('classRequired') || []).map((key) => db.CharacterClass[key] || app.airtable.database('CharacterClass').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    npcs: (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    passiveFactionConflict: (await Promise.all((record.get('passiveFactionConflict') || []).map((key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    activeFactionConflict: (await Promise.all((record.get('activeFactionConflict') || []).map((key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    passiveGuildConflict: (await Promise.all((record.get('passiveGuildConflict') || []).map((key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    activeGuildConflict: (await Promise.all((record.get('activeGuildConflict') || []).map((key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    areas: (await Promise.all((record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    classRequired: (
+      await Promise.all(
+        (record.get('classRequired') || []).map(
+          (key) => db.CharacterClass[key] || app.airtable.database('CharacterClass').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    npcs: (
+      await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    passiveFactionConflict: (
+      await Promise.all(
+        (record.get('passiveFactionConflict') || []).map(
+          (key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    activeFactionConflict: (
+      await Promise.all(
+        (record.get('activeFactionConflict') || []).map(
+          (key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    passiveGuildConflict: (
+      await Promise.all(
+        (record.get('passiveGuildConflict') || []).map(
+          (key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    activeGuildConflict: (
+      await Promise.all(
+        (record.get('activeGuildConflict') || []).map(
+          (key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    areas: (
+      await Promise.all(
+        (record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getCharacterGuild[key]
@@ -1506,27 +1805,30 @@ async function getCharacterGuilds(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterGuild').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('CharacterGuild')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getCharacterGuild(app, record.id)
+          const item = await getCharacterGuild(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.CharacterGuild[record.id] = item
+          db.CharacterGuild[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveCharacterGuilds(items)
+        app.db.saveCharacterGuilds(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1543,10 +1845,26 @@ async function getCharacterType(app, key) {
     id: record.get('id'),
     name: record.get('name'),
     isEnabled: !!record.get('isEnabled'),
-    npcs: (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    races: (await Promise.all((record.get('characterRaces') || []).map((key) => db.CharacterRace[key] || app.airtable.database('CharacterRace').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    areas: (await Promise.all((record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    characters: (await Promise.all((record.get('characters') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    npcs: (
+      await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    races: (
+      await Promise.all(
+        (record.get('characterRaces') || []).map(
+          (key) => db.CharacterRace[key] || app.airtable.database('CharacterRace').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    areas: (
+      await Promise.all(
+        (record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    characters: (
+      await Promise.all(
+        (record.get('characters') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getCharacterType[key]
@@ -1558,31 +1876,33 @@ async function getCharacterTypes(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterType').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('CharacterType')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getCharacterType(app, record.id)
+          const item = await getCharacterType(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.CharacterType[record.id] = item
+          db.CharacterType[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveCharacterTypes(items)
+        app.db.saveCharacterTypes(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
-
 
 async function getNpc(app, key) {
   if (!app.airtable.cache.getNpc) app.airtable.cache.getNpc = {}
@@ -1607,12 +1927,30 @@ async function getNpc(app, key) {
     lore3: record.get('lore3'),
     lore4: record.get('lore4'),
     quote1: record.get('quote1'),
-    character: record.get('character') ? (await app.airtable.database('Character').find(record.get('character'))).get('id') : undefined,
-    characterRace: record.get('characterRace') ? (await app.airtable.database('CharacterRace').find(record.get('characterRace'))).get('id') : undefined,
-    characterClass: record.get('characterClass') ? (await app.airtable.database('CharacterClass').find(record.get('characterClass'))).get('id') : undefined,
-    characterGuild: record.get('characterGuild') ? (await app.airtable.database('CharacterGuild').find(record.get('characterGuild'))).get('id') : undefined,
-    characterTypes: (await Promise.all((record.get('characterTypes') || []).map((key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)))).map(item => item.get ? item.get('id') : item.id),
-    energies: (await Promise.all((record.get('energies') || []).map((key) => db.Energy[key] || app.airtable.database('Energy').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    character: record.get('character')
+      ? (await app.airtable.database('Character').find(record.get('character'))).get('id')
+      : undefined,
+    characterRace: record.get('characterRace')
+      ? (await app.airtable.database('CharacterRace').find(record.get('characterRace'))).get('id')
+      : undefined,
+    characterClass: record.get('characterClass')
+      ? (await app.airtable.database('CharacterClass').find(record.get('characterClass'))).get('id')
+      : undefined,
+    characterGuild: record.get('characterGuild')
+      ? (await app.airtable.database('CharacterGuild').find(record.get('characterGuild'))).get('id')
+      : undefined,
+    characterTypes: (
+      await Promise.all(
+        (record.get('characterTypes') || []).map(
+          (key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
+    energies: (
+      await Promise.all(
+        (record.get('energies') || []).map((key) => db.Energy[key] || app.airtable.database('Energy').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getNpc[key]
@@ -1624,27 +1962,30 @@ async function getNpcs(app) {
   try {
     const items = []
 
-    await app.airtable.database('NPC').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('NPC')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getNpc(app, record.id)
+          const item = await getNpc(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.NPC[record.id] = item
+          db.NPC[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveNpcs(items)
+        app.db.saveNpcs(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1670,7 +2011,11 @@ async function getAct(app, key) {
     lore2: record.get('lore2'),
     lore3: record.get('lore3'),
     lore4: record.get('lore4'),
-    townNpcs: (await Promise.all((record.get('townNpcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item?.id),
+    townNpcs: (
+      await Promise.all(
+        (record.get('townNpcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key))
+      )
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
   }
 
   return app.airtable.cache.getAct[key]
@@ -1682,27 +2027,30 @@ async function getActs(app) {
   try {
     const items = []
 
-    await app.airtable.database('Act').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('Act')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getAct(app, record.id)
+          const item = await getAct(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.Act[record.id] = item
+          db.Act[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveActs(items)
+        app.db.saveActs(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1739,27 +2087,30 @@ async function getEras(app) {
   try {
     const items = []
 
-    await app.airtable.database('Era').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('Era')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getEra(app, record.id)
+          const item = await getEra(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.Era[record.id] = item
+          db.Era[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveEras(items)
+        app.db.saveEras(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1796,27 +2147,30 @@ async function getTimeGates(app) {
   try {
     const items = []
 
-    await app.airtable.database('TimeGate').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('TimeGate')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getTimeGate(app, record.id)
+          const item = await getTimeGate(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.TimeGate[record.id] = item
+          db.TimeGate[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveTimeGates(items)
+        app.db.saveTimeGates(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1852,27 +2206,30 @@ async function getAchievements(app) {
   try {
     const items = []
 
-    await app.airtable.database('Achievement').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('Achievement')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getAchievement(app, record.id)
+          const item = await getAchievement(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.Achievement[record.id] = item
+          db.Achievement[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveAchievements(items)
+        app.db.saveAchievements(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1893,7 +2250,9 @@ async function getEnergy(app, key) {
     shortDescription: record.get('shortDescription') || '',
     description: record.get('description') || '',
     image: record.get('image')?.[0]?.url,
-    npcs: (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item?.id),
+    npcs: (
+      await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))
+    ).map((item) => (item.get ? item.get('id') : item?.id)),
   }
 
   return app.airtable.cache.getEnergy[key]
@@ -1905,25 +2264,28 @@ async function getEnergies(app) {
   try {
     const items = []
 
-    await app.airtable.database('Energy').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        const item = await getEnergy(app, record.id)
+    await app.airtable
+      .database('Energy')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          const item = await getEnergy(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.Energy[record.id] = item
+          db.Energy[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveEnergies(items)
+        app.db.saveEnergies(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -1952,7 +2314,13 @@ async function getLore(app, key) {
     lore3: record.get('lore3'),
     lore4: record.get('lore4'),
     lore5: record.get('lore5'),
-    historicalRecords: (await Promise.all((record.get('historicalRecords') || []).map((key) => db.HistoricalRecords[key] || app.airtable.database('Historical Records').find(key)))).map(item => item.get ? item.get('id') : item.id),
+    historicalRecords: (
+      await Promise.all(
+        (record.get('historicalRecords') || []).map(
+          (key) => db.HistoricalRecords[key] || app.airtable.database('Historical Records').find(key)
+        )
+      )
+    ).map((item) => (item.get ? item.get('id') : item.id)),
   }
 
   return app.airtable.cache.getLore[key]
@@ -1964,27 +2332,30 @@ async function getLores(app) {
   try {
     const items = []
 
-    await app.airtable.database('Lore').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name') || !record.get('isEnabled')) continue
+    await app.airtable
+      .database('Lore')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name') || !record.get('isEnabled')) continue
 
-        const item = await getLore(app, record.id)
+          const item = await getLore(app, record.id)
 
-        items.push(item)
+          items.push(item)
 
-        db.Lore[record.id] = item
+          db.Lore[record.id] = item
 
-        log('Fetched', item)
-      }
+          log('Fetched', item)
+        }
 
-      app.db.saveLores(items)
+        app.db.saveLores(items)
 
-      fetchNextPage()
-    })
-  } catch(e) {
+        fetchNextPage()
+      })
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2005,104 +2376,104 @@ async function convertItemParams(app) {
   try {
     const items = []
 
-    await app.airtable.database('Item').select({
-      maxRecords: 10000,
-      view: "All Data"
-    }).eachPage(async function page(records, fetchNextPage) {
-      // log('Fetched items', records)
+    await app.airtable
+      .database('Item')
+      .select({
+        maxRecords: 10000,
+        view: 'All Data',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        // log('Fetched items', records)
 
-      for (const record of records) {
-        try {
-          // if (!record.get('isPublished')) continue
-          console.log(record.get('name'))
+        for (const record of records) {
+          try {
+            // if (!record.get('isPublished')) continue
+            console.log(record.get('name'))
 
-          const convertParam = async (game, num) => {
-            const result = []
+            const convertParam = async (game, num) => {
+              const result = []
 
-            for (let i = 1; i <= 3; i++) {
-              const paramValue = record.get(`a${num}Param${i}${game}`)
+              for (let i = 1; i <= 3; i++) {
+                const paramValue = record.get(`a${num}Param${i}${game}`)
 
-              if (paramValue && record.get(`a${num}${game}`)) {
-                const attr = await app.airtable.database('ItemAttribute').find(record.get(`a${num}${game}`))
-  console.log(game, num, i, attr.get(`paramType${i}`))
-                if (attr.get(`paramType${i}`) === 'percent') {
-                  result.push(convertToPercent(paramValue))
-                } else {
-                  result.push(paramValue)
+                if (paramValue && record.get(`a${num}${game}`)) {
+                  const attr = await app.airtable.database('ItemAttribute').find(record.get(`a${num}${game}`))
+                  console.log(game, num, i, attr.get(`paramType${i}`))
+                  if (attr.get(`paramType${i}`) === 'percent') {
+                    result.push(convertToPercent(paramValue))
+                  } else {
+                    result.push(paramValue)
+                  }
                 }
               }
+
+              return result
             }
 
-            return result
+            const data = {
+              a1RaidParams: [...(await convertParam('Raid', 1))].filter((r) => !!r),
+              a2RaidParams: [...(await convertParam('Raid', 2))].filter((r) => !!r),
+              a3RaidParams: [...(await convertParam('Raid', 3))].filter((r) => !!r),
+              a4RaidParams: [...(await convertParam('Raid', 4))].filter((r) => !!r),
+              a5RaidParams: [...(await convertParam('Raid', 5))].filter((r) => !!r),
+              a6RaidParams: [...(await convertParam('Raid', 6))].filter((r) => !!r),
+              a7RaidParams: [...(await convertParam('Raid', 7))].filter((r) => !!r),
+              a8RaidParams: [...(await convertParam('Raid', 8))].filter((r) => !!r),
+              a1EvolutionParams: [...(await convertParam('Evolution', 1))].filter((r) => !!r),
+              a2EvolutionParams: [...(await convertParam('Evolution', 2))].filter((r) => !!r),
+              a3EvolutionParams: [...(await convertParam('Evolution', 3))].filter((r) => !!r),
+              a4EvolutionParams: [...(await convertParam('Evolution', 4))].filter((r) => !!r),
+              a5EvolutionParams: [...(await convertParam('Evolution', 5))].filter((r) => !!r),
+              a6EvolutionParams: [...(await convertParam('Evolution', 6))].filter((r) => !!r),
+              a7EvolutionParams: [...(await convertParam('Evolution', 7))].filter((r) => !!r),
+              a8EvolutionParams: [...(await convertParam('Evolution', 8))].filter((r) => !!r),
+              a9EvolutionParams: [...(await convertParam('Evolution', 9))].filter((r) => !!r),
+              a10EvolutionParams: [...(await convertParam('Evolution', 10))].filter((r) => !!r),
+              a11EvolutionParams: [...(await convertParam('Evolution', 11))].filter((r) => !!r),
+              a12EvolutionParams: [...(await convertParam('Evolution', 12))].filter((r) => !!r),
+              a1InfiniteParams: [...(await convertParam('Infinite', 1))].filter((r) => !!r),
+              a2InfiniteParams: [...(await convertParam('Infinite', 2))].filter((r) => !!r),
+              a3InfiniteParams: [...(await convertParam('Infinite', 3))].filter((r) => !!r),
+              a4InfiniteParams: [...(await convertParam('Infinite', 4))].filter((r) => !!r),
+              a5InfiniteParams: [...(await convertParam('Infinite', 5))].filter((r) => !!r),
+              a6InfiniteParams: [...(await convertParam('Infinite', 6))].filter((r) => !!r),
+              a7InfiniteParams: [...(await convertParam('Infinite', 7))].filter((r) => !!r),
+              a8InfiniteParams: [...(await convertParam('Infinite', 8))].filter((r) => !!r),
+              a9InfiniteParams: [...(await convertParam('Infinite', 9))].filter((r) => !!r),
+              a10InfiniteParams: [...(await convertParam('Infinite', 10))].filter((r) => !!r),
+              a11InfiniteParams: [...(await convertParam('Infinite', 11))].filter((r) => !!r),
+              a12InfiniteParams: [...(await convertParam('Infinite', 12))].filter((r) => !!r),
+            }
+
+            // console.log(data)
+
+            app.airtable
+              .database('Item')
+              .update(record.id, data, { typecast: true })
+              .then(function (rec) {
+                // console.log(rec)
+                console.log('Done')
+              })
+            // record.putUpdate({'a1RaidParams': [record.get('a1Param1Raid'), record.get('a1Param2Raid')].filter(r => !!r)})
+
+            // return
+          } catch (e) {
+            console.log('Error', e)
+            return
           }
-
-          const data = {
-            'a1RaidParams': [...(await convertParam('Raid', 1))].filter(r => !!r),
-            'a2RaidParams': [...(await convertParam('Raid', 2))].filter(r => !!r),
-            'a3RaidParams': [...(await convertParam('Raid', 3))].filter(r => !!r),
-            'a4RaidParams': [...(await convertParam('Raid', 4))].filter(r => !!r),
-            'a5RaidParams': [...(await convertParam('Raid', 5))].filter(r => !!r),
-            'a6RaidParams': [...(await convertParam('Raid', 6))].filter(r => !!r),
-            'a7RaidParams': [...(await convertParam('Raid', 7))].filter(r => !!r),
-            'a8RaidParams': [...(await convertParam('Raid', 8))].filter(r => !!r),
-            'a1EvolutionParams': [...(await convertParam('Evolution', 1))].filter(r => !!r),
-            'a2EvolutionParams': [...(await convertParam('Evolution', 2))].filter(r => !!r),
-            'a3EvolutionParams': [...(await convertParam('Evolution', 3))].filter(r => !!r),
-            'a4EvolutionParams': [...(await convertParam('Evolution', 4))].filter(r => !!r),
-            'a5EvolutionParams': [...(await convertParam('Evolution', 5))].filter(r => !!r),
-            'a6EvolutionParams': [...(await convertParam('Evolution', 6))].filter(r => !!r),
-            'a7EvolutionParams': [...(await convertParam('Evolution', 7))].filter(r => !!r),
-            'a8EvolutionParams': [...(await convertParam('Evolution', 8))].filter(r => !!r),
-            'a9EvolutionParams': [...(await convertParam('Evolution', 9))].filter(r => !!r),
-            'a10EvolutionParams': [...(await convertParam('Evolution', 10))].filter(r => !!r),
-            'a11EvolutionParams': [...(await convertParam('Evolution', 11))].filter(r => !!r),
-            'a12EvolutionParams': [...(await convertParam('Evolution', 12))].filter(r => !!r),
-            'a1InfiniteParams': [...(await convertParam('Infinite', 1))].filter(r => !!r),
-            'a2InfiniteParams': [...(await convertParam('Infinite', 2))].filter(r => !!r),
-            'a3InfiniteParams': [...(await convertParam('Infinite', 3))].filter(r => !!r),
-            'a4InfiniteParams': [...(await convertParam('Infinite', 4))].filter(r => !!r),
-            'a5InfiniteParams': [...(await convertParam('Infinite', 5))].filter(r => !!r),
-            'a6InfiniteParams': [...(await convertParam('Infinite', 6))].filter(r => !!r),
-            'a7InfiniteParams': [...(await convertParam('Infinite', 7))].filter(r => !!r),
-            'a8InfiniteParams': [...(await convertParam('Infinite', 8))].filter(r => !!r),
-            'a9InfiniteParams': [...(await convertParam('Infinite', 9))].filter(r => !!r),
-            'a10InfiniteParams': [...(await convertParam('Infinite', 10))].filter(r => !!r),
-            'a11InfiniteParams': [...(await convertParam('Infinite', 11))].filter(r => !!r),
-            'a12InfiniteParams': [...(await convertParam('Infinite', 12))].filter(r => !!r),
-          }
-
-          // console.log(data)
-          
-          app.airtable.database('Item').update(
-              record.id,
-              data,
-              {typecast: true}
-          )
-          .then(function(rec) {
-            // console.log(rec)
-            console.log('Done')
-          })
-          // record.putUpdate({'a1RaidParams': [record.get('a1Param1Raid'), record.get('a1Param2Raid')].filter(r => !!r)})
-
-          // return
-        } catch(e) {
-          console.log('Error', e)
-          return
         }
-      }
 
-      fetchNextPage()
-    })
+        fetchNextPage()
+      })
 
     // To fetch the next page of records, call `fetchNextPage`.
     // If there are more records, `page` will get called again.
     // If there are no more records, `done` will get called.
     // fetchNextPage()
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
-
 
 async function convertItemAttributes(app) {
   log('Converting airtable data: ItemAttribute -> params')
@@ -2110,50 +2481,65 @@ async function convertItemAttributes(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemAttribute').select({
-      maxRecords: 10000,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      // log('Fetched items', records)
+    await app.airtable
+      .database('ItemAttribute')
+      .select({
+        maxRecords: 10000,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        // log('Fetched items', records)
 
-      for (const record of records) {
-        try {
-          // if (!record.get('isPublished')) continue
-          console.log(record.get('name'))
+        for (const record of records) {
+          try {
+            // if (!record.get('isPublished')) continue
+            console.log(record.get('name'))
 
-          const data = {
-            'paramValues': [record.get('paramType1') === 'percent' ? convertToPercent(record.get('paramValue1')) : record.get('paramValue1'), record.get('paramType2') === 'percent' ? convertToPercent(record.get('paramValue2')) : record.get('paramValue2'), record.get('paramType3') === 'percent' ? convertToPercent(record.get('paramValue3')) : record.get('paramValue3')].filter(r => !!r),
-            'paramTypes': [record.get('paramType1')?.replace('percent', 'value'), record.get('paramType2')?.replace('percent', 'value'), record.get('paramType3')?.replace('percent', 'value')].filter(r => !!r),
+            const data = {
+              paramValues: [
+                record.get('paramType1') === 'percent'
+                  ? convertToPercent(record.get('paramValue1'))
+                  : record.get('paramValue1'),
+                record.get('paramType2') === 'percent'
+                  ? convertToPercent(record.get('paramValue2'))
+                  : record.get('paramValue2'),
+                record.get('paramType3') === 'percent'
+                  ? convertToPercent(record.get('paramValue3'))
+                  : record.get('paramValue3'),
+              ].filter((r) => !!r),
+              paramTypes: [
+                record.get('paramType1')?.replace('percent', 'value'),
+                record.get('paramType2')?.replace('percent', 'value'),
+                record.get('paramType3')?.replace('percent', 'value'),
+              ].filter((r) => !!r),
+            }
+
+            console.log(data)
+
+            app.airtable
+              .database('ItemAttribute')
+              .update(record.id, data, { typecast: true })
+              .then(function (rec) {
+                // console.log(rec)
+                console.log('Done')
+              })
+            // record.putUpdate({'a1RaidParams': [record.get('a1Param1Raid'), record.get('a1Param2Raid')].filter(r => !!r)})
+
+            // return
+          } catch (e) {
+            console.log('Error', e)
+            return
           }
-
-          console.log(data)
-          
-          app.airtable.database('ItemAttribute').update(
-              record.id,
-              data,
-              {typecast: true}
-          )
-          .then(function(rec) {
-            // console.log(rec)
-            console.log('Done')
-          })
-          // record.putUpdate({'a1RaidParams': [record.get('a1Param1Raid'), record.get('a1Param2Raid')].filter(r => !!r)})
-
-          // return
-        } catch(e) {
-          console.log('Error', e)
-          return
         }
-      }
 
-      fetchNextPage()
-    })
+        fetchNextPage()
+      })
 
     // To fetch the next page of records, call `fetchNextPage`.
     // If there are more records, `page` will get called again.
     // If there are no more records, `done` will get called.
     // fetchNextPage()
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2164,40 +2550,43 @@ async function getGames(app) {
   try {
     const items = []
 
-    await app.airtable.database('Game').select({
-      maxRecords: 10,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        // if (!record.get('isPublished')) continue
+    await app.airtable
+      .database('Game')
+      .select({
+        maxRecords: 10,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          // if (!record.get('isPublished')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.link = record.get('link')
-        item.primaryColor = record.get('primaryColor')
-        item.secondaryColor = record.get('secondaryColor')
-        item.logoLink = record.get('logoLink')
-        item.shortDescription = record.get('shortDescription') || ''
-        item.description = record.get('description') || ''
-        item.storyline = record.get('storyline') || ''
-        item.cmcDescription = record.get('cmcDescription') || ''
-        item.contracts = record.get('contracts')
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.link = record.get('link')
+          item.primaryColor = record.get('primaryColor')
+          item.secondaryColor = record.get('secondaryColor')
+          item.logoLink = record.get('logoLink')
+          item.shortDescription = record.get('shortDescription') || ''
+          item.description = record.get('description') || ''
+          item.storyline = record.get('storyline') || ''
+          item.cmcDescription = record.get('cmcDescription') || ''
+          item.contracts = record.get('contracts')
 
-        db.Game[record.id] = item
+          items.push(item)
 
-        log('Fetched item', item)
-      }
+          db.Game[record.id] = item
 
-      fetchNextPage()
-    })
+          log('Fetched item', item)
+        }
+
+        fetchNextPage()
+      })
 
     app.db.saveGames(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2208,33 +2597,36 @@ async function getGameInfos(app) {
   try {
     const items = []
 
-    await app.airtable.database('GameInfo').select({
-      maxRecords: 200,
-      view: "All"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        const item = {} as any
+    await app.airtable
+      .database('GameInfo')
+      .select({
+        maxRecords: 200,
+        view: 'All',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.text = record.get('text')
-        item.game = (await app.airtable.database('Game').find(record.get('game'))).get('id')
-        item.isEnabled = !!record.get('isEnabled')
-        item.attachments = record.get('attachments')?.map(i => i.url) || []
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.text = record.get('text')
+          item.game = (await app.airtable.database('Game').find(record.get('game'))).get('id')
+          item.isEnabled = !!record.get('isEnabled')
+          item.attachments = record.get('attachments')?.map((i) => i.url) || []
 
-        db.GameInfo[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.GameInfo[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveGameInfos(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2245,40 +2637,63 @@ async function getItemMaterials(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemMaterial').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      log('Fetching', records)
-      for (const record of records) {
-        const item = {} as any
+    await app.airtable
+      .database('ItemMaterial')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        log('Fetching', records)
+        for (const record of records) {
+          const item = {} as any
 
-        if (!record.get('isEnabled')) continue
+          if (!record.get('isEnabled')) continue
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.link = record.get('link')
-        item.types = record.get('types')
-        item.description = record.get('description') || ''
-        item.basicItem = record.get('basicItem') ? (await app.airtable.database('Item').find(record.get('basicItem'))).get('id') : undefined
-        item.rarity = record.get('rarity') ? (await app.airtable.database('ItemRarity').find(record.get('rarity'))).get('id') : undefined
-        item.droppedBy = (await Promise.all((record.get('droppedBy') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.areas = (await Promise.all((record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.recipes = (await Promise.all((record.get('recipes') || []).map((key) => db.ItemRecipe[key] || app.airtable.database('ItemRecipe').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.link = record.get('link')
+          item.types = record.get('types')
+          item.description = record.get('description') || ''
+          item.basicItem = record.get('basicItem')
+            ? (await app.airtable.database('Item').find(record.get('basicItem'))).get('id')
+            : undefined
+          item.rarity = record.get('rarity')
+            ? (await app.airtable.database('ItemRarity').find(record.get('rarity'))).get('id')
+            : undefined
+          item.droppedBy = (
+            await Promise.all(
+              (record.get('droppedBy') || []).map(
+                (key) => db.Character[key] || app.airtable.database('Character').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.areas = (
+            await Promise.all(
+              (record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.recipes = (
+            await Promise.all(
+              (record.get('recipes') || []).map(
+                (key) => db.ItemRecipe[key] || app.airtable.database('ItemRecipe').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.ItemMaterial[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemMaterial[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemMaterials(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2289,28 +2704,31 @@ async function getItemAttributeParams(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemAttributeParam').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        const item = {} as any
+    await app.airtable
+      .database('ItemAttributeParam')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.values = record.get('values')
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.values = record.get('values')
 
-        log('Fetched', item)
-      }
+          items.push(item)
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemAttributeParams(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2321,27 +2739,30 @@ async function getItemParams(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemParam').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        const item = {} as any
+    await app.airtable
+      .database('ItemParam')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          const item = {} as any
 
-        item.name = record.get('name')
-  
-        items.push(item)
+          item.name = record.get('name')
 
-        db.ItemParam[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemParam[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemParams(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2352,35 +2773,50 @@ async function getItemSpecificTypes(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemSpecificType').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('ItemSpecificType')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.link = record.get('link')
-        item.subType = record.get('subType') ? (await app.airtable.database('ItemSubType').find(record.get('subType'))).get('id') : undefined
-        item.items = (await Promise.all((record.get('items') || []).map((key) => db.Item[key] || app.airtable.database('Item').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.itemMaterials = (await Promise.all((record.get('itemMaterials') || []).map((key) => db.ItemMaterial[key] || app.airtable.database('ItemMaterial').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.link = record.get('link')
+          item.subType = record.get('subType')
+            ? (await app.airtable.database('ItemSubType').find(record.get('subType'))).get('id')
+            : undefined
+          item.items = (
+            await Promise.all(
+              (record.get('items') || []).map((key) => db.Item[key] || app.airtable.database('Item').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.itemMaterials = (
+            await Promise.all(
+              (record.get('itemMaterials') || []).map(
+                (key) => db.ItemMaterial[key] || app.airtable.database('ItemMaterial').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.ItemSpecificType[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemSpecificType[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemSpecificTypes(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2391,40 +2827,55 @@ async function getItemSubTypes(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemSubType').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('ItemSubType')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.link = record.get('link')
-        item.min = record.get('min')
-        item.max = record.get('max')
-        item.speed = record.get('speed')
-        item.range = record.get('range')
-        item.weight = record.get('weight')
-        item.type = record.get('type') ? (await app.airtable.database('ItemType').find(record.get('type'))).get('id') : undefined
-        item.items = (await Promise.all((record.get('items') || []).map((key) => db.Item[key] || app.airtable.database('Item').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.specificTypes = (await Promise.all((record.get('specificTypes') || []).map((key) => db.ItemSpecificType[key] || app.airtable.database('ItemSpecificType').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.link = record.get('link')
+          item.min = record.get('min')
+          item.max = record.get('max')
+          item.speed = record.get('speed')
+          item.range = record.get('range')
+          item.weight = record.get('weight')
+          item.type = record.get('type')
+            ? (await app.airtable.database('ItemType').find(record.get('type'))).get('id')
+            : undefined
+          item.items = (
+            await Promise.all(
+              (record.get('items') || []).map((key) => db.Item[key] || app.airtable.database('Item').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.specificTypes = (
+            await Promise.all(
+              (record.get('specificTypes') || []).map(
+                (key) => db.ItemSpecificType[key] || app.airtable.database('ItemSpecificType').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.ItemSubType[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemSubType[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemSubTypes(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2435,35 +2886,58 @@ async function getItemTypes(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemType').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('ItemType')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.items = (await Promise.all((record.get('items') || []).map((key) => db.Item[key] || app.airtable.database('Item').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.subTypes = (await Promise.all((record.get('subTypes') || []).map((key) => db.ItemSubType[key] || app.airtable.database('ItemSubType').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.recipes = (await Promise.all((record.get('recipes') || []).map((key) => db.ItemRecipe[key] || app.airtable.database('ItemRecipe').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.slots = (await Promise.all((record.get('slots') || []).map((key) => db.ItemSlot[key] || app.airtable.database('ItemSlot').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.items = (
+            await Promise.all(
+              (record.get('items') || []).map((key) => db.Item[key] || app.airtable.database('Item').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.subTypes = (
+            await Promise.all(
+              (record.get('subTypes') || []).map(
+                (key) => db.ItemSubType[key] || app.airtable.database('ItemSubType').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.recipes = (
+            await Promise.all(
+              (record.get('recipes') || []).map(
+                (key) => db.ItemRecipe[key] || app.airtable.database('ItemRecipe').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.slots = (
+            await Promise.all(
+              (record.get('slots') || []).map((key) => db.ItemSlot[key] || app.airtable.database('ItemSlot').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.ItemType[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemType[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemTypes(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2474,37 +2948,50 @@ async function getItemAffixes(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemAffix').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('ItemAffix')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.isPrefix = !!record.get('isPrefix')
-        item.isSuffix = !!record.get('isSuffix')
-        item.isTitle = !!record.get('isTitle')
-        item.description = record.get('description') || ''
-        item.types = (await Promise.all((record.get('types') || []).map((key) => db.ItemType[key] || app.airtable.database('ItemType').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.rarities = (await Promise.all((record.get('rarities') || []).map((key) => db.ItemRarity[key] || app.airtable.database('ItemRarity').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.isPrefix = !!record.get('isPrefix')
+          item.isSuffix = !!record.get('isSuffix')
+          item.isTitle = !!record.get('isTitle')
+          item.description = record.get('description') || ''
+          item.types = (
+            await Promise.all(
+              (record.get('types') || []).map((key) => db.ItemType[key] || app.airtable.database('ItemType').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.rarities = (
+            await Promise.all(
+              (record.get('rarities') || []).map(
+                (key) => db.ItemRarity[key] || app.airtable.database('ItemRarity').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.ItemAffix[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemAffix[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemAffixes(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2515,30 +3002,37 @@ async function getItemSlots(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemSlot').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        const item = {} as any
+    await app.airtable
+      .database('ItemSlot')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.types = (await Promise.all((record.get('types') || []).map((key) => db.ItemType[key] || app.airtable.database('ItemType').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.types = (
+            await Promise.all(
+              (record.get('types') || []).map((key) => db.ItemType[key] || app.airtable.database('ItemType').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.ItemSlot[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemSlot[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemSlots(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2549,35 +3043,44 @@ async function getItemRarities(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemRarity').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('ItemRarity')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.color = record.get('color')
-        item.description = record.get('description') || ''
-        item.materials = (await Promise.all((record.get('materials') || []).map((key) => db.ItemMaterial[key] || app.airtable.database('ItemMaterial').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        // item.affixes = (await Promise.all((record.get('affixes') || []).map((key) => db.ItemAffix[key] || app.airtable.database('ItemAffix').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.color = record.get('color')
+          item.description = record.get('description') || ''
+          item.materials = (
+            await Promise.all(
+              (record.get('materials') || []).map(
+                (key) => db.ItemMaterial[key] || app.airtable.database('ItemMaterial').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          // item.affixes = (await Promise.all((record.get('affixes') || []).map((key) => db.ItemAffix[key] || app.airtable.database('ItemAffix').find(key)))).map(item => item.get ? item.get('id') : item.id)
 
-        db.ItemRarity[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemRarity[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemRarities(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2588,51 +3091,72 @@ async function getItemSets(app) {
   try {
     const items = []
 
-    await app.airtable.database('ItemSet').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('ItemSet')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.key = record.get('key')
-        item.description = record.get('description') || ''
-        item.levels = record.get('levels')
-        item.head = record.get('head') ? (await app.airtable.database('Item').find(record.get('head'))).get('id') : undefined
-        item.armor = record.get('armor') ? (await app.airtable.database('Item').find(record.get('armor'))).get('id') : undefined
-        item.weapon = record.get('weapon') ? (await app.airtable.database('Item').find(record.get('weapon'))).get('id') : undefined
-        item.weapon2 = record.get('weapon2') ? (await app.airtable.database('Item').find(record.get('weapon2'))).get('id') : undefined
-        item.ring = record.get('ring') ? (await app.airtable.database('Item').find(record.get('ring'))).get('id') : undefined
-        item.boots = record.get('boots') ? (await app.airtable.database('Item').find(record.get('boots'))).get('id') : undefined
-        item.gloves = record.get('gloves') ? (await app.airtable.database('Item').find(record.get('gloves'))).get('id') : undefined
-        item.leggings = record.get('leggings') ? (await app.airtable.database('Item').find(record.get('leggings'))).get('id') : undefined
-        item.necklace = record.get('necklace') ? (await app.airtable.database('Item').find(record.get('necklace'))).get('id') : undefined
-        item.belt = record.get('belt') ? (await app.airtable.database('Item').find(record.get('belt'))).get('id') : undefined
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.key = record.get('key')
+          item.description = record.get('description') || ''
+          item.levels = record.get('levels')
+          item.head = record.get('head')
+            ? (await app.airtable.database('Item').find(record.get('head'))).get('id')
+            : undefined
+          item.armor = record.get('armor')
+            ? (await app.airtable.database('Item').find(record.get('armor'))).get('id')
+            : undefined
+          item.weapon = record.get('weapon')
+            ? (await app.airtable.database('Item').find(record.get('weapon'))).get('id')
+            : undefined
+          item.weapon2 = record.get('weapon2')
+            ? (await app.airtable.database('Item').find(record.get('weapon2'))).get('id')
+            : undefined
+          item.ring = record.get('ring')
+            ? (await app.airtable.database('Item').find(record.get('ring'))).get('id')
+            : undefined
+          item.boots = record.get('boots')
+            ? (await app.airtable.database('Item').find(record.get('boots'))).get('id')
+            : undefined
+          item.gloves = record.get('gloves')
+            ? (await app.airtable.database('Item').find(record.get('gloves'))).get('id')
+            : undefined
+          item.leggings = record.get('leggings')
+            ? (await app.airtable.database('Item').find(record.get('leggings'))).get('id')
+            : undefined
+          item.necklace = record.get('necklace')
+            ? (await app.airtable.database('Item').find(record.get('necklace'))).get('id')
+            : undefined
+          item.belt = record.get('belt')
+            ? (await app.airtable.database('Item').find(record.get('belt'))).get('id')
+            : undefined
 
-        db.ItemSet[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.ItemSet[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveItemSets(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
 
-async function getItemTransmuteRules(app) {
-  
-}
+async function getItemTransmuteRules(app) {}
 
 async function getSkillClassifications(app) {
   log('Fetching airtable data: SkillClassification')
@@ -2640,36 +3164,49 @@ async function getSkillClassifications(app) {
   try {
     const items = []
 
-    await app.airtable.database('SkillClassification').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('SkillClassification')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.isEnabled = !!record.get('isEnabled')
-        item.code = record.get('code')
-        item.tags = record.get('tags')
-        item.skills = (await Promise.all((record.get('skills') || []).map((key) => db.Skill[key] || app.airtable.database('Skill').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.characterClasses = (await Promise.all((record.get('characterClasses') || []).map((key) => db.CharacterClass[key] || app.airtable.database('CharacterClass').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.isEnabled = !!record.get('isEnabled')
+          item.code = record.get('code')
+          item.tags = record.get('tags')
+          item.skills = (
+            await Promise.all(
+              (record.get('skills') || []).map((key) => db.Skill[key] || app.airtable.database('Skill').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.characterClasses = (
+            await Promise.all(
+              (record.get('characterClasses') || []).map(
+                (key) => db.CharacterClass[key] || app.airtable.database('CharacterClass').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.SkillClassification[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.SkillClassification[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveSkillClassifications(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2680,32 +3217,39 @@ async function getSkillMods(app) {
   try {
     const items = []
 
-    await app.airtable.database('SkillMod').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('SkillMod')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.skills = (await Promise.all((record.get('skills') || []).map((key) => db.Skill[key] || app.airtable.database('Skill').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.skills = (
+            await Promise.all(
+              (record.get('skills') || []).map((key) => db.Skill[key] || app.airtable.database('Skill').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.SkillMod[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.SkillMod[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveSkillMods(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2716,36 +3260,39 @@ async function getSkillConditions(app) {
   try {
     const items = []
 
-    await app.airtable.database('SkillCondition').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('SkillCondition')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.description = record.get('description') || ''
-        item.explanation = record.get('explanation') || ''
-        item.example = record.get('example') || ''
-        item.scope = record.get('scope')
-        item.parameters = record.get('parameters')
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.description = record.get('description') || ''
+          item.explanation = record.get('explanation') || ''
+          item.example = record.get('example') || ''
+          item.scope = record.get('scope')
+          item.parameters = record.get('parameters')
 
-        db.SkillCondition[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.SkillCondition[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveSkillConditions(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2756,32 +3303,35 @@ async function getSkillConditionParams(app) {
   try {
     const items = []
 
-    await app.airtable.database('SkillConditionParam').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('SkillConditionParam')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.examples = record.get('examples')
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.examples = record.get('examples')
 
-        db.SkillConditionParam[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.SkillConditionParam[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveSkillConditionParams(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2792,41 +3342,48 @@ async function getSkillStatusEffects(app) {
   try {
     const items = []
 
-    await app.airtable.database('SkillStatusEffect').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('SkillStatusEffect')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.type = record.get('type')
-        item.isImplemented = !!record.get('isImplemented')
-        item.duration = record.get('duration')
-        item.stats = record.get('stats')
-        item.explanation = record.get('explanation') || ''
-        item.description = record.get('description') || ''
-        item.modifiers = record.get('modifiers')
-        item.chanceToApply = record.get('chanceToApply')
-        item.criticalHitBonus = record.get('criticalHitBonus')
-        item.games = (await Promise.all((record.get('games') || []).map((key) => db.Game[key] || app.airtable.database('Game').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.type = record.get('type')
+          item.isImplemented = !!record.get('isImplemented')
+          item.duration = record.get('duration')
+          item.stats = record.get('stats')
+          item.explanation = record.get('explanation') || ''
+          item.description = record.get('description') || ''
+          item.modifiers = record.get('modifiers')
+          item.chanceToApply = record.get('chanceToApply')
+          item.criticalHitBonus = record.get('criticalHitBonus')
+          item.games = (
+            await Promise.all(
+              (record.get('games') || []).map((key) => db.Game[key] || app.airtable.database('Game').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.SkillStatusEffect[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.SkillStatusEffect[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveSkillStatusEffects(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2837,45 +3394,56 @@ async function getSkillTreeNodes(app) {
   try {
     const items = []
 
-    await app.airtable.database('SkillTreeNode').select({
-      maxRecords: 200,
-      view: "All"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('SkillTreeNode')
+      .select({
+        maxRecords: 200,
+        view: 'All',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.nodeId = record.get('nodeId')
-        item.classStartIndex = record.get('classStartIndex')
-        item.isSubclassStart = !!record.get('isSubclassStart')
-        item.orbit = record.get('orbit')
-        item.orbitIndex = record.get('orbitIndex')
-        item.in = record.get('in')
-        item.out = record.get('out')
-        item.requiredNode = record.get('requiredNode')
-        item.xPos = record.get('xPos')
-        item.yPos = record.get('yPos')
-        item.icon = record.get('icon')
-        item.games = (await Promise.all((record.get('games') || []).map((key) => db.Game[key] || app.airtable.database('Game').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.subclass = record.get('subclass') ? (await app.airtable.database('CharacterClass').find(record.get('subclass'))).get('id') : undefined
-        item.parentClass = record.get('parentClass') ? (await app.airtable.database('CharacterClass').find(record.get('parentClass'))).get('id') : undefined
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.nodeId = record.get('nodeId')
+          item.classStartIndex = record.get('classStartIndex')
+          item.isSubclassStart = !!record.get('isSubclassStart')
+          item.orbit = record.get('orbit')
+          item.orbitIndex = record.get('orbitIndex')
+          item.in = record.get('in')
+          item.out = record.get('out')
+          item.requiredNode = record.get('requiredNode')
+          item.xPos = record.get('xPos')
+          item.yPos = record.get('yPos')
+          item.icon = record.get('icon')
+          item.games = (
+            await Promise.all(
+              (record.get('games') || []).map((key) => db.Game[key] || app.airtable.database('Game').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.subclass = record.get('subclass')
+            ? (await app.airtable.database('CharacterClass').find(record.get('subclass'))).get('id')
+            : undefined
+          item.parentClass = record.get('parentClass')
+            ? (await app.airtable.database('CharacterClass').find(record.get('parentClass'))).get('id')
+            : undefined
 
-        db.SkillTreeNode[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.SkillTreeNode[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveSkillTreeNodes(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2886,31 +3454,34 @@ async function getRunes(app) {
   try {
     const items = []
 
-    await app.airtable.database('Rune').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('Rune')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
 
-        db.Rune[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.Rune[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     // app.db.saveRunes(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2921,44 +3492,53 @@ async function getCharacterRaces(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterRace').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('CharacterRace')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.link = record.get('link')
-        item.isPlayable = !!record.get('isPlayable')
-        item.image = record.get('image')?.[0]?.url
-        item.color = record.get('color')
-        item.geography = record.get('geography')
-        item.shortDescription = record.get('shortDescription') || ''
-        item.description = record.get('description') || ''
-        item.npcs = (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.type = record.get('type') ? (await app.airtable.database('CharacterType').find(record.get('type'))).get('id') : undefined
-        item.lore1 = record.get('lore1')
-        item.lore2 = record.get('lore2')
-        item.lore3 = record.get('lore3')
-        item.lore4 = record.get('lore4')
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.link = record.get('link')
+          item.isPlayable = !!record.get('isPlayable')
+          item.image = record.get('image')?.[0]?.url
+          item.color = record.get('color')
+          item.geography = record.get('geography')
+          item.shortDescription = record.get('shortDescription') || ''
+          item.description = record.get('description') || ''
+          item.npcs = (
+            await Promise.all(
+              (record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.type = record.get('type')
+            ? (await app.airtable.database('CharacterType').find(record.get('type'))).get('id')
+            : undefined
+          item.lore1 = record.get('lore1')
+          item.lore2 = record.get('lore2')
+          item.lore3 = record.get('lore3')
+          item.lore4 = record.get('lore4')
 
-        db.CharacterRace[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.CharacterRace[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveCharacterRaces(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -2969,34 +3549,53 @@ async function getCharacterGenders(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterGender').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('CharacterGender')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.characters = (await Promise.all((record.get('characters') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.npcs = (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.classes = (await Promise.all((record.get('classes') || []).map((key) => db.CharacterClass[key] || app.airtable.database('CharacterClass').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.characters = (
+            await Promise.all(
+              (record.get('characters') || []).map(
+                (key) => db.Character[key] || app.airtable.database('Character').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.npcs = (
+            await Promise.all(
+              (record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.classes = (
+            await Promise.all(
+              (record.get('classes') || []).map(
+                (key) => db.CharacterClass[key] || app.airtable.database('CharacterClass').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.CharacterGender[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.CharacterGender[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveCharacterGenders(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -3007,54 +3606,79 @@ async function getCharacterClasses(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterClass').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('CharacterClass')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.link = record.get('link')
-        item.parent = record.get('parent') ? (await app.airtable.database('CharacterClass').find(record.get('parent'))).get('id') : undefined
-        item.characters = (await Promise.all((record.get('characters') || []).map((key) => db.Character[key] || app.airtable.database('Character').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.npcs = (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.skills = (await Promise.all((record.get('skills') || []).map((key) => db.Skill[key] || app.airtable.database('Skill').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.guilds = (await Promise.all((record.get('guilds') || []).map((key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.shortDescription = record.get('shortDescription') || ''
-        item.description = record.get('description') || ''
-        item.buildInfo = record.get('buildInfo')
-        item.lore1 = record.get('lore1')
-        item.lore2 = record.get('lore2')
-        item.lore3 = record.get('lore3')
-        item.lore4 = record.get('lore4')
-        item.images = record.get('images')?.map(i => i.url) || []
-        item.raidImage = record.get('raidImage')?.[0]?.url
-        item.infiniteImage = record.get('infiniteImage')?.[0]?.url
-        item.sanctuaryImage = record.get('sanctuaryImage')?.[0]?.url
-        item.maleImage = record.get('maleImage')?.[0]?.url
-        item.femaleImage = record.get('femaleImage')?.[0]?.url
-        item.gender = record.get('gender')
-        item.archetype = record.get('archetype')
-        item.role = record.get('role')
-        item.isPlayable = !!record.get('isPlayable')
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.link = record.get('link')
+          item.parent = record.get('parent')
+            ? (await app.airtable.database('CharacterClass').find(record.get('parent'))).get('id')
+            : undefined
+          item.characters = (
+            await Promise.all(
+              (record.get('characters') || []).map(
+                (key) => db.Character[key] || app.airtable.database('Character').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.npcs = (
+            await Promise.all(
+              (record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.skills = (
+            await Promise.all(
+              (record.get('skills') || []).map((key) => db.Skill[key] || app.airtable.database('Skill').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.guilds = (
+            await Promise.all(
+              (record.get('guilds') || []).map(
+                (key) => db.CharacterGuild[key] || app.airtable.database('CharacterGuild').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.shortDescription = record.get('shortDescription') || ''
+          item.description = record.get('description') || ''
+          item.buildInfo = record.get('buildInfo')
+          item.lore1 = record.get('lore1')
+          item.lore2 = record.get('lore2')
+          item.lore3 = record.get('lore3')
+          item.lore4 = record.get('lore4')
+          item.images = record.get('images')?.map((i) => i.url) || []
+          item.raidImage = record.get('raidImage')?.[0]?.url
+          item.infiniteImage = record.get('infiniteImage')?.[0]?.url
+          item.sanctuaryImage = record.get('sanctuaryImage')?.[0]?.url
+          item.maleImage = record.get('maleImage')?.[0]?.url
+          item.femaleImage = record.get('femaleImage')?.[0]?.url
+          item.gender = record.get('gender')
+          item.archetype = record.get('archetype')
+          item.role = record.get('role')
+          item.isPlayable = !!record.get('isPlayable')
 
-        db.CharacterClass[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.CharacterClass[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveCharacterClasses(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -3065,40 +3689,69 @@ async function getCharacters(app) {
   try {
     const items = []
 
-    await app.airtable.database('Character').select({
-      maxRecords: 1000,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('Character')
+      .select({
+        maxRecords: 1000,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.types = (await Promise.all((record.get('types') || []).map((key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.areas = (await Promise.all((record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.factions = (await Promise.all((record.get('factions') || []).map((key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.npcs = (await Promise.all((record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.itemMaterials = (await Promise.all((record.get('itemMaterials') || []).map((key) => db.ItemMaterial[key] || app.airtable.database('ItemMaterial').find(key)))).map(item => item.get ? item.get('id') : item.id)
-        item.personality = record.get('personality')
-        item.name = record.get('name')
-        item.shortDescription = record.get('shortDescription') || ''
-        item.description = record.get('description') || ''
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.types = (
+            await Promise.all(
+              (record.get('types') || []).map(
+                (key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.areas = (
+            await Promise.all(
+              (record.get('areas') || []).map((key) => db.Area[key] || app.airtable.database('Area').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.factions = (
+            await Promise.all(
+              (record.get('factions') || []).map(
+                (key) => db.CharacterFaction[key] || app.airtable.database('CharacterFaction').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.npcs = (
+            await Promise.all(
+              (record.get('npcs') || []).map((key) => db.NPC[key] || app.airtable.database('NPC').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.itemMaterials = (
+            await Promise.all(
+              (record.get('itemMaterials') || []).map(
+                (key) => db.ItemMaterial[key] || app.airtable.database('ItemMaterial').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
+          item.personality = record.get('personality')
+          item.name = record.get('name')
+          item.shortDescription = record.get('shortDescription') || ''
+          item.description = record.get('description') || ''
 
-        db.Character[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.Character[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveCharacters(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -3109,34 +3762,37 @@ async function getCharacterAttributes(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterAttribute').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('CharacterAttribute')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.isManual = !!record.get('isManual')
-        item.value = record.get('value')
-        item.description = record.get('description') || ''
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.isManual = !!record.get('isManual')
+          item.value = record.get('value')
+          item.description = record.get('description') || ''
 
-        db.CharacterAttribute[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.CharacterAttribute[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveCharacterAttributes(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -3147,34 +3803,41 @@ async function getCharacterStats(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterStat').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('CharacterStat')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.key = record.get('key')
-        item.params = record.get('params')
-        item.games = (await Promise.all((record.get('games') || []).map((key) => db.Game[key] || app.airtable.database('Game').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.key = record.get('key')
+          item.params = record.get('params')
+          item.games = (
+            await Promise.all(
+              (record.get('games') || []).map((key) => db.Game[key] || app.airtable.database('Game').find(key))
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.CharacterStat[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.CharacterStat[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveCharacterStats(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -3185,31 +3848,34 @@ async function getCharacterTitles(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterTitle').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('CharacterTitle')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
 
-        db.CharacterTitle[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.CharacterTitle[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveCharacterTitles(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -3220,40 +3886,49 @@ async function getCharacterNameChoices(app) {
   try {
     const items = []
 
-    await app.airtable.database('CharacterNameChoice').select({
-      maxRecords: 200,
-      view: "Grid view"
-    }).eachPage(async function page(records, fetchNextPage) {
-      for (const record of records) {
-        if (!record.get('name')) continue
+    await app.airtable
+      .database('CharacterNameChoice')
+      .select({
+        maxRecords: 200,
+        view: 'Grid view',
+      })
+      .eachPage(async function page(records, fetchNextPage) {
+        for (const record of records) {
+          if (!record.get('name')) continue
 
-        const item = {} as any
+          const item = {} as any
 
-        item.uuid = record.id
-        item.id = record.get('id')
-        item.name = record.get('name')
-        item.isFirst = !!record.get('isFirst')
-        item.isLast = !!record.get('isLast')
-        item.isFull = !!record.get('isFull')
-        item.isTitle = !!record.get('isTitle')
-        item.isLight = !!record.get('isLight')
-        item.isPet = !!record.get('isPet')
-        item.gender = record.get('gender')
-        item.weight = record.get('weight')
-        item.types = (await Promise.all((record.get('types') || []).map((key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)))).map(item => item.get ? item.get('id') : item.id)
-  
-        items.push(item)
+          item.uuid = record.id
+          item.id = record.get('id')
+          item.name = record.get('name')
+          item.isFirst = !!record.get('isFirst')
+          item.isLast = !!record.get('isLast')
+          item.isFull = !!record.get('isFull')
+          item.isTitle = !!record.get('isTitle')
+          item.isLight = !!record.get('isLight')
+          item.isPet = !!record.get('isPet')
+          item.gender = record.get('gender')
+          item.weight = record.get('weight')
+          item.types = (
+            await Promise.all(
+              (record.get('types') || []).map(
+                (key) => db.CharacterType[key] || app.airtable.database('CharacterType').find(key)
+              )
+            )
+          ).map((item) => (item.get ? item.get('id') : item.id))
 
-        db.CharacterNameChoice[record.id] = item
+          items.push(item)
 
-        log('Fetched', item)
-      }
+          db.CharacterNameChoice[record.id] = item
 
-      fetchNextPage()
-    })
-    
+          log('Fetched', item)
+        }
+
+        fetchNextPage()
+      })
+
     app.db.saveCharacterNameChoices(items)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }
@@ -3266,10 +3941,10 @@ export async function monitorAirtable(app) {
 
     Airtable.configure({
       endpointUrl: 'https://api.airtable.com',
-      apiKey: app.airtable.apiKey
+      apiKey: app.airtable.apiKey,
     })
 
-    app.airtable.database = Airtable.base('appSk5DGjf8WaidIK');
+    app.airtable.database = Airtable.base('appSk5DGjf8WaidIK')
 
     // await getGames(app)
     // await getGameInfos(app)
@@ -3323,7 +3998,7 @@ export async function monitorAirtable(app) {
     // await getBiomeFeatures(app)
     // await getSolarSystems(app)
     // await getPlanets(app)
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 }

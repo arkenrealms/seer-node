@@ -1,7 +1,7 @@
 import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { log } from '@rune-backend-sdk/util'
+import { log } from '@runemetaverse/backend-sdk/build/util'
 
 export async function monitorCraftingStats(app) {
   try {
@@ -55,14 +55,17 @@ export async function monitorCraftingStats(app) {
           { name: 'Wrath', count: 3, data: craftingCompetition3Data.wrath },
           { name: 'Fortress', count: 3, data: craftingCompetition3Data.fortress },
           { name: 'Elder', count: 3, data: craftingCompetition3Data.elder },
-          { name: 'Pledge', count: 3, data: craftingCompetition3Data.pledge }
+          { name: 'Pledge', count: 3, data: craftingCompetition3Data.pledge },
         ],
-        competition4: []
+        competition4: [],
       }
 
-      jetpack.write(path.resolve('../db/crafting/leaderboard.json'), beautify(data, null, 2), { atomic: true, jsonIndent: 0 })
+      jetpack.write(path.resolve('../db/crafting/leaderboard.json'), beautify(data, null, 2), {
+        atomic: true,
+        jsonIndent: 0,
+      })
     }
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 

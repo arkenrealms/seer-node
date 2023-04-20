@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { log } from '@rune-backend-sdk/util'
+import { log } from '@runemetaverse/backend-sdk/build/util'
 
 export async function monitorCoordinator(app) {
   // Update coordinator refers
@@ -14,7 +14,7 @@ export async function monitorCoordinator(app) {
     const data = await response.json()
 
     jetpack.write(path.resolve(`./db/affiliate/refers.json`), beautify(data, null, 2), { atomic: true, jsonIndent: 0 })
-  } catch(e) {
+  } catch (e) {
     log('Error', e)
   }
 

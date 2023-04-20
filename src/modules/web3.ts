@@ -1,26 +1,26 @@
 import * as ethers from 'ethers'
 import Web3 from 'web3'
-import { log } from '@rune-backend-sdk/util'
-import { getAddress, getRandomProvider } from '@rune-backend-sdk/util/web3'
-import contractInfo from '@rune-backend-sdk/contractInfo'
-import ArcaneRaidV1 from '@rune-backend-sdk/contracts/ArcaneRaidV1.json'
-import ArcaneTraderV1 from '@rune-backend-sdk/contracts/ArcaneTraderV1.json'
-import RXSMarketplace from '@rune-backend-sdk/contracts/RXSMarketplace.json'
-import ArcaneCharacters from '@rune-backend-sdk/contracts/ArcaneCharacters.json'
-import ArcaneCharacterFactoryV3 from '@rune-backend-sdk/contracts/ArcaneCharacterFactoryV3.json'
-import ArcaneBarracksFacetV1 from '@rune-backend-sdk/contracts/ArcaneBarracksFacetV1.json'
-import ArcaneProfile from '@rune-backend-sdk/contracts/ArcaneProfile.json'
-import ArcaneItems from '@rune-backend-sdk/contracts/ArcaneItems.json'
-import RuneSenderV1 from '@rune-backend-sdk/contracts/RuneSenderV1.json'
-import BEP20Contract from '@rune-backend-sdk/contracts/BEP20.json'
-import secrets from "../../secrets.json"
+import { log } from '@runemetaverse/backend-sdk/build/util'
+import { getAddress, getRandomProvider } from '@runemetaverse/backend-sdk/build/util/web3'
+import contractInfo from '@runemetaverse/backend-sdk/build/contractInfo'
+import ArcaneRaidV1 from '@runemetaverse/backend-sdk/build/contracts/ArcaneRaidV1.json'
+import ArcaneTraderV1 from '@runemetaverse/backend-sdk/build/contracts/ArcaneTraderV1.json'
+import RXSMarketplace from '@runemetaverse/backend-sdk/build/contracts/RXSMarketplace.json'
+import ArcaneCharacters from '@runemetaverse/backend-sdk/build/contracts/ArcaneCharacters.json'
+import ArcaneCharacterFactoryV3 from '@runemetaverse/backend-sdk/build/contracts/ArcaneCharacterFactoryV3.json'
+import ArcaneBarracksFacetV1 from '@runemetaverse/backend-sdk/build/contracts/ArcaneBarracksFacetV1.json'
+import ArcaneProfile from '@runemetaverse/backend-sdk/build/contracts/ArcaneProfile.json'
+import ArcaneItems from '@runemetaverse/backend-sdk/build/contracts/ArcaneItems.json'
+import RuneSenderV1 from '@runemetaverse/backend-sdk/build/contracts/RuneSenderV1.json'
+import BEP20Contract from '@runemetaverse/backend-sdk/build/contracts/BEP20.json'
+import secrets from '../../secrets.json'
 
 function _initProvider(app) {
   try {
     log('Setting up provider')
 
     app.secrets = secrets
-    app.web3Provider = getRandomProvider(secrets.find(s => s.id === 'default-signer'))
+    app.web3Provider = getRandomProvider(secrets.find((s) => s.id === 'default-signer'))
     app.web3 = new Web3(app.web3Provider)
 
     app.ethersProvider = new ethers.providers.Web3Provider(app.web3Provider, 'any')
@@ -31,22 +31,62 @@ function _initProvider(app) {
     app.signers.write = app.ethersProvider.getSigner()
 
     app.contracts = {}
-    app.contracts.items = new ethers.Contract(getAddress(app.contractInfo.items), app.contractMetadata.ArcaneItems.abi, app.signers.read)
-    app.contracts.characters = new ethers.Contract(getAddress(app.contractInfo.characters), app.contractMetadata.ArcaneCharacters.abi, app.signers.read)
-    app.contracts.barracks = new ethers.Contract(getAddress(app.contractInfo.barracks), app.contractMetadata.ArcaneBarracksFacetV1.abi, app.signers.read)
-    app.contracts.trader = new ethers.Contract(getAddress(app.contractInfo.trader), app.contractMetadata.ArcaneTraderV1.abi, app.signers.read)
-    app.contracts.market = new ethers.Contract(getAddress(app.contractInfo.market), app.contractMetadata.RXSMarketplace.abi, app.signers.read)
-    app.contracts.characterFactory = new ethers.Contract(getAddress(app.contractInfo.characterFactory), app.contractMetadata.ArcaneCharacterFactoryV3.abi, app.signers.read)
-    app.contracts.profile = new ethers.Contract(getAddress(app.contractInfo.profile), app.contractMetadata.ArcaneProfile.abi, app.signers.read)
-    app.contracts.sender = new ethers.Contract(getAddress(app.contractInfo.sender), app.contractMetadata.RuneSenderV1.abi, app.signers.read)
-    app.contracts.busd = new ethers.Contract(getAddress(app.contractInfo.busd), app.contractMetadata.BEP20.abi, app.signers.read)
-    app.contracts.wbnb = new ethers.Contract(getAddress(app.contractInfo.wbnb), app.contractMetadata.BEP20.abi, app.signers.read)
+    app.contracts.items = new ethers.Contract(
+      getAddress(app.contractInfo.items),
+      app.contractMetadata.ArcaneItems.abi,
+      app.signers.read
+    )
+    app.contracts.characters = new ethers.Contract(
+      getAddress(app.contractInfo.characters),
+      app.contractMetadata.ArcaneCharacters.abi,
+      app.signers.read
+    )
+    app.contracts.barracks = new ethers.Contract(
+      getAddress(app.contractInfo.barracks),
+      app.contractMetadata.ArcaneBarracksFacetV1.abi,
+      app.signers.read
+    )
+    app.contracts.trader = new ethers.Contract(
+      getAddress(app.contractInfo.trader),
+      app.contractMetadata.ArcaneTraderV1.abi,
+      app.signers.read
+    )
+    app.contracts.market = new ethers.Contract(
+      getAddress(app.contractInfo.market),
+      app.contractMetadata.RXSMarketplace.abi,
+      app.signers.read
+    )
+    app.contracts.characterFactory = new ethers.Contract(
+      getAddress(app.contractInfo.characterFactory),
+      app.contractMetadata.ArcaneCharacterFactoryV3.abi,
+      app.signers.read
+    )
+    app.contracts.profile = new ethers.Contract(
+      getAddress(app.contractInfo.profile),
+      app.contractMetadata.ArcaneProfile.abi,
+      app.signers.read
+    )
+    app.contracts.sender = new ethers.Contract(
+      getAddress(app.contractInfo.sender),
+      app.contractMetadata.RuneSenderV1.abi,
+      app.signers.read
+    )
+    app.contracts.busd = new ethers.Contract(
+      getAddress(app.contractInfo.busd),
+      app.contractMetadata.BEP20.abi,
+      app.signers.read
+    )
+    app.contracts.wbnb = new ethers.Contract(
+      getAddress(app.contractInfo.wbnb),
+      app.contractMetadata.BEP20.abi,
+      app.signers.read
+    )
 
     // app.web3.on('networkChanged', function(networkId) {
     //   process.exit()
     // })
-    
-    app.ethersProvider.on("network", (newNetwork, oldNetwork) => {
+
+    app.ethersProvider.on('network', (newNetwork, oldNetwork) => {
       // When a Provider makes its initial connection, it emits a "network"
       // event with a null oldNetwork along with the newNetwork. So, if the
       // oldNetwork exists, it represents a changing network
@@ -55,8 +95,7 @@ function _initProvider(app) {
         process.exit()
       }
     })
-
-  } catch(e) {
+  } catch (e) {
     log(`Couldn't setup provider.`, e)
 
     setTimeout(() => _initProvider(app), 60 * 1000)
@@ -90,7 +129,7 @@ export function initWeb3(app) {
 
   app.signers = {
     read: undefined,
-    write: undefined
+    write: undefined,
   }
 
   initProvider(app)

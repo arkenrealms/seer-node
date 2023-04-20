@@ -1,4 +1,4 @@
-import { log } from '@rune-backend-sdk/util'
+import { log } from '@runemetaverse/backend-sdk/build/util'
 
 async function fastSaves(app) {
   log('[Save] Fast save')
@@ -9,7 +9,7 @@ async function fastSaves(app) {
     setTimeout(async () => await app.db.saveStats(), 35 * 1000)
     setTimeout(async () => await app.db.saveRunes(), 40 * 1000)
     setTimeout(async () => await app.db.saveOracle(), 45 * 1000)
-  } catch(e) {
+  } catch (e) {
     console.log('Save error', e)
   }
 
@@ -31,7 +31,7 @@ async function slowSaves(app) {
     setTimeout(async () => await app.db.saveConfig(), 3.5 * 60 * 1000)
     // setTimeout(async () => await app.db.saveApp(), 1 * 1000)
     // setTimeout(async () => await app.db.updateGit(), 1 * 1000)
-  } catch(e) {
+  } catch (e) {
     console.log('Save error', e)
   }
 
@@ -49,10 +49,10 @@ async function processQueuedSaves(app) {
 
   isSaverRunning = true
 
-  while(1) {
+  while (1) {
     try {
       await app.db.processSave()
-    } catch(e) {
+    } catch (e) {
       console.log('Process queued save error', e)
     }
 
@@ -61,7 +61,7 @@ async function processQueuedSaves(app) {
 }
 
 export async function monitorSaves(app) {
-  setTimeout(function() {
+  setTimeout(function () {
     setTimeout(() => fastSaves(app), 0)
     setTimeout(() => slowSaves(app), 2 * 60 * 1000)
   }, 3 * 60 * 1000)
