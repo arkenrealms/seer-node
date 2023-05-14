@@ -28,6 +28,7 @@ import { monitorSaves } from './modules/save'
 import { monitorSenderEvents } from './modules/sender'
 import { initSkinner } from './modules/skinner'
 import { monitorGeneralStats } from './modules/stats'
+import { convertPaymentRequests } from './modules/payment-request-converter'
 import { initWeb3 } from './modules/web3'
 // import { runTest } from './modules/tests/test-a'
 import * as tests from './tests'
@@ -223,6 +224,27 @@ async function init() {
           instance: monitorAirtable,
           async: false,
           timeout: 5 * 1000,
+        },
+      ]
+    } else if (process.env.RUNE_ENV === 'payments') {
+      app.moduleConfig = [
+        {
+          name: 'initConfig',
+          instance: initConfig,
+          async: false,
+          timeout: 0,
+        },
+        {
+          name: 'initDb',
+          instance: initDb,
+          async: false,
+          timeout: 0,
+        },
+        {
+          name: 'convertPaymentRequests',
+          instance: convertPaymentRequests,
+          async: false,
+          timeout: 10,
         },
       ]
     } else if (process.env.RUNE_ENV === 'skinner') {
