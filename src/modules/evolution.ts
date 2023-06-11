@@ -840,7 +840,9 @@ export async function connectRealm(app, realm) {
         let character = CharacterCache[winner.address]
 
         if (!character) {
+          console.log('Getting char data')
           character = await getCharacter(app, winner.address)
+          console.log('Got char data')
 
           CharacterCache[winner.address] = character
         }
@@ -863,7 +865,9 @@ export async function connectRealm(app, realm) {
       }
 
       for (const player of req.data.round.players) {
+        console.log('Loading user')
         const user = await app.db.loadUser(player.address)
+        console.log('Loaded user')
         const now = new Date().getTime() / 1000
 
         if (user.lastGamePlayed > now - 4 * 60) continue // Make sure this player isn't in 2 games or somehow getting double rewards
@@ -875,14 +879,14 @@ export async function connectRealm(app, realm) {
         app.db.setUserActive(user)
 
         if (player.killStreak >= 10) {
-          await app.live.emitAll('PlayerAction', {
+          app.live.emitAll('PlayerAction', {
             key: 'evolution1-killstreak',
             createdAt: new Date().getTime() / 1000,
             address: user.address,
             username: user.username,
             message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
           })
-          await app.notices.add('evolution1-killstreak', {
+          app.notices.add('evolution1-killstreak', {
             key: 'evolution1-killstreak',
             address: user.address,
             username: user.username,
@@ -1029,7 +1033,9 @@ export async function connectRealm(app, realm) {
             let character = CharacterCache[player.address]
 
             if (!character) {
+              console.log('Getting char data')
               character = await getCharacter(app, player.address)
+              console.log('Got char data')
 
               CharacterCache[player.address] = character
             }
@@ -1076,7 +1082,7 @@ export async function connectRealm(app, realm) {
 
             app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 
-            await app.live.emitAll('PlayerAction', {
+            app.live.emitAll('PlayerAction', {
               key: 'evolution1-winner',
               createdAt: new Date().getTime() / 1000,
               address: user.address,
@@ -1089,7 +1095,7 @@ export async function connectRealm(app, realm) {
             })
 
             if (rewardWinnerMap[index] > 0.1) {
-              await app.notices.add('evolution1-winner', {
+              app.notices.add('evolution1-winner', {
                 key: 'evolution1-winner',
                 address: user.address,
                 username: user.username,
@@ -1551,4 +1557,4 @@ export async function monitorEvolutionRealms(app) {
 setInterval(function () {
   log('Clearing character cache...')
   CharacterCache = {}
-}, 10 * 60 * 1000)
+}, 30 * 60 * 1000)
