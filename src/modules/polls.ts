@@ -1,7 +1,7 @@
 export async function initPolls(app) {
   app.polls = {}
 
-  app.api.addListener('GetPolls', function () {
+  app.api.on('GetPolls', function () {
     // GetPolls
     // CreatePoll
     // GetPoll
