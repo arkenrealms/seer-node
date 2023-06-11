@@ -59,7 +59,7 @@ export async function getAllItemEvents(app, retry = false) {
             }
 
             if (decodedItem.rarity.id === ItemRarity.Mythic.id) {
-              await app.live.emitAll('PlayerAction', {
+              await app.api.emitAll('PlayerAction', {
                 key: 'item-craft',
                 createdAt: new Date().getTime() / 1000,
                 address: token.owner,
@@ -77,7 +77,7 @@ export async function getAllItemEvents(app, retry = false) {
                 message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted a mythic ${decodedItem.name}`,
               })
             } else if (decodedItem.rarity.id === ItemRarity.Epic.id) {
-              await app.live.emitAll('PlayerAction', {
+              await app.api.emitAll('PlayerAction', {
                 key: 'item-craft',
                 createdAt: new Date().getTime() / 1000,
                 address: token.owner,
@@ -95,7 +95,7 @@ export async function getAllItemEvents(app, retry = false) {
                 message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted an epic ${decodedItem.name}`,
               })
             } else if (decodedItem.rarity.id === ItemRarity.Rare.id) {
-              await app.live.emitAll('PlayerAction', {
+              await app.api.emitAll('PlayerAction', {
                 key: 'item-craft',
                 createdAt: new Date().getTime() / 1000,
                 address: token.owner,
@@ -105,7 +105,7 @@ export async function getAllItemEvents(app, retry = false) {
                 message: `${user.username || `${userAddress.slice(0, 7)}...`} crafted a rare ${decodedItem.name}`,
               })
             } else if (decodedItem.rarity.id === ItemRarity.Magical.id) {
-              await app.live.emitAll('PlayerAction', {
+              await app.api.emitAll('PlayerAction', {
                 key: 'item-craft',
                 createdAt: new Date().getTime() / 1000,
                 address: token.owner,
@@ -130,7 +130,7 @@ export async function getAllItemEvents(app, retry = false) {
                 '0xa9b9195b19963f2d72a7f56bad3705ba536cdb66',
               ].includes(from)
             ) {
-              await app.live.emitAll('PlayerAction', {
+              await app.api.emitAll('PlayerAction', {
                 key: 'item-transfer',
                 createdAt: new Date().getTime() / 1000,
                 address: token.owner,

@@ -459,7 +459,7 @@ export async function initLive(app) {
         await app.db.saveUser(user)
       }
 
-      await app.live.emitAll('PlayerAction', {
+      await app.api.emitAll('PlayerAction', {
         key: 'admin',
         createdAt: new Date().getTime() / 1000,
         address: req.signature.address,
@@ -517,7 +517,7 @@ export async function initLive(app) {
         await app.db.saveUser(user)
       }
 
-      await app.live.emitAll('PlayerAction', {
+      await app.api.emitAll('PlayerAction', {
         key: 'admin',
         createdAt: new Date().getTime() / 1000,
         address: req.signature.address,

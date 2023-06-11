@@ -200,7 +200,7 @@ export async function getAllBarracksEvents(app, retry = false) {
         }
         await app.db.saveUserItem(user, item)
 
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'raid1-equipped',
           createdAt: new Date().getTime() / 1000,
           address: user.address,
@@ -228,7 +228,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         await app.db.saveUserItem(user, item)
 
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'raid1-unequipped',
           createdAt: new Date().getTime() / 1000,
           address: user.address,
@@ -244,7 +244,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'raid1-burn',
           createdAt: new Date().getTime() / 1000,
           address: user.address,
@@ -258,7 +258,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'raid1-bonus',
           createdAt: new Date().getTime() / 1000,
           address: user.address,
@@ -272,7 +272,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'raid1-hidden-pool',
           createdAt: new Date().getTime() / 1000,
           address: user.address,
@@ -286,7 +286,7 @@ export async function getAllBarracksEvents(app, retry = false) {
 
         const user = await app.db.loadUser(userAddress)
 
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'raid1-fee',
           createdAt: new Date().getTime() / 1000,
           address: user.address,

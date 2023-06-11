@@ -273,7 +273,7 @@ export function initDb(app) {
         return true
       } else {
         if (u.username) {
-          app.live.emitAll('PlayerAction', {
+          app.api.emitAll('PlayerAction', {
             key: 'player-inactive',
             createdAt: new Date().getTime() / 1000,
             address: u.address,
@@ -302,7 +302,7 @@ export function initDb(app) {
     if (activeUser) {
       activeUser.updated = now
     } else {
-      app.live.emitAll('PlayerAction', {
+      app.api.emitAll('PlayerAction', {
         key: 'player-active',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -1056,7 +1056,7 @@ export function initDb(app) {
     if (!guild.members.includes(user.address)) {
       guild.members.push(user.address)
 
-      app.live.emitAll('PlayerAction', {
+      app.api.emitAll('PlayerAction', {
         key: 'guild-join',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -1118,7 +1118,7 @@ export function initDb(app) {
   app.db.updateAchievementsByUser = async (user) => {
     if (!app.db.hasUserAchievement(user, 'CRAFT_1') && user.craftedItemCount >= 1) {
       app.db.addUserAchievement(user, 'CRAFT_1')
-      await app.live.emitAll('PlayerAction', {
+      await app.api.emitAll('PlayerAction', {
         key: 'achievement',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -1129,7 +1129,7 @@ export function initDb(app) {
     }
     if (!app.db.hasUserAchievement(user, 'CRAFT_10') && user.craftedItemCount >= 10) {
       app.db.addUserAchievement(user, 'CRAFT_10')
-      await app.live.emitAll('PlayerAction', {
+      await app.api.emitAll('PlayerAction', {
         key: 'achievement',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -1140,7 +1140,7 @@ export function initDb(app) {
     }
     if (!app.db.hasUserAchievement(user, 'CRAFT_100') && user.craftedItemCount >= 100) {
       app.db.addUserAchievement(user, 'CRAFT_100')
-      await app.live.emitAll('PlayerAction', {
+      await app.api.emitAll('PlayerAction', {
         key: 'achievement',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -1151,7 +1151,7 @@ export function initDb(app) {
     }
     if (!app.db.hasUserAchievement(user, 'CRAFT_1000') && user.craftedItemCount >= 1000) {
       app.db.addUserAchievement(user, 'CRAFT_1000')
-      await app.live.emitAll('PlayerAction', {
+      await app.api.emitAll('PlayerAction', {
         key: 'achievement',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -1168,7 +1168,7 @@ export function initDb(app) {
     }
     if (!app.db.hasUserAchievement(user, 'ACQUIRED_RUNE') && user.holdings?.rune >= 1) {
       app.db.addUserAchievement(user, 'ACQUIRED_RUNE')
-      await app.live.emitAll('PlayerAction', {
+      await app.api.emitAll('PlayerAction', {
         key: 'achievement',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -1180,7 +1180,7 @@ export function initDb(app) {
     if (!app.db.hasUserAchievement(user, 'BATTLE_RUNE_EVO')) {
       if (user.evolution?.overall?.rounds > 0) {
         app.db.addUserAchievement(user, 'BATTLE_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'achievement',
           createdAt: new Date().getTime() / 1000,
           address: user.address,
@@ -1193,7 +1193,7 @@ export function initDb(app) {
     if (!app.db.hasUserAchievement(user, 'MEGA_RUNE_EVO')) {
       if (user.evolution?.overall?.wins > 0) {
         app.db.addUserAchievement(user, 'MEGA_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'achievement',
           createdAt: new Date().getTime() / 1000,
           address: user.address,
@@ -1206,7 +1206,7 @@ export function initDb(app) {
     if (!app.db.hasUserAchievement(user, 'DOMINATE_RUNE_EVO')) {
       if (user.evolution?.overall?.winStreak > 25) {
         app.db.addUserAchievement(user, 'DOMINATE_RUNE_EVO')
-        await app.live.emitAll('PlayerAction', {
+        await app.api.emitAll('PlayerAction', {
           key: 'achievement',
           createdAt: new Date().getTime() / 1000,
           address: user.address,

@@ -59,7 +59,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller })
             // await saveConfig()
 
-            await app.live.emitAll('PlayerAction', {
+            await app.api.emitAll('PlayerAction', {
               key: 'market-list',
               createdAt: new Date().getTime() / 1000,
               address: seller,
@@ -115,7 +115,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveItemToken(item, { id: trade.tokenId, owner: seller })
             // await saveConfig()
 
-            await app.live.emitAll('PlayerAction', {
+            await app.api.emitAll('PlayerAction', {
               key: 'market-list',
               createdAt: new Date().getTime() / 1000,
               address: seller,
@@ -161,7 +161,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveItemTrade(item, specificTrade)
             await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller })
 
-            await app.live.emitAll('PlayerAction', {
+            await app.api.emitAll('PlayerAction', {
               key: 'market-update',
               createdAt: new Date().getTime() / 1000,
               address: seller,
@@ -206,7 +206,7 @@ export async function getAllMarketEvents(app, retry = false) {
             await app.db.saveItemTrade(item, specificTrade)
             await app.db.saveItemToken(item, { id: specificTrade.tokenId, owner: seller })
 
-            await app.live.emitAll('PlayerAction', {
+            await app.api.emitAll('PlayerAction', {
               key: 'market-delist',
               createdAt: new Date().getTime() / 1000,
               address: seller,
@@ -254,7 +254,7 @@ export async function getAllMarketEvents(app, retry = false) {
 
             app.db.oracle.inflow.marketFees.tokens.week.rxs += toShort(price) * 0.05
 
-            await app.live.emitAll('PlayerAction', {
+            await app.api.emitAll('PlayerAction', {
               key: 'market-buy',
               createdAt: new Date().getTime() / 1000,
               address: seller,

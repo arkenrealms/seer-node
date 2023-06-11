@@ -102,7 +102,7 @@ export async function getAllSenderEvents(app, retry = false) {
         await app.db.saveUser(user)
 
         if (finalizeRes.status === 1) {
-          await app.live.emitAll('PlayerAction', {
+          await app.api.emitAll('PlayerAction', {
             key: 'reward-claim',
             createdAt: new Date().getTime() / 1000,
             address: user.address,
@@ -111,7 +111,7 @@ export async function getAllSenderEvents(app, retry = false) {
           })
         } else {
           log('Error finalizing claim', e, finalizeRes)
-          await app.live.emitAll('PlayerAction', {
+          await app.api.emitAll('PlayerAction', {
             key: 'reward-claim',
             createdAt: new Date().getTime() / 1000,
             address: user.address,

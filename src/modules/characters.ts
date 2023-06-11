@@ -46,7 +46,7 @@ export async function getAllCharacterEvents(app, retry = false) {
           // log('8888', logInfo, e)
           app.db.oracle.inflow.characterFees.tokens.week.rxs += app.config.characterMintCost
 
-          await app.live.emitAll('PlayerAction', {
+          await app.api.emitAll('PlayerAction', {
             key: 'character-create',
             createdAt: new Date().getTime() / 1000,
             address: userAddress,
@@ -56,7 +56,7 @@ export async function getAllCharacterEvents(app, retry = false) {
         } else {
           await app.db.saveUserCharacter(user, { ...characterData, status: 'transferred_out' })
 
-          await app.live.emitAll('PlayerAction', {
+          await app.api.emitAll('PlayerAction', {
             key: 'character-transfer',
             createdAt: new Date().getTime() / 1000,
             address: userAddress,

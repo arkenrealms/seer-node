@@ -491,7 +491,7 @@ export async function connectRealm(app, realm) {
 
       const user = await app.db.loadUser(req.data.body.signature.address)
 
-      app.live.emitAll('PlayerAction', {
+      app.api.emitAll('PlayerAction', {
         key: 'moderator-action',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -879,7 +879,7 @@ export async function connectRealm(app, realm) {
         app.db.setUserActive(user)
 
         if (player.killStreak >= 10) {
-          app.live.emitAll('PlayerAction', {
+          app.api.emitAll('PlayerAction', {
             key: 'evolution1-killstreak',
             createdAt: new Date().getTime() / 1000,
             address: user.address,
@@ -1082,7 +1082,7 @@ export async function connectRealm(app, realm) {
 
             app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
 
-            app.live.emitAll('PlayerAction', {
+            app.api.emitAll('PlayerAction', {
               key: 'evolution1-winner',
               createdAt: new Date().getTime() / 1000,
               address: user.address,
