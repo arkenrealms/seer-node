@@ -504,12 +504,12 @@ async function init() {
           async: false,
           timeout: 1 * 60 * 1000,
         },
-        {
-          name: 'monitorGuildMemberDetails',
-          instance: monitorGuildMemberDetails,
-          async: false,
-          timeout: 1 * 60 * 1000,
-        },
+        // {
+        //   name: 'monitorGuildMemberDetails',
+        //   instance: monitorGuildMemberDetails,
+        //   async: false,
+        //   timeout: 1 * 60 * 1000,
+        // },
         {
           name: 'monitorSaves',
           instance: monitorSaves,
