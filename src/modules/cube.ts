@@ -13,6 +13,8 @@ function initEventHandler(app) {
 
   io.on('connection', function (socket) {
     try {
+      log('Cube handler connection')
+
       // Use by GS to tell DB it's connected
       socket.on('RC_AuthRequest', function (req) {
         if (req.data !== 'myverysexykey') {
