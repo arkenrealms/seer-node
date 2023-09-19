@@ -54,7 +54,7 @@ async function init() {
     app.flags = {}
 
     try {
-      app.admins = await (await fetch('https://raw.githubusercontent.com/RuneMetaverse/data/main/admins.json')).json()
+      app.admins = await (await fetch('https://raw.githubusercontent.com/RuneMetaverse/dao/main/admins.json')).json()
     } catch (e) {
       app.admins = {
         '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B': {
