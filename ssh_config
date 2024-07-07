@@ -1,0 +1,5 @@
+Host sdk
+HostName github.com
+IdentityFile ~/.ssh/id_ed25519_databaser
+ServerAliveInterval 60
+ServerAliveCountMax 30
