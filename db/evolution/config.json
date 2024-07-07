@@ -1,0 +1,8 @@
+{
+  "rewardItemAmountPerLegitPlayer": 0.0015,
+  "rewardItemAmountMax": 0.03,
+  "rewardWinnerAmountPerLegitPlayer": 0.015,
+  "rewardWinnerAmountMax": 0.3,
+  "rewardItemAmount": 0.02,
+  "rewardWinnerAmount": 0.05
+}

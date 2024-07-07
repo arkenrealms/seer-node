@@ -1,0 +1,11 @@
+{
+  "trades": { "updating": false },
+  "barracks": { "updating": false },
+  "blacksmith": { "updating": false },
+  "items": { "updating": false },
+  "characters": { "updating": false },
+  "test": { "updating": false },
+  "sender": { "updating": false },
+  "updatedDate": "1663921405420",
+  "updatedTimestamp": 1663921405420
+}
