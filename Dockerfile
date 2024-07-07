@@ -7,7 +7,7 @@ RUN npm install -g ts-node-dev
 
 COPY . .
 
-COPY id_ed25519 /root/.ssh/id_ed25519_databaser
+COPY id_ed25519_databaser /root/.ssh/id_ed25519_databaser
 RUN chmod 600 /root/.ssh/id_ed25519_databaser
 COPY ssh_config /root/.ssh/config
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
@@ -19,7 +19,7 @@ RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 # RUN npm link
 
 WORKDIR /usr/src/app
-RUN git clone git@evors:zeno-games/databaser.git
+RUN git clone git@databaser:zeno-games/databaser.git
 WORKDIR /usr/src/app/databaser
 RUN yarn install
 RUN yarn run build

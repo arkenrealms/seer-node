@@ -1,4 +1,4 @@
-Host sdk
+Host databaser
 HostName github.com
 IdentityFile ~/.ssh/id_ed25519_databaser
 ServerAliveInterval 60
