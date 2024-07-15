@@ -1,3 +1,9 @@
+id_ed25519.pub
+id_ed25519
+ssh_config
+secrets.json
+update.py
+
 rune.db
 rune.db.*
 *.prisma
