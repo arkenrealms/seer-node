@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { log } from '@runemetaverse/backend-sdk/build/util'
+import { log } from '@arken/node/util'
 
 export async function monitorGuildMemberDetails(app) {
   try {

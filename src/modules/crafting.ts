@@ -1,7 +1,7 @@
 import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { log } from '@runemetaverse/backend-sdk/build/util'
+import { log } from '@arken/node/util'
 
 export async function monitorCraftingStats(app) {
   try {

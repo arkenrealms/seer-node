@@ -1,4 +1,4 @@
-import { log } from '@runemetaverse/backend-sdk/build/util'
+import { log } from '@arken/node/util'
 
 async function fastSaves(app) {
   log('[Save] Fast save')

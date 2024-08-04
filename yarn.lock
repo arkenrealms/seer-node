@@ -2,6 +2,34 @@
 # yarn lockfile v1
 
 
+"@arken/node@^1.4.5":
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/@arken/node/-/node-1.4.5.tgz#67cbc499f34638400b984bbe59a01c60d4ecb7a0"
+  integrity sha512-0i9BNEvOjdRmEffO2DQI/L49B41ltKBUhe6YLESVhNpVRTaqHCEdXt1pdVdWUd9B6Aoy7RlH2KkjDDiGMcj10A==
+  dependencies:
+    "@truffle/hdwallet-provider" "^2.0.3"
+    "@typechain/ethers-v4" "^1.0.0"
+    "@types/common-tags" "^1.8.0"
+    "@types/ethereum-protocol" "^1.0.0"
+    "@types/node" "^13.7.0"
+    "@typescript-eslint/eslint-plugin" "^1.9.0"
+    "@typescript-eslint/parser" "^1.9.0"
+    es6-promise "^4.2.8"
+    ethers "^5.3.1"
+    fs-jetpack "^4.1.0"
+    js-md5 "^0.7.3"
+    knex "^0.21.1"
+    lokijs "^1.5.12"
+    moment "^2.29.1"
+    objection "^2.1.3"
+    shortid "^2.2.2"
+    socket.io-client "^4.1.2"
+    ts-node-dev "^1.1.8"
+    typescript "^4.3.4"
+    underscore "^1.13.2"
+    utf8 "^3.0.0"
+    web3 "^1.3.6"
+
 "@babel/code-frame@^7.0.0":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.10.4.tgz#168da1a36e90da68ae8d49c0f1b48c7c6249213a"
@@ -1711,34 +1739,6 @@
     hosted-git-info "^2.6.0"
     path-browserify "^1.0.0"
     url "^0.11.0"
-
-"@runemetaverse/backend-sdk@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@runemetaverse/backend-sdk/-/backend-sdk-1.3.1.tgz#0c3f1585875c4e572cd4d6546fea7d1fbdce781b"
-  integrity sha512-GI0ll1wNh+FQGyqAwwxSWhMeRJmWJllngqLy4PnxoBgaMfG/vJeTIhU++LdpIBpEvZPM9xbSOw6VRTLFDcjTFA==
-  dependencies:
-    "@truffle/hdwallet-provider" "^2.0.3"
-    "@typechain/ethers-v4" "^1.0.0"
-    "@types/common-tags" "^1.8.0"
-    "@types/ethereum-protocol" "^1.0.0"
-    "@types/node" "^13.7.0"
-    "@typescript-eslint/eslint-plugin" "^1.9.0"
-    "@typescript-eslint/parser" "^1.9.0"
-    es6-promise "^4.2.8"
-    ethers "^5.3.1"
-    fs-jetpack "^4.1.0"
-    js-md5 "^0.7.3"
-    knex "^0.21.1"
-    lokijs "^1.5.12"
-    moment "^2.29.1"
-    objection "^2.1.3"
-    shortid "^2.2.2"
-    socket.io-client "^4.1.2"
-    ts-node-dev "^1.1.8"
-    typescript "^4.3.4"
-    underscore "^1.13.2"
-    utf8 "^3.0.0"
-    web3 "^1.3.6"
 
 "@sentry/core@5.23.0":
   version "5.23.0"

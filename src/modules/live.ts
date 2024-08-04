@@ -1,7 +1,7 @@
-import { getHighestId, toShort, log, random, sha256 } from '@runemetaverse/backend-sdk/build/util'
-import { decodeItem } from '@runemetaverse/backend-sdk/build/util/item-decoder'
-import { isValidRequest, getSignedRequest } from '@runemetaverse/backend-sdk/build/util/web3'
-import getAddressByUsername from '@runemetaverse/backend-sdk/build/util/api/getAddressByOldUsername'
+import { getHighestId, toShort, log, random, sha256 } from '@arken/node/util'
+import { decodeItem } from '@arken/node/util/decoder'
+import { isValidRequest, getSignedRequest } from '@arken/node/util/web3'
+import getAddressByUsername from '@arken/node/util/api/getAddressByOldUsername'
 import shortId from 'shortid'
 
 const items = {
@@ -117,7 +117,7 @@ export async function initLive(app) {
 
       if (!token.defaultImage) token.defaultImage = token.image
 
-      token.image = `https://cache.rune.game/${skin}`
+      token.image = `https://cache.arken.gg/${skin}`
 
       app.db.queueSave(() => app.db.saveSkins())
       app.db.queueSave(() => app.db.saveTokenSkins())
@@ -225,7 +225,7 @@ export async function initLive(app) {
 
       const token = await app.db.loadToken(tokenId)
 
-      token.image = `https://cache.rune.game/${skin}`
+      token.image = `https://cache.arken.gg/${skin}`
 
       app.db.queueSave(() => app.db.saveSkins())
       app.db.queueSave(() => app.db.saveTokenSkins())

@@ -2,8 +2,8 @@ import fetch from 'node-fetch'
 import path from 'path'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { log, random } from '@runemetaverse/backend-sdk/build/util'
-import { toFixed } from '@runemetaverse/backend-sdk/build/util/math'
+import { log, random } from '@arken/node/util'
+import { toFixed } from '@arken/node/util/math'
 
 const rewardRunes = ['el', 'tir', 'zod', 'nef', 'sol', 'ist', 'gul', 'fal', 'um', 'ort']
 
@@ -24,11 +24,10 @@ export async function monitorDao(app) {
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'cross-site',
-        Referer: 'https://vote.rune.game/',
+        Referer: 'https://vote.arken.gg/',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
       },
-      body:
-        '{"operationName":"Proposals","variables":{"first":6,"skip":0,"space_in":["runemetaverse.eth"],"state":"all","author_in":[]},"query":"query Proposals($first: Int!, $skip: Int!, $state: String!, $space: String, $space_in: [String], $author_in: [String]) {\\n  proposals(\\n    first: $first\\n    skip: $skip\\n    where: {space: $space, state: $state, space_in: $space_in, author_in: $author_in}\\n  ) {\\n    id\\n    ipfs\\n    title\\n    body\\n    start\\n    end\\n    state\\n    author\\n    created\\n    choices\\n    space {\\n      id\\n      name\\n      members\\n      avatar\\n      symbol\\n    }\\n    scores_state\\n    scores_total\\n    scores\\n    votes\\n    quorum\\n    symbol\\n  }\\n}"}',
+      body: '{"operationName":"Proposals","variables":{"first":6,"skip":0,"space_in":["runemetaverse.eth"],"state":"all","author_in":[]},"query":"query Proposals($first: Int!, $skip: Int!, $state: String!, $space: String, $space_in: [String], $author_in: [String]) {\\n  proposals(\\n    first: $first\\n    skip: $skip\\n    where: {space: $space, state: $state, space_in: $space_in, author_in: $author_in}\\n  ) {\\n    id\\n    ipfs\\n    title\\n    body\\n    start\\n    end\\n    state\\n    author\\n    created\\n    choices\\n    space {\\n      id\\n      name\\n      members\\n      avatar\\n      symbol\\n    }\\n    scores_state\\n    scores_total\\n    scores\\n    votes\\n    quorum\\n    symbol\\n  }\\n}"}',
       method: 'POST',
     })
 
@@ -56,7 +55,7 @@ export async function monitorDao(app) {
           'sec-fetch-dest': 'empty',
           'sec-fetch-mode': 'cors',
           'sec-fetch-site': 'cross-site',
-          Referer: 'https://vote.rune.game/',
+          Referer: 'https://vote.arken.gg/',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
         },
         body:

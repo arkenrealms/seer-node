@@ -1,6 +1,6 @@
 import path from 'path'
 import jetpack from 'fs-jetpack'
-import { log } from '@runemetaverse/backend-sdk/build/util'
+import { log } from '@arken/node/util'
 
 export async function convertRewardsOld(app) {
   log('Convert rewards')

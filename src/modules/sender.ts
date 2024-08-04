@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import * as ethers from 'ethers'
-import { log, wait } from '@runemetaverse/backend-sdk/build/util'
-import { iterateBlocks, getAddress, getSignedRequest } from '@runemetaverse/backend-sdk/build/util/web3'
+import { log, wait } from '@arken/node/util'
+import { iterateBlocks, getAddress, getSignedRequest } from '@arken/node/util/web3'
 
 async function monitorBalances(app) {}
 
@@ -175,7 +175,7 @@ export async function monitorSenderEvents(app) {
 
   app.sender.coordinatorEndpoint = 'http://35.245.242.215'
 
-  if (process.env.RUNE_ENV === 'local') {
+  if (process.env.ARKEN_ENV === 'local') {
     app.sender.coordinatorEndpoint = 'http://localhost:5001'
   }
 

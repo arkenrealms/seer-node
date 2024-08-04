@@ -2,9 +2,9 @@ import path from 'path'
 import * as ethers from 'ethers'
 import jetpack from 'fs-jetpack'
 import beautify from 'json-beautify'
-import { log } from '@runemetaverse/backend-sdk/build/util'
-import { achievementData } from '@runemetaverse/backend-sdk/build/data/achievements'
-import { ItemsMainCategoriesType } from '@runemetaverse/backend-sdk/build/data/items.type'
+import { log } from '@arken/node/util'
+import { achievementData } from '@arken/node/data/achievements'
+import { ItemsMainCategoriesType } from '@arken/node/data/items.type'
 import {
   itemData,
   ItemTypeToText,
@@ -14,8 +14,8 @@ import {
   SkillNames,
   ClassNames,
   ItemRarity,
-} from '@runemetaverse/backend-sdk/build/data/items'
-import ItemAttributes from '@runemetaverse/backend-sdk/build/data/generated/itemAttributes.json'
+} from '@arken/node/data/items'
+import ItemAttributes from '@arken/node/data/generated/itemAttributes.json'
 
 export async function monitorMeta(app) {
   try {
@@ -53,7 +53,7 @@ export async function monitorMeta(app) {
 
     for (const _item of itemData[ItemsMainCategoriesType.OTHER]) {
       const item = JSON.parse(JSON.stringify(_item)) as any
-      item.icon = item.icon.replace('undefined', 'https://rune.game/')
+      item.icon = item.icon.replace('undefined', 'https://arken.gg/')
 
       if (item.recipe?.requirement) {
         item.recipe.requirement = item.recipe.requirement.map((r) => ({ ...r, id: RuneNames[r.id] }))
@@ -67,8 +67,8 @@ export async function monitorMeta(app) {
         description: Array.isArray(item.branches[1].description)
           ? item.branches[1].description[0]
           : item.branches[1].description,
-        home_url: 'https://rune.game',
-        external_url: 'https://rune.game/catalog/' + item.id,
+        home_url: 'https://arken.gg',
+        external_url: 'https://arken.gg/catalog/' + item.id,
         image_url: item.icon,
         language: 'en-US',
         ...item,
@@ -402,7 +402,7 @@ export async function monitorMeta(app) {
       })
 
       // const ipfs = ipfsClient.create({
-      //   host: 'ipfs.rune.game',
+      //   host: 'ipfs.arken.gg',
       //   protocol: 'https',
       //   port: 443,
       //   apiPath: '/api/v0'

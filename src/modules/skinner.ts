@@ -3,12 +3,12 @@ import beautify from 'json-beautify'
 import jetpack from 'fs-jetpack'
 import path from 'path'
 import fs from 'fs'
-import { log, removeDupes } from '@runemetaverse/backend-sdk/build/util'
-import { decodeItem } from '@runemetaverse/backend-sdk/build/util/item-decoder'
-import { achievementData } from '@runemetaverse/backend-sdk/build/data/achievements'
-import Profile from '@runemetaverse/backend-sdk/build/models/profile'
-import Account from '@runemetaverse/backend-sdk/build/models/account'
-import Model from '@runemetaverse/backend-sdk/build/models/base'
+import { log, removeDupes } from '@arken/node/util'
+import { decodeItem } from '@arken/node/util/decoder'
+import { achievementData } from '@arken/node/data/achievements'
+import Profile from '@arken/node/models/profile'
+import Account from '@arken/node/models/account'
+import Model from '@arken/node/models/base'
 import {
   itemData,
   ItemTypeToText,
@@ -18,9 +18,9 @@ import {
   SkillNames,
   ClassNames,
   ItemRarity,
-} from '@runemetaverse/backend-sdk/build/data/items'
+} from '@arken/node/data/items'
 import { userInfo } from 'os'
-import getUsername from '@runemetaverse/backend-sdk/build/util/api/getOldUsername'
+import getUsername from '@arken/node/util/api/getOldUsername'
 
 const PNG = require('pngjs').PNG
 const pixelmatch = require('pixelmatch')

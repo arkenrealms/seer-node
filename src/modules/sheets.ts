@@ -190,13 +190,13 @@
 
 //           const item = {
 //             "description": row.description,
-//             "home_url": "https://rune.game",
-//             "external_url": "https://rune.game/catalog/" + row.id,
-//             "image_url": "https://rune.game/images/items/" + pad(row.id, 5) + ".png",
+//             "home_url": "https://arken.gg",
+//             "external_url": "https://arken.gg/catalog/" + row.id,
+//             "image_url": "https://arken.gg/images/items/" + pad(row.id, 5) + ".png",
 //             "language": "en-US",
 //             "id": row.id,
 //             "name": row.name,
-//             "icon": "https://rune.game/images/items/" + pad(row.id, 5) + ".png",
+//             "icon": "https://arken.gg/images/items/" + pad(row.id, 5) + ".png",
 //             "type": row.type,
 //             "slots": [
 //               row.slot1,

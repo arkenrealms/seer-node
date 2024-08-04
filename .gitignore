@@ -4,8 +4,8 @@ ssh_config
 secrets.json
 update.py
 
-rune.db
-rune.db.*
+arken.db
+arken.db.*
 *.prisma
 
 build

@@ -1,12 +1,12 @@
 import path from 'path'
 import jetpack from 'fs-jetpack'
-import { log } from '@runemetaverse/backend-sdk/build/util'
+import { log } from '@arken/node/util'
 import oldPaymentRequests from '../data/oldPaymentRequests.json'
 
 export async function convertPaymentRequests(app) {
   log('Convert payment requests')
 
-  const application = await app.db.client.Application.findFirst({ where: { name: 'Rune Metaverse' } })
+  const application = await app.db.client.Application.findFirst({ where: { name: 'Arken Realms' } })
   const profile = await app.db.client.Profile.findFirst({ where: { name: 'RuneVault' } })
 
   for (const oldPaymentRequest of oldPaymentRequests) {

@@ -1,6 +1,6 @@
 import * as ethers from 'ethers'
-import { getHighestId, log, toShort } from '@runemetaverse/backend-sdk/build/util'
-import { iterateBlocks, getAddress } from '@runemetaverse/backend-sdk/build/util/web3'
+import { getHighestId, log, toShort } from '@arken/node/util'
+import { iterateBlocks, getAddress } from '@arken/node/util/web3'
 
 export async function getAllCharacterEvents(app, retry = false) {
   if (app.config.characters.updating) return

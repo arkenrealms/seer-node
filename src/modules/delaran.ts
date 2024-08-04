@@ -1,23 +1,23 @@
-import { isValidRequest, getSignedRequest } from '@runemetaverse/backend-sdk/build/util/web3'
-import { getHighestId, toShort, log } from '@runemetaverse/backend-sdk/build/util'
+import { isValidRequest, getSignedRequest } from '@arken/node/util/web3';
+import { getHighestId, toShort, log } from '@arken/node/util';
 
 async function monitorPlayerConnections(app) {
-  log('[delaran] Monitoring player connections')
+  log('[delaran] Monitoring player connections');
 
   try {
-    let connectedPlayers = []
-    let warnPlayers = []
+    let connectedPlayers = [];
+    let warnPlayers = [];
 
     for (const realm of app.db.evolution.realms) {
       if (app.games.evolution.realms[realm.key]?.games) {
         for (const game of app.games.evolution.realms[realm.key].games) {
           for (const player of game.connectedPlayers) {
             if (connectedPlayers.includes(player)) {
-              warnPlayers.push(player)
+              warnPlayers.push(player);
             }
           }
 
-          connectedPlayers = [...connectedPlayers, ...game.connectedPlayers]
+          connectedPlayers = [...connectedPlayers, ...game.connectedPlayers];
         }
       }
     }
@@ -27,11 +27,11 @@ async function monitorPlayerConnections(app) {
         for (const game of app.games.infinite.realms[realm.key].games) {
           for (const player of game.connectedPlayers) {
             if (connectedPlayers.includes(player)) {
-              warnPlayers.push(player)
+              warnPlayers.push(player);
             }
           }
 
-          connectedPlayers = [...connectedPlayers, ...game.connectedPlayers]
+          connectedPlayers = [...connectedPlayers, ...game.connectedPlayers];
         }
       }
     }
@@ -39,39 +39,39 @@ async function monitorPlayerConnections(app) {
     // warnPlayers.push('0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') // Testman
 
     for (const player of warnPlayers) {
-      const data = { target: player }
+      const data = { target: player };
       const signature = await getSignedRequest(
         app.web3,
         app.secrets.find((s) => s.id === 'evolution-signer'),
         data
-      )
+      );
 
-      app.realm.emitAll('CallRequest', { data: { method: 'RS_KickUser', signature, data } })
+      app.realm.emitAll('CallRequest', { data: { method: 'kickClient', signature, data } });
 
-      const user = await app.db.loadUser(player)
+      const user = await app.db.loadUser(player);
 
-      if (!user.warnings) user.warnings = {}
-      if (!user.warnings.delaran) user.warnings.delaran = 0
+      if (!user.warnings) user.warnings = {};
+      if (!user.warnings.delaran) user.warnings.delaran = 0;
 
-      user.warnings.delaran += 1
+      user.warnings.delaran += 1;
 
-      await app.db.saveUser(user)
+      await app.db.saveUser(user);
     }
 
     if (warnPlayers.length > 0) {
-      log(`[delaran] Warned players: ${warnPlayers.join(', ')}`)
+      log(`[delaran] Warned players: ${warnPlayers.join(', ')}`);
     }
   } catch (e) {
-    log('Error in delaran', e)
+    log('Error in delaran', e);
   }
 
-  setTimeout(() => monitorPlayerConnections(app), 60 * 1000)
+  setTimeout(() => monitorPlayerConnections(app), 60 * 1000);
 }
 
 export async function engageDelaran(app) {
   if (!app.delaran) {
-    app.delaran = {}
+    app.delaran = {};
   }
 
-  setTimeout(() => monitorPlayerConnections(app), 60 * 1000)
+  setTimeout(() => monitorPlayerConnections(app), 60 * 1000);
 }

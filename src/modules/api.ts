@@ -1,7 +1,7 @@
 import fs from 'fs'
 import express from 'express'
-import { getHighestId, toShort, log, random, sha256 } from '@runemetaverse/backend-sdk/build/util'
-import * as websocketUtil from '@runemetaverse/backend-sdk/build/util/websocket'
+import { getHighestId, toShort, log, random, sha256 } from '@arken/node/util'
+import * as websocketUtil from '@arken/node/util/websocket'
 
 const path = require('path')
 

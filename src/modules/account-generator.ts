@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 import path from 'path'
-import { getAddress, getRandomProvider } from '@runemetaverse/backend-sdk/build/util/web3'
-import { log } from '@runemetaverse/backend-sdk/build/util'
+import { getAddress, getRandomProvider } from '@arken/node/util/web3'
+import { log } from '@arken/node/util'
 import jetpack from 'fs-jetpack'
 
 export async function generateAccounts(app) {

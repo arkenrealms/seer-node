@@ -2,12 +2,12 @@ import * as ethers from 'ethers'
 import { PrismaClient } from '@prisma/client'
 import jetpack from 'fs-jetpack'
 import path from 'path'
-import { log, removeDupes } from '@runemetaverse/backend-sdk/build/util'
-import { decodeItem } from '@runemetaverse/backend-sdk/build/util/item-decoder'
-import { achievementData } from '@runemetaverse/backend-sdk/build/data/achievements'
-import Profile from '@runemetaverse/backend-sdk/build/models/profile'
-import Account from '@runemetaverse/backend-sdk/build/models/account'
-import Model from '@runemetaverse/backend-sdk/build/models/base'
+import { log, removeDupes } from '@arken/node/util'
+import { decodeItem } from '@arken/node/util/decoder'
+import { achievementData } from '@arken/node/data/achievements'
+import Profile from '@arken/node/models/profile'
+import Account from '@arken/node/models/account'
+import Model from '@arken/node/models/base'
 import {
   itemData,
   ItemTypeToText,
@@ -17,10 +17,10 @@ import {
   SkillNames,
   ClassNames,
   ItemRarity,
-} from '@runemetaverse/backend-sdk/build/data/items'
+} from '@arken/node/data/items'
 import { userInfo } from 'os'
-import getUsername from '@runemetaverse/backend-sdk/build/util/api/getOldUsername'
-// import { now } from 'rune-backend-sdk/build/util/time'
+import getUsername from '@arken/node/util/api/getOldUsername'
+// import { now } from '@arken/node/util/time'
 
 const cache = {
   users: {},
@@ -122,7 +122,7 @@ export function initDb(app) {
     activeUsers: jetpack.read(path.resolve('./db/activeUsers.json'), 'json') || [],
   }
 
-  if (process.env.RUNE_ENV === 'local') {
+  if (process.env.ARKEN_ENV === 'local') {
     app.db.evolution.realms = [
       {
         key: 'local1',
@@ -550,7 +550,7 @@ export function initDb(app) {
     try {
       const item = JSON.parse(JSON.stringify(decodeItem(token.id)))
 
-      item.icon = item.icon.replace('undefined', 'https://rune.game/')
+      item.icon = item.icon.replace('undefined', 'https://arken.gg/')
 
       if (item.recipe) {
         item.recipe.requirement = item.recipe.requirement.map((r) => ({
@@ -568,8 +568,8 @@ export function initDb(app) {
         description: Array.isArray(item.branches[1].description)
           ? item.branches[1].description[0]
           : item.branches[1].description,
-        home_url: 'https://rune.game',
-        external_url: 'https://rune.game/token/' + token.id,
+        home_url: 'https://arken.gg',
+        external_url: 'https://arken.gg/token/' + token.id,
         image_url: item.icon,
         language: 'en-US',
         ...item,
@@ -670,7 +670,7 @@ export function initDb(app) {
   app.db.loadUser = async (address) => {
     try {
       if (cache.users[address]) return cache.users[address]
-      if (process.env.RUNE_ENV !== 'production') return
+      if (process.env.ARKEN_ENV !== 'production') return
 
       let baseUser = {
         address,
@@ -953,7 +953,7 @@ export function initDb(app) {
     1: {
       name: 'The First Ones',
       description: `Formed after the discovery of a cache of hidden texts in an abandoned, secret Horadric meeting place. This group of scholars was brought together by Bin Zy.`,
-      icon: 'https://rune.game/images/teams/the-first-ones.png',
+      icon: 'https://arken.gg/images/teams/the-first-ones.png',
       backgroundColor: '#fff',
       discord: {
         role: '862170863827025950',
@@ -963,7 +963,7 @@ export function initDb(app) {
     2: {
       name: 'The Archivists',
       description: `The Archivists are an order based in Westmarch. These brave souls wade into battle wielding tome and quill, armored not in ensorcelled plate or links of chain, but in the knowledge of generations past. These archivists fight not only for the future of humanity, but for mankind's past as well. The members of their honored fraternity are many, and their numbers grow every day.`,
-      icon: 'https://rune.game/images/teams/the-first-ones.png',
+      icon: 'https://arken.gg/images/teams/the-first-ones.png',
       backgroundColor: '#fff',
       discord: {
         role: '862171000446779394',
@@ -973,7 +973,7 @@ export function initDb(app) {
     3: {
       name: 'Knights of Westmarch',
       description: `Pure at heart, during the Darkening of Tristrum, the knights closely followed the teachings of the Zakaram. The knights have since become a largely secular order, more focused on defending Westmarch from physical rather than spiritual harm. They are led by a knight commander.`,
-      icon: 'https://rune.game/images/teams/knights-of-westmarch.png',
+      icon: 'https://arken.gg/images/teams/knights-of-westmarch.png',
       backgroundColor: '#fff',
       discord: {
         role: '862171051450040320',
@@ -983,7 +983,7 @@ export function initDb(app) {
     4: {
       name: 'The Protectors',
       description: `After the destruction of the Worldstone, these survivors banded together to find and protect the Worldstone shards from falling into the hands of evil.`,
-      icon: 'https://rune.game/images/teams/the-protectors.png',
+      icon: 'https://arken.gg/images/teams/the-protectors.png',
       backgroundColor: '#fff',
       discord: {
         role: '',
@@ -993,7 +993,7 @@ export function initDb(app) {
     5: {
       name: 'The Destroyers',
       description: `After the destruction of the Worldstone, these dark souls serve Hell in the destruction of all living things.`,
-      icon: 'https://rune.game/images/teams/the-destroyers.png',
+      icon: 'https://arken.gg/images/teams/the-destroyers.png',
       backgroundColor: '#fff',
       discord: {
         role: '',
@@ -1005,7 +1005,7 @@ export function initDb(app) {
       name: 'Drocos Legion',
       description:
         'Dragon riders and defenders, this elite group seeks to defend the few remaining dragons from the onslaught of humanoids.',
-      icon: 'https://rune.game/images/teams/drocos-legion.png',
+      icon: 'https://arken.gg/images/teams/drocos-legion.png',
       backgroundColor: '#fff',
       discord: {
         role: '',
@@ -1017,7 +1017,7 @@ export function initDb(app) {
       name: 'Heden Saf',
       description:
         'A group of clerics and miracle-workers dedicated to the Cull: the eradication of all non-energy users in Haerra.',
-      icon: 'https://rune.game/images/teams/heden-saf.png',
+      icon: 'https://arken.gg/images/teams/heden-saf.png',
       backgroundColor: '#fff',
       discord: {
         role: '',
@@ -1029,7 +1029,7 @@ export function initDb(app) {
       name: 'Radiant Viziers',
       description:
         'The Radiant Viziers are a group of expert fighters dedicated to Relia, with bastions of influence all over Haerra.',
-      icon: 'https://rune.game/images/teams/radiant-viziers.png',
+      icon: 'https://arken.gg/images/teams/radiant-viziers.png',
       backgroundColor: '#fff',
       discord: {
         role: '',

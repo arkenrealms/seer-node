@@ -1,7 +1,7 @@
 import Airtable from 'airtable'
 import jetpack from 'fs-jetpack'
 import path from 'path'
-import { log } from '@runemetaverse/backend-sdk/build/util'
+import { log } from '@arken/node/util'
 import {
   RuneNames,
   Games,
@@ -23,7 +23,7 @@ import {
   StatNames,
   ModNames,
   TypeNames,
-} from '@runemetaverse/backend-sdk/build/data/items'
+} from '@arken/node/data/items'
 import Skills from '../../db/skills.json'
 
 const db = jetpack.read(path.resolve('./db/airtable.json'), 'json') || {

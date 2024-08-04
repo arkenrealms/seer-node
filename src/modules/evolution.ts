@@ -1,22 +1,22 @@
-import fetch from 'node-fetch'
-import path from 'path'
-import jetpack, { find } from 'fs-jetpack'
-import beautify from 'json-beautify'
-import { fancyTimeFormat } from '@runemetaverse/backend-sdk/build/util/time'
-import md5 from 'js-md5'
-import { log, removeDupes } from '@runemetaverse/backend-sdk/build/util'
-import { getClientSocket } from '@runemetaverse/backend-sdk/build/util/websocket'
-import { isValidRequest, getSignedRequest } from '@runemetaverse/backend-sdk/build/util/web3'
-import getUsername from '@runemetaverse/backend-sdk/build/util/api/getOldUsername'
+import fetch from 'node-fetch';
+import path from 'path';
+import jetpack, { find } from 'fs-jetpack';
+import beautify from 'json-beautify';
+import { fancyTimeFormat } from '@arken/node/util/time';
+import md5 from 'js-md5';
+import { log, removeDupes } from '@arken/node/util';
+import { getClientSocket } from '@arken/node/util/websocket';
+import { isValidRequest, getSignedRequest } from '@arken/node/util/web3';
+import getUsername from '@arken/node/util/api/getOldUsername';
 
-const shortId = require('shortid')
+const shortId = require('shortid');
 
-let CharacterCache = {}
-const ioCallbacks = {}
+let CharacterCache = {};
+const ioCallbacks = {};
 
 async function rsCall(app, realm, name, data = undefined) {
   try {
-    const id = shortId()
+    const id = shortId();
     const signature =
       data !== undefined && data !== null
         ? await getSignedRequest(
@@ -24,73 +24,73 @@ async function rsCall(app, realm, name, data = undefined) {
             app.secrets.find((s) => s.id === 'evolution-signer'),
             data
           )
-        : null
+        : null;
 
     return new Promise(async (resolve) => {
-      ioCallbacks[id] = {}
+      ioCallbacks[id] = {};
 
-      ioCallbacks[id].resolve = resolve
+      ioCallbacks[id].resolve = resolve;
 
       ioCallbacks[id].reqTimeout = setTimeout(function () {
-        log('Request timeout')
-        resolve({ status: 0, message: 'Request timeout' })
+        log('Request timeout');
+        resolve({ status: 0, message: 'Request timeout' });
 
-        delete ioCallbacks[id]
-      }, 60 * 1000)
+        delete ioCallbacks[id];
+      }, 60 * 1000);
 
       if (!realm.client.socket?.connected) {
-        log('Not connected to realm server: ' + realm.key)
-        return
+        log('Not connected to realm server: ' + realm.key);
+        return;
       }
 
-      log('Emit Realm', realm.key, name, { id, data })
+      log('Emit Realm', realm.key, name, { id, data });
 
-      realm.client.socket.emit(name, { id, signature, data })
-    })
+      realm.client.socket.emit(name, { id, signature, data });
+    });
   } catch (e) {
-    log(e)
+    log(e);
   }
 }
 
 function setRealmOffline(realm) {
-  if (realm.status === 'inactive' || realm.updateMode === 'manual') return
+  if (realm.status === 'inactive' || realm.updateMode === 'manual') return;
 
-  realm.status = 'offline'
-  realm.playerCount = 0
-  realm.speculatorCount = 0
-  realm.rewardItemAmount = 0
-  realm.rewardWinnerAmount = 0
+  realm.status = 'offline';
+  realm.playerCount = 0;
+  realm.speculatorCount = 0;
+  realm.rewardItemAmount = 0;
+  realm.rewardWinnerAmount = 0;
 }
 
 async function setRealmConfig(app, realm) {
   const configRes = (await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', {
     config: { ...app.db.evolution.config, roundId: realm.roundId },
-  })) as any
+  })) as any;
 
   if (configRes.status !== 1) {
-    setRealmOffline(realm)
-    return
+    setRealmOffline(realm);
+    return;
   }
 }
 
 async function updateRealm(app, realm) {
   try {
-    realm.games = []
+    realm.games = [];
 
-    const infoRes = (await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { config: {} })) as any // roundId: realm.roundId
+    const infoRes = (await rsCall(app, app.games.evolution.realms[realm.key], 'InfoRequest', { config: {} })) as any; // roundId: realm.roundId
 
     if (!infoRes || infoRes.status !== 1) {
-      setRealmOffline(realm)
-      return
+      setRealmOffline(realm);
+      return;
     }
 
-    log('infoRes', infoRes.data.games)
+    log('infoRes', infoRes.data.games);
 
-    const { data } = infoRes
+    const { data } = infoRes;
 
-    realm.playerCount = data.playerCount
-    realm.speculatorCount = data.speculatorCount
-    realm.version = data.version
+    realm.playerCount = data.playerCount;
+    realm.speculatorCount = data.speculatorCount;
+    realm.version = data.version;
 
     realm.games = data.games.map((game) => ({
       id: game.id,
@@ -106,70 +106,70 @@ async function updateRealm(app, realm) {
       timeLeft: ~~(5 * 60 - (new Date().getTime() / 1000 - game.round.startedAt)),
       timeLeftText: fancyTimeFormat(5 * 60 - (new Date().getTime() / 1000 - game.round.startedAt)),
       endpoint: (function () {
-        const url = new URL((process.env.RUNE_ENV === 'local' ? 'http://' : 'https://') + realm.endpoint)
-        url.port = game.port
-        return url.toString()
+        const url = new URL((process.env.ARKEN_ENV === 'local' ? 'http://' : 'https://') + realm.endpoint);
+        url.port = game.port;
+        return url.toString();
       })()
         .replace('http://', '')
         .replace('https://', '')
         .replace('/', ''),
-    }))
+    }));
 
-    delete realm.timeLeftFancy
+    delete realm.timeLeftFancy;
 
-    realm.status = 'online'
+    realm.status = 'online';
   } catch (e) {
-    log('Error', e)
+    log('Error', e);
 
-    setRealmOffline(realm)
+    setRealmOffline(realm);
   }
 
   // log('Updated server', server)
 
-  return realm
+  return realm;
 }
 
 async function updateRealms(app) {
   try {
-    log('Updating Evolution realms')
+    log('Updating Evolution realms');
 
-    let playerCount = 0
+    let playerCount = 0;
 
     for (const realm of app.db.evolution.realms) {
       // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue
-      if (realm.status === 'inactive' || realm.updateMode === 'manual') continue
+      if (realm.status === 'inactive' || realm.updateMode === 'manual') continue;
 
-      await updateRealm(app, realm)
+      await updateRealm(app, realm);
 
-      const hist = jetpack.read(path.resolve(`./db/evolution/${realm.key}/historical.json`), 'json') || {}
+      const hist = jetpack.read(path.resolve(`./db/evolution/${realm.key}/historical.json`), 'json') || {};
 
-      if (!hist.playerCount) hist.playerCount = []
+      if (!hist.playerCount) hist.playerCount = [];
 
-      const oldTime = new Date(hist.playerCount[hist.playerCount.length - 1]?.[0] || 0).getTime()
-      const newTime = new Date().getTime()
-      const diff = newTime - oldTime
+      const oldTime = new Date(hist.playerCount[hist.playerCount.length - 1]?.[0] || 0).getTime();
+      const newTime = new Date().getTime();
+      const diff = newTime - oldTime;
       if (diff / (1000 * 60 * 60 * 1) > 1) {
-        hist.playerCount.push([newTime, realm.playerCount])
+        hist.playerCount.push([newTime, realm.playerCount]);
       }
 
       jetpack.write(path.resolve(`./db/evolution/${realm.key}/historical.json`), JSON.stringify(hist), {
         atomic: true,
         jsonIndent: 0,
-      })
+      });
 
-      playerCount += realm.playerCount
+      playerCount += realm.playerCount;
 
-      log(`Realm ${realm.key} updated`, realm)
+      log(`Realm ${realm.key} updated`, realm);
     }
 
-    app.db.evolution.playerCount = playerCount
+    app.db.evolution.playerCount = playerCount;
 
     for (const server of app.db.evolution.servers) {
-      if (server.status === 'inactive' || server.updateMode === 'manual') continue
+      if (server.status === 'inactive' || server.updateMode === 'manual') continue;
       // if (server.key.indexOf('tournament') !== -1) continue
 
-      server.status = 'offline'
-      server.playerCount = 0
+      server.status = 'offline';
+      server.playerCount = 0;
     }
 
     const evolutionServers = app.db.evolution.realms
@@ -185,116 +185,119 @@ async function updateRealms(app) {
               regionId: r.regionId,
             }
           : {}
-      )
+      );
 
     for (const evolutionServer of evolutionServers) {
-      const server = app.db.evolution.servers.find((s) => s.key === evolutionServer.key)
+      const server = app.db.evolution.servers.find((s) => s.key === evolutionServer.key);
 
       if (!server) {
         if (evolutionServer.key) {
-          app.db.evolution.servers.push(evolutionServer)
+          app.db.evolution.servers.push(evolutionServer);
         }
-        continue
+        continue;
       }
 
-      if (evolutionServer.status === 'inactive' || evolutionServer.updateMode === 'manual') continue
+      if (evolutionServer.status === 'inactive' || evolutionServer.updateMode === 'manual') continue;
 
-      server.status = evolutionServer.status
-      server.version = evolutionServer.version
-      server.rewardItemAmount = evolutionServer.rewardItemAmount
-      server.rewardWinnerAmount = evolutionServer.rewardWinnerAmount
-      server.gameMode = evolutionServer.gameMode
-      server.roundId = evolutionServer.roundId
-      server.roundStartedAt = evolutionServer.roundStartedAt
-      server.roundStartedDate = evolutionServer.roundStartedDate
-      server.timeLeft = evolutionServer.timeLeft
-      server.timeLeftText = evolutionServer.timeLeftText
-      server.playerCount = evolutionServer.playerCount
-      server.speculatorCount = evolutionServer.speculatorCount
-      server.endpoint = evolutionServer.endpoint
+      server.status = evolutionServer.status;
+      server.version = evolutionServer.version;
+      server.rewardItemAmount = evolutionServer.rewardItemAmount;
+      server.rewardWinnerAmount = evolutionServer.rewardWinnerAmount;
+      server.gameMode = evolutionServer.gameMode;
+      server.roundId = evolutionServer.roundId;
+      server.roundStartedAt = evolutionServer.roundStartedAt;
+      server.roundStartedDate = evolutionServer.roundStartedDate;
+      server.timeLeft = evolutionServer.timeLeft;
+      server.timeLeftText = evolutionServer.timeLeftText;
+      server.playerCount = evolutionServer.playerCount;
+      server.speculatorCount = evolutionServer.speculatorCount;
+      server.endpoint = evolutionServer.endpoint;
     }
 
     jetpack.write(path.resolve('./db/evolution/realms.json'), JSON.stringify(app.db.evolution.realms), {
       atomic: true,
       jsonIndent: 0,
-    })
+    });
 
     // Update old servers file
     jetpack.write(path.resolve('./db/evolution/servers.json'), JSON.stringify(app.db.evolution.servers), {
       atomic: true,
       jsonIndent: 0,
-    })
+    });
 
-    log('Realm and server info generated')
+    log('Realm and server info generated');
 
     // Update overall historics
-    const hist = jetpack.read(path.resolve(`./db/evolution/historical.json`), 'json') || {}
+    const hist = jetpack.read(path.resolve(`./db/evolution/historical.json`), 'json') || {};
 
-    if (!hist.playerCount) hist.playerCount = []
+    if (!hist.playerCount) hist.playerCount = [];
 
-    const oldTime = new Date(hist.playerCount[hist.playerCount.length - 1]?.[0] || 0).getTime()
-    const newTime = new Date().getTime()
-    const diff = newTime - oldTime
+    const oldTime = new Date(hist.playerCount[hist.playerCount.length - 1]?.[0] || 0).getTime();
+    const newTime = new Date().getTime();
+    const diff = newTime - oldTime;
     if (diff / (1000 * 60 * 60 * 1) > 1) {
-      hist.playerCount.push([newTime, playerCount])
+      hist.playerCount.push([newTime, playerCount]);
     }
 
-    jetpack.write(path.resolve(`./db/evolution/historical.json`), JSON.stringify(hist), { atomic: true, jsonIndent: 0 })
+    jetpack.write(path.resolve(`./db/evolution/historical.json`), JSON.stringify(hist), {
+      atomic: true,
+      jsonIndent: 0,
+    });
   } catch (e) {
-    log('Error', e)
+    log('Error', e);
   }
 }
 
 function cleanupClient(client) {
-  log('Cleaning up', client.key)
+  log('Cleaning up', client.key);
 
-  client.socket?.close()
-  client.isConnected = false
-  client.isConnecting = false
-  client.isAuthed = false
+  client.socket?.close();
+  client.isConnected = false;
+  client.isConnecting = false;
+  client.isAuthed = false;
 
-  clearTimeout(client.timeout)
-  clearTimeout(client.pingReplyTimeout)
-  clearTimeout(client.pingerTimeout)
+  clearTimeout(client.timeout);
+  clearTimeout(client.pingReplyTimeout);
+  clearTimeout(client.pingerTimeout);
 }
 
 function disconnectClient(client) {
-  log('Disconnecting client', client.key)
+  log('Disconnecting client', client.key);
 
-  cleanupClient(client)
+  cleanupClient(client);
 }
 
 async function getCharacter(app, address) {
-  const equipment = await app.barracks.getPlayerEquipment(app, address)
-  const meta = await app.barracks.getMetaFromEquipment(app, equipment)
+  const equipment = await app.barracks.getPlayerEquipment(app, address);
+  const meta = await app.barracks.getMetaFromEquipment(app, equipment);
 
   // if (address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
   //   meta[1030] = 100
   // }
 
-  let error
-  if (meta[1030] > 100) error = `Problem with EvolutionMovementSpeedIncrease: ${address} ${meta[1030]}`
-  if (meta[1102] > 100) error = `Problem with DeathPenaltyAvoid: ${address} ${meta[1102]}`
-  if (meta[1104] > 100) error = `Problem with EnergyDecayDecrease: ${address} ${meta[1104]}`
-  if (meta[1105] > 100) error = `Problem with EnergyDecayIncrease: ${address} ${meta[1105]}`
-  if (meta[1150] > 100) error = `Problem with WinRewardsIncrease: ${address} ${meta[1150]}`
-  if (meta[1160] > 100) error = `Problem with WinRewardsDecrease: ${address} ${meta[1160]}`
-  if (meta[1222] > 100) error = `Problem with IncreaseMovementSpeedOnKill: ${address} ${meta[1222]}`
-  if (meta[1223] > 100) error = `Problem with EvolveMovementBurst: ${address} ${meta[1223]}`
-  if (meta[1164] > 100) error = `Problem with DoublePickupChance: ${address} ${meta[1164]}`
-  if (meta[1219] > 100) error = `Problem with IncreaseHealthOnKill: ${address} ${meta[1219]}`
-  if (meta[1117] > 100) error = `Problem with SpriteFuelIncrease: ${address} ${meta[1117]}`
-  if (meta[1118] > 100) error = `Problem with SpriteFuelDecrease: ${address} ${meta[1118]}`
+  let error;
+  if (meta[1030] > 100) error = `Problem with EvolutionMovementSpeedIncrease: ${address} ${meta[1030]}`;
+  if (meta[1102] > 100) error = `Problem with DeathPenaltyAvoid: ${address} ${meta[1102]}`;
+  if (meta[1104] > 100) error = `Problem with EnergyDecayDecrease: ${address} ${meta[1104]}`;
+  if (meta[1105] > 100) error = `Problem with EnergyDecayIncrease: ${address} ${meta[1105]}`;
+  if (meta[1150] > 100) error = `Problem with WinRewardsIncrease: ${address} ${meta[1150]}`;
+  if (meta[1160] > 100) error = `Problem with WinRewardsDecrease: ${address} ${meta[1160]}`;
+  if (meta[1222] > 100) error = `Problem with IncreaseMovementSpeedOnKill: ${address} ${meta[1222]}`;
+  if (meta[1223] > 100) error = `Problem with EvolveMovementBurst: ${address} ${meta[1223]}`;
+  if (meta[1164] > 100) error = `Problem with DoublePickupChance: ${address} ${meta[1164]}`;
+  if (meta[1219] > 100) error = `Problem with IncreaseHealthOnKill: ${address} ${meta[1219]}`;
+  if (meta[1117] > 100) error = `Problem with SpriteFuelIncrease: ${address} ${meta[1117]}`;
+  if (meta[1118] > 100) error = `Problem with SpriteFuelDecrease: ${address} ${meta[1118]}`;
 
   if (error) {
-    log('Error with character gear:', error)
-    process.exit(6)
+    log('Error with character gear:', error);
+    process.exit(6);
   }
 
   return {
     equipment,
     meta,
-  }
+  };
 }
 
 const runes = [
@@ -330,91 +333,79 @@ const runes = [
   'jah',
   'cham',
   'zod',
-]
+];
 
 export async function connectRealm(app, realm) {
-  if (realm.status === 'inactive' || realm.ignore) return
+  if (realm.status === 'inactive' || realm.ignore) return;
 
-  log('Connecting to realm', realm)
-  const { client } = app.games.evolution.realms[realm.key]
+  log('Connecting to realm', realm);
+  const { client } = app.games.evolution.realms[realm.key];
 
   if (client.isConnected || client.socket?.connected) {
-    log(`Realm ${realm.key} already connected, disconnecting`)
-    cleanupClient(client)
+    log(`Realm ${realm.key} already connected, disconnecting`);
+    cleanupClient(client);
   }
 
-  client.isConnecting = true
-  client.socket = getClientSocket((process.env.RUNE_ENV === 'local' ? 'http://' : 'https://') + realm.endpoint) // TODO: RS should be running things
+  client.isConnecting = true;
+  client.socket = getClientSocket((process.env.ARKEN_ENV === 'local' ? 'http://' : 'https://') + realm.endpoint); // TODO: RS should be running things
 
   client.socket.on('connect', async () => {
     try {
-      client.isConnected = true
+      client.isConnected = true;
 
-      log('Connected: ' + realm.key)
+      log('Connected: ' + realm.key);
 
-      const res = (await rsCall(app, app.games.evolution.realms[realm.key], 'AuthRequest', 'myverysexykey')) as any
+      const res = (await rsCall(app, app.games.evolution.realms[realm.key], 'AuthRequest', 'myverysexykey')) as any;
 
       if (res.status === 1) {
-        client.isAuthed = true
+        client.isAuthed = true;
 
-        clearTimeout(client.connectTimeout)
+        clearTimeout(client.connectTimeout);
 
-        await setRealmConfig(app, realm)
-        await updateRealm(app, realm)
+        await setRealmConfig(app, realm);
+        await updateRealm(app, realm);
       }
 
-      client.isConnecting = false
+      client.isConnecting = false;
 
       const pinger = async () => {
         try {
-          clearTimeout(client.pingReplyTimeout)
+          clearTimeout(client.pingReplyTimeout);
 
           client.pingReplyTimeout = setTimeout(function () {
-            log(`Realm ${realm.key} didnt respond in time, disconnecting`)
-            cleanupClient(client)
-          }, 70 * 1000)
+            log(`Realm ${realm.key} didnt respond in time, disconnecting`);
+            cleanupClient(client);
+          }, 70 * 1000);
 
-          await rsCall(app, app.games.evolution.realms[realm.key], 'PingRequest')
+          await rsCall(app, app.games.evolution.realms[realm.key], 'PingRequest');
 
-          clearTimeout(client.pingReplyTimeout)
+          clearTimeout(client.pingReplyTimeout);
 
-          if (!client.isConnected) return
+          if (!client.isConnected) return;
 
-          client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
+          client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000);
         } catch (e) {
-          log(e)
+          log(e);
         }
-      }
+      };
 
-      clearTimeout(client.pingerTimeout)
-      clearTimeout(client.pingReplyTimeout)
+      clearTimeout(client.pingerTimeout);
+      clearTimeout(client.pingReplyTimeout);
 
-      client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000)
+      client.pingerTimeout = setTimeout(async () => await pinger(), 15 * 1000);
     } catch (e) {
-      log('Error', e)
-      log(`Disconnecting ${realm.key} due to error`)
-      cleanupClient(client)
+      log('Error', e);
+      log(`Disconnecting ${realm.key} due to error`);
+      cleanupClient(client);
     }
-  })
+  });
 
   client.socket.on('disconnect', () => {
-    log('Disconnected: ' + realm.key)
-    cleanupClient(client)
-  })
+    log('Disconnected: ' + realm.key);
+    cleanupClient(client);
+  });
 
-  client.socket.on('PingRequest', function (msg) {
-    log('PingRequest', realm.key, msg)
-
-    client.socket.emit('PingResponse')
-  })
-
-  client.socket.on('PongRequest', function (msg) {
-    log('PongRequest', realm.key, msg)
-
-    client.socket.emit('PongResponse')
-  })
-
-  // client.socket.on('BanPlayerRequest', async function (req) {
+  // client.socket.on('banClient', async function (req) {
   //   console.log(req)
   //   try {
   //     log('Ban', realm.key, req)
@@ -451,47 +442,59 @@ export async function connectRealm(app, realm) {
   //   }
   // })
 
-  client.socket.on('UnbanPlayerRequest', async function (req) {
+  client.socket.on('PingRequest', function (msg) {
+    log('PingRequest', realm.key, msg);
+
+    client.socket.emit('PingResponse');
+  });
+
+  client.socket.on('PongRequest', function (msg) {
+    log('PongRequest', realm.key, msg);
+
+    client.socket.emit('PongResponse');
+  });
+
+  client.socket.on('unbanClient', async function (req) {
     try {
-      log('Ban', realm.key, req)
+      log('Ban', realm.key, req);
 
-      const user = await app.db.loadUser(req.data.target)
+      const user = await app.db.loadUser(req.data.target);
 
-      delete user.isBanned
-      delete user.bannedReason
+      delete user.isBanned;
+      delete user.bannedReason;
 
-      await app.db.saveUser(user)
+      await app.db.saveUser(user);
 
-      app.db.removeBanList('evolution', req.data.target)
-      app.db.saveBanList()
+      app.db.removeBanList('evolution', req.data.target);
+      app.db.saveBanList();
 
       app.realm.emitAll('UnbanUserRequest', {
         data: {
           target: req.data.target,
         },
-      })
+      });
 
-      client.socket.emit('UnbanPlayerResponse', {
+      client.socket.emit('UnbanClientResponse', {
         id: req.id,
         data: { status: 1 },
-      })
+      });
     } catch (e) {
-      log('Error', e)
+      log('Error', e);
 
-      client.socket.emit('UnbanPlayerResponse', {
+      client.socket.emit('UnbanClientResponse', {
         id: req.id,
         data: { status: 0, message: e },
-      })
+      });
     }
-  })
+  });
 
-  client.socket.on('ModRequest', async function (req) {
+  client.socket.on('mod', async function (req) {
     try {
-      log('ModRequest', realm.key, req)
+      log('mod', realm.key, req);
 
-      const user = await app.db.loadUser(req.data.body.signature.address)
+      const user = await app.db.loadUser(req.data.body.signature.address);
 
-      app.api.emitAll('PlayerAction', {
+      app.api.emitAll('playerAction', {
         key: 'moderator-action',
         createdAt: new Date().getTime() / 1000,
         address: user.address,
@@ -499,36 +502,36 @@ export async function connectRealm(app, realm) {
         method: req.data.params.method,
         realmKey: realm.key,
         message: `${user.username} called ${req.data.params.method}`,
-      })
+      });
 
       client.socket.emit('ModResponse', {
         id: req.id,
         data: { status: 1 },
-      })
+      });
     } catch (e) {
-      log('Error', e)
+      log('Error', e);
 
       client.socket.emit('ModResponse', {
         id: req.id,
         data: { status: 0, message: e },
-      })
+      });
     }
-  })
+  });
 
-  client.socket.on('BanPlayerRequest', async function (req) {
+  client.socket.on('banClient', async function (req) {
     try {
-      log('BanPlayerRequest', realm.key, req)
+      log('banClient', realm.key, req);
 
-      const user = await app.db.loadUser(req.data.target)
+      const user = await app.db.loadUser(req.data.target);
 
-      user.isBanned = true
-      user.bannedReason = req.data.reason
-      user.bannedUntil = req.data.until ? parseInt(req.data.until) : new Date().getTime() + 100 * 365 * 24 * 60 * 60 // 100 year ban by default
+      user.isBanned = true;
+      user.bannedReason = req.data.reason;
+      user.bannedUntil = req.data.until ? parseInt(req.data.until) : new Date().getTime() + 100 * 365 * 24 * 60 * 60; // 100 year ban by default
 
-      await app.db.saveUser(user)
+      await app.db.saveUser(user);
 
-      app.db.addBanList('evolution', { address: req.data.target, reason: req.data.reason, until: req.data.until })
-      app.db.saveBanList()
+      app.db.addBanList('evolution', { address: req.data.target, reason: req.data.reason, until: req.data.until });
+      app.db.saveBanList();
 
       app.realm.emitAll('BanUserRequest', {
         data: {
@@ -537,33 +540,33 @@ export async function connectRealm(app, realm) {
           bannedUntil: user.bannedUntil,
           bannedReason: user.bannedReason,
         },
-      })
+      });
 
       client.socket.emit('BanPlayerResponse', {
         id: req.id,
         data: { status: 1 },
-      })
+      });
     } catch (e) {
-      log('Error', e)
+      log('Error', e);
 
       client.socket.emit('BanPlayerResponse', {
         id: req.id,
         data: { status: 0, message: e },
-      })
+      });
     }
-  })
+  });
 
-  client.socket.on('ReportPlayerRequest', function (msg) {
-    log('ReportPlayerRequest', realm.key, msg)
+  client.socket.on('reportClient', function (msg) {
+    log('reportClient', realm.key, msg);
 
-    const { currentGamePlayers, currentPlayer, reportedPlayer } = msg
+    const { currentGamePlayers, currentPlayer, reportedPlayer } = msg;
 
-    if (currentPlayer.name.indexOf('Guest') !== -1 || currentPlayer.name.indexOf('Unknown') !== -1) return // No guest reports
+    if (currentPlayer.name.indexOf('Guest') !== -1 || currentPlayer.name.indexOf('Unknown') !== -1) return; // No guest reports
 
-    if (!app.db.evolution.reportList[reportedPlayer.address]) app.db.evolution.reportList[reportedPlayer.address] = []
+    if (!app.db.evolution.reportList[reportedPlayer.address]) app.db.evolution.reportList[reportedPlayer.address] = [];
 
     if (!app.db.evolution.reportList[reportedPlayer.address].includes(currentPlayer.address))
-      app.db.evolution.reportList[reportedPlayer.address].push(currentPlayer.address)
+      app.db.evolution.reportList[reportedPlayer.address].push(currentPlayer.address);
 
     // if (app.db.evolution.reportList[reportedPlayer.address].length >= 6) {
     //   app.db.evolution.banList.push(reportedPlayer.address)
@@ -588,7 +591,489 @@ export async function connectRealm(app, realm) {
     // }
 
     // Relay the report to connected realm servers
-  })
+  });
+
+  client.socket.on('GetCharacterRequest', async function (req) {
+    log('GetCharacterRequest', req);
+
+    try {
+      let character = CharacterCache[req.data.address];
+
+      if (!character) {
+        // if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
+        //   meta[1030] = 100
+        // }
+
+        // if (req.data.address === '0x6f756AFaC862A2486f4c1C96b46E00A98a70bEA2') {
+        //   meta[1030] = 100
+        // }
+
+        character = await getCharacter(app, req.data.address);
+
+        CharacterCache[req.data.address] = character;
+      }
+
+      log('GetCharacterResponse', character);
+
+      client.socket.emit('GetCharacterResponse', {
+        id: req.id,
+        data: { status: 1, character },
+      });
+    } catch (e) {
+      client.socket.emit('GetCharacterResponse', {
+        id: req.id,
+        data: { status: 0, message: 'Error' },
+      });
+    }
+  });
+
+  client.socket.on('SaveRoundRequest', async function (req) {
+    // Iterate the items found, add to user.evolution.rewards
+    // Itereate the runes found, add to user.evolution.runes
+    // Iterate the winners, add to the user.evolution.runes
+    // Add winning stats to user.evolution
+    try {
+      log('SaveRoundRequest', realm.key, req);
+
+      if (!(await isValidRequest(app.web3, req)) && app.db.evolution.modList.includes(req.signature.address)) {
+        log('Round invalid');
+
+        client.socket.emit('SaveRoundResponse', {
+          id: req.id,
+          data: { status: 0, message: 'Invalid signature' },
+        });
+        return;
+      }
+
+      if (!req.data.lastClients) {
+        log('Round no clients');
+
+        client.socket.emit('SaveRoundResponse', {
+          id: req.id,
+          data: { status: 0, message: 'Error processing' },
+        });
+        return;
+      }
+
+      if (req.data.round.winners.length === 0) {
+        realm.roundId += 1;
+
+        log('Round skipped');
+
+        client.socket.emit('SaveRoundResponse', {
+          id: req.id,
+          data: { status: 1 },
+        });
+        return;
+      }
+
+      if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountMax) {
+        log(req.data.rewardWinnerAmount, app.db.evolution.config.rewardWinnerAmountMax);
+        throw new Error('Big problem with reward amount');
+      }
+
+      let totalLegitPlayers = 0;
+
+      for (const client of req.data.lastClients) {
+        if (client.name.indexOf('Guest') !== -1 || client.name.indexOf('Unknown') !== -1) continue;
+
+        if (
+          (client.powerups > 100 && client.kills > 1) ||
+          (client.evolves > 20 && client.powerups > 200) ||
+          (client.rewards > 3 && client.powerups > 200) ||
+          client.evolves > 100 ||
+          client.points > 1000
+        ) {
+          totalLegitPlayers += 1;
+        }
+      }
+
+      if (totalLegitPlayers === 0) {
+        totalLegitPlayers = 1;
+      }
+
+      if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountPerLegitPlayer * totalLegitPlayers) {
+        log(
+          req.data.rewardWinnerAmount,
+          app.db.evolution.config.rewardWinnerAmountPerLegitPlayer,
+          totalLegitPlayers,
+          req.data.lastClients.length,
+          JSON.stringify(req.data.lastClients)
+        );
+        throw new Error('Big problem with reward amount 2');
+      }
+
+      if (req.data.roundId > realm.roundId) {
+        realm.roundId = req.data.roundId;
+      } else if (req.data.roundId < realm.roundId) {
+        const err = `Round id too low (realm.roundId = ${realm.roundId})`;
+
+        log(err);
+
+        client.socket.emit('SaveRoundResponse', {
+          id: req.id,
+          data: { status: 0, message: err },
+        });
+
+        await setRealmConfig(app, realm);
+
+        return;
+      } else {
+        realm.roundId += 1;
+      }
+
+      // if (req.data.roundId > realm.roundId) {
+      //   client.socket.emit('SaveRoundResponse', {
+      //     id: req.id,
+      //     data: { status: 0, message: 'Invalid round id' }
+      //   })
+      //   return
+      // }
+
+      const rewardWinnerMap = {
+        0: Math.round(req.data.rewardWinnerAmount * 1 * 1000) / 1000,
+        1: Math.round(req.data.rewardWinnerAmount * 0.25 * 1000) / 1000,
+        2: Math.round(req.data.rewardWinnerAmount * 0.15 * 1000) / 1000,
+        3: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        4: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        5: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        6: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        7: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        8: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+        9: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+      };
+
+      // const users = []
+
+      // Iterate the winners, determine the winning amounts, validate, save to user rewards
+      // Iterate all players and save their log / stats
+
+      const removeDupes2 = (list) => {
+        const seen = {};
+        return list.filter(function (item) {
+          // console.log(item)
+          const k1 = item.address;
+          const exists = seen.hasOwnProperty(k1);
+
+          if (!exists) {
+            seen[k1] = true;
+          }
+
+          return !exists;
+        });
+      };
+
+      req.data.round.players = removeDupes2(req.data.round.players); // [...new Set(req.data.round.players.map(obj => obj.key)) ] //
+
+      const winners = req.data.round.winners.slice(0, 10);
+
+      const rewardTweaks = {};
+
+      for (const winner of winners) {
+        let character = CharacterCache[winner.address];
+
+        if (!character) {
+          console.log('Getting char data');
+          character = await getCharacter(app, winner.address);
+          console.log('Got char data');
+
+          CharacterCache[winner.address] = character;
+        }
+
+        // if (character?.meta?.[1173] > 0) {
+        //   const portion = 0.05
+
+        //   for (const kill of winner.log.kills) {
+        //     const target = req.data.round.players.filter(p => p.hash === kill)
+
+        //     if (target?.address) {
+        //       if (!rewardTweaks[target.address]) rewardTweaks[target.address] = 0
+        //       if (!rewardTweaks[winner.address]) rewardTweaks[winner.address] = 0
+
+        //       rewardTweaks[target.address] -= portion
+        //       rewardTweaks[winner.address] += portion
+        //     }
+        //   }
+        // }
+      }
+
+      for (const player of req.data.round.players) {
+        console.log('Loading user');
+        const user = await app.db.loadUser(player.address);
+        console.log('Loaded user');
+        const now = new Date().getTime() / 1000;
+
+        if (user.lastGamePlayed > now - 4 * 60) continue; // Make sure this player isn't in 2 games or somehow getting double rewards
+
+        if (typeof user.username === 'object' || !user.username) user.username = await getUsername(user.address);
+
+        if (!user.username) continue; // Make sure cant earn without a character
+
+        app.db.setUserActive(user);
+
+        if (player.killStreak >= 10) {
+          app.api.emitAll('PlayerAction', {
+            key: 'evolution1-killstreak',
+            createdAt: new Date().getTime() / 1000,
+            address: user.address,
+            username: user.username,
+            message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
+          });
+          app.notices.add('evolution1-killstreak', {
+            key: 'evolution1-killstreak',
+            address: user.address,
+            username: user.username,
+            message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
+          });
+        }
+
+        for (const pickup of player.pickups) {
+          if (pickup.type === 'rune') {
+            // TODO: change to authoritative
+            if (
+              pickup.quantity >
+              req.data.round.players.length * app.db.evolution.config.rewardItemAmountPerLegitPlayer * 2
+            ) {
+              log(
+                pickup.quantity,
+                app.db.evolution.config.rewardItemAmountPerLegitPlayer,
+                req.data.round.players.length,
+                JSON.stringify(req.data.round.players)
+              );
+              throw new Error('Big problem with item reward amount');
+            }
+
+            if (pickup.quantity > req.data.round.players.length * app.db.evolution.config.rewardItemAmountMax) {
+              log(pickup.quantity, req.data.round.players.length, app.db.evolution.config.rewardItemAmountMax);
+              throw new Error('Big problem with item reward amount 2');
+            }
+
+            const runeSymbol = pickup.rewardItemName.toLowerCase();
+
+            if (!runes.includes(runeSymbol)) {
+              continue;
+            }
+
+            if (!user.rewards.runes[runeSymbol] || user.rewards.runes[runeSymbol] < 0.000000001) {
+              user.rewards.runes[runeSymbol] = 0;
+            }
+
+            user.rewards.runes[runeSymbol] += pickup.quantity;
+
+            if (!user.lifetimeRewards.runes[runeSymbol] || user.lifetimeRewards.runes[runeSymbol] < 0.000000001) {
+              user.lifetimeRewards.runes[runeSymbol] = 0;
+            }
+
+            user.lifetimeRewards.runes[runeSymbol] += pickup.quantity;
+
+            app.db.evolution.config.itemRewards.runes[runeSymbol.toLowerCase()] -= pickup.quantity;
+
+            app.db.oracle.outflow.evolutionRewards.tokens.week[runeSymbol.toLowerCase()] += pickup.quantity;
+          } else {
+            user.rewards.items[pickup.id] = {
+              name: pickup.name,
+              rarity: pickup.rarity,
+              quantity: pickup.quantity,
+            };
+
+            user.lifetimeRewards.items[pickup.id] = {
+              name: pickup.name,
+              rarity: pickup.rarity,
+              quantity: pickup.quantity,
+            };
+          }
+
+          // user.rewardTracking.push(req.tracking)
+        }
+
+        user.lastGamePlayed = now;
+
+        if (!user.evolution.hashes) user.evolution.hashes = [];
+        if (!user.evolution.hashes.includes(player.hash)) user.evolution.hashes.push(player.hash);
+
+        user.evolution.hashes = user.evolution.hashes.filter(function (item, pos) {
+          return user.evolution.hashes.indexOf(item) === pos;
+        });
+
+        // users.push(user)
+
+        if (!app.games.evolution.realms[realm.key].leaderboard.names)
+          app.games.evolution.realms[realm.key].leaderboard.names = {};
+
+        app.games.evolution.realms[realm.key].leaderboard.names[user.address] = user.username;
+
+        if (!app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address]) {
+          // 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency'
+          app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.rounds[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.kills[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.deaths[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.powerups[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.evolves[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.rewards[user.address] = 0;
+          app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] = 0;
+        }
+
+        // Update leaderboard stats
+        app.games.evolution.realms[realm.key].leaderboard.raw.rounds[user.address] += 1;
+        app.games.evolution.realms[realm.key].leaderboard.raw.kills[user.address] += player.kills;
+        app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address] += player.points;
+        app.games.evolution.realms[realm.key].leaderboard.raw.deaths[user.address] += player.deaths;
+        app.games.evolution.realms[realm.key].leaderboard.raw.powerups[user.address] += player.powerups;
+        app.games.evolution.realms[realm.key].leaderboard.raw.evolves[user.address] += player.evolves;
+        app.games.evolution.realms[realm.key].leaderboard.raw.rewards[user.address] += player.rewards;
+        app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] += player.pickups.length;
+
+        if (!app.games.evolution.global.leaderboard.names) app.games.evolution.global.leaderboard.names = {};
+
+        app.games.evolution.global.leaderboard.names[user.address] = user.username;
+
+        if (!app.games.evolution.global.leaderboard.raw.points[user.address]) {
+          // 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency'
+          app.games.evolution.global.leaderboard.raw.monetary[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.wins[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.rounds[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.kills[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.points[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.deaths[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.powerups[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.evolves[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.rewards[user.address] = 0;
+          app.games.evolution.global.leaderboard.raw.pickups[user.address] = 0;
+        }
+
+        // Update leaderboard stats
+        app.games.evolution.global.leaderboard.raw.rounds[user.address] += 1;
+        app.games.evolution.global.leaderboard.raw.kills[user.address] += player.kills;
+        app.games.evolution.global.leaderboard.raw.points[user.address] += player.points;
+        app.games.evolution.global.leaderboard.raw.deaths[user.address] += player.deaths;
+        app.games.evolution.global.leaderboard.raw.powerups[user.address] += player.powerups;
+        app.games.evolution.global.leaderboard.raw.evolves[user.address] += player.evolves;
+        app.games.evolution.global.leaderboard.raw.rewards[user.address] += player.rewards;
+        app.games.evolution.global.leaderboard.raw.pickups[user.address] += player.pickups.length;
+
+        if (winners.find((winner) => winner.address === player.address)) {
+          const index = winners.findIndex((winner) => winner.address === player.address);
+          // const player = req.data.round.winners[index]
+          // const user = users.find(u => u.address === player.address)
+
+          // if (!user) continue // He wasn't valid
+          if (user.username) {
+            // Make sure cant earn without a character
+            // if (req.data.round.winners[0].address === player.address) {
+            let character = CharacterCache[player.address];
+
+            if (!character) {
+              console.log('Getting char data');
+              character = await getCharacter(app, player.address);
+              console.log('Got char data');
+
+              CharacterCache[player.address] = character;
+            }
+
+            const WinRewardsIncrease = character?.meta?.[1150] || 0;
+            const WinRewardsDecrease = character?.meta?.[1160] || 0;
+
+            console.log('bbbb', rewardWinnerMap[index]);
+            const rewardMultiplier = 1 + (WinRewardsIncrease - WinRewardsDecrease) / 100;
+
+            if (rewardMultiplier > 2 || rewardMultiplier < 0) {
+              log(
+                'Error with reward multiplier.. bad things happened: ',
+                rewardMultiplier,
+                rewardMultiplier,
+                WinRewardsDecrease
+              );
+              process.exit(5);
+            }
+
+            rewardWinnerMap[index] *= rewardMultiplier;
+            console.log('cccc', rewardWinnerMap[index]);
+            // }
+
+            if (!user.rewards.runes['zod']) {
+              user.rewards.runes['zod'] = 0;
+            }
+
+            if (user.rewards.runes['zod'] < 0) {
+              user.rewards.runes['zod'] = 0;
+            }
+
+            user.rewards.runes['zod'] += rewardWinnerMap[index];
+
+            if (!user.lifetimeRewards.runes['zod']) {
+              user.lifetimeRewards.runes['zod'] = 0;
+            }
+
+            user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index];
+
+            app.db.oracle.outflow.evolutionRewards.tokens.week['zod'] += rewardWinnerMap[index];
+
+            app.games.evolution.global.leaderboard.raw.monetary[user.address] += rewardWinnerMap[index];
+
+            app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index];
+
+            app.api.emitAll('PlayerAction', {
+              key: 'evolution1-winner',
+              createdAt: new Date().getTime() / 1000,
+              address: user.address,
+              username: user.username,
+              realmKey: realm.key,
+              placement: index + 1,
+              message: `${user.username} placed #${index + 1} for ${rewardWinnerMap[index].toFixed(
+                4
+              )} ZOD in Evolution`,
+            });
+
+            if (rewardWinnerMap[index] > 0.1) {
+              app.notices.add('evolution1-winner', {
+                key: 'evolution1-winner',
+                address: user.address,
+                username: user.username,
+                realmKey: realm.key,
+                placement: index + 1,
+                message: `${user.username} won ${rewardWinnerMap[index].toFixed(4)} ZOD in Evolution`,
+              });
+            }
+
+            if (req.data.round.winners[0].address === player.address) {
+              if (!app.games.evolution.realms[realm.key].leaderboard.raw)
+                app.games.evolution.realms[realm.key].leaderboard.raw = {};
+              if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins)
+                app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0;
+
+              app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] += 1;
+
+              if (!app.games.evolution.global.leaderboard.raw) app.games.evolution.global.leaderboard.raw = {};
+              if (!app.games.evolution.global.leaderboard.raw.wins) app.games.evolution.global.leaderboard.raw.wins = 0;
+
+              app.games.evolution.global.leaderboard.raw.wins[user.address] += 1;
+            }
+          }
+        }
+
+        await app.db.saveUser(user);
+      }
+
+      log('Round saved');
+
+      client.socket.emit('SaveRoundResponse', {
+        id: req.id,
+        data: { status: 1 },
+      });
+    } catch (e) {
+      log('Error', e);
+
+      client.socket.emit('SaveRoundResponse', {
+        id: req.id,
+        data: { status: 0, message: e },
+      });
+
+      disconnectClient(client);
+    }
+  });
 
   // {
   //   id: 'vLgqLC_oa',
@@ -660,522 +1145,40 @@ export async function connectRealm(app, realm) {
   //   ]
   // }
 
-  client.socket.on('GetCharacterRequest', async function (req) {
-    log('GetCharacterRequest', req)
-
-    try {
-      let character = CharacterCache[req.data.address]
-
-      if (!character) {
-        // if (req.data.address === '0x1a367CA7bD311F279F1dfAfF1e60c4d797Faa6eb') {
-        //   meta[1030] = 100
-        // }
-
-        // if (req.data.address === '0x6f756AFaC862A2486f4c1C96b46E00A98a70bEA2') {
-        //   meta[1030] = 100
-        // }
-
-        character = await getCharacter(app, req.data.address)
-
-        CharacterCache[req.data.address] = character
-      }
-
-      log('GetCharacterResponse', character)
-
-      client.socket.emit('GetCharacterResponse', {
-        id: req.id,
-        data: { status: 1, character },
-      })
-    } catch (e) {
-      client.socket.emit('GetCharacterResponse', {
-        id: req.id,
-        data: { status: 0, message: 'Error' },
-      })
-    }
-  })
-
-  client.socket.on('SaveRoundRequest', async function (req) {
-    // Iterate the items found, add to user.evolution.rewards
-    // Itereate the runes found, add to user.evolution.runes
-    // Iterate the winners, add to the user.evolution.runes
-    // Add winning stats to user.evolution
-    try {
-      log('SaveRoundRequest', realm.key, req)
-
-      if (!(await isValidRequest(app.web3, req)) && app.db.evolution.modList.includes(req.signature.address)) {
-        log('Round invalid')
-
-        client.socket.emit('SaveRoundResponse', {
-          id: req.id,
-          data: { status: 0, message: 'Invalid signature' },
-        })
-        return
-      }
-
-      if (!req.data.lastClients) {
-        log('Round no clients')
-
-        client.socket.emit('SaveRoundResponse', {
-          id: req.id,
-          data: { status: 0, message: 'Error processing' },
-        })
-        return
-      }
-
-      if (req.data.round.winners.length === 0) {
-        realm.roundId += 1
-
-        log('Round skipped')
-
-        client.socket.emit('SaveRoundResponse', {
-          id: req.id,
-          data: { status: 1 },
-        })
-        return
-      }
-
-      if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountMax) {
-        log(req.data.rewardWinnerAmount, app.db.evolution.config.rewardWinnerAmountMax)
-        throw new Error('Big problem with reward amount')
-      }
-
-      let totalLegitPlayers = 0
-
-      for (const client of req.data.lastClients) {
-        if (client.name.indexOf('Guest') !== -1 || client.name.indexOf('Unknown') !== -1) continue
-
-        if (
-          (client.powerups > 100 && client.kills > 1) ||
-          (client.evolves > 20 && client.powerups > 200) ||
-          (client.rewards > 3 && client.powerups > 200) ||
-          client.evolves > 100 ||
-          client.points > 1000
-        ) {
-          totalLegitPlayers += 1
-        }
-      }
-
-      if (totalLegitPlayers === 0) {
-        totalLegitPlayers = 1
-      }
-
-      if (req.data.rewardWinnerAmount > app.db.evolution.config.rewardWinnerAmountPerLegitPlayer * totalLegitPlayers) {
-        log(
-          req.data.rewardWinnerAmount,
-          app.db.evolution.config.rewardWinnerAmountPerLegitPlayer,
-          totalLegitPlayers,
-          req.data.lastClients.length,
-          JSON.stringify(req.data.lastClients)
-        )
-        throw new Error('Big problem with reward amount 2')
-      }
-
-      if (req.data.roundId > realm.roundId) {
-        realm.roundId = req.data.roundId
-      } else if (req.data.roundId < realm.roundId) {
-        const err = `Round id too low (realm.roundId = ${realm.roundId})`
-
-        log(err)
-
-        client.socket.emit('SaveRoundResponse', {
-          id: req.id,
-          data: { status: 0, message: err },
-        })
-
-        await setRealmConfig(app, realm)
-
-        return
-      } else {
-        realm.roundId += 1
-      }
-
-      // if (req.data.roundId > realm.roundId) {
-      //   client.socket.emit('SaveRoundResponse', {
-      //     id: req.id,
-      //     data: { status: 0, message: 'Invalid round id' }
-      //   })
-      //   return
-      // }
-
-      const rewardWinnerMap = {
-        0: Math.round(req.data.rewardWinnerAmount * 1 * 1000) / 1000,
-        1: Math.round(req.data.rewardWinnerAmount * 0.25 * 1000) / 1000,
-        2: Math.round(req.data.rewardWinnerAmount * 0.15 * 1000) / 1000,
-        3: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
-        4: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
-        5: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
-        6: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
-        7: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
-        8: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
-        9: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
-      }
-
-      // const users = []
-
-      // Iterate the winners, determine the winning amounts, validate, save to user rewards
-      // Iterate all players and save their log / stats
-
-      const removeDupes2 = (list) => {
-        const seen = {}
-        return list.filter(function (item) {
-          // console.log(item)
-          const k1 = item.address
-          const exists = seen.hasOwnProperty(k1)
-
-          if (!exists) {
-            seen[k1] = true
-          }
-
-          return !exists
-        })
-      }
-
-      req.data.round.players = removeDupes2(req.data.round.players) // [...new Set(req.data.round.players.map(obj => obj.key)) ] //
-
-      const winners = req.data.round.winners.slice(0, 10)
-
-      const rewardTweaks = {}
-
-      for (const winner of winners) {
-        let character = CharacterCache[winner.address]
-
-        if (!character) {
-          console.log('Getting char data')
-          character = await getCharacter(app, winner.address)
-          console.log('Got char data')
-
-          CharacterCache[winner.address] = character
-        }
-
-        // if (character?.meta?.[1173] > 0) {
-        //   const portion = 0.05
-
-        //   for (const kill of winner.log.kills) {
-        //     const target = req.data.round.players.filter(p => p.hash === kill)
-
-        //     if (target?.address) {
-        //       if (!rewardTweaks[target.address]) rewardTweaks[target.address] = 0
-        //       if (!rewardTweaks[winner.address]) rewardTweaks[winner.address] = 0
-
-        //       rewardTweaks[target.address] -= portion
-        //       rewardTweaks[winner.address] += portion
-        //     }
-        //   }
-        // }
-      }
-
-      for (const player of req.data.round.players) {
-        console.log('Loading user')
-        const user = await app.db.loadUser(player.address)
-        console.log('Loaded user')
-        const now = new Date().getTime() / 1000
-
-        if (user.lastGamePlayed > now - 4 * 60) continue // Make sure this player isn't in 2 games or somehow getting double rewards
-
-        if (typeof user.username === 'object' || !user.username) user.username = await getUsername(user.address)
-
-        if (!user.username) continue // Make sure cant earn without a character
-
-        app.db.setUserActive(user)
-
-        if (player.killStreak >= 10) {
-          app.api.emitAll('PlayerAction', {
-            key: 'evolution1-killstreak',
-            createdAt: new Date().getTime() / 1000,
-            address: user.address,
-            username: user.username,
-            message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
-          })
-          app.notices.add('evolution1-killstreak', {
-            key: 'evolution1-killstreak',
-            address: user.address,
-            username: user.username,
-            message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
-          })
-        }
-
-        for (const pickup of player.pickups) {
-          if (pickup.type === 'rune') {
-            // TODO: change to authoritative
-            if (
-              pickup.quantity >
-              req.data.round.players.length * app.db.evolution.config.rewardItemAmountPerLegitPlayer * 2
-            ) {
-              log(
-                pickup.quantity,
-                app.db.evolution.config.rewardItemAmountPerLegitPlayer,
-                req.data.round.players.length,
-                JSON.stringify(req.data.round.players)
-              )
-              throw new Error('Big problem with item reward amount')
-            }
-
-            if (pickup.quantity > req.data.round.players.length * app.db.evolution.config.rewardItemAmountMax) {
-              log(pickup.quantity, req.data.round.players.length, app.db.evolution.config.rewardItemAmountMax)
-              throw new Error('Big problem with item reward amount 2')
-            }
-
-            const runeSymbol = pickup.rewardItemName.toLowerCase()
-
-            if (!runes.includes(runeSymbol)) {
-              continue
-            }
-
-            if (!user.rewards.runes[runeSymbol] || user.rewards.runes[runeSymbol] < 0.000000001) {
-              user.rewards.runes[runeSymbol] = 0
-            }
-
-            user.rewards.runes[runeSymbol] += pickup.quantity
-
-            if (!user.lifetimeRewards.runes[runeSymbol] || user.lifetimeRewards.runes[runeSymbol] < 0.000000001) {
-              user.lifetimeRewards.runes[runeSymbol] = 0
-            }
-
-            user.lifetimeRewards.runes[runeSymbol] += pickup.quantity
-
-            app.db.evolution.config.itemRewards.runes[runeSymbol.toLowerCase()] -= pickup.quantity
-
-            app.db.oracle.outflow.evolutionRewards.tokens.week[runeSymbol.toLowerCase()] += pickup.quantity
-          } else {
-            user.rewards.items[pickup.id] = {
-              name: pickup.name,
-              rarity: pickup.rarity,
-              quantity: pickup.quantity,
-            }
-
-            user.lifetimeRewards.items[pickup.id] = {
-              name: pickup.name,
-              rarity: pickup.rarity,
-              quantity: pickup.quantity,
-            }
-          }
-
-          // user.rewardTracking.push(req.tracking)
-        }
-
-        user.lastGamePlayed = now
-
-        if (!user.evolution.hashes) user.evolution.hashes = []
-        if (!user.evolution.hashes.includes(player.hash)) user.evolution.hashes.push(player.hash)
-
-        user.evolution.hashes = user.evolution.hashes.filter(function (item, pos) {
-          return user.evolution.hashes.indexOf(item) === pos
-        })
-
-        // users.push(user)
-
-        if (!app.games.evolution.realms[realm.key].leaderboard.names)
-          app.games.evolution.realms[realm.key].leaderboard.names = {}
-
-        app.games.evolution.realms[realm.key].leaderboard.names[user.address] = user.username
-
-        if (!app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address]) {
-          // 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency'
-          app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.rounds[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.kills[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.deaths[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.powerups[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.evolves[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.rewards[user.address] = 0
-          app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] = 0
-        }
-
-        // Update leaderboard stats
-        app.games.evolution.realms[realm.key].leaderboard.raw.rounds[user.address] += 1
-        app.games.evolution.realms[realm.key].leaderboard.raw.kills[user.address] += player.kills
-        app.games.evolution.realms[realm.key].leaderboard.raw.points[user.address] += player.points
-        app.games.evolution.realms[realm.key].leaderboard.raw.deaths[user.address] += player.deaths
-        app.games.evolution.realms[realm.key].leaderboard.raw.powerups[user.address] += player.powerups
-        app.games.evolution.realms[realm.key].leaderboard.raw.evolves[user.address] += player.evolves
-        app.games.evolution.realms[realm.key].leaderboard.raw.rewards[user.address] += player.rewards
-        app.games.evolution.realms[realm.key].leaderboard.raw.pickups[user.address] += player.pickups.length
-
-        if (!app.games.evolution.global.leaderboard.names) app.games.evolution.global.leaderboard.names = {}
-
-        app.games.evolution.global.leaderboard.names[user.address] = user.username
-
-        if (!app.games.evolution.global.leaderboard.raw.points[user.address]) {
-          // 'orbs', 'revenges', 'rounds', 'wins', 'timeSpent', 'winRatio', 'killDeathRatio', 'roundPointRatio', 'averageLatency'
-          app.games.evolution.global.leaderboard.raw.monetary[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.wins[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.rounds[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.kills[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.points[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.deaths[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.powerups[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.evolves[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.rewards[user.address] = 0
-          app.games.evolution.global.leaderboard.raw.pickups[user.address] = 0
-        }
-
-        // Update leaderboard stats
-        app.games.evolution.global.leaderboard.raw.rounds[user.address] += 1
-        app.games.evolution.global.leaderboard.raw.kills[user.address] += player.kills
-        app.games.evolution.global.leaderboard.raw.points[user.address] += player.points
-        app.games.evolution.global.leaderboard.raw.deaths[user.address] += player.deaths
-        app.games.evolution.global.leaderboard.raw.powerups[user.address] += player.powerups
-        app.games.evolution.global.leaderboard.raw.evolves[user.address] += player.evolves
-        app.games.evolution.global.leaderboard.raw.rewards[user.address] += player.rewards
-        app.games.evolution.global.leaderboard.raw.pickups[user.address] += player.pickups.length
-
-        if (winners.find((winner) => winner.address === player.address)) {
-          const index = winners.findIndex((winner) => winner.address === player.address)
-          // const player = req.data.round.winners[index]
-          // const user = users.find(u => u.address === player.address)
-
-          // if (!user) continue // He wasn't valid
-          if (user.username) {
-            // Make sure cant earn without a character
-            // if (req.data.round.winners[0].address === player.address) {
-            let character = CharacterCache[player.address]
-
-            if (!character) {
-              console.log('Getting char data')
-              character = await getCharacter(app, player.address)
-              console.log('Got char data')
-
-              CharacterCache[player.address] = character
-            }
-
-            const WinRewardsIncrease = character?.meta?.[1150] || 0
-            const WinRewardsDecrease = character?.meta?.[1160] || 0
-
-            console.log('bbbb', rewardWinnerMap[index])
-            const rewardMultiplier = 1 + (WinRewardsIncrease - WinRewardsDecrease) / 100
-
-            if (rewardMultiplier > 2 || rewardMultiplier < 0) {
-              log(
-                'Error with reward multiplier.. bad things happened: ',
-                rewardMultiplier,
-                rewardMultiplier,
-                WinRewardsDecrease
-              )
-              process.exit(5)
-            }
-
-            rewardWinnerMap[index] *= rewardMultiplier
-            console.log('cccc', rewardWinnerMap[index])
-            // }
-
-            if (!user.rewards.runes['zod']) {
-              user.rewards.runes['zod'] = 0
-            }
-
-            if (user.rewards.runes['zod'] < 0) {
-              user.rewards.runes['zod'] = 0
-            }
-
-            user.rewards.runes['zod'] += rewardWinnerMap[index]
-
-            if (!user.lifetimeRewards.runes['zod']) {
-              user.lifetimeRewards.runes['zod'] = 0
-            }
-
-            user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index]
-
-            app.db.oracle.outflow.evolutionRewards.tokens.week['zod'] += rewardWinnerMap[index]
-
-            app.games.evolution.global.leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
-
-            app.games.evolution.realms[realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index]
-
-            app.api.emitAll('PlayerAction', {
-              key: 'evolution1-winner',
-              createdAt: new Date().getTime() / 1000,
-              address: user.address,
-              username: user.username,
-              realmKey: realm.key,
-              placement: index + 1,
-              message: `${user.username} placed #${index + 1} for ${rewardWinnerMap[index].toFixed(
-                4
-              )} ZOD in Evolution`,
-            })
-
-            if (rewardWinnerMap[index] > 0.1) {
-              app.notices.add('evolution1-winner', {
-                key: 'evolution1-winner',
-                address: user.address,
-                username: user.username,
-                realmKey: realm.key,
-                placement: index + 1,
-                message: `${user.username} won ${rewardWinnerMap[index].toFixed(4)} ZOD in Evolution`,
-              })
-            }
-
-            if (req.data.round.winners[0].address === player.address) {
-              if (!app.games.evolution.realms[realm.key].leaderboard.raw)
-                app.games.evolution.realms[realm.key].leaderboard.raw = {}
-              if (!app.games.evolution.realms[realm.key].leaderboard.raw.wins)
-                app.games.evolution.realms[realm.key].leaderboard.raw.wins = 0
-
-              app.games.evolution.realms[realm.key].leaderboard.raw.wins[user.address] += 1
-
-              if (!app.games.evolution.global.leaderboard.raw) app.games.evolution.global.leaderboard.raw = {}
-              if (!app.games.evolution.global.leaderboard.raw.wins) app.games.evolution.global.leaderboard.raw.wins = 0
-
-              app.games.evolution.global.leaderboard.raw.wins[user.address] += 1
-            }
-          }
-        }
-
-        await app.db.saveUser(user)
-      }
-
-      log('Round saved')
-
-      client.socket.emit('SaveRoundResponse', {
-        id: req.id,
-        data: { status: 1 },
-      })
-    } catch (e) {
-      log('Error', e)
-
-      client.socket.emit('SaveRoundResponse', {
-        id: req.id,
-        data: { status: 0, message: e },
-      })
-
-      disconnectClient(client)
-    }
-  })
-
   client.socket.onAny(function (eventName, res) {
     // log('Event All', eventName, res)
-    if (!res || !res.id) return
+    if (!res || !res.id) return;
     // console.log(eventName, res)
     if (ioCallbacks[res.id]) {
-      log('Callback', eventName, res)
+      log('Callback', eventName, res);
 
-      clearTimeout(ioCallbacks[res.id].reqTimeout)
+      clearTimeout(ioCallbacks[res.id].reqTimeout);
 
-      ioCallbacks[res.id].resolve(res.data)
+      ioCallbacks[res.id].resolve(res.data);
 
-      delete ioCallbacks[res.id]
+      delete ioCallbacks[res.id];
     }
-  })
+  });
 
-  client.socket.connect()
+  client.socket.connect();
 
   client.connectTimeout = setTimeout(function () {
     if (!client.isAuthed) {
-      log(`Couldnt connect/authorize ${realm.key} on ${realm.endpoint}`)
-      disconnectClient(client)
+      log(`Couldnt connect/authorize ${realm.key} on ${realm.endpoint}`);
+      disconnectClient(client);
     }
-  }, 60 * 1000)
+  }, 60 * 1000);
 }
 
 export async function connectRealms(app) {
-  log('Connecting to Evolution realms')
+  log('Connecting to Evolution realms');
 
   try {
     for (const realm of app.db.evolution.realms) {
       if (!app.games.evolution.realms[realm.key]) {
-        app.games.evolution.realms[realm.key] = {}
+        app.games.evolution.realms[realm.key] = {};
         for (const key in Object.keys(realm)) {
-          app.games.evolution.realms[realm.key][key] = realm[key]
+          app.games.evolution.realms[realm.key][key] = realm[key];
         }
       }
 
@@ -1194,7 +1197,7 @@ export async function connectRealms(app) {
       if (!app.games.evolution.global) {
         app.games.evolution.global = {
           key: 'global',
-        }
+        };
       }
 
       if (!app.games.evolution.global.leaderboard) {
@@ -1287,7 +1290,7 @@ export async function connectRealms(app) {
               },
             ],
           },
-        }
+        };
       }
 
       if (!app.games.evolution.realms[realm.key].leaderboard) {
@@ -1380,11 +1383,11 @@ export async function connectRealms(app) {
               },
             ],
           },
-        }
+        };
       }
 
       if (!app.games.evolution.realms[realm.key].client) {
-        app.games.evolution.realms[realm.key].key = realm.key
+        app.games.evolution.realms[realm.key].key = realm.key;
 
         app.games.evolution.realms[realm.key].client = {
           isAuthed: false,
@@ -1393,57 +1396,57 @@ export async function connectRealms(app) {
           socket: null,
           connectTimeout: null,
           reqTimeout: null,
-        }
+        };
       }
 
       if (!realm.roundId) {
-        realm.roundId = 1
+        realm.roundId = 1;
       }
 
       // if (realm.key.indexOf('ptr') !== -1 || realm.key.indexOf('tournament') !== -1) continue
-      if (realm.status === 'inactive' || realm.updateMode === 'manual') continue
+      if (realm.status === 'inactive' || realm.updateMode === 'manual') continue;
 
       if (
         !app.games.evolution.realms[realm.key].client.isConnected &&
         !app.games.evolution.realms[realm.key].client.isConnecting &&
         !app.games.evolution.realms[realm.key].client.isAuthed
       ) {
-        await connectRealm(app, realm)
+        await connectRealm(app, realm);
       }
     }
   } catch (e) {
-    log('Error', e)
+    log('Error', e);
   }
 }
 
 export async function emitAll(app, ...args) {
   for (const realm of app.db.evolution.realms) {
     if (app.games.evolution.realms[realm.key]?.client?.isAuthed) {
-      console.log('emitAll', realm.key, ...args)
-      app.games.evolution.realms[realm.key]?.client?.socket.emit(...args)
+      console.log('emitAll', realm.key, ...args);
+      app.games.evolution.realms[realm.key]?.client?.socket.emit(...args);
     }
   }
 }
 
 export async function monitorEvolutionRealms(app) {
   if (!app.realm) {
-    app.realm = {}
-    app.realm.apiAddress = '0x4b64Ff29Ee3B68fF9de11eb1eFA577647f83151C'
+    app.realm = {};
+    app.realm.apiAddress = '0x4b64Ff29Ee3B68fF9de11eb1eFA577647f83151C';
     app.realm.apiSignature = await getSignedRequest(
       app.web3,
       app.secrets.find((s) => s.id === 'evolution-signer'),
       'evolution'
-    )
-    app.realm.emitAll = emitAll.bind(null, app)
+    );
+    app.realm.emitAll = emitAll.bind(null, app);
   }
 
   if (!app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued) {
     app.db.evolution.config.rewardWinnerAmountPerLegitPlayerQueued =
-      app.db.evolution.config.rewardWinnerAmountPerLegitPlayer
+      app.db.evolution.config.rewardWinnerAmountPerLegitPlayer;
   }
 
   if (!app.db.evolution.config.rewardWinnerAmountMaxQueued) {
-    app.db.evolution.config.rewardWinnerAmountMaxQueued = app.db.evolution.config.rewardWinnerAmountMax
+    app.db.evolution.config.rewardWinnerAmountMaxQueued = app.db.evolution.config.rewardWinnerAmountMax;
   }
 
   if (!app.db.evolution.config.itemRewards) {
@@ -1541,20 +1544,20 @@ export async function monitorEvolutionRealms(app) {
         // }
       ],
       items: [],
-    }
+    };
   }
 
   if (!app.db.evolution.config.itemRewardsQueued) {
-    app.db.evolution.config.itemRewardsQueued = app.db.evolution.config.itemRewards
+    app.db.evolution.config.itemRewardsQueued = app.db.evolution.config.itemRewards;
   }
 
-  await connectRealms(app)
-  await updateRealms(app)
+  await connectRealms(app);
+  await updateRealms(app);
 
-  setTimeout(() => monitorEvolutionRealms(app), 30 * 1000)
+  setTimeout(() => monitorEvolutionRealms(app), 30 * 1000);
 }
 
 setInterval(function () {
-  log('Clearing character cache...')
-  CharacterCache = {}
-}, 30 * 60 * 1000)
+  log('Clearing character cache...');
+  CharacterCache = {};
+}, 30 * 60 * 1000);

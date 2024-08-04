@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-import { log } from '@runemetaverse/backend-sdk/build/util'
+import { log } from '@arken/node/util'
 
 async function calculateGameRewards(app) {
   // Update current rewards to the previous calculation
