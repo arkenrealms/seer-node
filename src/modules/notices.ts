@@ -1,28 +1,27 @@
-import fetch from 'node-fetch'
-import path from 'path'
-import jetpack, { find } from 'fs-jetpack'
-import beautify from 'json-beautify'
+import path from 'path';
+import jetpack, { find } from 'fs-jetpack';
+import beautify from 'json-beautify';
 
-const shortId = require('shortid')
+const shortId = require('shortid');
 
 async function add(type, data) {
-  console.log('Update notices')
+  console.log('Update notices');
 
-  const now = new Date().getTime() / 1000
+  const now = new Date().getTime() / 1000;
   const notices = (jetpack.read(path.resolve('./db/notices.json'), 'json') || []).filter(
     (n) => n.createdAt > now - 30 * 24 * 60 * 60
-  )
+  );
 
-  if (notices.find((n) => n.type === type && data.message === n.data.message)) return // already exists
+  if (notices.find((n) => n.type === type && data.message === n.data.message)) return; // already exists
 
   notices.push({
     id: shortId(),
     type,
     data,
     createdAt: now,
-  })
+  });
 
-  jetpack.write(path.resolve(`./db/notices.json`), JSON.stringify(notices), { atomic: true, jsonIndent: 0 })
+  jetpack.write(path.resolve(`./db/notices.json`), JSON.stringify(notices), { atomic: true, jsonIndent: 0 });
 }
 
 export async function initNotices(app) {
@@ -30,8 +29,8 @@ export async function initNotices(app) {
   try {
     app.notices = {
       add,
-    }
+    };
   } catch (e) {
-    console.log('Error', e)
+    console.log('Error', e);
   }
 }

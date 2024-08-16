@@ -1,74 +1,74 @@
-import fetch from 'node-fetch'
-import * as ethers from 'ethers'
-import { log, wait } from '@arken/node/util'
-import { iterateBlocks, getAddress, getSignedRequest } from '@arken/node/util/web3'
+import fetch from 'axios';
+import * as ethers from 'ethers';
+import { log, wait } from '@arken/node/util';
+import { iterateBlocks, getAddress, getSignedRequest } from '@arken/node/util/web3';
 
 async function monitorBalances(app) {}
 
 export async function getAllSenderEvents(app, retry = false) {
-  if (app.config.sender.updating) return
+  if (app.config.sender.updating) return;
 
-  log('[Sender] Updating')
+  log('[Sender] Updating');
 
-  app.config.sender.updating = true
+  app.config.sender.updating = true;
 
   try {
-    const contractAddressToKey = {}
+    const contractAddressToKey = {};
 
     for (const contractKey of Object.keys(app.contractInfo)) {
-      contractAddressToKey[app.contractInfo[contractKey][56]] = contractKey
+      contractAddressToKey[app.contractInfo[contractKey][56]] = contractKey;
     }
 
-    const rand = Math.floor(Math.random() * Math.floor(999999))
-    const response = await fetch(`${app.sender.coordinatorEndpoint}/data/claimRequests.json?${rand}`) // ?${rand}
-    const claimRequests = await response.json()
+    const rand = Math.floor(Math.random() * Math.floor(999999));
+    const response = await fetch(`${app.sender.coordinatorEndpoint}/data/claimRequests.json?${rand}`); // ?${rand}
+    const claimRequests = response.data;
 
-    const iface = new ethers.utils.Interface(app.contractMetadata.RuneSenderV1.abi)
+    const iface = new ethers.utils.Interface(app.contractMetadata.RuneSenderV1.abi);
 
     // @ts-ignore
     async function processLog(log2, updateConfig = true) {
       try {
-        const e = iface.parseLog(log2)
+        const e = iface.parseLog(log2);
 
-        console.log(e.name, e)
-        const user = await app.db.loadUser(e.args.to)
+        console.log(e.name, e);
+        const user = await app.db.loadUser(e.args.to);
 
-        if (!user.claimRequests) user.claimRequests = []
+        if (!user.claimRequests) user.claimRequests = [];
 
         const coordinatorRequest = claimRequests.find(
           (c) => c.data?.requestId === e.args.requestId && c.status == 'completed'
-        )
+        );
 
-        let claimRequest = user.claimRequests.find((c) => c.requestId === e.args.requestId)
+        let claimRequest = user.claimRequests.find((c) => c.requestId === e.args.requestId);
 
         if (!claimRequest) {
           claimRequest = {
             id: coordinatorRequest?.id,
             requestId: e.args.requestId,
-          }
+          };
 
-          user.claimRequests.push(claimRequest)
+          user.claimRequests.push(claimRequest);
         }
 
-        claimRequest.status = 'completed'
+        claimRequest.status = 'completed';
 
         if (coordinatorRequest) {
-          if (!user.rewardHistory) user.rewardHistory = []
+          if (!user.rewardHistory) user.rewardHistory = [];
 
           for (const index in coordinatorRequest.tokenAddresses) {
             const rune = {
               key: contractAddressToKey[coordinatorRequest.tokenAddresses[index]],
               value: coordinatorRequest.tokenAmounts[index],
-            }
+            };
 
-            const rewardHistoryItem = user.rewardHistory.find((r) => r.id === coordinatorRequest.id)
+            const rewardHistoryItem = user.rewardHistory.find((r) => r.id === coordinatorRequest.id);
             if (!rewardHistoryItem) {
               user.rewardHistory.push({
                 id: coordinatorRequest.id,
                 rune: rune.key,
                 value: rune.value,
                 timestamp: new Date().getTime(),
-              })
+              });
 
               // if (!user.rewards.runes[rune.key]) {
               //   user.rewards.runes[rune.key] = 0
@@ -93,13 +93,13 @@ export async function getAllSenderEvents(app, retry = false) {
               'rune-databaser/sender'
             ),
           }),
-        }
+        };
 
-        const finalizeRes = await (
+        const finalizeRes = (
           await fetch(`${app.sender.coordinatorEndpoint}/claim/finalize/${e.args.requestId}`, requestOptions)
-        ).json() // ?${rand}
+        ).data; // ?${rand}
 
-        await app.db.saveUser(user)
+        await app.db.saveUser(user);
 
         if (finalizeRes.status === 1) {
           await app.api.emitAll('PlayerAction', {
@@ -108,28 +108,28 @@ export async function getAllSenderEvents(app, retry = false) {
             address: user.address,
             username: user.username,
             message: `${user.username} claimed rewards`,
-          })
+          });
         } else {
-          log('Error finalizing claim', e, finalizeRes)
+          log('Error finalizing claim', e, finalizeRes);
           await app.api.emitAll('PlayerAction', {
             key: 'reward-claim',
             createdAt: new Date().getTime() / 1000,
             address: user.address,
             username: user.username,
             message: `${user.username} claimed (finalization failed)`,
-          })
+          });
         }
       } catch (ex) {
-        log(ex)
-        log('Error parsing log: ', log2)
-        await wait(1000)
+        log(ex);
+        log('Error parsing log: ', log2);
+        await wait(1000);
       }
     }
 
-    const blockNumber = await app.web3.eth.getBlockNumber()
+    const blockNumber = await app.web3.eth.getBlockNumber();
 
     if (parseInt(blockNumber) > 10000) {
-      const events = ['RewardsSent(address,uint256,string)']
+      const events = ['RewardsSent(address,uint256,string)'];
 
       for (const event of events) {
         await iterateBlocks(
@@ -141,47 +141,47 @@ export async function getAllSenderEvents(app, retry = false) {
           app.contracts.sender.filters[event](),
           processLog,
           async function (blockNumber2) {
-            app.config.sender.lastBlock[event] = blockNumber2
+            app.config.sender.lastBlock[event] = blockNumber2;
             // await saveConfig()
           }
-        )
+        );
       }
     } else {
-      log('Error parsing block number', blockNumber)
+      log('Error parsing block number', blockNumber);
     }
 
     // console.log(JSON.stringify(newCoordinatorRequests, null, 2))
 
-    log('Finished')
+    log('Finished');
   } catch (e) {
-    log('Error', e)
-    await wait(1000)
+    log('Error', e);
+    await wait(1000);
   }
 
-  app.config.sender.updating = false
-  app.config.sender.updatedDate = new Date().toString()
-  app.config.sender.updatedTimestamp = new Date().getTime()
+  app.config.sender.updating = false;
+  app.config.sender.updatedDate = new Date().toString();
+  app.config.sender.updatedTimestamp = new Date().getTime();
 
   // await saveItemsEvents()
   // await saveConfig()
 
   if (retry) {
-    setTimeout(() => getAllSenderEvents(app), 5 * 60 * 1000)
+    setTimeout(() => getAllSenderEvents(app), 5 * 60 * 1000);
   }
 }
 
 export async function monitorSenderEvents(app) {
-  app.sender = {}
+  app.sender = {};
 
-  app.sender.coordinatorEndpoint = 'http://35.245.242.215'
+  app.sender.coordinatorEndpoint = 'http://35.245.242.215';
 
   if (process.env.ARKEN_ENV === 'local') {
-    app.sender.coordinatorEndpoint = 'http://localhost:5001'
+    app.sender.coordinatorEndpoint = 'http://localhost:5001';
   }
 
-  await getAllSenderEvents(app)
+  await getAllSenderEvents(app);
 
   app.contracts.sender.on('RewardsSent', async () => {
-    await getAllSenderEvents(app)
-  })
+    await getAllSenderEvents(app);
+  });
 }

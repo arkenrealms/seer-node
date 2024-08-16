@@ -479,7 +479,7 @@
     "id": "0xce8d2d0c914587e195f958bfed591c5fa1bd4937427726ee02b678667bec0e24",
     "ipfs": "QmdkSvkYRMZaYZF6Ad27EPH4MdEEVqeCWuChf7NW4Ass5A",
     "title": "Test Proposal",
-    "body": "This is just a test of the Snapshot system for Rune.game voting.",
+    "body": "This is just a test of the Snapshot system for Arken voting.",
     "start": 1649521618,
     "end": 1649780818,
     "state": "closed",

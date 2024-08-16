@@ -1,22 +1,20 @@
 {
   "name": "@arken/seer",
   "version": "2.0.0",
-  "main": "build/src/index.js",
-  "engine": {
-    "node": "18.16.1"
-  },
+  "main": "src/index.ts",
   "scripts": {
-    "local": "ARKEN_ENV=local CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
-    "payments": "ARKEN_ENV=payments CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
-    "airtable": "ARKEN_ENV=airtable CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
-    "skinner": "ARKEN_ENV=skinner CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
-    "dao": "ARKEN_ENV=dao CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "local": "ARKEN_ENV=local CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "payments": "ARKEN_ENV=payments CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "airtable": "ARKEN_ENV=airtable CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "skinner": "ARKEN_ENV=skinner CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "dao": "ARKEN_ENV=dao CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "build": "NODE_ENV=production tsc",
-    "start": "ARKEN_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://autumn-blue-meadow.bsc.quiknode.pro/6b0e7864e252135989a5346630683db90691012a/ LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js",
+    "start": "ARKEN_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js",
     "forever": "forever start forever-config.json",
     "clean": "rm forever-script-err.log && rm forever-script-log.log && rm forever-script-out.log && rm nohup.out"
   },
   "devDependencies": {
+    "@arken/node": "workspace:*",
     "@nomiclabs/buidler": "^1.4.7",
     "@nomiclabs/buidler-ethers": "^1.3.4",
     "@nomiclabs/buidler-etherscan": "^2.1.0",
@@ -62,15 +60,19 @@
     "socket.io-client": "^4.1.2",
     "solhint": "^3.0.0",
     "ts-generator": "0.0.8",
-    "ts-node": "^8.6.2",
-    "ts-node-dev": "^1.1.8",
+    "ts-node": "^8.3.0",
+    "ts-node-dev": "~2.0.0",
     "tslint": "^6.1.2",
     "typechain": "^2.0.0",
     "typescript": "^4.3.4",
-    "web3": "^1.2.11"
-  },
-  "directories": {
-    "test": "test"
+    "web3": "^1.2.11",
+    "axios": "~1.6.8",
+    "bignumber.js": "^9.0.0",
+    "rxjs": "^7",
+    "lokijs": "^1.5.8",
+    "moment": "^2.24.0",
+    "fast-safe-stringify": "^2.0.7",
+    "flatted": "^2.0.1"
   },
   "dependencies": {
     "@prisma/client": "^4.11.0",
@@ -80,7 +82,6 @@
     "json-beautify": "^1.1.1",
     "pixelmatch": "^5.3.0",
     "prisma": "^4.11.0",
-    "@arken/node": "../node",
     "shortid": "^2.2.16",
     "sqlite3": "^5.0.3",
     "tsconfig-paths": "^3.12.0",

@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:20
 
 WORKDIR /usr/src/app
 RUN apt-get update
@@ -7,20 +7,14 @@ RUN npm install -g ts-node-dev
 
 COPY . .
 
-COPY id_ed25519_databaser /root/.ssh/id_ed25519_databaser
-RUN chmod 600 /root/.ssh/id_ed25519_databaser
+COPY id_ed25519 /root/.ssh/id_ed25519
+RUN chmod 600 /root/.ssh/id_ed25519
 COPY ssh_config /root/.ssh/config
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-# RUN git clone git@sdk:zeno-games/rune-backend-sdk.git
-# WORKDIR /usr/src/app/rune-backend-sdk
-# RUN git checkout 38625f33014c31f227fc1a8b82e2f9ed1b97a81a
-# RUN yarn install
-# RUN npm link
-
 WORKDIR /usr/src/app
-RUN git clone git@databaser:zeno-games/databaser.git
-WORKDIR /usr/src/app/databaser
+RUN git clone git@databaser:arken-engineering/seer.git
+WORKDIR /usr/src/app/seer
 RUN yarn install
 RUN yarn run build
 

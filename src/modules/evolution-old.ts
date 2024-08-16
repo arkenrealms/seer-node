@@ -115,7 +115,7 @@
 //   }
 // }
 
-// import fetch from 'node-fetch'
+// import fetch from 'axios';
 // import path from 'path'
 // import jetpack from 'fs-jetpack'
 // import beautify from 'json-beautify'
@@ -1248,4 +1248,4 @@
 //   setTimeout(() => monitorEvolutionStats2(app), 30 * 1000)
 // }
 
-export default 1
+export default 1;

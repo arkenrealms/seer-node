@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import path from 'path';
 import jetpack, { find } from 'fs-jetpack';
 import beautify from 'json-beautify';
@@ -1561,3 +1560,560 @@ setInterval(function () {
   log('Clearing character cache...');
   CharacterCache = {};
 }, 30 * 60 * 1000);
+
+import { t } from '@trpc/server';
+import { z } from 'zod';
+import { isDebug, log } from '@arken/node/util';
+import * as dotenv from 'dotenv';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
+import { AppDatabase, Application, Character } from '../types';
+import { log } from '@arken/node/util';
+import { emitAll, emitDirect } from '@arken/node/util/websocket';
+import { isValidRequest, getSignedRequest } from '@arken/node/web3';
+import { getCharacter } from './character-utils';
+import { isDebug, log } from '@arken/node/util';
+import { catchExceptions, subProcesses } from '@arken/node/util/process';
+import fetch from 'node-fetch';
+
+dotenv.config();
+
+export const router = t.router;
+export const procedure = t.procedure;
+export const createCallerFactory = t.createCallerFactory;
+
+export class Seer {
+  constructor() {}
+
+  characters: Record<string, Character> = {};
+
+  pingRequest(msg: any) {
+    log('PingRequest', msg);
+    this.io.emit('PingResponse');
+  }
+
+  pongRequest(msg: any) {
+    log('PongRequest', msg);
+    this.io.emit('PongResponse');
+  }
+
+  async unbanClient(req: { data: { target: string }; id: string }) {
+    log('unbanClient', req);
+
+    const user = await this.db.loadUser(req.data.target);
+    delete user.isBanned;
+    delete user.banReason;
+    await this.db.saveUser(user);
+
+    this.db.removeBanList('evolution', req.data.target);
+    this.db.saveBanList();
+
+    return { target: req.data.target };
+  }
+
+  async mod(req: {
+    data: {
+      body: { signature: { address: string } };
+      params: { method: string };
+    };
+  }) {
+    log('mod', req);
+
+    const user = await this.db.loadUser(req.data.body.signature.address);
+    emitAll('playerAction', {
+      key: 'moderator-action',
+      createdAt: new Date().getTime() / 1000,
+      address: user.address,
+      username: user.username,
+      method: req.data.params.method,
+      message: `${user.username} called ${req.data.params.method}`,
+    });
+
+    return { status: 1 };
+  }
+
+  async banClient(req: { data: { target: string; reason: string; until?: number }; id: string }) {
+    log('banClient', req);
+
+    const user = await this.db.loadUser(req.data.target);
+    user.isBanned = true;
+    user.banReason = req.data.reason;
+    user.banExpireDate = req.data.until || new Date().getTime() + 100 * 365 * 24 * 60 * 60; // 100 years by default
+
+    await this.db.saveUser(user);
+
+    this.db.addBanList('evolution', {
+      address: req.data.target,
+      reason: req.data.reason,
+      until: req.data.until,
+    });
+
+    this.db.saveBanList();
+
+    return {
+      status: 1,
+      data: {
+        target: req.data.target,
+        createdAt: new Date().getTime(),
+        banExpireDate: user.banExpireDate,
+        banReason: user.banReason,
+      },
+    };
+  }
+
+  reportClient(msg: any) {
+    log('reportClient', msg);
+
+    const { currentGamePlayers, currentPlayer, reportedPlayer } = msg;
+
+    if (currentPlayer.name.includes('Guest') || currentPlayer.name.includes('Unknown')) return; // No guest reports
+
+    if (!this.db.evolution.reportList[reportedPlayer.address]) {
+      this.db.evolution.reportList[reportedPlayer.address] = [];
+    }
+
+    if (!this.db.evolution.reportList[reportedPlayer.address].includes(currentPlayer.address)) {
+      this.db.evolution.reportList[reportedPlayer.address].push(currentPlayer.address);
+    }
+
+    // Additional logic for handling reports and disconnects can be added here
+
+    // Relay the report to connected realm servers
+  }
+
+  setRealmOffline(realm) {
+    if (realm.status === 'inactive' || realm.updateMode === 'manual') return;
+
+    realm.status = 'offline';
+    realm.playerCount = 0;
+    realm.speculatorCount = 0;
+    realm.rewardItemAmount = 0;
+    realm.rewardWinnerAmount = 0;
+  }
+
+  async getCharacter(req: { data: { address: string }; id: string }) {
+    log('GetCharacterRequest', req);
+
+    let character = this.characters[req.data.address];
+    if (!character) {
+      character = await getCharacter(this.app, req.data.address);
+      this.characters[req.data.address] = character;
+    }
+
+    return { status: 1, character };
+  }
+
+  async setRealmConfig(app, realm) {
+    const configRes = (await rsCall(app, app.games.evolution.realms[realm.key], 'SetConfigRequest', {
+      config: { ...app.db.evolution.config, roundId: realm.roundId },
+    })) as any;
+
+    if (configRes.status !== 1) {
+      this.setRealmOffline(realm);
+      return;
+    }
+  }
+
+  async saveRound(req) {
+    log('SaveRoundRequest', this.realm.key, req);
+
+    if (!(await isValidRequest(req)) && this.db.evolution.modList.includes(req.signature.address)) {
+      log('Round invalid');
+
+      return { status: 0, message: 'Invalid signature' };
+    }
+
+    if (!req.data.lastClients) {
+      log('Round no clients');
+
+      return { status: 0, message: 'Error processing' };
+    }
+
+    if (req.data.round.winners.length === 0) {
+      this.realm.roundId += 1;
+
+      log('Round skipped');
+
+      return { status: 1 };
+    }
+
+    if (req.data.rewardWinnerAmount > this.db.evolution.config.rewardWinnerAmountMax) {
+      log(req.data.rewardWinnerAmount, this.db.evolution.config.rewardWinnerAmountMax);
+      throw new Error('Big problem with reward amount');
+    }
+
+    let totalLegitPlayers = 0;
+
+    for (const client of req.data.lastClients) {
+      if (client.name.includes('Guest') || client.name.includes('Unknown')) continue;
+
+      if (
+        (client.powerups > 100 && client.kills > 1) ||
+        (client.evolves > 20 && client.powerups > 200) ||
+        (client.rewards > 3 && client.powerups > 200) ||
+        client.evolves > 100 ||
+        client.points > 1000
+      ) {
+        totalLegitPlayers += 1;
+      }
+    }
+
+    if (totalLegitPlayers === 0) {
+      totalLegitPlayers = 1;
+    }
+
+    if (req.data.rewardWinnerAmount > this.db.evolution.config.rewardWinnerAmountPerLegitPlayer * totalLegitPlayers) {
+      log(
+        req.data.rewardWinnerAmount,
+        this.db.evolution.config.rewardWinnerAmountPerLegitPlayer,
+        totalLegitPlayers,
+        req.data.lastClients.length,
+        JSON.stringify(req.data.lastClients)
+      );
+      throw new Error('Big problem with reward amount 2');
+    }
+
+    if (req.data.roundId > this.realm.roundId) {
+      this.realm.roundId = req.data.roundId;
+    } else if (req.data.roundId < this.realm.roundId) {
+      const err = `Round id too low (realm.roundId = ${this.realm.roundId})`;
+
+      log(err);
+
+      await this.setRealmConfig();
+
+      return { status: 0, message: err };
+    } else {
+      this.realm.roundId += 1;
+    }
+
+    const rewardWinnerMap = {
+      0: Math.round(req.data.rewardWinnerAmount * 1 * 1000) / 1000,
+      1: Math.round(req.data.rewardWinnerAmount * 0.25 * 1000) / 1000,
+      2: Math.round(req.data.rewardWinnerAmount * 0.15 * 1000) / 1000,
+      3: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+      4: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+      5: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+      6: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+      7: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+      8: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+      9: Math.round(req.data.rewardWinnerAmount * 0.05 * 1000) / 1000,
+    };
+
+    const removeDupes2 = (list) => {
+      const seen = {};
+      return list.filter((item) => {
+        const k1 = item.address;
+        if (seen[k1]) {
+          return false;
+        } else {
+          seen[k1] = true;
+          return true;
+        }
+      });
+    };
+
+    req.data.round.players = removeDupes2(req.data.round.players);
+
+    const winners = req.data.round.winners.slice(0, 10);
+
+    for (const winner of winners) {
+      let character = this.characters[winner.address];
+
+      if (!character) {
+        character = await this.getCharacter(winner.address);
+        this.characters[winner.address] = character;
+      }
+
+      // Additional reward logic based on character's meta data
+    }
+
+    for (const player of req.data.round.players) {
+      const user = await this.db.loadUser(player.address);
+      const now = new Date().getTime() / 1000;
+
+      if (user.lastGamePlayed > now - 4 * 60) continue;
+
+      if (!user.username) user.username = await this.getUsername(user.address);
+      if (!user.username) continue;
+
+      this.db.setUserActive(user);
+
+      if (player.killStreak >= 10) {
+        this.api.emitAll('PlayerAction', {
+          key: 'evolution1-killstreak',
+          createdAt: new Date().getTime() / 1000,
+          address: user.address,
+          username: user.username,
+          message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
+        });
+        this.notices.add('evolution1-killstreak', {
+          key: 'evolution1-killstreak',
+          address: user.address,
+          username: user.username,
+          message: `${user.username} got a ${player.killStreak} killstreak in Evolution`,
+        });
+      }
+
+      for (const pickup of player.pickups) {
+        if (pickup.type === 'rune') {
+          if (
+            pickup.quantity >
+            req.data.round.players.length * this.db.evolution.config.rewardItemAmountPerLegitPlayer * 2
+          ) {
+            log(
+              pickup.quantity,
+              this.db.evolution.config.rewardItemAmountPerLegitPlayer,
+              req.data.round.players.length,
+              JSON.stringify(req.data.round.players)
+            );
+            throw new Error('Big problem with item reward amount');
+          }
+
+          if (pickup.quantity > req.data.round.players.length * this.db.evolution.config.rewardItemAmountMax) {
+            log(pickup.quantity, req.data.round.players.length, this.db.evolution.config.rewardItemAmountMax);
+            throw new Error('Big problem with item reward amount 2');
+          }
+
+          const runeSymbol = pickup.rewardItemName.toLowerCase();
+          if (!runes.includes(runeSymbol)) continue;
+
+          user.rewards.runes[runeSymbol] = (user.rewards.runes[runeSymbol] || 0) + pickup.quantity;
+          user.lifetimeRewards.runes[runeSymbol] = (user.lifetimeRewards.runes[runeSymbol] || 0) + pickup.quantity;
+
+          this.db.evolution.config.itemRewards.runes[runeSymbol.toLowerCase()] -= pickup.quantity;
+          this.db.oracle.outflow.evolutionRewards.tokens.week[runeSymbol.toLowerCase()] += pickup.quantity;
+        } else {
+          user.rewards.items[pickup.id] = {
+            name: pickup.name,
+            rarity: pickup.rarity,
+            quantity: pickup.quantity,
+          };
+
+          user.lifetimeRewards.items[pickup.id] = {
+            name: pickup.name,
+            rarity: pickup.rarity,
+            quantity: pickup.quantity,
+          };
+        }
+      }
+
+      user.lastGamePlayed = now;
+
+      if (!user.evolution.hashes) user.evolution.hashes = [];
+      if (!user.evolution.hashes.includes(player.hash)) user.evolution.hashes.push(player.hash);
+
+      user.evolution.hashes = user.evolution.hashes.filter((item, pos) => user.evolution.hashes.indexOf(item) === pos);
+
+      if (!this.games.evolution.realms[this.realm.key].leaderboard.names)
+        this.games.evolution.realms[this.realm.key].leaderboard.names = {};
+
+      this.games.evolution.realms[this.realm.key].leaderboard.names[user.address] = user.username;
+
+      if (!this.games.evolution.realms[this.realm.key].leaderboard.raw.points[user.address]) {
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.monetary[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.wins[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.rounds[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.kills[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.points[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.deaths[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.powerups[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.evolves[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.rewards[user.address] = 0;
+        this.games.evolution.realms[this.realm.key].leaderboard.raw.pickups[user.address] = 0;
+      }
+
+      this.games.evolution.realms[this.realm.key].leaderboard.raw.rounds[user.address] += 1;
+      this.games.evolution.realms[this.realm.key].leaderboard.raw.kills[user.address] += player.kills;
+      this.games.evolution.realms[this.realm.key].leaderboard.raw.points[user.address] += player.points;
+      this.games.evolution.realms[this.realm.key].leaderboard.raw.deaths[user.address] += player.deaths;
+      this.games.evolution.realms[this.realm.key].leaderboard.raw.powerups[user.address] += player.powerups;
+      this.games.evolution.realms[this.realm.key].leaderboard.raw.evolves[user.address] += player.evolves;
+      this.games.evolution.realms[this.realm.key].leaderboard.raw.rewards[user.address] += player.rewards;
+      this.games.evolution.realms[this.realm.key].leaderboard.raw.pickups[user.address] += player.pickups.length;
+
+      if (!this.games.evolution.global.leaderboard.names) this.games.evolution.global.leaderboard.names = {};
+
+      this.games.evolution.global.leaderboard.names[user.address] = user.username;
+
+      if (!this.games.evolution.global.leaderboard.raw.points[user.address]) {
+        this.games.evolution.global.leaderboard.raw.monetary[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.wins[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.rounds[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.kills[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.points[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.deaths[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.powerups[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.evolves[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.rewards[user.address] = 0;
+        this.games.evolution.global.leaderboard.raw.pickups[user.address] = 0;
+      }
+
+      this.games.evolution.global.leaderboard.raw.rounds[user.address] += 1;
+      this.games.evolution.global.leaderboard.raw.kills[user.address] += player.kills;
+      this.games.evolution.global.leaderboard.raw.points[user.address] += player.points;
+      this.games.evolution.global.leaderboard.raw.deaths[user.address] += player.deaths;
+      this.games.evolution.global.leaderboard.raw.powerups[user.address] += player.powerups;
+      this.games.evolution.global.leaderboard.raw.evolves[user.address] += player.evolves;
+      this.games.evolution.global.leaderboard.raw.rewards[user.address] += player.rewards;
+      this.games.evolution.global.leaderboard.raw.pickups[user.address] += player.pickups.length;
+
+      if (winners.find((winner) => winner.address === player.address)) {
+        const index = winners.findIndex((winner) => winner.address === player.address);
+        if (user.username) {
+          let character = this.characters[player.address];
+
+          if (!character) {
+            character = await this.getCharacter(player.address);
+            this.characters[player.address] = character;
+          }
+
+          const WinRewardsIncrease = character?.meta?.[1150] || 0;
+          const WinRewardsDecrease = character?.meta?.[1160] || 0;
+
+          const rewardMultiplier = 1 + (WinRewardsIncrease - WinRewardsDecrease) / 100;
+
+          if (rewardMultiplier > 2 || rewardMultiplier < 0) {
+            log(
+              'Error with reward multiplier.. bad things happened: ',
+              rewardMultiplier,
+              rewardMultiplier,
+              WinRewardsDecrease
+            );
+            process.exit(5);
+          }
+
+          rewardWinnerMap[index] *= rewardMultiplier;
+
+          if (!user.rewards.runes['zod']) {
+            user.rewards.runes['zod'] = 0;
+          }
+
+          if (user.rewards.runes['zod'] < 0) {
+            user.rewards.runes['zod'] = 0;
+          }
+
+          user.rewards.runes['zod'] += rewardWinnerMap[index];
+
+          if (!user.lifetimeRewards.runes['zod']) {
+            user.lifetimeRewards.runes['zod'] = 0;
+          }
+
+          user.lifetimeRewards.runes['zod'] += rewardWinnerMap[index];
+
+          this.db.oracle.outflow.evolutionRewards.tokens.week['zod'] += rewardWinnerMap[index];
+
+          this.games.evolution.global.leaderboard.raw.monetary[user.address] += rewardWinnerMap[index];
+          this.games.evolution.realms[this.realm.key].leaderboard.raw.monetary[user.address] += rewardWinnerMap[index];
+
+          this.api.emitAll('PlayerAction', {
+            key: 'evolution1-winner',
+            createdAt: new Date().getTime() / 1000,
+            address: user.address,
+            username: user.username,
+            realmKey: this.realm.key,
+            placement: index + 1,
+            message: `${user.username} placed #${index + 1} for ${rewardWinnerMap[index].toFixed(4)} ZOD in Evolution`,
+          });
+
+          if (rewardWinnerMap[index] > 0.1) {
+            this.notices.add('evolution1-winner', {
+              key: 'evolution1-winner',
+              address: user.address,
+              username: user.username,
+              realmKey: this.realm.key,
+              placement: index + 1,
+              message: `${user.username} won ${rewardWinnerMap[index].toFixed(4)} ZOD in Evolution`,
+            });
+          }
+
+          if (req.data.round.winners[0].address === player.address) {
+            if (!this.games.evolution.realms[this.realm.key].leaderboard.raw)
+              this.games.evolution.realms[this.realm.key].leaderboard.raw = {};
+            if (!this.games.evolution.realms[this.realm.key].leaderboard.raw.wins)
+              this.games.evolution.realms[this.realm.key].leaderboard.raw.wins = 0;
+
+            this.games.evolution.realms[this.realm.key].leaderboard.raw.wins[user.address] += 1;
+
+            if (!this.games.evolution.global.leaderboard.raw) this.games.evolution.global.leaderboard.raw = {};
+            if (!this.games.evolution.global.leaderboard.raw.wins) this.games.evolution.global.leaderboard.raw.wins = 0;
+
+            this.games.evolution.global.leaderboard.raw.wins[user.address] += 1;
+          }
+        }
+      }
+
+      await this.db.saveUser(user);
+    }
+
+    log('Round saved');
+
+    return { status: 1 };
+  }
+}
+
+const seer = new Seer();
+
+interface ProcedureContext {}
+
+export const createRouter = (
+  handler: (input: unknown, ctx: ProcedureContext) => Promise<void> | void // Adjust the return type if needed
+) => {
+  return router({
+    pingRequest: procedure.input(z.any()).mutation(({ input }) => seer.pingRequest(input)),
+
+    pongRequest: procedure.input(z.any()).mutation(({ input }) => seer.pongRequest(input)),
+
+    unbanClient: procedure
+      .input(z.object({ data: z.object({ target: z.string() }) }))
+      .mutation(({ input }) => seer.unbanClient(input)),
+
+    mod: procedure
+      .input(
+        z.object({
+          data: z.object({
+            body: z.object({ signature: z.object({ address: z.string() }) }),
+          }),
+        })
+      )
+      .mutation(({ input }) => seer.mod(input)),
+
+    banClient: procedure
+      .input(
+        z.object({
+          data: z.object({
+            target: z.string(),
+            reason: z.string(),
+            until: z.number().optional(),
+          }),
+          id: z.string(),
+        })
+      )
+      .mutation(({ input }) => seer.banClient(input)),
+
+    reportClient: procedure.input(z.any()).mutation(({ input }) => seer.reportClient(input)),
+
+    getCharacter: procedure
+      .input(z.object({ data: z.object({ address: z.string() }) }))
+      .mutation(({ input }) => seer.getCharacter(input)),
+
+    saveRound: procedure
+      .input(
+        z.object({
+          data: z.object({
+            signature: z.object({ address: z.string() }),
+            lastClients: z.array(z.any()),
+            rewardWinnerAmount: z.number(),
+            round: z.object({
+              winners: z.array(z.any()),
+              players: z.array(z.any()),
+            }),
+            roundId: z.number(),
+          }),
+        })
+      )
+      .mutation(({ input }) => seer.saveRound(input)),
+  });
+};
+
+export type Router = ReturnType<typeof createRouter>;
