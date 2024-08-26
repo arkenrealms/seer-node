@@ -1,38 +1,38 @@
-import fs from 'fs'
-import express from 'express'
-import { getHighestId, toShort, log } from '@arken/node/util'
-import * as websocketUtil from '@arken/node/util/websocket'
-import { decodeItem } from '@arken/node/util/decoder'
+import fs from 'fs';
+import express from 'express';
+import { getHighestId, toShort, log } from '@arken/node/util';
+import * as websocketUtil from '@arken/node/util/websocket';
+import { decodeItem } from '@arken/node/util/decoder';
 
-const path = require('path')
+const path = require('path');
 
 function initEventHandler(app) {
-  const { emitDirect, emitAll, io } = app.cubeBridge
+  const { emitDirect, emitAll, io } = app.cubeBridge;
 
-  log('Cube event handler')
+  log('Cube event handler');
 
   io.on('connection', function (socket) {
     try {
-      log('Cube handler connection')
+      log('Cube handler connection');
 
       // Use by GS to tell DB it's connected
       socket.on('RC_AuthRequest', function (req) {
         if (req.data !== 'myverysexykey') {
-          log('Invalid databaser creds:', req)
+          log('Invalid databaser creds:', req);
           emitDirect(socket, 'RC_AuthResponse', {
             id: req.id,
             data: { status: 0 },
-          })
-          return
+          });
+          return;
         }
 
-        socket.authed = true
+        socket.authed = true;
 
         emitDirect(socket, 'RC_AuthResponse', {
           id: req.id,
           data: { status: 1 },
-        })
-      })
+        });
+      });
 
       socket.on('RC_GetUserRequest', async function (req) {
         if (!socket.authed) {
@@ -41,8 +41,8 @@ function initEventHandler(app) {
             data: {
               status: 0,
             },
-          })
-          return
+          });
+          return;
         }
 
         emitDirect(socket, 'RC_GetUserResponse', {
@@ -51,11 +51,11 @@ function initEventHandler(app) {
             status: 1,
             user: await app.db.loadUser(req.data.address),
           },
-        })
-      })
+        });
+      });
 
       socket.on('RC_SaveUserClaimRequest', async function (req) {
-        log('RC_SaveUserClaimRequest', req)
+        log('RC_SaveUserClaimRequest', req);
 
         if (!socket.authed) {
           emitDirect(socket, 'RC_SaveUserClaimResponse', {
@@ -63,14 +63,14 @@ function initEventHandler(app) {
             data: {
               status: 0,
             },
-          })
-          return
+          });
+          return;
         }
 
         try {
-          const user = await app.db.loadUser(req.data.address)
+          const user = await app.db.loadUser(req.data.address);
 
-          if (!user.rewardHistory) user.rewardHistory = []
+          if (!user.rewardHistory) user.rewardHistory = [];
 
           for (const rune of req.data.runes) {
             user.rewardHistory.push({
@@ -78,12 +78,12 @@ function initEventHandler(app) {
               rune: rune.key,
               value: rune.value,
               timestamp: new Date().getTime(),
-            })
+            });
 
-            user.rewards.runes[rune.key] -= rune.value
+            user.rewards.runes[rune.key] -= rune.value;
 
             if (user.rewards.runes[rune.key] < 0.000000001) {
-              user.rewards.runes[rune.key] = 0
+              user.rewards.runes[rune.key] = 0;
             }
           }
 
@@ -93,46 +93,46 @@ function initEventHandler(app) {
               item: JSON.parse(JSON.stringify(user.rewards.items[item.key])),
               quantity: item.quantity,
               timestamp: new Date().getTime(),
-            })
+            });
 
-            delete user.rewards.items[item.key]
+            delete user.rewards.items[item.key];
           }
 
-          if (!user.claimRequests) user.claimRequests = []
+          if (!user.claimRequests) user.claimRequests = [];
 
-          let claimRequest = user.claimRequests.find((c) => c.requestId === req.data.requestId)
+          let claimRequest = user.claimRequests.find((c) => c.requestId === req.data.requestId);
 
           if (!claimRequest) {
             claimRequest = {
               id: req.data.id,
               requestId: req.data.requestId,
               timestamp: new Date().getTime(),
-            }
+            };
 
-            user.claimRequests.push(claimRequest)
+            user.claimRequests.push(claimRequest);
 
-            claimRequest.status = 'processing'
+            claimRequest.status = 'processing';
           }
 
-          await app.db.saveUser(user)
+          await app.db.saveUser(user);
 
           emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
             data: {
               status: 1,
             },
-          })
+          });
         } catch (e) {
-          log('Error', e)
+          log('Error', e);
 
           emitDirect(socket, 'RC_SaveUserClaimResponse', {
             id: req.id,
             data: {
               status: 0,
             },
-          })
+          });
         }
-      })
+      });
 
       socket.on('RC_EvolutionRealmListRequest', function (req) {
         if (!socket.authed) {
@@ -141,8 +141,8 @@ function initEventHandler(app) {
             data: {
               status: 0,
             },
-          })
-          return
+          });
+          return;
         }
 
         emitDirect(socket, 'RC_EvolutionRealmListResponse', {
@@ -151,11 +151,11 @@ function initEventHandler(app) {
             status: 1,
             list: app.db.evolution.servers,
           },
-        })
-      })
+        });
+      });
 
       socket.on('RC_SaveTradeRequest', async function (req) {
-        log('RC_SaveTradeRequest', req)
+        log('RC_SaveTradeRequest', req);
 
         if (!socket.authed) {
           emitDirect(socket, 'RC_SaveTradeResponse', {
@@ -163,30 +163,30 @@ function initEventHandler(app) {
             data: {
               status: 0,
             },
-          })
-          return
+          });
+          return;
         }
 
-        const trade = req.data.trade
+        const trade = req.data.trade;
 
-        trade.id = getHighestId(app.db.trades) + 1
+        trade.id = getHighestId(app.db.trades) + 1;
 
-        const decodedItem = decodeItem(trade.tokenId.toString())
+        const decodedItem = decodeItem(trade.tokenId.toString());
 
-        trade.item = { id: decodedItem.id, name: decodedItem.name }
+        trade.item = { id: decodedItem.id, name: decodedItem.name };
 
-        app.db.trades.push(trade)
+        app.db.trades.push(trade);
 
-        log('Adding trade', trade)
+        log('Adding trade', trade);
 
-        const item = app.db.loadItem(trade.item.id)
+        const item = app.db.loadItem(trade.item.id);
 
-        const seller = await app.db.loadUser(trade.seller)
+        const seller = await app.db.loadUser(trade.seller);
 
-        await app.db.saveUserTrade(seller, trade)
-        await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade)
-        await app.db.saveItemTrade(item, trade)
-        await app.db.saveItemToken(item, { id: trade.tokenId, owner: trade.seller })
+        await app.db.saveUserTrade(seller, trade);
+        await app.db.saveTokenTrade(app.db.loadToken(trade.tokenId), trade);
+        await app.db.saveItemTrade(item, trade);
+        await app.db.saveItemToken(item, { id: trade.tokenId, owner: trade.seller });
 
         emitDirect(socket, 'RC_SaveTradeResponse', {
           id: req.id,
@@ -194,37 +194,37 @@ function initEventHandler(app) {
             status: 1,
             tradeId: trade.id,
           },
-        })
-      })
+        });
+      });
 
       socket.onAny(function (eventName, res) {
         // log('onAny', eventName, res)
-        if (!res || !res.id) return
+        if (!res || !res.id) return;
         // console.log(eventName, res)
         if (app.cubeBridge.ioCallbacks[res.id]) {
-          log('Callback', eventName)
-          app.cubeBridge.ioCallbacks[res.id](res.data)
+          log('Callback', eventName);
+          app.cubeBridge.ioCallbacks[res.id](res.data);
 
-          delete app.cubeBridge.ioCallbacks[res.id]
+          delete app.cubeBridge.ioCallbacks[res.id];
         }
-      })
+      });
 
-      socket.on('disconnect', function () {})
+      socket.on('disconnect', function () {});
     } catch (e) {
-      log('Error', e)
+      log('Error', e);
     }
-  })
+  });
 }
 
 export async function initCubeBridge(app) {
   try {
-    app.cubeBridge = {}
+    app.cubeBridge = {};
 
-    app.cubeBridge.ioCallbacks = {}
+    app.cubeBridge.ioCallbacks = {};
 
-    app.cubeBridge.server = express()
+    app.cubeBridge.server = express();
 
-    const isHttps = false // process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
+    const isHttps = false; // process.env.SUDO_USER === 'dev' || process.env.OS_FLAVOUR === 'debian-10'
 
     if (isHttps) {
       app.cubeBridge.https = require('https').createServer(
@@ -233,9 +233,9 @@ export async function initCubeBridge(app) {
           cert: fs.readFileSync(path.resolve('./fullchain.pem')),
         },
         app.cubeBridge.server
-      )
+      );
     } else {
-      app.cubeBridge.http = require('http').Server(app.cubeBridge.server)
+      app.cubeBridge.http = require('http').Server(app.cubeBridge.server);
     }
 
     app.cubeBridge.io = require('socket.io')(isHttps ? app.cubeBridge.https : app.cubeBridge.http, {
@@ -250,26 +250,26 @@ export async function initCubeBridge(app) {
       cors: {
         origin: '*',
       },
-    })
+    });
 
     // Finalize
     if (isHttps) {
-      const sslPort = process.env.CUBE_BRIDGE_PORT || 443
+      const sslPort = process.env.CUBE_BRIDGE_PORT || 443;
       app.cubeBridge.https.listen(sslPort, function () {
-        log(`:: Backend ready and listening on *:${sslPort}`)
-      })
+        log(`:: Server ready and listening on *:${sslPort}`);
+      });
     } else {
-      const port = process.env.CUBE_BRIDGE_PORT || 7777
+      const port = process.env.CUBE_BRIDGE_PORT || 7777;
       app.cubeBridge.http.listen(port, function () {
-        log(`:: Backend ready and listening on *:${port}`)
-      })
+        log(`:: Server ready and listening on *:${port}`);
+      });
     }
 
-    app.cubeBridge.emitDirect = websocketUtil.emitDirect
-    app.cubeBridge.emitAll = websocketUtil.emitAll.bind(null, app.cubeBridge.io)
+    app.cubeBridge.emitDirect = websocketUtil.emitDirect;
+    app.cubeBridge.emitAll = websocketUtil.emitAll.bind(null, app.cubeBridge.io);
 
-    initEventHandler(app)
+    initEventHandler(app);
   } catch (e) {
-    log('Error', e)
+    log('Error', e);
   }
 }

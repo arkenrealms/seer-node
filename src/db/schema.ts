@@ -1,1 +1,1 @@
-export * from '@arken/node/schemas';
+export * from '@arken/node/schema/mongoose';

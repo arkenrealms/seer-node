@@ -155,12 +155,12 @@ export async function initApi(app) {
     if (isHttps) {
       const sslPort = process.env.LIVE_PORT || 8443;
       app.api.https.listen(sslPort, function () {
-        log(`:: Backend ready and listening on *:${sslPort}`);
+        log(`:: Server ready and listening on *:${sslPort}`);
       });
     } else {
       const port = process.env.LIVE_PORT || 8080;
       app.api.http.listen(port, function () {
-        log(`:: Backend ready and listening on *:${port}`);
+        log(`:: Server ready and listening on *:${port}`);
       });
     }
 
