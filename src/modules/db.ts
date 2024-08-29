@@ -750,25 +750,35 @@ export async function initDb(app) {
           log('User didnt exist on filesystem: ', address);
         }
 
-        const account = await app.model.Account.upsert({
-          email: address + '@arken.gg',
-          firstName: 'Raider',
-          lastName: address,
-          password: '',
-          avatar: '',
-          meta: {},
-        });
+        const account = await app.model.Account.upsert(
+          {
+            email: address + '@arken.gg',
+          },
+          {
+            email: address + '@arken.gg',
+            firstName: 'Raider',
+            lastName: address,
+            password: '',
+            avatar: '',
+            meta: {},
+          }
+        );
 
-        await app.model.Profile.upsert({
-          name: baseUser.username || baseUser.address,
-          account,
-          address,
-          avatar: null,
-          role: 'user', // [developer, user]
-          value: '',
-          // ownedProducts: [1, 2, 3, 4, 5],
-          meta: baseUser,
-        } as any);
+        await app.model.Profile.upsert(
+          {
+            name: baseUser.username || baseUser.address,
+          },
+          {
+            name: baseUser.username || baseUser.address,
+            account,
+            address,
+            avatar: null,
+            role: 'user', // [developer, user]
+            value: '',
+            // ownedProducts: [1, 2, 3, 4, 5],
+            meta: baseUser,
+          } as any
+        );
 
         profile = await app.model.Profile.where({ address }).exec();
       }
