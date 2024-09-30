@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "main": "src/index.ts",
   "scripts": {
+    "dev": "pm2 delete seer --kill-timeout 500 || true && sleep 1 && pm2 start src/index.ts --name seer --no-daemon -f --node-args=\"--require ts-node/register\" --watch --interpreter ts-node --interpreter-args \"--project tsconfig.json\" --ignore-watch=\"node_modules saved narration old storage data db build .git *.db *.log *.json *.png *.mp4 *.db *.db.* *.lock\" > /dev/null 2>&1 & sleep 2 && pm2 logs seer",
     "airtable": "ARKEN_ENV=airtable CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "build": "NODE_ENV=production tsc",
     "clean": "rm forever-script-err.log && rm forever-script-log.log && rm forever-script-out.log && rm nohup.out",
@@ -14,23 +15,28 @@
     "start": "ARKEN_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js"
   },
   "dependencies": {
-    "@prisma/client": "^4",
+    "@arken/node": "workspace:*",
     "airtable": "^0",
+    "dayjs": "^1",
+    "lodash": "^4",
+    "lodash.merge": "^4",
     "ipfs-http-client": "^50",
     "js-md5": "^0",
     "json-beautify": "^1",
     "lokijs": "^1",
     "moment": "^2",
+    "mongoose": "^8",
     "pixelmatch": "^5",
-    "prisma": "^4",
     "rxjs": "^7",
     "shortid": "^2",
     "sqlite3": "^5",
     "tsconfig-paths": "^4",
-    "tsnd": "^1"
+    "@types/socket.io-client": "~3.0.0"
   },
   "devDependencies": {
-    "@arken/node": "workspace:*",
+    "@types/lodash": "^4",
+    "@types/mongoose": "^5",
+    "@types/lodash.merge": "^4",
     "@nomiclabs/buidler": "^1",
     "@nomiclabs/buidler-ethers": "^1",
     "@nomiclabs/buidler-etherscan": "^2",

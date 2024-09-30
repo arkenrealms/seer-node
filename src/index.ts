@@ -1,3 +1,44 @@
+console.time('Startup timer');
+
+import 'reflect-metadata';
+import dotEnv from 'dotenv';
+dotEnv.config();
+
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
+
+import fs from 'fs';
+import path from 'path';
+import helmet from 'helmet';
+import cors from 'cors';
+import { Server as SocketIOServer } from 'socket.io';
+import _ from 'lodash';
+import express from 'express';
+// import { config } from './config';
+import type { Application, ApplicationModelType, ApplicationServiceType } from '@arken/node/types';
+import * as database from '@arken/node/db';
+// import { createRouter, createCallerFactory } from '@arken/node/router';
+import { createRouter as createEvolutionRouter } from './modules/evolution';
+import {
+  Area,
+  Asset,
+  Chain,
+  Character,
+  Chat,
+  Collection,
+  Core,
+  Game,
+  Interface,
+  Item,
+  Job,
+  Market,
+  Product,
+  Profile,
+  Raffle,
+  Skill,
+  Video,
+} from '@arken/node';
 import { isDebug, log } from '@arken/node/util';
 import { catchExceptions, subProcesses } from '@arken/node/util/process';
 import * as dotenv from 'dotenv';
@@ -30,24 +71,147 @@ import { initSkinner } from './modules/skinner';
 import { monitorGeneralStats } from './modules/stats';
 import { convertPaymentRequests } from './modules/payment-request-converter';
 import { initWeb3 } from './modules/web3';
-import type { Router as EvolutionRouter } from './modules/evolution';
+import util from '@arken/node/util';
+import { initTRPC } from '@trpc/server';
+import { z } from 'zod';
 
 // import { runTest } from './modules/tests/test-a'
 import * as tests from './tests';
 
-export type Router = EvolutionRouter;
+export const t = initTRPC.context<{}>().create();
+export const router = t.router;
+export const procedure = t.procedure;
+export const createCallerFactory = t.createCallerFactory;
+
+export const createRouter = () =>
+  router({
+    banUser: procedure
+      .input(z.object({ target: z.string(), banReason: z.string(), banExpireDate: z.string() }))
+      .mutation(({ input, ctx }) => {
+        return { status: 1 };
+      }),
+
+    info: procedure.query(({ input, ctx }) => {
+      return { status: 1, data: { stuff: 1 } };
+    }),
+
+    auth: procedure
+      .input(z.object({ data: z.any(), signature: z.object({ hash: z.string(), address: z.string() }) }))
+      .mutation(({ input, ctx }) => {
+        return {
+          status: 1,
+          config: {
+            maxClients: 100,
+            roundId: 1,
+            rewardItemAmount: 0,
+            rewardWinnerAmount: 0,
+            rewardItemAmountPerLegitPlayer: 0,
+            rewardItemAmountMax: 0,
+            rewardWinnerAmountPerLegitPlayer: 0,
+            rewardWinnerAmountMax: 0,
+            drops: {
+              guardian: 0,
+              earlyAccess: 0,
+              trinket: 0,
+              santa: 0,
+            },
+            totalLegitPlayers: 0,
+            isBattleRoyale: false,
+            isGodParty: false,
+            level2open: false,
+            isRoundPaused: false,
+            gameMode: 'Deathmatch',
+            maxEvolves: 0,
+            pointsPerEvolve: 0,
+            pointsPerKill: 0,
+            decayPower: 0,
+            dynamicDecayPower: true,
+            baseSpeed: 0,
+            avatarSpeedMultiplier: {},
+            avatarDecayPower: {},
+            preventBadKills: false,
+            antifeed1: false,
+            antifeed2: false,
+            antifeed3: false,
+            noDecay: false,
+            noBoot: false,
+            rewardSpawnLoopSeconds: 0,
+            orbOnDeathPercent: 0,
+            orbTimeoutSeconds: 0,
+            orbCutoffSeconds: 0,
+            orbLookup: {},
+            roundLoopSeconds: 0,
+            fastLoopSeconds: 0,
+            leadercap: false,
+            hideMap: false,
+            checkPositionDistance: 0,
+            checkInterval: 0,
+            resetInterval: 0,
+            loggableEvents: [],
+            mapBoundary: {
+              x: { min: 0, max: 0 },
+              y: { min: 0, max: 0 },
+            },
+            spawnBoundary1: {
+              x: { min: 0, max: 0 },
+              y: { min: 0, max: 0 },
+            },
+            spawnBoundary2: {
+              x: { min: 0, max: 0 },
+              y: { min: 0, max: 0 },
+            },
+            rewards: {
+              runes: [
+                {
+                  type: 'rune',
+                  symbol: 'solo',
+                  quantity: 10000,
+                },
+              ],
+              items: [],
+              characters: [
+                {
+                  type: 'character',
+                  tokenId: '1',
+                },
+              ],
+            },
+          },
+        };
+      }),
+    evolution: createEvolutionRouter(t),
+  });
+
+export type Router = ReturnType<typeof createRouter>;
 
 dotenv.config();
+
+export default class Server implements Application {
+  router: Router;
+  service: ApplicationServiceType = {};
+  model: ApplicationModelType = {};
+
+  server: any;
+  http: any;
+  https: any;
+  isHttps: boolean;
+  cache: any;
+  db: any;
+  services: any;
+  applications: any;
+  application: any;
+  filters: Record<string, any> = { applicationId: null };
+}
 
 // console.log('env', process.env)
 
 process.env.REACT_APP_PUBLIC_URL = 'https://arken.gg/';
 
 if (isDebug) {
-  log('Running Databaser in DEBUG mode');
+  log('Running Seer in DEBUG mode');
 }
 
-async function init() {
+async function initModules() {
   catchExceptions(true);
 
   try {
@@ -325,54 +489,54 @@ async function init() {
       ];
     } else if (process.env.ARKEN_ENV === 'local') {
       app.moduleConfig = [
-        {
-          name: 'initConfig',
-          instance: initConfig,
-          async: false,
-          timeout: 0,
-        },
-        {
-          name: 'initDb',
-          instance: initDb,
-          async: false,
-          timeout: 0,
-        },
-        {
-          name: 'initApi',
-          instance: initApi,
-          async: false,
-          timeout: 0,
-        },
-        {
-          name: 'initWeb3',
-          instance: initWeb3,
-          async: false,
-          timeout: 0,
-        },
-        {
-          name: 'initLive',
-          instance: initLive,
-          async: false,
-          timeout: 1 * 1000,
-        },
-        {
-          name: 'initPaymentRequests',
-          instance: initPaymentRequests,
-          async: false,
-          timeout: 1 * 1000,
-        },
-        {
-          name: 'initPolls',
-          instance: initPolls,
-          async: false,
-          timeout: 1 * 1000,
-        },
-        {
-          name: 'initReferrals',
-          instance: initReferrals,
-          async: false,
-          timeout: 1 * 1000,
-        },
+        // {
+        //   name: 'initConfig',
+        //   instance: initConfig,
+        //   async: false,
+        //   timeout: 0,
+        // },
+        // {
+        //   name: 'initDb',
+        //   instance: initDb,
+        //   async: false,
+        //   timeout: 0,
+        // },
+        // {
+        //   name: 'initApi',
+        //   instance: initApi,
+        //   async: false,
+        //   timeout: 0,
+        // },
+        // {
+        //   name: 'initWeb3',
+        //   instance: initWeb3,
+        //   async: false,
+        //   timeout: 0,
+        // },
+        // {
+        //   name: 'initLive',
+        //   instance: initLive,
+        //   async: false,
+        //   timeout: 1 * 1000,
+        // },
+        // {
+        //   name: 'initPaymentRequests',
+        //   instance: initPaymentRequests,
+        //   async: false,
+        //   timeout: 1 * 1000,
+        // },
+        // {
+        //   name: 'initPolls',
+        //   instance: initPolls,
+        //   async: false,
+        //   timeout: 1 * 1000,
+        // },
+        // {
+        //   name: 'initReferrals',
+        //   instance: initReferrals,
+        //   async: false,
+        //   timeout: 1 * 1000,
+        // },
         // {
         //   name: 'convertPaymentRequests',
         //   instance: convertPaymentRequests,
@@ -623,7 +787,241 @@ async function init() {
   }
 }
 
-init();
+class Seer implements Application {
+  util = util;
+  db: any = null;
+  filters: Record<string, any> = { applicationId: null };
+  // TODO: improve
+  service: ApplicationServiceType = {};
+  model: ApplicationModelType = {};
+  applications: any[] = [];
+  application: any;
+  cache: any;
+  router: any; // TODO: fix
+  server: any;
+  isHttps: boolean;
+  https: any;
+  http: any;
+
+  async init() {
+    try {
+      await initModules();
+
+      this.router = createRouter();
+
+      this.cache = {};
+
+      this.db = await database.init({ app: this });
+
+      // this.services = [
+      //   { name: 'Job', isEnabled: true, service: services.Job },
+      //   { name: 'Core', isEnabled: true, service: services.Core },
+      // ];
+
+      this.service = {
+        Area: new Area.Service(),
+        Asset: new Asset.Service(),
+        Chain: new Chain.Service(),
+        Character: new Character.Service(),
+        Chat: new Chat.Service(),
+        Collection: new Collection.Service(),
+        Core: new Core.Service(),
+        Game: new Game.Service(),
+        Interface: new Interface.Service(),
+        Item: new Item.Service(),
+        Job: new Job.Service(),
+        Market: new Market.Service(),
+        Product: new Product.Service(),
+        Profile: new Profile.Service(),
+        Raffle: new Raffle.Service(),
+        Skill: new Skill.Service(),
+        Video: new Video.Service(),
+      };
+
+      for (const service of [
+        Area,
+        Asset,
+        Chain,
+        Character,
+        Chat,
+        Collection,
+        Core,
+        Game,
+        Interface,
+        Item,
+        Job,
+        Market,
+        Product,
+        Profile,
+        Raffle,
+        Skill,
+        Video,
+      ]) {
+        for (const modelName of Object.keys(service.models)) {
+          const model = service.models[modelName];
+
+          this.cache[model.collection.name] = {};
+          this.model[model.collection.name] = model;
+        }
+      }
+
+      this.applications = await this.model.Application.find().populate('agents').exec();
+
+      this.application = this.applications.find((application) => application.name === 'Arken');
+
+      this.filters.applicationId = this.application.id;
+
+      for (const modelName of Object.keys(this.model)) {
+        const model = this.model[modelName];
+        model.filters.applicationId = this.filters.applicationId;
+      }
+
+      this.server = express();
+      this.server.set('trust proxy', 1);
+      this.server.use(helmet());
+      this.server.use(
+        cors({
+          allowedHeaders: [
+            'Accept',
+            'Authorization',
+            'Cache-Control',
+            'X-Requested-With',
+            'Content-Type',
+            'applicationId',
+          ],
+        })
+      );
+
+      this.isHttps = false; // process.env.ARKEN_ENV !== 'local';
+
+      if (this.isHttps) {
+        this.https = require('https').createServer(
+          {
+            key: fs.readFileSync(path.resolve('./privkey.pem')),
+            cert: fs.readFileSync(path.resolve('./fullchain.pem')),
+          },
+          this.server
+        );
+      } else {
+        this.http = require('http').Server(this.server);
+      }
+
+      const io = new SocketIOServer(this.isHttps ? this.https : this.http, {
+        serveClient: false,
+        // pingInterval: 30 * 1000,
+        // pingTimeout: 90 * 1000,
+        // upgradeTimeout: 20 * 1000,
+        // allowUpgrades: true,
+        // cookie: false,
+        // serveClient: false,
+        // allowEIO3: true,
+        // cors: {
+        //   origin: '*',
+        // },
+      });
+
+      // io.use((socket, next) => {
+      //   const origin = socket.handshake.headers.origin;
+
+      //   // Example CORS logic
+      //   if (origin && origin === 'http://your-allowed-origin.com') {
+      //     // Allow the request to proceed
+      //     next();
+      //   } else {
+      //     // Disallow the request with an error
+      //     next(new Error('CORS policy error: Origin not allowed'));
+      //   }
+      // });
+
+      io.on('connection', async (socket) => {
+        try {
+          console.log('Connection', socket.id);
+
+          const client = { socket, roles: ['admin', 'user', 'guest'], ioCallbacks: {} };
+
+          socket.on('trpc', async (message) => {
+            console.log('Seer.Server trpc message', message);
+            const { id, method, params } = message;
+
+            try {
+              const ctx = { app: this, client, profile: undefined };
+              const createCaller = createCallerFactory(
+                this.router
+                // forgeServer.router({
+                //   // connected: procedure
+                //   //   .use(hasRole("admin", t))
+                //   //   .use(customErrorFormatter(t))
+                //   //   .input(schema.connected)
+                //   //   .mutation(({ input, ctx }) =>
+                //   //     service.connected(input as Schema.ConnectedInput, ctx)
+                //   //   ),
+
+                //   job: this.service.Job.router,
+                //   core: this.service.Core.router,
+                // })
+              );
+
+              const caller = createCaller(ctx);
+
+              // @ts-ignore
+              const result = await caller[method](params);
+              socket.emit('trpcResponse', { id, result });
+            } catch (error) {
+              console.log('Server error', error);
+              socket.emit('trpcResponse', { id, error: error.message });
+            }
+          });
+
+          socket.on('trpcResponse', async (message) => {
+            log('Seer client trpcResponse message', message);
+            const pack = message;
+            console.log('Seer client trpcResponse pack', pack);
+            const { id } = pack;
+
+            if (pack.error) {
+              console.log(
+                'Seer client callback - error occurred',
+                pack,
+                client.ioCallbacks[id] ? client.ioCallbacks[id].request : ''
+              );
+              return;
+            }
+
+            try {
+              log(`Seer client callback ${client.ioCallbacks[id] ? 'Exists' : 'Doesnt Exist'}`);
+
+              if (client.ioCallbacks[id]) {
+                clearTimeout(client.ioCallbacks[id].timeout);
+
+                client.ioCallbacks[id].resolve(pack.result);
+
+                delete client.ioCallbacks[id];
+              }
+            } catch (e) {
+              console.log('Seer client trpcResponse error', id, e);
+            }
+          });
+        } catch (e) {
+          console.log('Seer.Server error', e);
+        }
+      });
+
+      const port = this.isHttps ? process.env.SSL_PORT || 443 : process.env.PORT || 80;
+      const res = await (this.isHttps ? this.https : this.http).listen({ port: Number(port) });
+
+      console.log(`Server ready and listening on ${JSON.stringify(res.address())} (http${this.isHttps ? 's' : ''})`);
+
+      console.timeEnd('Startup timer');
+    } catch (err) {
+      console.info(err);
+      console.error('Seer.Server error', err);
+    }
+  }
+}
+
+const seer = new Seer();
+
+seer.init();
 
 // Force restart after an hour
 // setTimeout(() => {

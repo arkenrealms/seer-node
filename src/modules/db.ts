@@ -1,13 +1,9 @@
 import * as ethers from 'ethers';
-import { PrismaClient } from '@prisma/client';
 import jetpack from 'fs-jetpack';
 import path from 'path';
 import { log, removeDupes } from '@arken/node/util';
 import { decodeItem } from '@arken/node/util/decoder';
 import { achievementData } from '@arken/node/data/achievements';
-import Profile from '@arken/node/models/profile';
-import Account from '@arken/node/models/account';
-import Model from '@arken/node/models/base';
 import { Model as MongooseModel, Document } from 'mongoose';
 import {
   itemData,
@@ -21,8 +17,8 @@ import {
 } from '@arken/node/data/items';
 import { userInfo } from 'os';
 import getUsername from '@arken/node/util/api/getOldUsername';
-import * as database from '../db';
-import * as schemas from '../db/schema';
+import * as database from '@arken/node/db';
+// import * as schemas from '../db/schema';
 // import { now } from '@arken/node/util/time'
 
 const cache = {
@@ -113,16 +109,16 @@ export async function initDb(app) {
     activeUsers: jetpack.read(path.resolve('./db/activeUsers.json'), 'json') || [],
   };
 
-  const models = Object.keys(schemas).filter((key) => key !== 'NodeRelation');
+  // const models = Object.keys(schemas).filter((key) => key !== 'NodeRelation');
 
   // for (const model of models) {
   //   app.cache[model] = {};
   // }
-  app.model = {};
+  // app.model = {};
 
-  for (const model of models) {
-    app.model[model] = app.db.mongo.model(model, schemas[model]);
-  }
+  // for (const model of models) {
+  //   app.model[model] = app.db.mongo.model(model, schemas[model]);
+  // }
 
   if (process.env.ARKEN_ENV === 'local') {
     app.db.evolution.realms = [

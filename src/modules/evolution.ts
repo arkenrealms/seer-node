@@ -1,4 +1,3 @@
-import { initTRPC } from '@trpc/server';
 import type * as Arken from '@arken/node/types';
 // import { isDebug, log } from '@arken/node/util';
 // import * as dotenv from 'dotenv';
@@ -15,76 +14,73 @@ import type * as Arken from '@arken/node/types';
 // import getUsername from '@arken/node/util/api/getOldUsername';
 import { z } from 'zod';
 
-const t = initTRPC.context<{}>().create();
-
 export async function monitorEvolutionRealms(app) {}
 
-class Service {}
+export const createRouter = (t: any) =>
+  t.router({
+    saveRound: t.procedure
+      .input(
+        z.object({
+          shardId: z.string(),
+          roundId: z.number(),
+          round: z.any(),
+          rewardWinnerAmount: z.number(),
+          lastClients: z.any(),
+        })
+      )
+      .mutation(({ input, ctx }) => {
+        return { status: 1 };
+      }),
 
-export const service = new Service();
+    getProfile: t.procedure.input(z.string()).query(({ input, ctx }) => {
+      return { status: 1, data: {} as Arken.Profile.Types.Profile };
+    }),
 
-export const router = t.router({
-  banUser: t.procedure.input(z.any()).mutation(({ input, ctx }) => {
-    return { status: 1 };
-  }),
+    // unbanClient: t.procedure
+    //   .input(z.object({ data: z.object({ target: z.string() }), id: z.string() }))
+    //   .mutation(({ input, ctx }) => {
+    //     service.unbanClient(ctx.app, input);
+    //   }),
 
-  info: t.procedure.input(z.any()).query(({ input, ctx }) => {
-    return { status: 1, data: { stuff: 1 } };
-  }),
+    // mod: t.procedure
+    //   .input(
+    //     z.object({
+    //       data: z.object({
+    //         body: z.object({ signature: z.object({ address: z.string() }) }),
+    //         params: z.object({ method: z.string() }),
+    //       }),
+    //     })
+    //   )
+    //   .mutation(({ input, ctx }) => {
+    //     service.mod(ctx.app, input);
+    //   }),
 
-  saveRound: t.procedure.input(z.any()).mutation(({ input, ctx }) => {
-    return { status: 1 };
-  }),
+    // banClient: t.procedure
+    //   .input(
+    //     z.object({
+    //       data: z.object({ target: z.string(), reason: z.string(), until: z.number().optional() }),
+    //       id: z.string(),
+    //     })
+    //   )
+    //   .mutation(({ input, ctx }) => {
+    //     service.banClient(ctx.app, input);
+    //   }),
 
-  getProfile: t.procedure.input(z.string()).query(({ input, ctx }) => {
-    return { status: 1, data: {} as Arken.schema.Profile };
-  }),
+    // getCharacter: t.procedure
+    //   .input(z.object({ data: z.object({ address: z.string() }), id: z.string() }))
+    //   .mutation(({ input, ctx }) => {
+    //     service.getCharacter(ctx.app, input);
+    //   }),
 
-  // unbanClient: t.procedure
-  //   .input(z.object({ data: z.object({ target: z.string() }), id: z.string() }))
-  //   .mutation(({ input, ctx }) => {
-  //     service.unbanClient(ctx.app, input);
-  //   }),
+    // saveRound: t.procedure.input(z.any()).mutation(({ input, ctx }) => {
+    //   service.saveRound(ctx.app, input);
+    // }),
 
-  // mod: t.procedure
-  //   .input(
-  //     z.object({
-  //       data: z.object({
-  //         body: z.object({ signature: z.object({ address: z.string() }) }),
-  //         params: z.object({ method: z.string() }),
-  //       }),
-  //     })
-  //   )
-  //   .mutation(({ input, ctx }) => {
-  //     service.mod(ctx.app, input);
-  //   }),
-
-  // banClient: t.procedure
-  //   .input(
-  //     z.object({
-  //       data: z.object({ target: z.string(), reason: z.string(), until: z.number().optional() }),
-  //       id: z.string(),
-  //     })
-  //   )
-  //   .mutation(({ input, ctx }) => {
-  //     service.banClient(ctx.app, input);
-  //   }),
-
-  // getCharacter: t.procedure
-  //   .input(z.object({ data: z.object({ address: z.string() }), id: z.string() }))
-  //   .mutation(({ input, ctx }) => {
-  //     service.getCharacter(ctx.app, input);
-  //   }),
-
-  // saveRound: t.procedure.input(z.any()).mutation(({ input, ctx }) => {
-  //   service.saveRound(ctx.app, input);
-  // }),
-
-  // Add more procedures as necessary
-});
+    // Add more procedures as necessary
+  });
 
 // Add the router type export if necessary
-export type Router = typeof router;
+// export type Router = ReturnType<typeof createRouter>;
 
 // class service {
 //   private characters: Record<string, any> = {};
@@ -1790,7 +1786,7 @@ export type Router = typeof router;
 // dotenv.config();
 
 // export const router = t.router;
-// export const procedure = t.procedure;
+// export const procedure = procedure;
 // export const createCallerFactory = t.createCallerFactory;
 
 // export class Seer {
@@ -2275,15 +2271,15 @@ export type Router = typeof router;
 //   handler: (input: unknown, ctx: ProcedureContext) => Promise<void> | void // Adjust the return type if needed
 // ) => {
 //   return router({
-//     pingRequest: procedure.input(z.any()).mutation(({ input }) => seer.pingRequest(input)),
+//     pingRequest: t.procedure.input(z.any()).mutation(({ input }) => seer.pingRequest(input)),
 
-//     pongRequest: procedure.input(z.any()).mutation(({ input }) => seer.pongRequest(input)),
+//     pongRequest: t.procedure.input(z.any()).mutation(({ input }) => seer.pongRequest(input)),
 
-//     unbanClient: procedure
+//     unbanClient: t.procedure
 //       .input(z.object({ data: z.object({ target: z.string() }) }))
 //       .mutation(({ input }) => seer.unbanClient(input)),
 
-//     mod: procedure
+//     mod: t.procedure
 //       .input(
 //         z.object({
 //           data: z.object({
@@ -2293,7 +2289,7 @@ export type Router = typeof router;
 //       )
 //       .mutation(({ input }) => seer.mod(input)),
 
-//     banClient: procedure
+//     banClient: t.procedure
 //       .input(
 //         z.object({
 //           data: z.object({
@@ -2306,13 +2302,13 @@ export type Router = typeof router;
 //       )
 //       .mutation(({ input }) => seer.banClient(input)),
 
-//     reportClient: procedure.input(z.any()).mutation(({ input }) => seer.reportClient(input)),
+//     reportClient: t.procedure.input(z.any()).mutation(({ input }) => seer.reportClient(input)),
 
-//     getCharacter: procedure
+//     getCharacter: t.procedure
 //       .input(z.object({ data: z.object({ address: z.string() }) }))
 //       .mutation(({ input }) => seer.getCharacter(input)),
 
-//     saveRound: procedure
+//     saveRound: t.procedure
 //       .input(
 //         z.object({
 //           data: z.object({

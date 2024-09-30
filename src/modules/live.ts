@@ -117,7 +117,7 @@ export async function initLive(app) {
 
       if (!token.defaultImage) token.defaultImage = token.image;
 
-      token.image = `https://envoy.arken.gg/${skin}`;
+      token.image = `https://s1.envoy.arken.asi.sh/${skin}`;
 
       app.db.queueSave(() => app.db.saveSkins());
       app.db.queueSave(() => app.db.saveTokenSkins());
@@ -225,7 +225,7 @@ export async function initLive(app) {
 
       const token = await app.db.loadToken(tokenId);
 
-      token.image = `https://envoy.arken.gg/${skin}`;
+      token.image = `https://s1.envoy.arken.asi.sh/${skin}`;
 
       app.db.queueSave(() => app.db.saveSkins());
       app.db.queueSave(() => app.db.saveTokenSkins());
