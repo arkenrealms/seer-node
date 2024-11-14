@@ -3,6 +3,7 @@ id_ed25519
 ssh_config
 secrets.json
 update.py
+.DS_Store
 
 arken.db
 arken.db.*
