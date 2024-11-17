@@ -17,7 +17,8 @@ import _ from 'lodash';
 import express from 'express';
 import type { Application, ApplicationModelType, ApplicationServiceType } from '@arken/node/types';
 import * as database from '@arken/node/db';
-import { createRouter } from '@arken/seer-protocol';
+import * as Arken from '@arken/node/types';
+import * as Seer from '@arken/seer-protocol';
 import {
   Area,
   Asset,
@@ -666,7 +667,7 @@ async function initModules() {
   }
 }
 
-class Seer implements Application {
+class SeerNode extends Seer.SeerBase {
   util = util;
   db: any = null;
   filters: Record<string, any> = { applicationId: null };
@@ -674,19 +675,19 @@ class Seer implements Application {
   service: ApplicationServiceType = {};
   model: ApplicationModelType = {};
   applications: any[] = [];
-  application: any;
-  cache: any;
-  router: any; // TODO: fix
-  server: any;
-  isHttps: boolean;
-  https: any;
-  http: any;
+  declare application: any;
+  declare cache: any;
+  declare router: any; // TODO: fix
+  declare server: any;
+  declare isHttps: boolean;
+  declare https: any;
+  declare http: any;
 
   async init() {
     try {
       await initModules();
 
-      this.router = createRouter();
+      this.router = Seer.createRouter(this);
 
       this.cache = {};
 
@@ -736,8 +737,8 @@ class Seer implements Application {
         Skill,
         Video,
       ]) {
-        for (const modelName of Object.keys(service.models)) {
-          const model = service.models[modelName];
+        for (const modelName of Object.keys(service.Models)) {
+          const model = service.Models[modelName];
 
           this.cache[model.collection.name] = {};
           this.model[model.collection.name] = model;
@@ -849,7 +850,7 @@ class Seer implements Application {
               socket.emit('trpcResponse', { id, result: serialize(result) });
             } catch (error) {
               console.log('Server error', error);
-              socket.emit('trpcResponse', { id, result: {}, error: error.message });
+              socket.emit('trpcResponse', { id, result: {}, error: error?.message || 'Unknown error occurred' });
             }
           });
 
@@ -898,9 +899,58 @@ class Seer implements Application {
       console.error('Seer.Server error', err);
     }
   }
+
+  async updateRealm(
+    input: Seer.Types.RouterInput['updateRealm'],
+    ctx: Seer.Types.ServiceContext
+  ): Promise<Seer.Types.RouterOutput['updateRealm']> {
+    if (!input) throw new Error('Input should not be void');
+
+    const data = {};
+
+    if (!this.realms[input.data.realmId]) this.realms[input.data.realmId] = {};
+
+    const realm: Arken.Core.Types.Realm = this.realms[input.data.realmId];
+
+    realm.status = input.data.status;
+    realm.clientCount = input.data.clientCount;
+    realm.regionCode = input.data.regionCode;
+    realm.realmShards = input.data.realmShards;
+
+    return {
+      status: 1,
+      data,
+    };
+  }
+
+  async getRealms(
+    input: Seer.Types.RouterInput['getRealms'],
+    ctx: Seer.Types.ServiceContext
+  ): Promise<Seer.Types.RouterOutput['getRealms']> {
+    this.realms = [
+      {
+        status: 'Online',
+        clientCount: 11,
+        regionCode: 'EU',
+        realmShards: [
+          {
+            status: 'Online',
+            clientCount: 11,
+          },
+        ],
+      },
+    ];
+
+    const data = this.realms;
+
+    return {
+      status: 1,
+      data,
+    };
+  }
 }
 
-const seer = new Seer();
+const seer = new SeerNode();
 
 seer.init();
 

@@ -13,8 +13,8 @@ COPY ssh_config /root/.ssh/config
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 
 WORKDIR /usr/src/app
-RUN git clone git@databaser:arken-engineering/seer.git
-WORKDIR /usr/src/app/seer
+RUN git clone git@databaser:arken-engineering/seer-node.git
+WORKDIR /usr/src/app/seer-node
 RUN yarn install
 RUN yarn run build
 
