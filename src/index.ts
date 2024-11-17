@@ -927,15 +927,20 @@ class SeerNode extends Seer.SeerBase {
     input: Seer.Types.RouterInput['getRealms'],
     ctx: Seer.Types.ServiceContext
   ): Promise<Seer.Types.RouterOutput['getRealms']> {
+    console.log('getRealms');
+
     this.realms = [
       {
         status: 'Online',
         clientCount: 11,
         regionCode: 'EU',
+        endpoint: 'localhost:7020',
+        gameId: '673996aec43266df5f966da6',
         realmShards: [
           {
             status: 'Online',
             clientCount: 11,
+            endpoint: 'localhost:7020',
           },
         ],
       },
