@@ -19,6 +19,7 @@ import type { Application, ApplicationModelType, ApplicationServiceType } from '
 import * as database from '@arken/node/db';
 import * as Arken from '@arken/node/types';
 import * as Seer from '@arken/seer-protocol';
+import { getFilter } from '@arken/node/util/api';
 import {
   Area,
   Asset,
@@ -687,7 +688,7 @@ class SeerNode extends Seer.SeerBase {
     try {
       await initModules();
 
-      this.router = Seer.createRouter(this);
+      this.router = Seer.createRouter();
 
       this.cache = {};
 
@@ -900,59 +901,74 @@ class SeerNode extends Seer.SeerBase {
     }
   }
 
-  async updateRealm(
-    input: Seer.Types.RouterInput['updateRealm'],
-    ctx: Seer.Types.ServiceContext
-  ): Promise<Seer.Types.RouterOutput['updateRealm']> {
-    if (!input) throw new Error('Input should not be void');
+  // async updateRealm(
+  //   input: Seer.Types.RouterInput['updateRealm'],
+  //   ctx: Seer.Types.ServiceContext
+  // ): Promise<Seer.Types.RouterOutput['updateRealm']> {
+  //   if (!input) throw new Error('Input should not be void');
 
-    const data = {};
+  //   const data = {};
 
-    if (!this.realms[input.data.realmId]) this.realms[input.data.realmId] = {};
+  //   if (!this.realms[input.data.realmId]) this.realms[input.data.realmId] = {};
 
-    const realm: Arken.Core.Types.Realm = this.realms[input.data.realmId];
+  //   const realm: Arken.Core.Types.Realm = this.realms[input.data.realmId];
 
-    realm.status = input.data.status;
-    realm.clientCount = input.data.clientCount;
-    realm.regionCode = input.data.regionCode;
-    realm.realmShards = input.data.realmShards;
+  //   realm.status = input.data.status;
+  //   realm.clientCount = input.data.clientCount;
+  //   realm.regionCode = input.data.regionCode;
+  //   realm.realmShards = input.data.realmShards;
 
-    return {
-      status: 1,
-      data,
-    };
-  }
+  //   return {
+  //     status: 1,
+  //     data,
+  //   };
+  // }
 
-  async getRealms(
-    input: Seer.Types.RouterInput['getRealms'],
-    ctx: Seer.Types.ServiceContext
-  ): Promise<Seer.Types.RouterOutput['getRealms']> {
-    console.log('getRealms');
+  // async getRealms(
+  //   input: Seer.Types.RouterInput['getRealms'],
+  //   ctx: Seer.Types.ServiceContext
+  // ): Promise<Seer.Types.RouterOutput['getRealms']> {
+  //   console.log('getRealms');
 
-    this.realms = [
-      {
-        status: 'Online',
-        clientCount: 11,
-        regionCode: 'EU',
-        endpoint: 'localhost:7020',
-        gameId: '673996aec43266df5f966da6',
-        realmShards: [
-          {
-            status: 'Online',
-            clientCount: 11,
-            endpoint: 'localhost:7020',
-          },
-        ],
-      },
-    ];
+  //   this.realms = [
+  //     {
+  //       status: 'Online',
+  //       clientCount: 11,
+  //       regionCode: 'EU',
+  //       endpoint: 'localhost:7020',
+  //       gameId: '673996aec43266df5f966da6',
+  //       realmShards: [
+  //         {
+  //           status: 'Online',
+  //           clientCount: 11,
+  //           endpoint: 'localhost:7020',
+  //         },
+  //       ],
+  //     },
+  //   ];
 
-    const data = this.realms;
+  //   const data = this.realms;
 
-    return {
-      status: 1,
-      data,
-    };
-  }
+  //   return {
+  //     status: 1,
+  //     data,
+  //   };
+  // }
+
+  // async getTrades(
+  //   input: Seer.Types.RouterInput['getTrades'],
+  //   ctx: Seer.Types.ServiceContext
+  // ): Promise<Seer.Types.RouterOutput['getTrades']> {
+  //   console.log('Core.Service.getRealms', input);
+
+  //   const filter = getFilter(input);
+
+  //   const data = await this.model.Trade.find(filter).exec();
+
+  //   console.log('vvvv', data);
+
+  //   return { status: 1, data: data as Arken.Core.Types.Trade[] };
+  // }
 }
 
 const seer = new SeerNode();
