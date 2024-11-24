@@ -641,7 +641,9 @@
   {
     "uuid": "recKZgdEdp64CYkJh",
     "id": 73,
+    "name": "Rune",
     "link": "https://arken.gg/item-specific-type/",
+    "subType": 63,
     "items": [],
     "itemMaterials": []
   },
