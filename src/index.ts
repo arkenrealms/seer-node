@@ -103,7 +103,7 @@ async function initModules() {
     app.flags = {};
 
     try {
-      app.admins = (await fetch('https://raw.githubusercontent.com/arken-engineering/council/main/admins.json')).data;
+      app.admins = (await fetch('https://raw.githubusercontent.com/arkenrealms/council/main/admins.json')).data;
     } catch (e) {
       app.admins = {
         '0xa987f487639920A3c2eFe58C8FBDedB96253ed9B': {
@@ -821,11 +821,11 @@ class SeerNode extends Seer.SeerBase {
           const client = { socket, roles: ['admin', 'user', 'guest'], ioCallbacks: {} };
 
           socket.on('trpc', async (message) => {
-            console.log('Seer.Server trpc message', message);
+            // console.log('Seer.Server trpc message', message);
             const { id, method, params } = message;
 
             try {
-              const ctx = { app: this, client, profile: undefined };
+              const ctx = { app: this, client }; // , profile: undefined
               const createCaller = createCallerFactory(
                 this.router
                 // forgeServer.router({
@@ -844,11 +844,12 @@ class SeerNode extends Seer.SeerBase {
 
               const caller = createCaller(ctx);
 
+              console.log('Seer calling trpc route', method, params);
               // @ts-ignore
               const result = params ? await caller[method](deserialize(params)) : await caller[method]();
 
-              console.log('Seer sending trpc response', result);
-              socket.emit('trpcResponse', { id, result: serialize(result) });
+              console.log('Seer sending trpc response', method, params, JSON.stringify(result));
+              socket.emit('trpcResponse', { id, result: serialize({ data: result }) });
             } catch (error) {
               console.log('Server error', error);
               socket.emit('trpcResponse', { id, result: {}, error: error?.message || 'Unknown error occurred' });
