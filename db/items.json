@@ -29801,7 +29801,7 @@
             "description": "{parameter2}",
             "explanation": "",
             "param1": { "spec": "0", "min": 0, "max": 0, "value": 0 },
-            "param2": { "spec": "Every Rune in Arken: Heart of the Oasis (1 EL-ZOD)", "min": null, "max": null }
+            "param2": { "spec": "Every Rune in Arken: Heart of the Oasis (1 EX-ZENO)", "min": null, "max": null }
           },
           {
             "uuid": "recoXBsvXqwwGElbQ",
