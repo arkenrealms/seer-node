@@ -312,18 +312,21 @@ class SeerNode extends Seer.SeerBase {
       //   }
       // });
 
+      const ctx = { app: this, client: null, profile: null };
+
       io.on('connection', async (socket) => {
         try {
           console.log('Connection', socket.id);
 
-          const client = { socket, roles: ['admin', 'user', 'guest'], ioCallbacks: {} };
+          const client = { socket, profile: null, roles: ['admin', 'user', 'guest'], ioCallbacks: {} };
 
           socket.on('trpc', async (message) => {
             // console.log('Seer.Server trpc message', message);
             const { id, method, params } = message;
 
             try {
-              const ctx = { app: this, client }; // , profile: undefined
+              ctx.client = client; // , profile: undefined
+
               const createCaller = createCallerFactory(
                 this.router
                 // forgeServer.router({
