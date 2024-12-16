@@ -350,10 +350,14 @@ class SeerNode extends Seer.SeerBase {
               const result = params ? await caller[method](deserialize(params)) : await caller[method]();
 
               console.log('Seer sending trpc response', method, params, JSON.stringify(result));
-              socket.emit('trpcResponse', { id, result: serialize({ data: result }) });
+              socket.emit('trpcResponse', { id, result: serialize({ status: 1, data: result }) });
             } catch (error) {
               console.log('Server error', error);
-              socket.emit('trpcResponse', { id, result: {}, error: error?.message || 'Unknown error occurred' });
+              socket.emit('trpcResponse', {
+                id,
+                result: serialize({ status: 0 }),
+                error: error?.stack + '' || 'Unknown error occurred',
+              });
             }
           });
 
