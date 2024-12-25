@@ -17,6 +17,7 @@ import express from 'express';
 import * as database from '@arken/node/db';
 import * as Arken from '@arken/node/types';
 import { getFilter } from '@arken/node/util/api';
+import { initWeb3 } from './web3';
 import {
   Area,
   Asset,
@@ -165,6 +166,7 @@ async function initModules() {
 class SeerNode extends Seer.SeerBase {
   util = util;
   db: any = null;
+  web3: any;
   filters: Record<string, any> = { applicationId: null };
   // TODO: improve
   service: Seer.Types.ApplicationServiceType = {};
@@ -248,6 +250,8 @@ class SeerNode extends Seer.SeerBase {
 
       this.application = this.applications.find((application) => application.name === 'Arken');
 
+      if (!this.application) throw new Error('Cannot get Arken application');
+
       this.filters.applicationId = this.application.id;
 
       for (const modelName of Object.keys(this.model)) {
@@ -271,7 +275,7 @@ class SeerNode extends Seer.SeerBase {
         })
       );
 
-      this.isHttps = false; // process.env.ARKEN_ENV !== 'local';
+      this.isHttps = process.env.ARKEN_ENV !== 'local';
 
       if (this.isHttps) {
         this.https = require('https').createServer(
@@ -284,6 +288,8 @@ class SeerNode extends Seer.SeerBase {
       } else {
         this.http = require('http').Server(this.server);
       }
+
+      this.web3 = null;
 
       const io = new SocketIOServer(this.isHttps ? this.https : this.http, {
         serveClient: false,
@@ -313,6 +319,8 @@ class SeerNode extends Seer.SeerBase {
       // });
 
       const ctx = { app: this, client: null, profile: null };
+
+      initWeb3(this);
 
       io.on('connection', async (socket) => {
         try {

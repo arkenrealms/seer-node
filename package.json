@@ -4,15 +4,15 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "pm2 delete seer-node --kill-timeout 500 || true && sleep 1 && pm2 flush seer-node || true && sleep 1 && pm2 start src/index.ts --name seer-node --no-daemon -f --node-args=\"--require ts-node/register\" --watch --interpreter ts-node --interpreter-args \"--project tsconfig.json\" --ignore-watch=\"node_modules saved narration old storage data db build .git *.db *.log *.json *.png *.mp4 *.db *.db.* *.lock\" > /dev/null 2>&1 & sleep 2 && pm2 logs seer-node",
-    "airtable": "ARKEN_ENV=airtable CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "airtable": "ARKEN_ENV=airtable CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "build": "NODE_ENV=production tsc",
     "clean": "rm forever-script-err.log && rm forever-script-log.log && rm forever-script-out.log && rm nohup.out",
-    "dao": "ARKEN_ENV=dao CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "dao": "ARKEN_ENV=dao CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "forever": "forever start forever-config.json",
-    "local": "ARKEN_ENV=local CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
-    "payments": "ARKEN_ENV=payments CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
-    "skinner": "ARKEN_ENV=skinner CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
-    "start": "ARKEN_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js"
+    "local": "ARKEN_ENV=local CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "payments": "ARKEN_ENV=payments CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "skinner": "ARKEN_ENV=skinner CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
+    "start": "ARKEN_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js"
   },
   "dependencies": {
     "@arken/node": "workspace:*",

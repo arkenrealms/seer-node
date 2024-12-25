@@ -5,7 +5,7 @@
   "spinSleepTime": 30000,
   "append": true,
   "watch": false,
-  "command": "sudo ARKEN_ENV=production LOG_PREFIX=[DB] CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://spring-practical-market.bsc.quiknode.pro/89275f246ac3cd3b9dacd017b931805deca236c0/ LOG=1 /usr/bin/node -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules",
+  "command": "sudo ARKEN_ENV=production LOG_PREFIX=[DB] CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 /usr/bin/node -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules",
   "script": "build/src/index.js",
   "logFile": "./forever-script-log.log",
   "outFile": "./forever-script-out.log",
