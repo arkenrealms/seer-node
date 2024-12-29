@@ -1,6 +1,5 @@
 console.time('Startup timer');
 
-import 'reflect-metadata';
 import dotEnv from 'dotenv';
 dotEnv.config();
 
@@ -172,6 +171,7 @@ class SeerNode extends Seer.SeerBase {
   service: Seer.Types.ApplicationServiceType = {};
   model: Seer.Types.ApplicationModelType = {};
   applications: any[] = [];
+
   declare application: any;
   declare cache: any;
   declare router: any; // TODO: fix
@@ -289,7 +289,7 @@ class SeerNode extends Seer.SeerBase {
         this.http = require('http').Server(this.server);
       }
 
-      this.web3 = null;
+      initWeb3(this);
 
       const io = new SocketIOServer(this.isHttps ? this.https : this.http, {
         serveClient: false,
@@ -318,23 +318,25 @@ class SeerNode extends Seer.SeerBase {
       //   }
       // });
 
-      const ctx = { app: this, client: null, profile: null };
-
-      initWeb3(this);
-
-      io.on('connection', async (socket) => {
+      io.on('connection', async (socket: any) => {
         try {
           console.log('Connection', socket.id);
 
-          const client = { socket, profile: null, roles: ['admin', 'user', 'guest'], ioCallbacks: {} };
+          socket.ctx = { app: this, client: { profile: null, roles: ['guest'], ioCallbacks: {} } };
+
+          // socket.ctx.client = { profile: null, roles: ['guest'], ioCallbacks: {} };
+
+          // if (process.env.ARKEN_ENV === 'local') {
+          //   // socket.ctx.client.profile = await socket.ctx.app.model.Profile.findOne({ name: 'returnportal' }).exec();
+          //   socket.ctx.client.roles.push('user');
+          //   socket.ctx.client.roles.push('admin');
+          // }
 
           socket.on('trpc', async (message) => {
             // console.log('Seer.Server trpc message', message);
             const { id, method, params } = message;
 
             try {
-              ctx.client = client; // , profile: undefined
-
               const createCaller = createCallerFactory(
                 this.router
                 // forgeServer.router({
@@ -351,7 +353,7 @@ class SeerNode extends Seer.SeerBase {
                 // })
               );
 
-              const caller = createCaller(ctx);
+              const caller = createCaller(socket.ctx);
 
               console.log('Seer calling trpc route', method, params);
               // @ts-ignore
@@ -379,20 +381,20 @@ class SeerNode extends Seer.SeerBase {
               console.log(
                 'Seer client callback - error occurred',
                 pack,
-                client.ioCallbacks[id] ? client.ioCallbacks[id].request : ''
+                socket.ctx.client.ioCallbacks[id] ? socket.ctx.client.ioCallbacks[id].request : ''
               );
               return;
             }
 
             try {
-              log(`Seer client callback ${client.ioCallbacks[id] ? 'Exists' : 'Doesnt Exist'}`);
+              log(`Seer client callback ${socket.ctx.client.ioCallbacks[id] ? 'Exists' : 'Doesnt Exist'}`);
 
-              if (client.ioCallbacks[id]) {
-                clearTimeout(client.ioCallbacks[id].timeout);
+              if (socket.ctx.client.ioCallbacks[id]) {
+                clearTimeout(socket.ctx.client.ioCallbacks[id].timeout);
 
-                client.ioCallbacks[id].resolve(pack.result);
+                socket.ctx.client.ioCallbacks[id].resolve(pack.result);
 
-                delete client.ioCallbacks[id];
+                delete socket.ctx.client.ioCallbacks[id];
               }
             } catch (e) {
               console.log('Seer client trpcResponse error', id, e);
