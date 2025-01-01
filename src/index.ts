@@ -162,7 +162,7 @@ async function initModules() {
   }
 }
 
-class SeerNode extends Seer.SeerBase {
+class SeerNode extends Seer.Application {
   util = util;
   db: any = null;
   web3: any;
