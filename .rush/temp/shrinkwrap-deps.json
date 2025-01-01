@@ -1,5 +1,5 @@
 {
-  "../../packages/seer/packages/node": "../../packages/seer/packages/node:vG6aNuQl+JRhe6oOX49ObcIedKzezAbsqduzIrZ3jno=:",
+  "../../packages/seer/packages/node": "../../packages/seer/packages/node:z024Eg5ksjMob8cd/hxBuY4GF5PmoXlaJVqPAJ4mGrU=:",
   "/@achingbrain/node-fetch/2.6.7": "sha512-iTASGs+HTFK5E4ZqcMsHmeJ4zodyq8L38lZV33jwqcBJYoUt3HjN4+ot+O9/0b+ke8ddE7UgOtVuZN/OkV19/g==",
   "/@babel/code-frame/7.24.7": "sha512-BcYH1CVJBO9tvyIZ2jVeXgSIMvGZ2FDRvDdOIVQyuklNKSsx+eppDEBq/g47Ayw+RqNFE+URvOShmf+f/qwAlA==",
   "/@babel/compat-data/7.25.2": "sha512-bYcppcpKBvX4znYaPEeFau03bp89ShqNMLs+rmdptMw+heSZh9+z84d2YG+K7cYLbWwzdjtDoW/uqZmPjulClQ==",
@@ -170,8 +170,8 @@
   "/@szmarczak/http-timer/4.0.6": "sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==",
   "/@szmarczak/http-timer/5.0.1": "sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==",
   "/@tootallnate/once/1.1.2": "sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==",
-  "/@trpc/client/11.0.0-rc.678_76bc3c3b5ef2d35b9f35786b7db79f9c": "sha512-Y3UawZReKGRDy0AnGlNRhqm8m0Rdp7BAvS4PylsO77Wx5Q775O6mruZGuW02IlFIFqmJCUM2/ykt1h8GaSndbw==",
-  "/@trpc/server/11.0.0-rc.678_typescript@5.5.4": "sha512-q5OEUV4aBfHPoV6uQAlNdkxmq6IizLtnblVs91jAXey3Mxquool05nYxnk8xH4n159e0IOSXEJsQfSZtOYlA5Q==",
+  "/@trpc/client/11.0.0-rc.660_1d508f818962cf489e98dfeb50c317ab": "sha512-bNpkZEfyMGKHynYFxdLpY8nJ1n7E3JHKcd4Pe2cagmpkzOEF9tFT3kzNf+eLI8XMG8196lTRR0J0W2/1Q8/cug==",
+  "/@trpc/server/11.0.0-rc.660_typescript@5.5.4": "sha512-QUapcZCNOpHT7ng9LceGc9ImkboWd0Go9ryrduZpL+p4jdfaC6409AQ3x4XEW6Wu3yBmZAn4CywCsDrDhjDy/w==",
   "/@truffle/abi-utils/1.0.3": "sha512-AWhs01HCShaVKjml7Z4AbVREr/u4oiWxCcoR7Cktm0mEvtT04pvnxW5xB/cI4znRkrbPdFQlFt67kgrAjesYkw==",
   "/@truffle/blockchain-utils/0.1.9": "sha512-RHfumgbIVo68Rv9ofDYfynjnYZIfP/f1vZy4RoqkfYAO+fqfc58PDRzB1WAGq2U6GPuOnipOJxQhnqNnffORZg==",
   "/@truffle/codec/0.17.3": "sha512-Ko/+dsnntNyrJa57jUD9u4qx9nQby+H4GsUO6yjiCPSX0TQnEHK08XWqBSg0WdmCH2+h0y1nr2CXSx8gbZapxg==",
