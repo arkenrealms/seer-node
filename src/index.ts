@@ -164,6 +164,7 @@ async function initModules() {
 
 class SeerNode extends Seer.Application {
   util = util;
+  data: any = null;
   db: any = null;
   web3: any;
   filters: Record<string, any> = { applicationId: null };
@@ -187,6 +188,8 @@ class SeerNode extends Seer.Application {
       this.router = Seer.createRouter();
 
       this.cache = {};
+
+      this.data = {};
 
       this.db = await database.init({ app: this });
 
@@ -258,6 +261,8 @@ class SeerNode extends Seer.Application {
         const model = this.model[modelName];
         model.filters.applicationId = this.filters.applicationId;
       }
+
+      this.cache.Profile.admin = await this.model.Profile.findOne({ name: 'Hashwarp' });
 
       this.server = express();
       this.server.set('trust proxy', 1);
