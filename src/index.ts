@@ -29,6 +29,7 @@ import { getFilter } from '@arken/node/util/api';
 import { setZkVerifier } from '@arken/node/util/mongo';
 import { hashEvents } from '@arken/node/util/mongo';
 import { createSocketTrpcHandler } from '@arken/node/trpc/socketServer';
+import { attachTrpcResponseHandler, createSocketProxyClient } from '@arken/node/trpc/socketLink';
 import { initWeb3 } from './web3';
 import { mountAuth } from './auth/mountAuth';
 import {
@@ -329,110 +330,26 @@ class SeerNode extends Seer.Application {
         // }
       } as any);
 
+      attachTrpcResponseHandler({
+        client: client as any,
+        backendName: 'peer',
+        logging: isDebug,
+        onServerPush: ({ method, params }) => {
+          // If the peer ever pushes server-initiated messages (no id),
+          // you can route them here.
+          log('Peer server push', method, params);
+        },
+      });
+
       this.peer = {
         client,
-        emit: createTRPCProxyClient<Seer.Router>({
-          links: [
-            () =>
-              ({ op, next }) => {
-                return observable((observer) => {
-                  const { input } = op;
-
-                  op.context.client = client;
-
-                  // @ts-ignore
-                  op.context.client.roles = ['seer', 'admin', 'mod', 'user', 'guest'];
-
-                  if (!client) {
-                    log('Seer -> Peer: Emit Direct failed, no client', op);
-                    observer.complete();
-                    return;
-                  }
-
-                  if (!client.socket || !client.socket.emit) {
-                    log('Seer -> Peer: Emit Direct failed, bad socket', op);
-                    observer.complete();
-                    return;
-                  }
-                  log('Seer -> Peer: Emit Direct', op);
-
-                  const uuid = generateShortId();
-
-                  const request = { id: uuid, method: op.path, type: op.type, params: serialize(input) };
-                  client.socket.emit('trpc', request);
-
-                  // save the ID and callback when finished
-                  const timeout = setTimeout(() => {
-                    log('Seer -> Peer: Request timed out', op);
-                    delete client.ioCallbacks[uuid];
-                    observer.error(new TRPCClientError('Seer -> Peer: Request timeout'));
-                  }, 15000); // 15 seconds timeout
-
-                  client.ioCallbacks[uuid] = {
-                    request,
-                    timeout,
-                    resolve: (pack) => {
-                      clearTimeout(timeout);
-                      if (pack.error) {
-                        observer.error(pack.error);
-                      } else {
-                        const result = deserialize(pack.result);
-                        console.log('Seer -> Peer: ioCallbacks.resolve', result);
-
-                        // @ts-ignore
-                        if (result?.status !== 1) throw new Error('Seer -> Peer callback status error' + result);
-
-                        observer.next({
-                          // @ts-ignore
-                          result: result ? result : { data: undefined },
-                        });
-
-                        observer.complete();
-                      }
-                      delete client.ioCallbacks[uuid];
-                    },
-                    reject: (error) => {
-                      log('Seer -> Peer: ioCallbacks.reject', error);
-                      clearTimeout(timeout);
-                      observer.error(error);
-                      delete client.ioCallbacks[uuid];
-                    },
-                  };
-                });
-              },
-          ],
+        emit: createSocketProxyClient<Seer.Router>({
+          client,
+          logPrefix: 'Seer -> Peer',
+          roles: ['seer', 'admin', 'mod', 'user', 'guest'],
+          requestTimeoutMs: 15_000,
         }),
       };
-
-      client.socket.on('trpcResponse', async (message) => {
-        log('Peer client trpcResponse message', message);
-        const pack = message;
-        log('Peer trpcResponse pack', pack);
-        const { id } = pack;
-
-        if (pack.error) {
-          log(
-            'Peer client callback - error occurred',
-            pack,
-            client.ioCallbacks[id] ? client.ioCallbacks[id].request : ''
-          );
-          return;
-        }
-
-        try {
-          log(`Peer client callback ${client.ioCallbacks[id] ? 'Exists' : 'Doesnt Exist'}`);
-
-          if (client.ioCallbacks[id]) {
-            clearTimeout(client.ioCallbacks[id].timeout);
-
-            client.ioCallbacks[id].resolve(pack);
-
-            delete client.ioCallbacks[id];
-          }
-        } catch (e) {
-          log('Peer client trpcResponse error', id, e);
-        }
-      });
 
       const connect = async () => {
         // Initialize the realm server with status 1
