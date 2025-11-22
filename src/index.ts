@@ -28,7 +28,9 @@ import * as Arken from '@arken/node/types';
 import { getFilter } from '@arken/node/util/api';
 import { setZkVerifier } from '@arken/node/util/mongo';
 import { hashEvents } from '@arken/node/util/mongo';
+import { createSocketTrpcHandler } from '@arken/node/trpc/socketServer';
 import { initWeb3 } from './web3';
+import { mountAuth } from './auth/mountAuth';
 import {
   Area,
   Asset,
@@ -76,57 +78,6 @@ if (isDebug) {
 }
 
 // let lastRemotePayloadTs = new Date(0).toISOString(); // or load from DB
-
-async function mountAuth(app: any) {
-  // Use real dynamic import without TS transform (prevents require() fallback)
-  const din = new Function('s', 'return import(s)') as (s: string) => Promise<any>;
-
-  const [{ ExpressAuth, getSession }, Google, GitHub, Discord, { MongoDBAdapter }] = await Promise.all([
-    din('@auth/express'), // named exports
-    din('@auth/core/providers/google'), // default export
-    din('@auth/core/providers/github'), // default export (optional)
-    din('@auth/core/providers/discord'), // default export (optional)
-    din('@auth/mongodb-adapter'),
-  ]);
-
-  const cookies =
-    process.env.ARKEN_ENV !== 'local'
-      ? ({
-          sessionToken: {
-            name: '__Secure-arken.session-token',
-            options: {
-              domain: process.env.COOKIE_DOMAIN ?? '.arken.gg',
-              path: '/',
-              httpOnly: true,
-              sameSite: 'lax' as const,
-              secure: true,
-            },
-          },
-        } as const)
-      : undefined;
-
-  app.get('/__echo/*', (req, res) => {
-    res.json({ baseUrl: req.baseUrl, path: req.path, originalUrl: req.originalUrl, method: req.method });
-  });
-
-  const authConfig: import('@auth/express').ExpressAuthConfig = {
-    trustHost: true,
-    secret: process.env.AUTH_SECRET!,
-    adapter: MongoDBAdapter((await import('mongoose')).default.connection.getClient()),
-    session: { strategy: 'database' },
-    providers: [Google.default /*, GitHub.default, Discord.default*/],
-    ...(cookies ? { cookies } : {}),
-  };
-
-  app.use('/auth', ExpressAuth(authConfig));
-
-  app.get('/api/session', async (req, res) => {
-    const session = await getSession(req, authConfig);
-    res.json(session ?? null);
-  });
-
-  return { getSession, authConfig };
-}
 
 async function initModules() {
   catchExceptions(true);
@@ -328,6 +279,11 @@ class SeerNode extends Seer.Application {
   }
 
   async syncFromRemoteSeer() {
+    if (!this.peer) {
+      console.log('Peer has not been initialized');
+      return;
+    }
+
     // You'll need a trpcRemote client configured somewhere
     const { payloads } = await this.peer.emit.core.syncGetPayloadsSince.query({
       since: this.lastRemotePayloadTs,
@@ -513,18 +469,24 @@ class SeerNode extends Seer.Application {
       this.buildSeerSnapshot().catch((err) => {
         console.error('buildSeerSnapshot error', err);
       });
-    }, 10_000); // every 10 seconds, for example
+    }, 60_000);
 
     setInterval(() => {
       this.syncFromRemoteSeer().catch((err) => {
         console.error('syncFromRemoteSeer error', err);
       });
-    }, 15_000); // every 15 seconds, for example
+    }, 5_00_000);
 
     try {
       await initModules();
 
       this.router = Seer.createRouter();
+
+      const handleSocketTrpc = createSocketTrpcHandler({
+        router: this.router,
+        createCallerFactory,
+        log: console.log, // or your "log" util
+      });
 
       this.cache = {};
 
@@ -708,42 +670,7 @@ class SeerNode extends Seer.Application {
           // }
 
           socket.on('trpc', async (message) => {
-            // console.log('Seer.Server trpc message', message);
-            const { id, method, params } = message;
-
-            try {
-              const createCaller = createCallerFactory(
-                this.router
-                // forgeServer.router({
-                //   // connected: procedure
-                //   //   .use(hasRole("admin", t))
-                //   //   .use(customErrorFormatter(t))
-                //   //   .input(schema.connected)
-                //   //   .mutation(({ input, ctx }) =>
-                //   //     service.connected(input as Schema.ConnectedInput, ctx)
-                //   //   ),
-
-                //   job: this.service.Job.router,
-                //   core: this.service.Core.router,
-                // })
-              );
-
-              const caller = createCaller(socket.ctx);
-
-              console.log('Seer calling trpc route', method, params);
-              // @ts-ignore
-              const result = params ? await caller[method](deserialize(params)) : await caller[method]();
-
-              console.log('Seer sending trpc response', method, params, JSON.stringify(result));
-              socket.emit('trpcResponse', { id, result: serialize({ status: 1, data: result }) });
-            } catch (error) {
-              console.log('Server error', error);
-              socket.emit('trpcResponse', {
-                id,
-                result: serialize({ status: 0 }),
-                error: error?.stack + '' || 'Unknown error occurred',
-              });
-            }
+            await handleSocketTrpc(socket, socket.ctx, message);
           });
 
           socket.on('trpcResponse', async (message) => {
@@ -783,7 +710,7 @@ class SeerNode extends Seer.Application {
       const port = this.isHttps ? process.env.SSL_PORT || 443 : process.env.PORT || 80;
       const res = await (this.isHttps ? this.https : this.http).listen({ port: Number(port) });
 
-      this.connectPeer();
+      // this.connectPeer();
 
       console.log(`Server ready and listening on ${JSON.stringify(res.address())} (http${this.isHttps ? 's' : ''})`);
 
