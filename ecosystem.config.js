@@ -1,0 +1,31 @@
+module.exports = {
+  apps: [
+    {
+      name: 'seer-node',
+      script: 'src/index.ts',
+      interpreter: 'ts-node',
+      interpreter_args: '--project tsconfig.json',
+      node_args: '--require ts-node/register',
+      watch: true,
+      ignore_watch: [
+        'node_modules',
+        'saved',
+        'narration',
+        'old',
+        'storage',
+        'data',
+        'db',
+        'build',
+        '.git',
+        '*.db',
+        '*.log',
+        '*.json',
+        '*.png',
+        '*.mp4',
+        '*.db.*',
+        '*.lock',
+      ],
+      env: { NODE_ENV: 'development' },
+    },
+  ],
+};

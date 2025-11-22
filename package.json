@@ -12,7 +12,8 @@
     "local": "ARKEN_ENV=local CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "payments": "ARKEN_ENV=payments CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
     "skinner": "ARKEN_ENV=skinner CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] tsnd --respawn -r tsconfig-paths/register ./src/index.ts",
-    "start": "ARKEN_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js"
+    "start": "ARKEN_ENV=production NODE_ENV=production CUBE_BRIDGE_PORT=7777 LIVE_PORT=8443 PROVIDER_URI=wss://crimson-wider-orb.bsc.quiknode.pro/43f35ed5d02063d52c43f355825c13ae6e0b46e7 LOG=1 LOG_PREFIX=[DB] node -r dotenv/config -r tsconfig-paths/register --max_semi_space_size=30000 --max-old-space-size=30000 --initial-old-space-size=8000 --optimize-for-size --experimental-modules --experimental-json-modules build/src/index.js",
+    "test": "jest --detectOpenHandles --forceExit --coverage --verbose --config jest.config.unit.js"
   },
   "dependencies": {
     "@arken/node": "workspace:*",
@@ -33,7 +34,14 @@
     "shortid": "^2",
     "sqlite3": "^5",
     "tsconfig-paths": "^4",
-    "@types/socket.io-client": "~3.0.0"
+    "@auth/core": "~0.40.0",
+    "@auth/express": "~0.11.0",
+    "@auth/mongodb-adapter": "~3.10.0",
+    "mongodb": "~6.20.0",
+    "jest": "~30.2.0",
+    "@types/jest": "~30.0.0",
+    "circomlibjs": "~0.1.7",
+    "mongodb-memory-server": "~10.3.0"
   },
   "devDependencies": {
     "@types/lodash": "^4",

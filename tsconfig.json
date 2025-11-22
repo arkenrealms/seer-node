@@ -20,6 +20,7 @@
     "lib": ["ESNext"],
     "moduleResolution": "Node"
   },
+  "references": [{ "path": "../../../node" }],
   "include": ["./src/**/*"],
   "exclude": []
 }

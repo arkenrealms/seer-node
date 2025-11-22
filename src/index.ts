@@ -1,3 +1,5 @@
+// seer/packages/node/src/index.ts
+
 console.time('Startup timer');
 
 import dotEnv from 'dotenv';
@@ -6,6 +8,13 @@ dotEnv.config();
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
+import type { ExpressAuthConfig } from '@auth/express';
+import { io as ioClient } from 'socket.io-client';
+import { observable } from '@trpc/server/observable';
+import { getSignedRequest } from '@arken/node/util/web3';
+import { createTRPCProxyClient, TRPCClientError, httpBatchLink, createWSClient, wsLink } from '@trpc/client';
+import { generateShortId } from '@arken/node/util/db';
+import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import helmet from 'helmet';
@@ -13,9 +22,12 @@ import cors from 'cors';
 import { Server as SocketIOServer } from 'socket.io';
 import _ from 'lodash';
 import express from 'express';
+import type { Application } from 'express';
 import * as database from '@arken/node/db';
 import * as Arken from '@arken/node/types';
 import { getFilter } from '@arken/node/util/api';
+import { setZkVerifier } from '@arken/node/util/mongo';
+import { hashEvents } from '@arken/node/util/mongo';
 import { initWeb3 } from './web3';
 import {
   Area,
@@ -48,6 +60,7 @@ import { z } from 'zod';
 
 // import { runTest } from './modules/tests/test-a'
 import * as tests from './tests';
+import { generateProof as generateLeafProof } from '@arken/node/util/zk'; // leaf-update zk proof
 
 export const t = initTRPC.context<{}>().create();
 export const router = t.router;
@@ -62,8 +75,68 @@ if (isDebug) {
   log('Running Seer in DEBUG mode');
 }
 
+// let lastRemotePayloadTs = new Date(0).toISOString(); // or load from DB
+
+async function mountAuth(app: any) {
+  // Use real dynamic import without TS transform (prevents require() fallback)
+  const din = new Function('s', 'return import(s)') as (s: string) => Promise<any>;
+
+  const [{ ExpressAuth, getSession }, Google, GitHub, Discord, { MongoDBAdapter }] = await Promise.all([
+    din('@auth/express'), // named exports
+    din('@auth/core/providers/google'), // default export
+    din('@auth/core/providers/github'), // default export (optional)
+    din('@auth/core/providers/discord'), // default export (optional)
+    din('@auth/mongodb-adapter'),
+  ]);
+
+  const cookies =
+    process.env.ARKEN_ENV !== 'local'
+      ? ({
+          sessionToken: {
+            name: '__Secure-arken.session-token',
+            options: {
+              domain: process.env.COOKIE_DOMAIN ?? '.arken.gg',
+              path: '/',
+              httpOnly: true,
+              sameSite: 'lax' as const,
+              secure: true,
+            },
+          },
+        } as const)
+      : undefined;
+
+  app.get('/__echo/*', (req, res) => {
+    res.json({ baseUrl: req.baseUrl, path: req.path, originalUrl: req.originalUrl, method: req.method });
+  });
+
+  const authConfig: import('@auth/express').ExpressAuthConfig = {
+    trustHost: true,
+    secret: process.env.AUTH_SECRET!,
+    adapter: MongoDBAdapter((await import('mongoose')).default.connection.getClient()),
+    session: { strategy: 'database' },
+    providers: [Google.default /*, GitHub.default, Discord.default*/],
+    ...(cookies ? { cookies } : {}),
+  };
+
+  app.use('/auth', ExpressAuth(authConfig));
+
+  app.get('/api/session', async (req, res) => {
+    const session = await getSession(req, authConfig);
+    res.json(session ?? null);
+  });
+
+  return { getSession, authConfig };
+}
+
 async function initModules() {
   catchExceptions(true);
+
+  setZkVerifier(async (payload, ctx) => {
+    // 1. Recompute operation hash H from ctx.doc / ctx.update
+    // 2. Call your zkSNARK verifier (snarkjs, etc.)
+    // 3. Optionally check payload.walletAddress is allowed for this app/op
+    return true; // or false
+  });
 
   try {
     const app: any = {};
@@ -162,26 +235,292 @@ async function initModules() {
   }
 }
 
+interface Peer {
+  client: any;
+  emit: ReturnType<typeof createTRPCProxyClient<Seer.Router>>;
+}
+
 class SeerNode extends Seer.Application {
   util = util;
   data: any = null;
   db: any = null;
   web3: any;
+  secrets: any; // Secrets for signing
   filters: Record<string, any> = { applicationId: null };
   // TODO: improve
   service: Seer.Types.ApplicationServiceType = {};
   model: Seer.Types.ApplicationModelType = {};
   applications: any[] = [];
+  peer: Peer;
 
+  declare router: Seer.Router;
   declare application: any;
   declare cache: any;
-  declare router: any; // TODO: fix
   declare server: any;
   declare isHttps: boolean;
   declare https: any;
   declare http: any;
 
+  lastSnapshotSeq: number = 0;
+  lastRemotePayloadTs: string = new Date(0).toISOString();
+
+  // Simple placeholder snapshot proof generator.
+  // Later you can switch this to a real Groth16/Plonk circuit for
+  // { eventsHash, merkleRoot } -> proof / publicSignals.
+  private async generateSnapshotProof(events: any[], merkleRoot: string) {
+    if (process.env.ZK_SNAPSHOT_ENABLED === 'true') {
+      // ⚠️ This is *not* semantically correct, just a placeholder
+      const { proof, publicSignals } = await generateLeafProof({
+        oldRoot: '0',
+        newRoot: '0',
+        oldLeaf: '0',
+        newLeaf: '0',
+        leafIndex: 0,
+        siblings: [],
+      });
+
+      return { proof, publicSignals: publicSignals as string[] };
+    }
+
+    // Default: stub
+    return {
+      proof: null,
+      publicSignals: [merkleRoot],
+    };
+  }
+
+  async buildSeerSnapshot() {
+    const SNAPSHOT_INTERVAL = 100;
+    const LOCAL_SEER_ID = process.env.SEER_NODE_WALLET ?? 'seer-node-1';
+
+    // 1. Load new events since last snapshot
+    const events = await this.model.SeerEvent.find({ seq: { $gt: this.lastSnapshotSeq } })
+      .sort({ seq: 1 })
+      .limit(SNAPSHOT_INTERVAL)
+      .lean()
+      .exec();
+
+    if (!events.length) return;
+
+    const eventsHash = hashEvents(events);
+
+    // TODO: replace with real Merkle tree over events
+    const merkleRoot = eventsHash;
+
+    // 🔧 For now, use the snapshot stub, not the leaf-update circuit.
+    const { proof, publicSignals } = await this.generateSnapshotProof(events, merkleRoot);
+
+    // 3. Store SeerPayload
+    const payloadDoc = await this.model.SeerPayload.create({
+      fromSeer: LOCAL_SEER_ID,
+      applicationId: null, // or per-app if you split events by app
+      events,
+      eventsHash,
+      merkleRoot,
+      proof,
+      publicSignals,
+    });
+
+    const maxSeq = events[events.length - 1].seq;
+    this.lastSnapshotSeq = maxSeq;
+
+    console.log(`Seer snapshot created: payloadId=${(payloadDoc as any).id}, events=${events.length}`);
+  }
+
+  async syncFromRemoteSeer() {
+    // You'll need a trpcRemote client configured somewhere
+    const { payloads } = await this.peer.emit.core.syncGetPayloadsSince.query({
+      since: this.lastRemotePayloadTs,
+    });
+
+    if (!payloads || !payloads.length) return;
+
+    // Insert them locally (or upsert + apply events)
+    await this.model.SeerPayload.create(payloads);
+
+    const last = payloads[payloads.length - 1];
+    this.lastRemotePayloadTs = new Date(last.createdAt).toISOString();
+
+    console.log(`Synced ${payloads.length} payloads from remote seer, lastTs=${this.lastRemotePayloadTs}`);
+
+    // Optionally: apply payload.events to local Mongo
+    // for (const p of payloads) {
+    //   await this.applySeerPayloadEvents(p);
+    // }
+  }
+
+  async connectPeer() {
+    return new Promise((resolve, reject) => {
+      // @ts-ignore
+      const client: Seer.Client = {};
+
+      client.ioCallbacks = {};
+
+      const isLocal = process.env.ARKEN_ENV === 'local';
+
+      client.endpoint = process.env['PEER_ENDPOINT' + (isLocal ? '_LOCAL' : '')];
+
+      log('Connecting to Peer', client.endpoint);
+
+      client.socket = ioClient(client.endpoint, {
+        transports: ['websocket'],
+        upgrade: false,
+        autoConnect: false,
+        // pingInterval: 5000,
+        // pingTimeout: 20000
+        // extraHeaders: {
+        //   "my-custom-header": "1234"
+        // }
+      } as any);
+
+      this.peer = {
+        client,
+        emit: createTRPCProxyClient<Seer.Router>({
+          links: [
+            () =>
+              ({ op, next }) => {
+                return observable((observer) => {
+                  const { input } = op;
+
+                  op.context.client = client;
+
+                  // @ts-ignore
+                  op.context.client.roles = ['seer', 'admin', 'mod', 'user', 'guest'];
+
+                  if (!client) {
+                    log('Seer -> Peer: Emit Direct failed, no client', op);
+                    observer.complete();
+                    return;
+                  }
+
+                  if (!client.socket || !client.socket.emit) {
+                    log('Seer -> Peer: Emit Direct failed, bad socket', op);
+                    observer.complete();
+                    return;
+                  }
+                  log('Seer -> Peer: Emit Direct', op);
+
+                  const uuid = generateShortId();
+
+                  const request = { id: uuid, method: op.path, type: op.type, params: serialize(input) };
+                  client.socket.emit('trpc', request);
+
+                  // save the ID and callback when finished
+                  const timeout = setTimeout(() => {
+                    log('Seer -> Peer: Request timed out', op);
+                    delete client.ioCallbacks[uuid];
+                    observer.error(new TRPCClientError('Seer -> Peer: Request timeout'));
+                  }, 15000); // 15 seconds timeout
+
+                  client.ioCallbacks[uuid] = {
+                    request,
+                    timeout,
+                    resolve: (pack) => {
+                      clearTimeout(timeout);
+                      if (pack.error) {
+                        observer.error(pack.error);
+                      } else {
+                        const result = deserialize(pack.result);
+                        console.log('Seer -> Peer: ioCallbacks.resolve', result);
+
+                        // @ts-ignore
+                        if (result?.status !== 1) throw new Error('Seer -> Peer callback status error' + result);
+
+                        observer.next({
+                          // @ts-ignore
+                          result: result ? result : { data: undefined },
+                        });
+
+                        observer.complete();
+                      }
+                      delete client.ioCallbacks[uuid];
+                    },
+                    reject: (error) => {
+                      log('Seer -> Peer: ioCallbacks.reject', error);
+                      clearTimeout(timeout);
+                      observer.error(error);
+                      delete client.ioCallbacks[uuid];
+                    },
+                  };
+                });
+              },
+          ],
+        }),
+      };
+
+      client.socket.on('trpcResponse', async (message) => {
+        log('Peer client trpcResponse message', message);
+        const pack = message;
+        log('Peer trpcResponse pack', pack);
+        const { id } = pack;
+
+        if (pack.error) {
+          log(
+            'Peer client callback - error occurred',
+            pack,
+            client.ioCallbacks[id] ? client.ioCallbacks[id].request : ''
+          );
+          return;
+        }
+
+        try {
+          log(`Peer client callback ${client.ioCallbacks[id] ? 'Exists' : 'Doesnt Exist'}`);
+
+          if (client.ioCallbacks[id]) {
+            clearTimeout(client.ioCallbacks[id].timeout);
+
+            client.ioCallbacks[id].resolve(pack);
+
+            delete client.ioCallbacks[id];
+          }
+        } catch (e) {
+          log('Peer client trpcResponse error', id, e);
+        }
+      });
+
+      const connect = async () => {
+        // Initialize the realm server with status 1
+        const signature = await getSignedRequest(this.web3, this.secrets, 'evolution');
+
+        const res: Seer.RouterOutput['auth'] = await this.peer.emit.core.authorize.mutate({
+          address: signature.address,
+          token: signature.hash,
+          data: signature.data,
+        });
+
+        log('Peer auth res', res);
+
+        if (!res?.profile) {
+          console.error('Could not connect to Peer. Retrying in 10 seconds.');
+
+          setTimeout(connect, 10 * 1000);
+
+          return;
+        }
+
+        log('Peer connected', res);
+        resolve(null);
+      };
+
+      client.socket.on('connect', connect);
+      client.socket.connect();
+    });
+  }
+
   async init() {
+    // Kick off periodic snapshots
+    setInterval(() => {
+      this.buildSeerSnapshot().catch((err) => {
+        console.error('buildSeerSnapshot error', err);
+      });
+    }, 10_000); // every 10 seconds, for example
+
+    setInterval(() => {
+      this.syncFromRemoteSeer().catch((err) => {
+        console.error('syncFromRemoteSeer error', err);
+      });
+    }, 15_000); // every 15 seconds, for example
+
     try {
       await initModules();
 
@@ -266,9 +605,20 @@ class SeerNode extends Seer.Application {
 
       this.server = express();
       this.server.set('trust proxy', 1);
+
       this.server.use(helmet());
+
+      // Allow your SPA origins + cookies
       this.server.use(
         cors({
+          origin: [
+            'https://arken.gg',
+            'https://beta.arken.gg',
+            'https://dev.arken.gg',
+            'http://localhost:8021',
+            'http://arken.gg.local:8021',
+          ],
+          credentials: true,
           allowedHeaders: [
             'Accept',
             'Authorization',
@@ -323,11 +673,31 @@ class SeerNode extends Seer.Application {
       //   }
       // });
 
+      const { getSession, authConfig } = await mountAuth(this.server);
+
+      // If you want sessions inside Socket.IO:
+      io.use(async (socket, next) => {
+        try {
+          const sess = await getSession(socket.request as any, authConfig);
+          (socket as any).authSession = sess;
+          next();
+        } catch (e) {
+          next(e as any);
+        }
+      });
+
       io.on('connection', async (socket: any) => {
         try {
           console.log('Connection', socket.id);
 
-          socket.ctx = { app: this, client: { profile: null, roles: ['guest'], ioCallbacks: {} } };
+          socket.ctx = {
+            app: this,
+            client: { profile: null, roles: ['guest'], ioCallbacks: {} },
+            session: socket.authSession, // <-- here
+          };
+
+          // Example: lift to 'user' role if logged-in
+          if (socket.ctx.session?.user) socket.ctx.client.roles.push('user');
 
           // socket.ctx.client = { profile: null, roles: ['guest'], ioCallbacks: {} };
 
@@ -412,6 +782,8 @@ class SeerNode extends Seer.Application {
 
       const port = this.isHttps ? process.env.SSL_PORT || 443 : process.env.PORT || 80;
       const res = await (this.isHttps ? this.https : this.http).listen({ port: Number(port) });
+
+      this.connectPeer();
 
       console.log(`Server ready and listening on ${JSON.stringify(res.address())} (http${this.isHttps ? 's' : ''})`);
 

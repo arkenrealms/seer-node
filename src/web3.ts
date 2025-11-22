@@ -38,6 +38,7 @@ function initProvider(ctx) {
     ctx.contractMetadata.bsc.ArkenBlacksmith = { abi: ArkenBlacksmith };
     ctx.contractMetadata.bsc.RuneTimelock = { abi: RuneTimelock };
 
+    ctx.secrets = secrets.find((signer) => signer.id === 'default-signer');
     ctx.web3Provider = { bsc: getRandomProvider(secrets.find((signer) => signer.id === 'default-signer')) };
     ctx.web3 = { bsc: new Web3(ctx.web3Provider.bsc) };
 

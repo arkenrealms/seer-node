@@ -4,7 +4,7 @@ ARG CACHEBUST=1
 
 WORKDIR /usr/src/app
 RUN apt-get update && apt-get install -y vim && rm -rf /var/lib/apt/lists/*
-RUN npm install -g @microsoft/rush ts-node-dev
+RUN npm install -g @microsoft/rush ts-node-dev pm2
 
 WORKDIR /usr/src/app
 RUN git clone https://github.com/arkenrealms/arken.git
@@ -30,5 +30,5 @@ RUN rush update
 
 EXPOSE 7040
 
-CMD ["sleep", "infinity"]
+CMD ["pm2-runtime", "ecosystem.config.js"]
 # CMD ["rushx dev"]
