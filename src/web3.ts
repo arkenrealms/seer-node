@@ -39,7 +39,11 @@ function initProvider(ctx) {
     ctx.contractMetadata.bsc.RuneTimelock = { abi: RuneTimelock };
 
     ctx.secrets = secrets.find((signer) => signer.id === 'default-signer');
-    ctx.web3Provider = { bsc: getRandomProvider(secrets.find((signer) => signer.id === 'default-signer')) };
+    try {
+      ctx.web3Provider = { bsc: getRandomProvider(secrets.find((signer) => signer.id === 'default-signer')) };
+    } catch (e) {
+      console.warn('Could not initiate web3 provider');
+    }
     ctx.web3 = { bsc: new Web3(ctx.web3Provider.bsc) };
 
     ctx.ethersProvider = { bsc: new ethers.providers.Web3Provider(ctx.web3Provider.bsc, 'any') };
