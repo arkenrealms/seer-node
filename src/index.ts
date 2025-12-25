@@ -101,7 +101,7 @@ async function initModules() {
     try {
       app.admins = (await fetch('https://raw.githubusercontent.com/arkenrealms/council/main/admins.json')).data;
     } catch (e) {
-      console.log('Could not fetch council. Exiting.');
+      console.log('Could not fetch the Seer Council. Exiting.');
       process.exit(0);
     }
 
