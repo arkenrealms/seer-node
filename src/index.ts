@@ -1,4 +1,4 @@
-// seer/packages/node/src/index.ts
+// arken/packages/seer/packages/node/src/index.ts
 
 console.time('Startup timer');
 
@@ -8,6 +8,8 @@ dotEnv.config();
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
+import { createSocketTrpcHandler } from '@arken/node/trpc/socketServer';
+import { attachTrpcResponseHandler, bindSocketClientEmit, createSocketProxyClient } from '@arken/node/trpc/socketLink';
 import type { ExpressAuthConfig } from '@auth/express';
 import { io as ioClient } from 'socket.io-client';
 import { observable } from '@trpc/server/observable';
@@ -28,8 +30,6 @@ import * as Arken from '@arken/node/types';
 import { getFilter } from '@arken/node/util/api';
 import { setZkVerifier } from '@arken/node/util/mongo';
 import { hashEvents } from '@arken/node/util/mongo';
-import { createSocketTrpcHandler } from '@arken/node/trpc/socketServer';
-import { attachTrpcResponseHandler, createSocketProxyClient } from '@arken/node/trpc/socketLink';
 import { initWeb3 } from './web3';
 import { mountAuth } from './auth/mountAuth';
 import {
@@ -52,6 +52,7 @@ import {
   Video,
 } from '@arken/node';
 import * as Seer from '@arken/seer-protocol';
+import * as Forge from '@arken/forge-protocol';
 import { isDebug, log } from '@arken/node/util';
 import { catchExceptions, subProcesses } from '@arken/node/util/process';
 import * as dotenv from 'dotenv';
@@ -243,41 +244,45 @@ class SeerNode extends Seer.Application {
   }
 
   async buildSeerSnapshot() {
-    const SNAPSHOT_INTERVAL = 100;
-    const LOCAL_SEER_ID = process.env.SEER_NODE_WALLET ?? 'seer-node-1';
+    try {
+      const SNAPSHOT_INTERVAL = 100;
+      const LOCAL_SEER_ID = process.env.SEER_NODE_WALLET ?? 'seer-node-1';
 
-    // 1. Load new events since last snapshot
-    const events = await this.model.SeerEvent.find({ seq: { $gt: this.lastSnapshotSeq } })
-      .sort({ seq: 1 })
-      .limit(SNAPSHOT_INTERVAL)
-      .lean()
-      .exec();
+      // 1. Load new events since last snapshot
+      const events = await this.model.SeerEvent.find({ seq: { $gt: this.lastSnapshotSeq } })
+        .sort({ seq: 1 })
+        .limit(SNAPSHOT_INTERVAL)
+        .lean()
+        .exec();
 
-    if (!events.length) return;
+      if (!events.length) return;
 
-    const eventsHash = hashEvents(events);
+      const eventsHash = hashEvents(events);
 
-    // TODO: replace with real Merkle tree over events
-    const merkleRoot = eventsHash;
+      // TODO: replace with real Merkle tree over events
+      const merkleRoot = eventsHash;
 
-    // 🔧 For now, use the snapshot stub, not the leaf-update circuit.
-    const { proof, publicSignals } = await this.generateSnapshotProof(events, merkleRoot);
+      // 🔧 For now, use the snapshot stub, not the leaf-update circuit.
+      const { proof, publicSignals } = await this.generateSnapshotProof(events, merkleRoot);
 
-    // 3. Store SeerPayload
-    const payloadDoc = await this.model.SeerPayload.create({
-      fromSeer: LOCAL_SEER_ID,
-      applicationId: null, // or per-app if you split events by app
-      events,
-      eventsHash,
-      merkleRoot,
-      proof,
-      publicSignals,
-    });
+      // 3. Store SeerPayload
+      const payloadDoc = await this.model.SeerPayload.create({
+        fromSeer: LOCAL_SEER_ID,
+        applicationId: null, // or per-app if you split events by app
+        events,
+        eventsHash,
+        merkleRoot,
+        proof,
+        publicSignals,
+      });
 
-    const maxSeq = events[events.length - 1].seq;
-    this.lastSnapshotSeq = maxSeq;
+      const maxSeq = events[events.length - 1].seq;
+      this.lastSnapshotSeq = maxSeq;
 
-    console.log(`Seer snapshot created: payloadId=${(payloadDoc as any).id}, events=${events.length}`);
+      console.log(`Seer snapshot created: payloadId=${(payloadDoc as any).id}, events=${events.length}`);
+    } catch (e) {
+      console.log('Seer snapshot creation failed: ' + e.message);
+    }
   }
 
   async syncFromRemoteSeer() {
@@ -311,8 +316,6 @@ class SeerNode extends Seer.Application {
     return new Promise((resolve, reject) => {
       // @ts-ignore
       const client: Seer.Client = {};
-
-      client.ioCallbacks = {};
 
       const isLocal = process.env.ARKEN_ENV === 'local';
 
@@ -436,6 +439,7 @@ class SeerNode extends Seer.Application {
         Skill: new Skill.Service(),
         Video: new Video.Service(),
 
+        Trek: new Seer.Trek.Service(),
         Evolution: new Seer.Evolution.Service(),
         Infinite: new Seer.Infinite.Service(),
         Oasis: new Seer.Oasis.Service(),
@@ -572,54 +576,45 @@ class SeerNode extends Seer.Application {
 
           socket.ctx = {
             app: this,
-            client: { profile: null, roles: ['guest'], ioCallbacks: {} },
+            client: {
+              profile: null,
+              roles: ['guest'],
+              // 👇 reusable helper replaces the inline emit/onAny plumbing
+              emit: bindSocketClientEmit<Forge.Router>({
+                client: { ioCallbacks: {}, socket } as any,
+                socket,
+                backendName: 'seer-client',
+                logPrefix: 'Seer -> Client',
+                roles: ['guest'],
+                requestTimeoutMs: 15_000,
+                logging: isDebug,
+              }),
+            },
             session: socket.authSession, // <-- here
           };
 
           // Example: lift to 'user' role if logged-in
           if (socket.ctx.session?.user) socket.ctx.client.roles.push('user');
 
-          // socket.ctx.client = { profile: null, roles: ['guest'], ioCallbacks: {} };
+          // IMPORTANT: keep the ctx client's roles in sync for emit-context usage
+          // (createSocketProxyClient sets op.context.client.roles, but we also want our real ctx client roles)
+          // If you want emit() to reflect dynamic roles, rebind when roles change; for now, minimal parity:
+          (socket.ctx.client as any).socket = socket;
 
-          // if (process.env.ARKEN_ENV === 'local') {
-          //   // socket.ctx.client.profile = await socket.ctx.app.model.Profile.findOne({ name: 'returnportal' }).exec();
-          //   socket.ctx.client.roles.push('user');
-          //   socket.ctx.client.roles.push('admin');
-          // }
+          // Handle inbound "trpc" requests (client -> server)
+          const handleSocketTrpc = createSocketTrpcHandler({
+            router: this.router,
+            createCallerFactory,
+            log: console.log, // or your "log" util
+          });
 
           socket.on('trpc', async (message) => {
             await handleSocketTrpc(socket, socket.ctx, message);
           });
 
-          socket.on('trpcResponse', async (message) => {
-            log('Seer client trpcResponse message', message);
-            const pack = message;
-            console.log('Seer client trpcResponse pack', pack);
-            const { id } = pack;
-
-            if (pack.error) {
-              console.log(
-                'Seer client callback - error occurred',
-                pack,
-                socket.ctx.client.ioCallbacks[id] ? socket.ctx.client.ioCallbacks[id].request : ''
-              );
-              return;
-            }
-
-            try {
-              log(`Seer client callback ${socket.ctx.client.ioCallbacks[id] ? 'Exists' : 'Doesnt Exist'}`);
-
-              if (socket.ctx.client.ioCallbacks[id]) {
-                clearTimeout(socket.ctx.client.ioCallbacks[id].timeout);
-
-                socket.ctx.client.ioCallbacks[id].resolve(pack.result);
-
-                delete socket.ctx.client.ioCallbacks[id];
-              }
-            } catch (e) {
-              console.log('Seer client trpcResponse error', id, e);
-            }
-          });
+          // NOTE:
+          // We no longer need a custom socket.on('trpcResponse', ...) block here,
+          // because bindSocketClientEmit(...) already attached the shared trpcResponse resolver.
         } catch (e) {
           console.log('Seer.Server error', e);
         }
