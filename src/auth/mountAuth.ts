@@ -9,9 +9,13 @@ export type AuthDeps = {
   // @auth/express
   ExpressAuth: (config: ExpressAuthConfig) => any;
   getSession: (req: any, config: ExpressAuthConfig) => Promise<any>;
-  // Google provider object (whatever @auth/core/providers/google exports as default)
+
+  // Providers
   Google: any;
-  // Pre-built adapter instance (e.g. MongoDBAdapter(client))
+  Discord: any;
+  GitHub: any;
+
+  // Adapter instance (e.g. MongoDBAdapter(client))
   adapter: any;
 };
 
@@ -20,7 +24,7 @@ export type AuthDeps = {
  * Uses only injected deps.
  */
 export async function mountAuthWithDeps(app: App, deps: AuthDeps) {
-  const { ExpressAuth, getSession, Google, adapter } = deps;
+  const { ExpressAuth, getSession, Google, Discord, GitHub, adapter } = deps;
 
   const cookies =
     process.env.ARKEN_ENV !== 'local'
@@ -53,10 +57,37 @@ export async function mountAuthWithDeps(app: App, deps: AuthDeps) {
     secret: process.env.AUTH_SECRET!,
     adapter,
     session: { strategy: 'database' },
-    providers: [Google /*, GitHub, Discord*/],
+
+    // Set AUTH_DEBUG=true to get useful logs
+    debug: process.env.AUTH_DEBUG === 'true',
+
+    // ✅ Providers enabled
+    providers: [Discord, GitHub, Google],
+
+    callbacks: {
+      async session({ session, user }) {
+        // With database sessions, Auth.js passes `user` here.
+        if (session.user && user?.id) {
+          (session.user as any).id = user.id;
+        }
+        return session;
+      },
+
+      async redirect({ url, baseUrl }) {
+        if (url.startsWith('/')) return new URL(url, baseUrl).toString();
+        try {
+          const u = new URL(url);
+          if (u.hostname === 'alpha.arken.gg') return url;
+          if (u.hostname === 'arken.gg' || u.hostname.endsWith('.arken.gg')) return url;
+        } catch {}
+        return baseUrl;
+      },
+    },
+
     ...(cookies ? { cookies } : {}),
   };
 
+  // ✅ Auth.js Express recommends wildcard mount
   app.use('/auth', ExpressAuth(authConfig));
 
   app.get('/api/session', async (req, res) => {
@@ -79,7 +110,7 @@ export async function mountAuth(app: App, deps?: AuthDeps) {
   // Use real dynamic import without TS transform (prevents require() fallback)
   const din = new Function('s', 'return import(s)') as (s: string) => Promise<any>;
 
-  const [authMod, googleMod, , , adapterMod] = await Promise.all([
+  const [authMod, googleMod, githubMod, discordMod, adapterMod] = await Promise.all([
     din('@auth/express'),
     din('@auth/core/providers/google'),
     din('@auth/core/providers/github'),
@@ -89,8 +120,12 @@ export async function mountAuth(app: App, deps?: AuthDeps) {
 
   const ExpressAuth = authMod.ExpressAuth;
   const getSession = authMod.getSession;
+
   const Google = googleMod.default;
+  const GitHub = githubMod.default;
+  const Discord = discordMod.default;
+
   const adapter = adapterMod.MongoDBAdapter(mongoose.connection.getClient());
 
-  return mountAuthWithDeps(app, { ExpressAuth, getSession, Google, adapter });
+  return mountAuthWithDeps(app, { ExpressAuth, getSession, Google, Discord, GitHub, adapter });
 }

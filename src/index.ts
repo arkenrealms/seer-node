@@ -5,6 +5,7 @@ console.time('Startup timer');
 import dotEnv from 'dotenv';
 dotEnv.config();
 
+import * as ethers from 'ethers';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
@@ -16,6 +17,7 @@ import { observable } from '@trpc/server/observable';
 import { getSignedRequest } from '@arken/node/util/web3';
 import { createTRPCProxyClient, TRPCClientError, httpBatchLink, createWSClient, wsLink } from '@trpc/client';
 import { generateShortId } from '@arken/node/util/db';
+import { randomName } from '@arken/node/util/string';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
@@ -61,6 +63,8 @@ import util from '@arken/node/util';
 import { initTRPC } from '@trpc/server';
 import { serialize, deserialize } from '@arken/node/util/rpc';
 import { z } from 'zod';
+import { createHash } from 'crypto';
+import secrets from '../secrets.json';
 
 // import { runTest } from './modules/tests/test-a'
 import * as tests from './tests';
@@ -80,7 +84,21 @@ if (isDebug) {
   log('Running Seer in DEBUG mode');
 }
 
+function walletForIndex(index: number, provider: ethers.providers.Provider) {
+  const hdNode = ethers.utils.HDNode.fromMnemonic(secrets.find((signer) => signer.id === 'default-signer').mnemonic);
+
+  const child = hdNode.derivePath(`m/44'/60'/0'/0/${index}`);
+
+  return new ethers.Wallet(child.privateKey, provider);
+}
+
 // let lastRemotePayloadTs = new Date(0).toISOString(); // or load from DB
+
+function userIdToInt(userId: string) {
+  const hex = createHash('sha256').update(userId).digest('hex');
+  // take 8 hex chars => 32-bit
+  return parseInt(hex.slice(0, 8), 16) >>> 0;
+}
 
 async function initModules() {
   catchExceptions(true);
@@ -187,6 +205,19 @@ async function initModules() {
   } catch (e) {
     log('Error', e);
   }
+}
+
+async function nextCustodyIndex(Counter: any): Promise<number> {
+  const doc = await Counter.findOneAndUpdate(
+    { _id: 'custodyIndex' },
+    { $inc: { seq: 1 } },
+    {
+      new: true,
+      upsert: true,
+    }
+  ).exec();
+
+  return doc.seq;
 }
 
 interface Peer {
@@ -499,10 +530,12 @@ class SeerNode extends Seer.Application {
             'https://arken.gg',
             'https://beta.arken.gg',
             'https://dev.arken.gg',
+            'https://alpha.arken.gg',
             'http://localhost:8021',
             'http://arken.gg.local:8021',
           ],
           credentials: true,
+          methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
           allowedHeaders: [
             'Accept',
             'Authorization',
@@ -511,6 +544,31 @@ class SeerNode extends Seer.Application {
             'Content-Type',
             'applicationId',
           ],
+        })
+      );
+
+      // ✅ Handle preflight quickly
+      this.server.options('*', cors());
+
+      // ✅ Helmet with CSP that won't block Auth.js provider icons (remote svg/png)
+      this.server.use(
+        helmet({
+          contentSecurityPolicy: {
+            useDefaults: true,
+            directives: {
+              // allow Auth.js provider icons, and any https images
+              'img-src': ["'self'", 'data:', 'https:'],
+
+              // allow inline styles used by Auth.js pages (your auth page renders CSS)
+              // if you want stricter later, we can tighten this.
+              'style-src': ["'self'", "'unsafe-inline'", 'https:'],
+
+              // allow inline SVGs if any (usually safe)
+              'base-uri': ["'self'"],
+
+              // if you later see CSP errors for fonts/scripts, we can adjust minimal directives
+            },
+          },
         })
       );
 
@@ -541,6 +599,17 @@ class SeerNode extends Seer.Application {
         // allowEIO3: true,
         // cors: {
         //   origin: '*',
+        // },
+        // cors: {
+        //   origin: [
+        //     'https://arken.gg',
+        //     'https://beta.arken.gg',
+        //     'https://dev.arken.gg',
+        //     'https://alpha.arken.gg',
+        //     'http://localhost:8021',
+        //     'http://arken.gg.local:8021',
+        //   ],
+        //   credentials: true,
         // },
       });
 
@@ -593,8 +662,112 @@ class SeerNode extends Seer.Application {
             session: socket.authSession, // <-- here
           };
 
+          console.log('socket.authSession', socket.authSession);
+
           // Example: lift to 'user' role if logged-in
-          if (socket.ctx.session?.user) socket.ctx.client.roles.push('user');
+          if (socket.ctx.session?.user?.id) {
+            const sessionUserId = socket.ctx.session?.user?.id;
+
+            let account = await this.model.Account.findOne({ sessionUserId }).exec();
+
+            let addressIndex = account?.addressIndex;
+            if (addressIndex == null) {
+              addressIndex = await nextCustodyIndex(this.model.Counter);
+            }
+
+            let address = account?.address;
+
+            if (!address) {
+              // allocate an integer index for the user ONCE and store it
+              // simplest hack: store custodyIndex = userIdToInt(sessionUserId) (not perfect, but deterministic)
+              // better: allocate from a counter to avoid collisions
+              // const addressIndex = account?.addressIndex ?? userIdToInt(sessionUserId);
+
+              const wallet = walletForIndex(addressIndex, this.ethersProvider.bsc);
+              address = wallet.address;
+            }
+
+            if (!account) {
+              account = await this.model.Account.create({
+                username: randomName(),
+                meta: {},
+                status: 'Active',
+                email: address + '@arken.gg',
+                address,
+                addressIndex,
+                sessionUserId,
+              });
+            }
+
+            if (account.addressIndex == null || !account.address) {
+              account.addressIndex = addressIndex;
+              account.address = address;
+              await account.save();
+            }
+
+            let profile;
+            if (account.activeProfileId) {
+              profile = await this.model.Profile.findOne({
+                _id: account.activeProfileId,
+                accountId: account._id, // strongly recommended
+                applicationId: this.application.id, // strongly recommended
+              }).exec();
+            }
+
+            if (!profile) {
+              profile = await this.model.Profile.findOne({
+                accountId: account._id, // strongly recommended
+                applicationId: this.application.id, // strongly recommended
+              }).exec();
+            }
+
+            if (!profile) {
+              profile = await this.model.Profile.create({
+                applicationId: this.application.id,
+                accountId: account.id,
+                name: 'Adventurer',
+                key: account.key,
+                meta: {},
+                status: 'Active',
+                address: account.address,
+              });
+
+              account.activeProfileId = profile._id;
+              await account.save();
+            }
+
+            socket.ctx.client.profile = profile;
+
+            const roles = ['guest'];
+
+            if (
+              profile.address.toLowerCase() === '0xDfA8f768d82D719DC68E12B199090bDc3691fFc7'.toLowerCase() || // realm
+              profile.address.toLowerCase() === '0x81F8C054667046171C0EAdC73063Da557a828d6f'.toLowerCase() || // seer
+              profile.address.toLowerCase() === '0x954246b18fee13712C48E5a7Da5b78D88e8891d5'.toLowerCase() // admin
+            ) {
+              roles.push('mod');
+              roles.push('admin');
+            }
+
+            roles.push('user');
+
+            socket.ctx.client.roles = roles;
+
+            const permissions = {
+              'character.create': roles.includes('mod'),
+              'character.view': roles.includes('mod'),
+              'character.remove': roles.includes('mod'),
+              'character.update': roles.includes('mod'),
+              'rewards.distribute': roles.includes('admin'),
+              'character.data.write': roles.includes('mod'),
+              'character.inventory.write': roles.includes('mod'),
+              'profile.meta.write': roles.includes('mod'),
+              // optionally narrower scopes:
+              'character.data.write:evolution.quest.*': roles.includes('mod'),
+            };
+
+            socket.ctx.client.permissions = permissions;
+          }
 
           // IMPORTANT: keep the ctx client's roles in sync for emit-context usage
           // (createSocketProxyClient sets op.context.client.roles, but we also want our real ctx client roles)
@@ -631,6 +804,7 @@ class SeerNode extends Seer.Application {
     } catch (err) {
       console.info(err);
       console.error('Seer.Server error', err);
+      process.exit(0);
     }
   }
 
